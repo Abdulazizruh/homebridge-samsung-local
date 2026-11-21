@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 0.1.0-beta.3 — experimental.** The code passes its automated tests against recorded appliance data, but this release has **not yet been run against a real appliance** by the project. See [What has been tested](#what-has-been-tested).
+> **Status: 0.1.0-beta.3 — beta.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
@@ -131,11 +131,12 @@ Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + 
 | Unit and simulation tests (43 JavaScript, 6 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
-| Connection to a real appliance | **Not done** |
-| Any function on a real air conditioner | **Not done** |
-| Install inside the Homebridge Docker container on a Raspberry Pi | **Not done** |
+| Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** (one installation) |
+| Discovery and live readings on a real `ARTIK051_PRAC_20K` air conditioner | **Pass** (one unit) |
+| Control from Apple Home on that unit | **Reported working by its owner**; not yet checked function by function |
+| Other air-conditioner models, long-running stability, reconnect on real hardware | **Not done** |
 
-Every air-conditioner function is therefore **experimental** until confirmed on hardware. The resource maps come from LocalThings, which records what was measured on real units, but an advertised mode is not proof that writing it works on your unit.
+Air-conditioner support is therefore still **experimental**: it rests on one unit. The resource maps come from LocalThings, which records what was measured on real units, but an advertised mode is not proof that writing it works on your unit.
 
 ## Diagnostics
 

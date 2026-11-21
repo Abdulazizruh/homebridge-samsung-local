@@ -4,7 +4,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Stable releases are 
 
 ## 0.1.0-beta.3 — 2026-11-22
 
-First fixes from a real installation (Homebridge in Docker on a Raspberry Pi).
+First fixes from a real installation (Homebridge in Docker on a Raspberry Pi). Discovery, live readings and control now run on a real `ARTIK051_PRAC_20K` air conditioner.
 
 ### Fixed
 - The settings page now hands its configuration to Homebridge on load, so SAVE works on a fresh install and the child bridge option appears.
