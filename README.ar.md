@@ -70,10 +70,12 @@
 
 ```sh
 cd /var/lib/homebridge
-npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/releases/download/v0.1.0-beta.1/homebridge-samsung-local-0.1.0-beta.1.tgz
+npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.1.tar.gz
 ```
 
 </div>
+
+يعمل هذا الأمر ما دام المستودع عامًا. إذا كان المستودع خاصًا فانسخ ملف الحزمة إلى مجلد Homebridge وثبّته منه: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.1.tgz`.
 
 ثم أعد تشغيل Homebridge.
 

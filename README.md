@@ -66,8 +66,10 @@ Beta, before npm publication — in the Homebridge terminal:
 
 ```sh
 cd /var/lib/homebridge
-npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/releases/download/v0.1.0-beta.1/homebridge-samsung-local-0.1.0-beta.1.tgz
+npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.1.tar.gz
 ```
+
+This works while the repository is public. While it is private, copy the release package into the Homebridge folder and install it from there: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.1.tgz`.
 
 Then restart Homebridge.
 
