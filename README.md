@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 0.1.0-beta.3 — beta.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.0.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
@@ -60,16 +60,14 @@ The client certificate is generated on your machine. Its private key never leave
 
 ## Install
 
-Once published to npm: search for **Samsung Local** in the Homebridge **Plugins** tab and install.
+Search for **Samsung Local** in the Homebridge **Plugins** tab and install.
 
-Beta, before npm publication — in the Homebridge terminal:
+Or, in the Homebridge terminal:
 
 ```sh
 cd /var/lib/homebridge
-npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.3.tar.gz
+npm install --save homebridge-samsung-local
 ```
-
-This works while the repository is public. While it is private, copy the release package into the Homebridge folder and install it from there: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.3.tgz`.
 
 Then restart Homebridge.
 
@@ -145,7 +143,7 @@ Air-conditioner support is therefore still **experimental**: it rests on one uni
 
 ## Update
 
-Use the Homebridge Plugins tab once published, or repeat the install command with the new version. The settings, the certificate and the accessories are kept.
+Use the Homebridge Plugins tab. The settings, the certificate and the accessories are kept.
 
 ## Remove
 

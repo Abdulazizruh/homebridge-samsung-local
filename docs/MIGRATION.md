@@ -9,7 +9,7 @@ Apple Home treats the Local accessories as new devices. **Automations, scenes, r
 | 1 | Keep both plugins running. Confirm each Local accessory does everything you use |
 | 2 | In the Home app, put each Local accessory in the same room as the old one |
 | 3 | Edit every automation and scene: add the Local accessory, remove the old one. The Home app has no bulk replace |
-| 4 | The "Local" suffix is fixed in the beta. Rename the accessory in the Home app if you want |
+| 4 | The "Local" suffix is fixed. Rename the accessory in the Home app if you want |
 | 5 | In the old plugin, add the migrated appliance to its ignore list (or remove the plugin if nothing else uses it) |
 | 6 | Keep TVs, washers and anything this plugin does not expose on the old plugin |
 
@@ -28,7 +28,7 @@ This plugin never changes or deletes the old plugin's configuration, tokens, cac
 | 1 | أبقِ الإضافتين تعملان معًا، وتأكد أن كل جهاز Local يؤدي كل ما تستخدمه |
 | 2 | ضع كل جهاز Local في غرفة الجهاز القديم نفسها داخل تطبيق Home |
 | 3 | عدّل كل أتمتة ومشهد: أضف جهاز Local ثم احذف القديم. تطبيق Home لا يوفر استبدالًا جماعيًا |
-| 4 | اللاحقة Local ثابتة في النسخة التجريبية؛ غيّر اسم الجهاز من تطبيق Home إن أردت |
+| 4 | اللاحقة Local ثابتة؛ غيّر اسم الجهاز من تطبيق Home إن أردت |
 | 5 | في الإضافة القديمة أضف الجهاز المنقول إلى قائمة التجاهل، أو احذف الإضافة إذا لم يبق لها استخدام |
 | 6 | أبقِ التلفزيونات والغسالة وكل ما لم تدعمه هذه الإضافة على الإضافة القديمة |
 

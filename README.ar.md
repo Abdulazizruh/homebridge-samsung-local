@@ -11,7 +11,7 @@
 
 [English](README.md)
 
-> **الحالة: 0.1.0-beta.3 — تجريبي.** تعمل على مكيف حقيقي واحد (`ARTIK051_PRAC_20K`، و Homebridge داخل Docker على Raspberry Pi). بقية الموديلات وأنواع الأجهزة لم تتأكد بعد. راجع [ما تم اختباره](#ما-تم-اختباره).
+> **الحالة: 1.0.0.** تعمل على مكيف حقيقي واحد (`ARTIK051_PRAC_20K`، و Homebridge داخل Docker على Raspberry Pi). بقية الموديلات وأنواع الأجهزة لم تتأكد بعد. راجع [ما تم اختباره](#ما-تم-اختباره).
 > مشروع غير رسمي، وليس تابعًا لشركة Samsung أو معتمدًا منها. ليس إضافة Homebridge Verified.
 
 ## ما الذي يقدمه
@@ -62,20 +62,18 @@
 
 ## التثبيت
 
-بعد النشر على npm: ابحث عن **Samsung Local** في تبويب **Plugins** داخل Homebridge ثم ثبّتها.
+ابحث عن **Samsung Local** في تبويب **Plugins** داخل Homebridge ثم ثبّتها.
 
-للنسخة التجريبية قبل النشر على npm، نفّذ في طرفية Homebridge:
+أو نفّذ في طرفية Homebridge:
 
 <div dir="ltr">
 
 ```sh
 cd /var/lib/homebridge
-npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.3.tar.gz
+npm install --save homebridge-samsung-local
 ```
 
 </div>
-
-يعمل هذا الأمر ما دام المستودع عامًا. إذا كان المستودع خاصًا فانسخ ملف الحزمة إلى مجلد Homebridge وثبّته منه: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.3.tgz`.
 
 ثم أعد تشغيل Homebridge.
 
@@ -151,7 +149,7 @@ npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/arch
 
 ## التحديث
 
-من تبويب Plugins بعد النشر، أو بتكرار أمر التثبيت بالإصدار الجديد. تبقى الإعدادات والشهادة والأجهزة كما هي.
+من تبويب Plugins. تبقى الإعدادات والشهادة والأجهزة كما هي.
 
 ## الإزالة
 

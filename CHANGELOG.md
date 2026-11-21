@@ -1,10 +1,10 @@
 # Changelog
 
-Versions follow [Semantic Versioning](https://semver.org/). Stable releases are published under the npm tag `latest`. Pre-releases use `beta` once a stable release exists; until then they are also `latest`.
+Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## 0.1.0-beta.3 — 2026-11-22
+## 1.0.0 — 2026-11-22
 
-First fixes from a real installation (Homebridge in Docker on a Raspberry Pi). Discovery, live readings and control now run on a real `ARTIK051_PRAC_20K` air conditioner.
+First regular release. Includes the first fixes from a real installation (Homebridge in Docker on a Raspberry Pi). Discovery, live readings and control now run on a real `ARTIK051_PRAC_20K` air conditioner.
 
 ### Fixed
 - The settings page now hands its configuration to Homebridge on load, so SAVE works on a fresh install and the child bridge option appears.
