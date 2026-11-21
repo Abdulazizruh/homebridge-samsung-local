@@ -39,8 +39,8 @@ An IP address alone is **not** enough for every appliance. Discovery only report
 
 | Requirement | Detail |
 |---|---|
-| Homebridge | 1.8 or newer, or 2.x |
-| Node.js | 20.19+, 22.12+ or 24 |
+| Homebridge | 2.x (tested on 2.5). 1.8+ is expected to work but is untested |
+| Node.js | 22.12 or newer, or 24 |
 | Python | **3.11 or newer** with `venv` and `pip` |
 | CPU | 64-bit ARM (Raspberry Pi 4/5 with a 64-bit OS) or x86-64. **32-bit systems are not supported** (no prebuilt packages) |
 | Network | The Homebridge host must reach the appliances directly. In Docker use `network_mode: host` |
