@@ -300,11 +300,17 @@ export class AcAccessory {
     const T = Characteristic.TargetHeatingCoolingState;
     const service = this.#service('thermostat', Service.Thermostat, this.displayName, true);
     service.setPrimaryService(true);
-    // Follow a name change made in the plugin settings, once. A name the
-    // user later gives the tile in the Home app is left alone.
+    // A name change made in the plugin settings is followed only while the
+    // tile still carries the name this plugin gave it. Once the user renames
+    // the tile in the Home app, that name is kept through updates and
+    // restarts; only resetting the accessory brings the settings name back.
     if (this.context.appliedName !== this.displayName) {
-      service.setCharacteristic(Characteristic.ConfiguredName, this.displayName);
-      this.context.appliedName = this.displayName;
+      const current = service.getCharacteristic(Characteristic.ConfiguredName).value;
+      const renamedInHome = this.context.appliedName !== undefined && current !== this.context.appliedName;
+      if (!renamedInHome) {
+        service.setCharacteristic(Characteristic.ConfiguredName, this.displayName);
+        this.context.appliedName = this.displayName;
+      }
     }
 
     const valid = [T.OFF];

@@ -243,3 +243,20 @@ test('renaming in the settings renames the existing accessory, without a duplica
   const C = second.api.hap.Characteristic;
   assert.equal(second.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).value, 'Layla AC');
 });
+
+test('a name given in the Home app survives restarts and settings changes', async (t) => {
+  const storage = tmpDir();
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC Local' }] } });
+  await online(first.platform);
+  const cachedAccessory = first.api.registered[0].accessory;
+  const C = first.api.hap.Characteristic;
+  // What the Home app does when the user renames the tile.
+  first.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).updateValue('غرفة ليلى');
+  await first.platform.stop();
+  for (const name of ['Layla AC Local', 'Layla AC', 'Something else']) {
+    const next = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name }] }, cached: [cachedAccessory] });
+    await online(next.platform);
+    assert.equal(next.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).value, 'غرفة ليلى', name);
+    await next.platform.stop();
+  }
+});
