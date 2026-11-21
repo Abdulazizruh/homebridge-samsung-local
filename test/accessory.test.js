@@ -192,8 +192,8 @@ test('energy: W and kWh use Eve characteristics on the thermostat, no fake senso
   }
 });
 
-test('naming: trial accessories carry the Local suffix once', () => {
-  assert.equal(accessoryName('Living Room AC'), 'Living Room AC Local');
-  assert.equal(accessoryName('Bedroom Local'), 'Bedroom Local');
-  assert.equal(accessoryName(''), 'Samsung AC Local');
+test('naming: the accessory is named exactly as typed', () => {
+  assert.equal(accessoryName('Living Room AC'), 'Living Room AC');
+  assert.equal(accessoryName('  Bedroom Local '), 'Bedroom Local');
+  assert.equal(accessoryName(''), 'Samsung AC');
 });

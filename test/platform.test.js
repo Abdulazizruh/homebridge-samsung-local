@@ -33,12 +33,12 @@ async function boot({ storage = tmpDir(), devices, config, cached = [] }) {
 const ac = (host, extra = {}) => ({ host, fixture: fixturePath('ac_windfree'), ...extra });
 const online = (platform, id = DI) => waitFor(() => platform.devices.get(id)?.link.online && platform.devices.get(id).link.resources);
 
-test('discovery to accessory: one accessory, Local suffix, own namespace', async (t) => {
+test('discovery to accessory: one accessory, named as typed, own namespace', async (t) => {
   const { api, platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', name: 'Majlis AC' }] } });
   t.after(() => platform.stop());
   await waitFor(() => api.registered.length === 1);
   const { accessory, plugin, platform: platformName } = api.registered[0];
-  assert.equal(accessory.displayName, 'Majlis AC Local');
+  assert.equal(accessory.displayName, 'Majlis AC');
   assert.deepEqual([plugin, platformName], [PLUGIN_NAME, PLATFORM_NAME]);
   assert.equal(accessory.UUID, api.hap.uuid.generate(UUID_NAMESPACE + DI));
   assert.equal(accessory.context.deviceId, DI);
@@ -227,4 +227,19 @@ test('wipe and reinstall: only this plugin\'s folder is touched', async () => {
   const again = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
   await online(again.platform);
   await again.platform.stop();
+});
+
+test('renaming in the settings renames the existing accessory, without a duplicate', async (t) => {
+  const storage = tmpDir();
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC Local' }] } });
+  await online(first.platform);
+  const cachedAccessory = first.api.registered[0].accessory;
+  await first.platform.stop();
+  const second = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] }, cached: [cachedAccessory] });
+  t.after(() => second.platform.stop());
+  await online(second.platform);
+  assert.equal(second.api.registered.length, 0);
+  assert.equal(cachedAccessory.displayName, 'Layla AC');
+  const C = second.api.hap.Characteristic;
+  assert.equal(second.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).value, 'Layla AC');
 });

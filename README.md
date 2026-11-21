@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.1.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.2.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
@@ -79,7 +79,7 @@ Then restart Homebridge.
 4. Press **Add to configuration**.
 5. On the plugin card open **⋮ → Bridge Settings** and enable the **child bridge**. Restart, then scan the child bridge's own QR code in the Home app.
 
-Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named with the suffix **Local** so they are easy to tell apart from the ones your existing plugin provides. Seeing the same appliance twice (once per bridge) during a trial is expected.
+Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
 
 A static DHCP lease for each appliance is recommended. If an address changes, enter the new one and press **Test & discover**: the existing entry is updated.
 

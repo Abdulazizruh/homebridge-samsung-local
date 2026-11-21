@@ -180,6 +180,10 @@ export class SamsungLocalPlatform {
       accessory = new this.api.platformAccessory(name, uuid, this.api.hap.Categories.AIR_CONDITIONER);
       fresh = true;
     }
+    if (!fresh && accessory.displayName !== name) {
+      accessory.updateDisplayName?.(name);
+      accessory.displayName = name;
+    }
     accessory.context.deviceId = deviceId;
     accessory.context.baseName = entry.name || accessory.context.baseName || model || null;
     accessory.context.model = model ?? accessory.context.model ?? null;

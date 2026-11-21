@@ -30,7 +30,7 @@
             "name": {
               "title": "Name (optional)",
               "type": "string",
-              "description": "\"Local\" is appended automatically."
+              "description": "Shown in HomeKit exactly as typed."
             },
             "id": {
               "title": "Device ID (filled by discovery)",

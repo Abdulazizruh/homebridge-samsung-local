@@ -1,5 +1,4 @@
 import { acCommand, buildAcModel, expectedAfter } from '../capabilities/ac.js';
-import { NAME_SUFFIX } from '../settings.js';
 import { eveCharacteristics } from './eve.js';
 
 /** Which optional services appear by default. Each can be changed per device. */
@@ -301,6 +300,12 @@ export class AcAccessory {
     const T = Characteristic.TargetHeatingCoolingState;
     const service = this.#service('thermostat', Service.Thermostat, this.displayName, true);
     service.setPrimaryService(true);
+    // Follow a name change made in the plugin settings, once. A name the
+    // user later gives the tile in the Home app is left alone.
+    if (this.context.appliedName !== this.displayName) {
+      service.setCharacteristic(Characteristic.ConfiguredName, this.displayName);
+      this.context.appliedName = this.displayName;
+    }
 
     const valid = [T.OFF];
     if (s.modes?.heat) {
@@ -575,7 +580,7 @@ export class AcAccessory {
   }
 }
 
+/** The accessory is named exactly as the user typed it. */
 export function accessoryName(name) {
-  const base = String(name || 'Samsung AC').trim();
-  return new RegExp(`\\b${NAME_SUFFIX}$`, 'i').test(base) ? base : `${base} ${NAME_SUFFIX}`;
+  return String(name || '').trim() || 'Samsung AC';
 }

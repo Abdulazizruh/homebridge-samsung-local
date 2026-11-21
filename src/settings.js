@@ -6,5 +6,4 @@ export const PLATFORM_NAME = 'SamsungLocal';
 export const STORAGE_DIR_NAME = 'samsung-local';
 /** Namespace for accessory UUIDs. Never reuse another plugin's seed. */
 export const UUID_NAMESPACE = 'homebridge-samsung-local:device:';
-export const NAME_SUFFIX = 'Local';
 export const MIN_PYTHON = [3, 11];

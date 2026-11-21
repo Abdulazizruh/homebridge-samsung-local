@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.2 — 2026-11-22
+
+### Changed
+- Accessories are named exactly as typed in the settings. The automatic "Local" suffix is gone. Existing accessories take the new name on the next restart; a name you gave a tile in the Home app is not touched.
+
+### بالعربية
+- يظهر اسم الجهاز كما تكتبه في الإعدادات تمامًا، وأُلغيت اللاحقة Local التلقائية. الأجهزة الحالية تأخذ الاسم الجديد عند إعادة التشغيل، ويبقى أي اسم غيّرته من تطبيق Home كما هو.
+
 ## 1.0.1 — 2026-11-22
 
 ### Changed
