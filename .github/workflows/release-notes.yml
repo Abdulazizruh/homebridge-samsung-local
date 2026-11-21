@@ -1,0 +1,33 @@
+# Keeps every GitHub release's notes equal to its section in CHANGELOG.md, so
+# the notes appear on the release page and in Homebridge before an update.
+name: Release notes
+on:
+  release:
+    types: [published]
+  push:
+    branches: [main]
+    paths: [CHANGELOG.md, scripts/release-notes.js, .github/workflows/release-notes.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Copy changelog sections into release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for tag in $(gh release list --limit 100 --json tagName --jq '.[].tagName'); do
+            node scripts/release-notes.js "$tag" > notes.md
+            if [ -s notes.md ]; then
+              gh release edit "$tag" --notes-file notes.md
+              echo "updated $tag"
+            else
+              echo "no changelog section for $tag"
+            fi
+          done

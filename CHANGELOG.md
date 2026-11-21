@@ -16,6 +16,13 @@ First regular release. Includes the first fixes from a real installation (Homebr
 - Fan slider: 0 % now selects Auto (and shows Auto as 0 %), matching homebridge-smartthings-oauth. It still never powers the unit off.
 - Discovery may take up to three minutes before giving up (was 90 seconds).
 
+### بالعربية
+- أول إصدار فعلي. يعمل الاكتشاف والقراءة والتحكم على مكيف `ARTIK051_PRAC_20K` حقيقي.
+- سحب شريط المروحة إلى 0% يختار الوضع التلقائي، ويبقى المكيف يعمل.
+- زر SAVE يعمل من أول تثبيت، فيظهر خيار الجسر الفرعي.
+- عند فشل الاكتشاف تظهر تفاصيل تقنية: المنافذ التي جُرّبت ورد الجهاز.
+- مهلة الاكتشاف صارت حتى ثلاث دقائق.
+
 ## 0.1.0-beta.2 — 2026-11-22
 
 No functional change. Still not run against real hardware.
@@ -24,6 +31,9 @@ No functional change. Still not run against real hardware.
 - First version published to npm, so it can be found and installed from the Homebridge Plugins search.
 - Supported Node.js stated as 22.12+ and 24 (the versions tested in CI).
 - Install instructions corrected.
+
+### بالعربية
+- أول نسخة تُنشر على npm لتظهر في بحث Plugins داخل Homebridge. دون تغيير في الوظائف.
 
 ## 0.1.0-beta.1 — 2026-11-22
 
@@ -42,3 +52,6 @@ First trial release. Not yet run against real hardware.
 - Samsung TVs, TCP 8888 appliances and appliances that refuse the automatic certificate are not supported.
 - No brightness for the display light. No voltage, current or occupancy readings.
 - 32-bit systems are not supported.
+
+### بالعربية
+- أول نسخة تجريبية: اتصال محلي بأجهزة Samsung، صفحة إعدادات بالعربية والإنجليزية، ودعم المكيفات في HomeKit.
