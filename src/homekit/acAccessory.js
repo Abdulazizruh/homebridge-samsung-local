@@ -392,7 +392,13 @@ export class AcAccessory {
         .onGet(() => this.#rotation(this.#requireOnline()))
         .onSet(async (value) => {
           if (Number(value) <= 0) {
-            setTimeout(() => this.#push(), 600);
+            // Zero on the slider means Auto, as in homebridge-smartthings-oauth.
+            // It never powers the unit off.
+            if (s.fan.speeds.auto !== undefined && this.#requireOnline().fan !== 'auto') {
+              await this.#command('fan', 'auto', 'fan auto');
+            } else {
+              setTimeout(() => this.#push(), 600);
+            }
             return;
           }
           const index = Math.min(manual.length - 1, Math.max(0, Math.round(Number(value) / step) - 1));
@@ -435,7 +441,8 @@ export class AcAccessory {
 
   #rotation(st) {
     const manual = this.#manualSpeeds();
-    const index = manual.indexOf(st.fan === 'auto' ? (this.context.lastManualFan ?? manual[0]) : st.fan);
+    // Auto shows as 0 %: the slider has no position of its own for it.
+    const index = manual.indexOf(st.fan);
     return index < 0 ? 0 : Math.round(((index + 1) * 100) / manual.length);
   }
 
@@ -535,7 +542,7 @@ export class AcAccessory {
         fan.updateCharacteristic(Characteristic.Active, st.power ? 1 : 0);
       }
       if (free('fan')) {
-        if (fan.testCharacteristic(Characteristic.RotationSpeed) && st.fan !== 'auto') {
+        if (fan.testCharacteristic(Characteristic.RotationSpeed)) {
           fan.updateCharacteristic(Characteristic.RotationSpeed, this.#rotation(st));
         }
         if (fan.testCharacteristic(Characteristic.TargetFanState)) {

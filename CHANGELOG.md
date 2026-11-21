@@ -13,6 +13,7 @@ First fixes from a real installation (Homebridge in Docker on a Raspberry Pi).
 - A failed discovery shows technical details: which ports were tried, what the appliance advertised, and the DTLS outcome or alert it answered with.
 
 ### Changed
+- Fan slider: 0 % now selects Auto (and shows Auto as 0 %), matching homebridge-smartthings-oauth. It still never powers the unit off.
 - Discovery may take up to three minutes before giving up (was 90 seconds).
 
 ## 0.1.0-beta.2 — 2026-11-22

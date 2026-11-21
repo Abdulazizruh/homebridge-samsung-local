@@ -100,7 +100,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Power, Cool / Heat / Auto, target and current temperature | Thermostat | Apple Home | Celsius. Range and step come from the appliance |
 | Dry, Fan Only | Two switches | Apple Home | HomeKit thermostats have no state for these modes |
 | Fan speed Low / Medium / High / Turbo | Fan slider (4 steps) | Apple Home | |
-| Fan **Auto** | Fan "Auto" control **and** a dedicated switch | Apple Home | Never a slider position |
+| Fan **Auto** | A dedicated switch, the fan "Auto" control, and 0 % on the slider | Apple Home | The slider shows Auto as 0 % |
 | Fan **Turbo** | Dedicated switch (and the top slider step) | Apple Home | |
 | Swing | Fan oscillation | Apple Home | On/off only; HomeKit has no vertical/horizontal choice |
 | WindFree, Fast, Quiet (optional: Sleep, Smart, Comfort, 2-Step, wind follows / avoids people) | Switches | Apple Home | One comfort mode at a time, as on the appliance |

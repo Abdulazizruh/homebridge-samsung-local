@@ -96,6 +96,19 @@ test('Auto and Turbo are explicit choices, not slider positions', async () => {
   assert.equal(link.sent.at(-1).body[`${V}modes`], '2');
 });
 
+test('fan slider: zero means Auto and never powers off', async () => {
+  const { link, set, get, C, res } = setup();
+  await set('fan', C.RotationSpeed, 75);
+  assert.equal(res['/wind/strength/vs/0'][`${V}modes`], '3');
+  await set('fan', C.RotationSpeed, 0);
+  assert.equal(res['/wind/strength/vs/0'][`${V}modes`], '0');
+  await set('fan', C.Active, 0); // HomeKit sends this right after a zero speed
+  assert.equal(await get('fan', C.RotationSpeed), 0);
+  assert.equal(await get('fanAuto', C.On), true);
+  assert.equal(res['/power/vs/0'][`${V}power`], 'On');
+  assert.ok(link.sent.every((w) => w.path[0] !== 'power'));
+});
+
 test('special modes: turning one off never powers off and never cancels another', async () => {
   const { link, set, get, C, res } = setup();
   await set('windFree', C.On, true);
