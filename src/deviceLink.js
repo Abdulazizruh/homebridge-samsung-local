@@ -42,6 +42,7 @@ export class DeviceLink extends EventEmitter {
         return;
       }
       this.resources = msg.resources;
+      this.pushes = msg.pushes ?? this.pushes ?? 0;
       this.lastSeen = Date.now();
       this.#setOnline(true);
       this.emit('update', this.resources);

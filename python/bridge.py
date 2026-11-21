@@ -458,13 +458,14 @@ class DeviceWorker(threading.Thread):
         super().__init__(daemon=True, name=f"device-{key}")
         self.key, self.host, self.port = key, host, port
         self.cred_dir, self.expected_di = cred_dir, expected_di
-        self.poll_interval = max(5.0, float(poll_interval))
+        self.poll_interval = max(2.0, float(poll_interval))
         self.push = push
         self._stop = threading.Event()
         self._wake = threading.Event()
         self._wake_at = None
         self._link = None
         self._link_lock = threading.Lock()
+        self.notifications = 0
 
     # -- called from other threads -----------------------------------------
     def stop(self):
@@ -487,6 +488,7 @@ class DeviceWorker(threading.Thread):
     # -- worker ------------------------------------------------------------
     def _on_notification(self, href, payload):
         # Runs on the session's reader thread: never do I/O here.
+        self.notifications += 1
         self.request_refresh(0.3)
 
     def _sleep(self, seconds):
@@ -555,7 +557,7 @@ class DeviceWorker(threading.Thread):
                 continue
             self._wake_at = None
             resources, _mode = link.read_resources()
-            emit({"ev": "state", "key": self.key, "resources": resources})
+            emit({"ev": "state", "key": self.key, "resources": resources, "pushes": self.notifications})
             next_poll = time.monotonic() + self.poll_interval
 
 

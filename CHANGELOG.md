@@ -2,6 +2,16 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.1 — 2026-11-22
+
+### Changed
+- The polling interval can be set as low as 2 seconds (was 5), for appliances that send no push updates. On the `ARTIK051_PRAC_20K` tested, changes made with the remote showed up only at the polling interval.
+- The log says, two minutes after connecting, whether push updates are arriving from the appliance.
+
+### بالعربية
+- فترة القراءة الدورية تقبل حتى ثانيتين (كانت 5)، للأجهزة التي لا ترسل تحديثات فورية. على المكيف المجرَّب ظهرت تغييرات الريموت بعد فترة القراءة الدورية.
+- يذكر السجل بعد دقيقتين من الاتصال هل تصل التحديثات الفورية من الجهاز.
+
 ## 1.0.0 — 2026-11-22
 
 First regular release. Includes the first fixes from a real installation (Homebridge in Docker on a Raspberry Pi). Discovery, live readings and control now run on a real `ARTIK051_PRAC_20K` air conditioner.

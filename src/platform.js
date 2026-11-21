@@ -193,7 +193,7 @@ export class SamsungLocalPlatform {
       host: entry.host,
       port: entry.port ?? null,
       expectedDi: deviceId,
-      pollInterval: Number(this.config.pollInterval) || 15,
+      pollInterval: Math.max(2, Number(this.config.pollInterval) || 15),
       push: this.config.pushUpdates !== false,
       log: this.log,
     });
@@ -203,6 +203,17 @@ export class SamsungLocalPlatform {
     link.on('update', (resources) => {
       writeJson(snapshotFile(this.paths, deviceId), this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true));
     });
+    // Say once whether the appliance delivers push updates, so a slow
+    // reaction to the remote can be explained from the log.
+    const pushCheck = setTimeout(() => {
+      if (link.online && this.config.pushUpdates !== false) {
+        this.log.info(link.pushes > 0
+          ? `[${name}] push updates are arriving from the appliance.`
+          : `[${name}] no push updates received so far; changes made at the appliance show up at the polling interval (${link.pollInterval}s).`);
+      }
+    }, 120_000);
+    pushCheck.unref?.();
+    this.retryTimers.add(pushCheck);
     link.on('availability', (online) => {
       if (!online) {
         writeJson(snapshotFile(this.paths, deviceId),

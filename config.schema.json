@@ -165,9 +165,9 @@
         "title": "Polling interval (seconds)",
         "type": "integer",
         "default": 15,
-        "minimum": 5,
+        "minimum": 2,
         "maximum": 300,
-        "description": "Fallback read when the appliance sends no push update."
+        "description": "How often the appliance is read when it sends no push update. Changes made with the remote show up within this time. Minimum 2; lower values load the appliance more."
       },
       "pushUpdates": {
         "title": "Use push updates when the appliance supports them",

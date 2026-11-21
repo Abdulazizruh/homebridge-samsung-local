@@ -45,9 +45,10 @@
     <h6 data-t="generalTitle"></h6>
     <div class="sl-row">
       <label class="mb-0" data-t="pollInterval"></label>
-      <input type="number" class="form-control" id="sl-poll" min="5" max="300" style="max-width:110px" dir="ltr">
+      <input type="number" class="form-control" id="sl-poll" min="2" max="300" style="max-width:110px" dir="ltr">
       <label class="mb-0"><input type="checkbox" id="sl-push"> <span data-t="push"></span></label>
     </div>
+    <div class="sl-muted mt-1" data-t="pollNote"></div>
   </div>
 
   <div class="sl-card sl-danger">
@@ -75,7 +76,7 @@
       addHint: 'Enter the appliance IP address. Success means the appliance answered an authenticated read of its identity and resources.',
       discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
-      generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates',
+      generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 2 seconds; 5 or more is gentler on the appliance.',
       kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
       sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
       name: 'Name', namePh: 'e.g. Living Room AC', nameNote: '"Local" is appended automatically.',
@@ -134,7 +135,7 @@
       addHint: 'أدخل عنوان IP للجهاز. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
       discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
-      generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية',
+      generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى ثانيتان؛ 5 ثوانٍ فأكثر أخف على الجهاز.',
       kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
       sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
       name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'تُضاف اللاحقة Local تلقائيًا.',
@@ -340,7 +341,7 @@
   }
 
   $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
-  $('sl-poll').addEventListener('change', async (e) => { config.pollInterval = Math.min(300, Math.max(5, Number(e.target.value) || 15)); await save(false); });
+  $('sl-poll').addEventListener('change', async (e) => { config.pollInterval = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await save(false); });
   $('sl-push').addEventListener('change', async (e) => { config.pushUpdates = e.target.checked; await save(false); });
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();
