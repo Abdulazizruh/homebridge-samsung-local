@@ -7,7 +7,11 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 ### Changed
 - Accessories are named exactly as typed in the settings. The automatic "Local" suffix is gone. Existing accessories take the new name on the next restart; a name you gave a tile in the Home app is not touched.
 
+### Added
+- A **Configuration** button on every configured appliance in the settings page. It opens the name and the "Shown in HomeKit" options directly, without running discovery again.
+
 ### بالعربية
+- زر **الإعدادات** على كل جهاز في قائمة الأجهزة المضافة، يفتح الاسم وخيارات «ما يظهر في HomeKit» مباشرة دون إعادة الاكتشاف.
 - يظهر اسم الجهاز كما تكتبه في الإعدادات تمامًا، وأُلغيت اللاحقة Local التلقائية. الأجهزة الحالية تأخذ الاسم الجديد عند إعادة التشغيل، ويبقى أي اسم غيّرته من تطبيق Home كما هو.
 
 ## 1.0.1 — 2026-11-22

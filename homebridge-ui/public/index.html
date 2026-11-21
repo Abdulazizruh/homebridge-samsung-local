@@ -81,7 +81,7 @@
       sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
       name: 'Name', namePh: 'e.g. Living Room AC', nameNote: 'Shown in HomeKit exactly as typed.',
       showInHome: 'Shown in HomeKit', add: 'Add to configuration', update: 'Update configuration',
-      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', diagnostics: 'Diagnostics', changeIp: 'Change IP',
+      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', diagnostics: 'Diagnostics', changeIp: 'Change IP', configure: 'Configuration',
       online: 'connected', offline: 'not reachable', unknownState: 'not contacted yet',
       thFeature: 'Function / reading', thDevice: 'Appliance', thPlugin: 'Plugin', thWhere: 'Shown in', thNote: 'Value / limits',
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
@@ -140,7 +140,7 @@
       sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
       name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'يظهر في HomeKit كما تكتبه تمامًا.',
       showInHome: 'ما يظهر في HomeKit', add: 'أضف إلى الإعدادات', update: 'حدّث الإعدادات',
-      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان',
+      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان', configure: 'الإعدادات',
       online: 'متصل', offline: 'غير متاح', unknownState: 'لم يُتصل به بعد',
       thFeature: 'الوظيفة أو القياس', thDevice: 'الجهاز', thPlugin: 'الإضافة', thWhere: 'مكان الظهور', thNote: 'القيمة والقيود',
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
@@ -289,12 +289,27 @@
       return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${esc(dev.host)}</div><div class="sl-muted">${energy}</div></td>
         <td>${state}</td>
         <td><label class="mb-0"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}></label></td>
-        <td><button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${t('changeIp')}</button>
+        <td><button class="btn btn-sm btn-primary" data-cfg="${i}">${t('configure')}</button>
+            <button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${t('changeIp')}</button>
             <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${t('diagnostics')}</button>
             <button class="btn btn-sm btn-outline-danger" data-rm="${i}">${t('remove')}</button></td></tr>`;
     }).join('')}</tbody></table></div>`;
     box.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', async () => { config.devices.splice(Number(b.dataset.rm), 1); await save(); }));
     box.querySelectorAll('[data-en]').forEach((b) => b.addEventListener('change', async () => { config.devices[Number(b.dataset.en)].enabled = b.checked; await save(); }));
+    box.querySelectorAll('[data-cfg]').forEach((b) => b.addEventListener('click', () => {
+      const dev = config.devices[Number(b.dataset.cfg)];
+      const snap = status.devices.find((x) => x.deviceId && x.deviceId === dev.id) || status.devices.find((x) => x.host === dev.host);
+      if (snap?.described) {
+        // Known appliance: open its options straight away, without a new discovery.
+        lastProbe = { ...snap, host: dev.host, deviceId: dev.id ?? snap.deviceId, source: 'snapshot' };
+        renderResult();
+        $('sl-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('sl-name')?.focus({ preventScroll: true });
+      } else {
+        $('sl-host').value = dev.host;
+        $('sl-discover').click();
+      }
+    }));
     box.querySelectorAll('[data-ip]').forEach((b) => b.addEventListener('click', () => { $('sl-host').value = config.devices[Number(b.dataset.ip)].host; $('sl-host').focus(); }));
     box.querySelectorAll('[data-diag]').forEach((b) => b.addEventListener('click', async () => {
       try {
