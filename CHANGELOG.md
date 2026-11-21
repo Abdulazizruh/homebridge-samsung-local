@@ -23,6 +23,13 @@ First regular release. Includes the first fixes from a real installation (Homebr
 - عند فشل الاكتشاف تظهر تفاصيل تقنية: المنافذ التي جُرّبت ورد الجهاز.
 - مهلة الاكتشاف صارت حتى ثلاث دقائق.
 
+## 0.1.0-beta.3 — 2026-11-22
+
+Pre-release of the changes that became 1.0.0: fan slider zero selects Auto, SAVE works on a fresh install, technical details on a failed discovery.
+
+### بالعربية
+- نسخة تمهيدية للتغييرات التي صارت 1.0.0: شريط المروحة عند 0% يختار التلقائي، وإصلاح زر SAVE، وتفاصيل تقنية عند فشل الاكتشاف.
+
 ## 0.1.0-beta.2 — 2026-11-22
 
 No functional change. Still not run against real hardware.
