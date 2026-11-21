@@ -1,0 +1,311 @@
+{
+ "_source": "mbillow/localthings tests/fixtures/airconditioner_device.json (MIT, (c) 2026 Marc Billow). Already redacted upstream; reshaped to {href: rep}.",
+ "identity": {
+  "di": "00000000-0000-4000-8000-0000000000b2",
+  "pi": null,
+  "name": "",
+  "manufacturer": "Samsung",
+  "platformModel": "",
+  "types": [
+   "oic.wk.d",
+   "oic.d.airconditioner"
+  ]
+ },
+ "resources": {
+  "/personality/presence/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "",
+     "x.com.samsung.da.deviceId": "**REDACTED**",
+     "x.com.samsung.da.value": ""
+    }
+   ]
+  },
+  "/realtimenotiforclient/vs/0": {
+   "x.com.samsung.da.timeforshortnoti": "0",
+   "x.com.samsung.da.longnotisubscription": "false",
+   "x.com.samsung.da.periodicnotisubscription": "true"
+  },
+  "/filter/airdustfilter/vs/0": {
+   "x.com.samsung.da.filterUsage": "100",
+   "x.com.samsung.da.filterUsageResolution": "1",
+   "x.com.samsung.da.filterDesiredUsage": "500",
+   "x.com.samsung.da.filterStatus": "wash",
+   "x.com.samsung.da.filterCapacity": "500",
+   "x.com.samsung.da.filterCapacityUnit": "Hour",
+   "x.com.samsung.da.filterResetType": [
+    "replaceable",
+    "washable"
+   ]
+  },
+  "/temperature/control/vs/0": {
+   "x.com.samsung.da.increment": "1"
+  },
+  "/mode/convenient/vs/0": {
+   "x.com.samsung.da.modes": "Off",
+   "x.com.samsung.da.supportedModes": [
+    "Off",
+    "Sleep",
+    "Quiet",
+    "Smart",
+    "Speed"
+   ]
+  },
+  "/option/airpurify/vs/0": {
+   "x.com.samsung.da.modes": "Off",
+   "x.com.samsung.da.supportedModes": [
+    "On",
+    "Off"
+   ]
+  },
+  "/option/autoclean/vs/0": {
+   "x.com.samsung.da.status": "Stop",
+   "x.com.samsung.da.settingStatus": "Off",
+   "x.com.samsung.da.progress": "0",
+   "x.com.samsung.da.supportedStatus": [
+    "Start",
+    "Stop"
+   ],
+   "x.com.samsung.da.supportedSettingStatus": [
+    "On",
+    "Off"
+   ]
+  },
+  "/wind/strength/vs/0": {
+   "x.com.samsung.da.modes": "1",
+   "x.com.samsung.da.supportedModes": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "x.com.samsung.da.modesName": [
+    "Auto",
+    "Low",
+    "Mid",
+    "High",
+    "Turbo"
+   ]
+  },
+  "/wind/direction/vs/0": {
+   "x.com.samsung.da.modes": "Fix",
+   "x.com.samsung.da.supportedModes": [
+    "Fix",
+    "All",
+    "Up_And_Low"
+   ]
+  },
+  "/alarms/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Alarm",
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "ErrorCode_OFF",
+     "x.com.samsung.da.triggeredTime": "2026-07-21T07:20:30"
+    },
+    {
+     "x.com.samsung.da.id": "1",
+     "x.com.samsung.da.description": "Alarm",
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "FilterAlarm",
+     "x.com.samsung.da.triggeredTime": "2026-07-21T07:20:30",
+     "x.com.samsung.da.state": "Created"
+    }
+   ]
+  },
+  "/temperatures/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Temperature",
+     "x.com.samsung.da.desired": "24.0",
+     "x.com.samsung.da.current": "27.0",
+     "x.com.samsung.da.maximum": "30",
+     "x.com.samsung.da.minimum": "16",
+     "x.com.samsung.da.increment": "1.0",
+     "x.com.samsung.da.unit": "Celsius"
+    }
+   ]
+  },
+  "/temperature/current/0": {
+   "range": [
+    16.0,
+    30.0
+   ],
+   "units": "C",
+   "temperature": 27.0
+  },
+  "/temperature/desired/0": {
+   "range": [
+    16.0,
+    30.0
+   ],
+   "units": "C",
+   "temperature": 24.0
+  },
+  "/diagnosis/vs/0": {
+   "x.com.samsung.da.diagnosisStart": "Ready"
+  },
+  "/energy/consumption/vs/0": {
+   "x.com.samsung.da.instantaneousPower": "0",
+   "x.com.samsung.da.cumulativePower": "1686632",
+   "x.com.samsung.da.cumulativeSavedPower": "0",
+   "x.com.samsung.da.cumulativeUnit": "Wh",
+   "x.com.samsung.da.instantaneousPowerUnit": "W"
+  },
+  "/energy/consumption/0": {
+   "power": 0.0
+  },
+  "/mode/vs/0": {
+   "x.com.samsung.da.supportedModes": [
+    "Cool",
+    "Dry",
+    "Wind",
+    "Auto",
+    "Heat"
+   ],
+   "x.com.samsung.da.modes": [
+    "Cool"
+   ],
+   "x.com.samsung.da.options": [
+    "Sleep_0",
+    "ArtificialWorking_Off",
+    "ComfortAICooling_Off",
+    "AiTempChanged_Off",
+    "AiTemp_240",
+    "OutdoorTemp_79",
+    "CoolCapa_50",
+    "WarmCapa_60",
+    "Light_Off",
+    "Volume_100",
+    "OptionCode_53304",
+    "ExtendOptionCode_197256",
+    "RacInfo_None",
+    "UpdateAllow_NotAllowed",
+    "DurationOn_0",
+    "WelcomeCoolingState_Off"
+   ]
+  },
+  "/power/vs/0": {
+   "x.com.samsung.da.power": "Off"
+  },
+  "/power/0": {
+   "value": false
+  },
+  "/sensors/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Sensor for CleanLevel",
+     "x.com.samsung.da.type": "CleanLevel",
+     "x.com.samsung.da.value": [
+      "0"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "1",
+     "x.com.samsung.da.description": "Sensor for Odor",
+     "x.com.samsung.da.type": "Odor",
+     "x.com.samsung.da.value": [
+      "0"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "2",
+     "x.com.samsung.da.description": "Sensor for Dust",
+     "x.com.samsung.da.type": "Dust",
+     "x.com.samsung.da.value": [
+      "0",
+      "0"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "3",
+     "x.com.samsung.da.description": "Sensor for FineDust",
+     "x.com.samsung.da.type": "FineDust",
+     "x.com.samsung.da.value": [
+      "0",
+      "0"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "4",
+     "x.com.samsung.da.description": "Sensor for SuperFineDust",
+     "x.com.samsung.da.type": "SuperFineDust",
+     "x.com.samsung.da.value": [
+      "0",
+      "0"
+     ]
+    }
+   ]
+  },
+  "/information/vs/0": {
+   "x.com.samsung.da.modelNum": "ARTIK051_PRAC_20K|10217841|60010532001411004200003000000000",
+   "x.com.samsung.da.description": "ARTIK051_PRAC_20K",
+   "x.com.samsung.da.serialNum": "**REDACTED**",
+   "x.com.samsung.da.otnDUID": "**REDACTED**",
+   "x.com.samsung.da.serialNumOption": "**REDACTED**",
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Version",
+     "x.com.samsung.da.type": "Software",
+     "x.com.samsung.da.number": "02181A230313",
+     "x.com.samsung.da.newVersionAvailable": "0"
+    },
+    {
+     "x.com.samsung.da.id": "1",
+     "x.com.samsung.da.description": "Version",
+     "x.com.samsung.da.type": "Firmware",
+     "x.com.samsung.da.number": "22112400,FFFFFFFF",
+     "x.com.samsung.da.newVersionAvailable": "0"
+    },
+    {
+     "x.com.samsung.da.id": "2",
+     "x.com.samsung.da.description": "Version",
+     "x.com.samsung.da.type": "Outdoor",
+     "x.com.samsung.da.number": "0000,0000"
+    }
+   ]
+  },
+  "/file/information/vs/0": {
+   "x.com.samsung.timeoffset": "+00:00",
+   "x.com.samsung.supprtedtype": 1
+  },
+  "/configuration/vs/0": {
+   "x.com.samsung.da.region": "0000000000",
+   "x.com.samsung.da.airconOptionList": [
+    "SingleCommand_1",
+    "DR",
+    "HOMECARE_WIZARD_V2",
+    "PRODUCT_GLOBAL",
+    "AI_RAC_GLOBAL_HEATPUMP_3.0",
+    "AI_3.0",
+    "Auto_To_AI",
+    "AI_Heat"
+   ]
+  },
+  "/humidity/0": {
+   "humidity": 0
+  },
+  "/humidity/vs/0": {
+   "x.com.samsung.da.humidity": "0"
+  },
+  "/drlc/0": {
+   "DRLevel": 0,
+   "start": "1970-01-01T00:00:00Z",
+   "duration": 0,
+   "override": false
+  },
+  "/drlc/vs/0": {
+   "x.com.samsung.da.drlcLevel": "0",
+   "x.com.samsung.da.duration": "00:00:00",
+   "x.com.samsung.da.drlcStartTime": "1970-01-01T00:00:00Z",
+   "x.com.samsung.da.override": "Off",
+   "x.com.samsung.da.realSaving": "Off"
+  },
+  "/timezone/vs/0": {}
+ }
+}

@@ -1,0 +1,185 @@
+{
+  "pluginAlias": "SamsungLocal",
+  "pluginType": "platform",
+  "singular": true,
+  "customUi": true,
+  "headerDisplay": "Local control of Samsung appliances. Use the form above to add an appliance by IP address and discover what it supports.",
+  "footerDisplay": "Unofficial project, not affiliated with Samsung. Run this plugin as a child bridge.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "Samsung Local",
+        "required": true
+      },
+      "devices": {
+        "title": "Appliances",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "title": "IP address",
+              "type": "string",
+              "format": "ipv4",
+              "required": true,
+              "placeholder": "192.168.1.50"
+            },
+            "name": {
+              "title": "Name (optional)",
+              "type": "string",
+              "description": "\"Local\" is appended automatically."
+            },
+            "id": {
+              "title": "Device ID (filled by discovery)",
+              "type": "string",
+              "description": "Stable ID read from the appliance. Keeps one accessory when the IP address changes. Do not edit."
+            },
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "features": {
+              "title": "Shown in HomeKit",
+              "type": "object",
+              "properties": {
+                "fan": {
+                  "title": "Fan tile (speed slider, Auto, swing)",
+                  "type": "boolean",
+                  "default": true
+                },
+                "fanAutoSwitch": {
+                  "title": "Fan Auto switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "fanTurboSwitch": {
+                  "title": "Turbo switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "fanSpeedSwitches": {
+                  "title": "Low / Medium / High switches",
+                  "type": "boolean",
+                  "default": false
+                },
+                "drySwitch": {
+                  "title": "Dry mode switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "fanOnlySwitch": {
+                  "title": "Fan Only mode switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "windFree": {
+                  "title": "WindFree switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "fast": {
+                  "title": "Fast switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "quiet": {
+                  "title": "Quiet switch",
+                  "type": "boolean",
+                  "default": true
+                },
+                "sleep": {
+                  "title": "Sleep switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "smart": {
+                  "title": "Smart switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "comfort": {
+                  "title": "Comfort switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "twoStep": {
+                  "title": "2-Step switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "motionDirect": {
+                  "title": "Wind follows people switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "motionIndirect": {
+                  "title": "Wind avoids people switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "light": {
+                  "title": "Display light",
+                  "type": "boolean",
+                  "default": true
+                },
+                "beep": {
+                  "title": "Beep switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "autoClean": {
+                  "title": "Auto Clean switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "humidity": {
+                  "title": "Humidity sensor",
+                  "type": "boolean",
+                  "default": true
+                },
+                "filter": {
+                  "title": "Filter status",
+                  "type": "boolean",
+                  "default": true
+                },
+                "outdoorTemperature": {
+                  "title": "Outdoor temperature sensor (derived, unverified)",
+                  "type": "boolean",
+                  "default": false
+                },
+                "energyEve": {
+                  "title": "Power and energy for Eve-compatible apps",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "pollInterval": {
+        "title": "Polling interval (seconds)",
+        "type": "integer",
+        "default": 15,
+        "minimum": 5,
+        "maximum": 300,
+        "description": "Fallback read when the appliance sends no push update."
+      },
+      "pushUpdates": {
+        "title": "Use push updates when the appliance supports them",
+        "type": "boolean",
+        "default": true
+      },
+      "pythonPath": {
+        "title": "Python interpreter (optional)",
+        "type": "string",
+        "placeholder": "python3",
+        "description": "Only needed when the default python3 is older than 3.11."
+      }
+    }
+  }
+}

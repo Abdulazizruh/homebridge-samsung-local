@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Samsung Local for Homebridge">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2E8BFF"/>
+      <stop offset="1" stop-color="#0B4FD6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- house outline: the home network -->
+  <path d="M104 204 256 76l152 128" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M140 194v130a22 22 0 0 0 22 22h188a22 22 0 0 0 22-22V194" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- wall-mounted air conditioner -->
+  <rect x="190" y="196" width="132" height="50" rx="14" fill="#fff"/>
+  <rect x="208" y="225" width="96" height="7" rx="3.5" fill="#0B4FD6"/>
+  <!-- air flow -->
+  <path d="M216 270v24M256 270v36M296 270v24" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+  <!-- LOCAL badge -->
+  <rect x="116" y="380" width="280" height="76" rx="38" fill="#fff"/>
+  <text x="256" y="437" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="54" letter-spacing="6" fill="#0B4FD6">LOCAL</text>
+</svg>

@@ -1,0 +1,369 @@
+<style>
+  .sl-wrap { font-size: 0.92rem; }
+  .sl-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .sl-head img { width: 52px; height: 52px; border-radius: 12px; }
+  .sl-card { border: 1px solid rgba(128,128,128,.3); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+  .sl-card h6 { font-weight: 700; margin-bottom: 8px; }
+  .sl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sl-row input[type=text] { flex: 1 1 160px; min-width: 0; }
+  .sl-table { width: 100%; border-collapse: collapse; }
+  .sl-table th, .sl-table td { padding: 4px 5px; font-size: .84rem; border-bottom: 1px solid rgba(128,128,128,.2); text-align: start; vertical-align: top; }
+  .sl-pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; background: rgba(128,128,128,.18); }
+  .sl-ok { background: rgba(40,167,69,.2); } .sl-warn { background: rgba(255,193,7,.25); } .sl-bad { background: rgba(220,53,69,.2); }
+  .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
+  .sl-danger { border-color: rgba(220,53,69,.5); }
+  .sl-lang { margin-inline-start: auto; }
+  .sl-scroll { overflow-x: auto; }
+</style>
+
+<div class="sl-wrap" id="sl-root">
+  <div class="sl-head">
+    <img src="icon.png" alt="">
+    <div><strong data-t="title"></strong><div class="sl-muted" data-t="subtitle"></div></div>
+    <button class="btn btn-sm btn-outline-secondary sl-lang" id="sl-lang"></button>
+  </div>
+
+  <div class="sl-card" id="sl-runtime"></div>
+  <div class="sl-card" id="sl-bridge" style="display:none"></div>
+
+  <div class="sl-card">
+    <h6 data-t="addTitle"></h6>
+    <div class="sl-row">
+      <input type="text" class="form-control" id="sl-host" inputmode="decimal" placeholder="192.168.1.50" dir="ltr">
+      <button class="btn btn-primary" id="sl-discover" data-t="discover"></button>
+    </div>
+    <div class="sl-muted mt-1" data-t="addHint"></div>
+    <div id="sl-result" class="mt-2"></div>
+  </div>
+
+  <div class="sl-card">
+    <h6 data-t="devicesTitle"></h6>
+    <div id="sl-devices"></div>
+  </div>
+
+  <div class="sl-card">
+    <h6 data-t="generalTitle"></h6>
+    <div class="sl-row">
+      <label class="mb-0" data-t="pollInterval"></label>
+      <input type="number" class="form-control" id="sl-poll" min="5" max="300" style="max-width:110px" dir="ltr">
+      <label class="mb-0"><input type="checkbox" id="sl-push"> <span data-t="push"></span></label>
+    </div>
+  </div>
+
+  <div class="sl-card sl-danger">
+    <h6 data-t="wipeTitle"></h6>
+    <ul class="mb-2" id="sl-wipe-list"></ul>
+    <div class="sl-row">
+      <input type="text" class="form-control" id="sl-wipe-confirm" placeholder="DELETE" dir="ltr" style="max-width:160px">
+      <button class="btn btn-danger" id="sl-wipe" data-t="wipeButton"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(async () => {
+  const T = {
+    en: {
+      title: 'Samsung Local', subtitle: 'Local control, no cloud subscription',
+      langButton: 'العربية',
+      runtimeReady: 'Python runtime: ready', runtimeMissing: 'Python runtime: not prepared yet',
+      runtimePrepare: 'Prepare now', runtimePreparing: 'Preparing… this can take a few minutes on a Raspberry Pi',
+      runtimeNote: 'One-time download of pinned packages from PyPI into the plugin folder. No root access, nothing installed system-wide.',
+      pythonFound: 'Python found', pythonProblem: 'Python problem',
+      bridgeWarn: 'Run this plugin as a child bridge: use the bridge button (⋮ → Bridge Settings) on the plugin card after saving. It keeps this plugin separate from your other plugins.',
+      addTitle: 'Add an appliance', discover: 'Test & discover',
+      addHint: 'Enter the appliance IP address. Success means the appliance answered an authenticated read of its identity and resources.',
+      discovering: 'Connecting to the appliance…',
+      devicesTitle: 'Configured appliances', none: 'No appliances yet.',
+      generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates',
+      kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
+      sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
+      name: 'Name', namePh: 'e.g. Living Room AC', nameNote: '"Local" is appended automatically.',
+      showInHome: 'Shown in HomeKit', add: 'Add to configuration', update: 'Update configuration',
+      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', diagnostics: 'Diagnostics', changeIp: 'Change IP',
+      online: 'connected', offline: 'not reachable', unknownState: 'not contacted yet',
+      thFeature: 'Function / reading', thDevice: 'Appliance', thPlugin: 'Plugin', thWhere: 'Shown in', thNote: 'Value / limits',
+      yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
+      whereHome: 'Apple Home', whereEve: 'Eve + this page', whereUi: 'this page', whereNone: '—',
+      testNote: 'All rows are mapped from LocalThings data and still need confirmation on your appliance.',
+      unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
+      support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
+      reason_tv: 'Samsung TVs need an OCF credential that owners cannot obtain yet. Keep the TV on your current plugin.',
+      'reason_not-mapped-yet': 'The appliance answered locally, but this version has no HomeKit mapping for this type yet. Send the diagnostics file to get it supported.',
+      'reason_unknown-type': 'The appliance answered, but its type is not recognized.',
+      wipeTitle: 'Delete this plugin\'s data',
+      wipe1: 'Deletes only the folder "samsung-local" in the Homebridge storage: certificate, cached readings and the Python runtime.',
+      wipe2: 'Does not delete the saved settings on this page, other plugins, or anything on the appliances or in SmartThings.',
+      wipe3: 'To remove the accessories from the Home app, remove the child bridge there.',
+      wipeButton: 'Delete data', wipeDone: 'Deleted: ', wipeNothing: 'Nothing to delete.', wipeType: 'Type DELETE to confirm.',
+      err_no_local_api: 'No local endpoint answered at this address. Check the IP address, that the appliance is powered and on the same network, and that the Homebridge container uses host networking.',
+      err_auth_rejected: 'The appliance refused the automatic certificate. It needs additional credentials that this plugin cannot obtain yet.',
+      err_legacy_http: 'This appliance only offers the older interface on TCP 8888, which is not supported yet.',
+      err_timeout: 'The appliance did not answer in time. If LocalThings or another local integration is connected to it, stop that one for the test: some appliances accept a single local connection.',
+      err_connection: 'The connection failed. If another local integration is connected to this appliance, stop it for the test.',
+      err_python_missing: 'Python 3 was not found. The official Homebridge Docker image includes it.',
+      err_python_too_old: 'Python 3.11 or newer is required. Use the current official Homebridge image (Ubuntu 24.04).',
+      err_venv_failed: 'Could not create the Python environment (python3-venv missing).',
+      err_pip_offline: 'Could not reach PyPI. Internet access is needed for this one-time step.',
+      err_pip_failed: 'Installing the Python packages failed. 64-bit ARM and x86-64 are supported; 32-bit systems are not.',
+      f: { power: 'Power', 'mode.cool': 'Cool', 'mode.heat': 'Heat', 'mode.auto': 'Auto mode', 'mode.dry': 'Dry', 'mode.fan': 'Fan only',
+        currentTemperature: 'Current temperature (°C)', targetTemperature: 'Target temperature (°C)', humidity: 'Humidity (%)',
+        'fan.auto': 'Fan: Auto', 'fan.low': 'Fan: Low', 'fan.medium': 'Fan: Medium', 'fan.high': 'Fan: High', 'fan.turbo': 'Fan: Turbo',
+        swing: 'Swing', 'preset.windFree': 'WindFree', 'preset.fast': 'Fast', 'preset.quiet': 'Quiet', 'preset.sleep': 'Sleep',
+        'preset.smart': 'Smart', 'preset.comfort': 'Comfort', 'preset.twoStep': '2-Step', 'preset.motionDirect': 'Wind follows people',
+        'preset.motionIndirect': 'Wind avoids people', light: 'Display light', beep: 'Beep', autoClean: 'Auto clean',
+        filter: 'Filter usage (%)', alarms: 'Alarms', powerWatts: 'Power now (W)', energyKWh: 'Energy total (kWh)',
+        voltage: 'Voltage (V)', current: 'Current (A)', outdoorTemperature: 'Outdoor temperature (°C)', occupancy: 'Motion / occupancy' },
+      v: { off: 'off', both: 'both', vertical: 'vertical', horizontal: 'horizontal', normal: 'normal', wash: 'wash', replace: 'replace', none: 'none' },
+      n: { switch: 'separate switch', 'on-off-only': 'on/off only, no brightness', 'not-reported': 'not reported by this appliance',
+        'derived-token': 'derived value, unverified', 'no-known-resource': 'no known local resource', 'reports-zero': 'appliance reports 0: hidden until it measures' },
+      feat: { fan: 'Fan tile', fanAutoSwitch: 'Fan Auto switch', fanTurboSwitch: 'Turbo switch', fanSpeedSwitches: 'Low/Medium/High switches',
+        drySwitch: 'Dry switch', fanOnlySwitch: 'Fan Only switch', windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart',
+        comfort: 'Comfort', twoStep: '2-Step', motionDirect: 'Wind follows people', motionIndirect: 'Wind avoids people', light: 'Display light',
+        beep: 'Beep', autoClean: 'Auto clean', humidity: 'Humidity sensor', filter: 'Filter status', outdoorTemperature: 'Outdoor temperature', energyEve: 'Power & energy (Eve)' },
+    },
+    ar: {
+      title: 'Samsung Local', subtitle: 'تحكم محلي دون اشتراك سحابي',
+      langButton: 'English',
+      runtimeReady: 'بيئة Python: جاهزة', runtimeMissing: 'بيئة Python: لم تُجهَّز بعد',
+      runtimePrepare: 'جهّزها الآن', runtimePreparing: 'جارٍ التجهيز… قد يستغرق دقائق على Raspberry Pi',
+      runtimeNote: 'تنزيل لمرة واحدة لحزم محددة الإصدار من PyPI داخل مجلد الإضافة. لا يحتاج صلاحيات المدير، ولا يثبّت شيئًا على مستوى النظام.',
+      pythonFound: 'Python الموجود', pythonProblem: 'مشكلة في Python',
+      bridgeWarn: 'شغّل هذه الإضافة كجسر فرعي مستقل: بعد الحفظ استخدم زر الجسر في بطاقة الإضافة (⋮ ← إعدادات الجسر). بذلك تبقى منفصلة عن بقية الإضافات.',
+      addTitle: 'إضافة جهاز', discover: 'اختبار واكتشاف',
+      addHint: 'أدخل عنوان IP للجهاز. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
+      discovering: 'جارٍ الاتصال بالجهاز…',
+      devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
+      generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية',
+      kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
+      sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
+      name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'تُضاف اللاحقة Local تلقائيًا.',
+      showInHome: 'ما يظهر في HomeKit', add: 'أضف إلى الإعدادات', update: 'حدّث الإعدادات',
+      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان',
+      online: 'متصل', offline: 'غير متاح', unknownState: 'لم يُتصل به بعد',
+      thFeature: 'الوظيفة أو القياس', thDevice: 'الجهاز', thPlugin: 'الإضافة', thWhere: 'مكان الظهور', thNote: 'القيمة والقيود',
+      yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
+      whereHome: 'Apple Home', whereEve: 'Eve وهذه الصفحة', whereUi: 'هذه الصفحة', whereNone: '—',
+      testNote: 'جميع الصفوف مبنية على خرائط LocalThings، وتحتاج تأكيدًا على جهازك.',
+      unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
+      support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
+      reason_tv: 'تلفزيونات Samsung تحتاج بيانات اعتماد OCF يتعذر على المالك الحصول عليها حاليًا. أبقِ التلفزيون على الإضافة الحالية.',
+      'reason_not-mapped-yet': 'استجاب الجهاز محليًا، لكن هذه النسخة لم تُضف له خدمات HomeKit بعد. أرسل ملف التشخيص لدعمه.',
+      'reason_unknown-type': 'استجاب الجهاز، لكن نوعه غير معروف.',
+      wipeTitle: 'حذف بيانات هذه الإضافة',
+      wipe1: 'يحذف مجلد samsung-local فقط داخل تخزين Homebridge: الشهادة والقراءات المحفوظة وبيئة Python.',
+      wipe2: 'تبقى إعدادات هذه الصفحة والإضافات الأخرى وكل ما على الأجهزة وفي SmartThings دون تغيير.',
+      wipe3: 'لإزالة الأجهزة من تطبيق Home احذف الجسر الفرعي من التطبيق نفسه.',
+      wipeButton: 'احذف البيانات', wipeDone: 'تم حذف: ', wipeNothing: 'لم يوجد ما يُحذف.', wipeType: 'اكتب DELETE للتأكيد.',
+      err_no_local_api: 'لم يستجب منفذ محلي على هذا العنوان. تحقق من العنوان، ومن تشغيل الجهاز ووجوده على الشبكة نفسها، ومن أن حاوية Homebridge تعمل بوضع شبكة المضيف.',
+      err_auth_rejected: 'رفض الجهاز الشهادة التلقائية. يحتاج بيانات اعتماد إضافية يتعذر على الإضافة الحصول عليها حاليًا.',
+      err_legacy_http: 'هذا الجهاز يوفّر الواجهة الأقدم على TCP 8888 فقط، وهي غير مدعومة بعد.',
+      err_timeout: 'لم يستجب الجهاز في الوقت المحدد. إذا كان LocalThings أو تكامل محلي آخر متصلًا به فأوقفه مؤقتًا للاختبار؛ بعض الأجهزة تقبل اتصالًا محليًا واحدًا.',
+      err_connection: 'فشل الاتصال. إذا كان تكامل محلي آخر متصلًا بالجهاز فأوقفه مؤقتًا للاختبار.',
+      err_python_missing: 'لم يُعثر على Python 3. صورة Homebridge الرسمية على Docker تتضمنه.',
+      err_python_too_old: 'يلزم Python 3.11 أو أحدث. استخدم صورة Homebridge الرسمية الحالية (Ubuntu 24.04).',
+      err_venv_failed: 'تعذّر إنشاء بيئة Python (الحزمة python3-venv غير موجودة).',
+      err_pip_offline: 'تعذّر الوصول إلى PyPI. يلزم اتصال بالإنترنت لهذه الخطوة مرة واحدة.',
+      err_pip_failed: 'فشل تثبيت حزم Python. المدعوم: ARM 64-بت و x86-64؛ الأنظمة 32-بت غير مدعومة.',
+      f: { power: 'التشغيل والإيقاف', 'mode.cool': 'تبريد', 'mode.heat': 'تدفئة', 'mode.auto': 'الوضع التلقائي', 'mode.dry': 'تجفيف', 'mode.fan': 'مروحة فقط',
+        currentTemperature: 'الحرارة الحالية (°م)', targetTemperature: 'الحرارة المستهدفة (°م)', humidity: 'الرطوبة (%)',
+        'fan.auto': 'المروحة: تلقائي', 'fan.low': 'المروحة: منخفض', 'fan.medium': 'المروحة: متوسط', 'fan.high': 'المروحة: مرتفع', 'fan.turbo': 'المروحة: السرعة القصوى',
+        swing: 'التأرجح', 'preset.windFree': 'WindFree', 'preset.fast': 'سريع', 'preset.quiet': 'هادئ', 'preset.sleep': 'نوم',
+        'preset.smart': 'ذكي', 'preset.comfort': 'راحة', 'preset.twoStep': 'مرحلتان', 'preset.motionDirect': 'توجيه الهواء نحو الأشخاص',
+        'preset.motionIndirect': 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة', beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي',
+        filter: 'استهلاك الفلتر (%)', alarms: 'التنبيهات والأعطال', powerWatts: 'القدرة اللحظية (واط)', energyKWh: 'الطاقة التراكمية (كيلوواط ساعة)',
+        voltage: 'الجهد (فولت)', current: 'التيار (أمبير)', outdoorTemperature: 'الحرارة الخارجية (°م)', occupancy: 'الحركة والإشغال' },
+      v: { off: 'متوقف', both: 'الاتجاهان', vertical: 'رأسي', horizontal: 'أفقي', normal: 'سليم', wash: 'يحتاج غسلًا', replace: 'يحتاج استبدالًا', none: 'لا يوجد' },
+      n: { switch: 'مفتاح مستقل', 'on-off-only': 'تشغيل وإطفاء فقط دون سطوع', 'not-reported': 'الجهاز لم يعلن عنه',
+        'derived-token': 'قيمة مشتقة غير مؤكدة', 'no-known-resource': 'لم يُعرف له مورد محلي', 'reports-zero': 'الجهاز يُرجع صفرًا: يُخفى حتى يبدأ القياس' },
+      feat: { fan: 'بطاقة المروحة', fanAutoSwitch: 'مفتاح المروحة التلقائية', fanTurboSwitch: 'مفتاح السرعة القصوى', fanSpeedSwitches: 'مفاتيح منخفض/متوسط/مرتفع',
+        drySwitch: 'مفتاح التجفيف', fanOnlySwitch: 'مفتاح مروحة فقط', windFree: 'WindFree', fast: 'سريع', quiet: 'هادئ', sleep: 'نوم', smart: 'ذكي',
+        comfort: 'راحة', twoStep: 'مرحلتان', motionDirect: 'توجيه الهواء نحو الأشخاص', motionIndirect: 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة',
+        beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي', humidity: 'حساس الرطوبة', filter: 'حالة الفلتر', outdoorTemperature: 'الحرارة الخارجية', energyEve: 'القدرة والطاقة (Eve)' },
+    },
+  };
+  const KINDS = {
+    en: { airConditioner: 'Air conditioner', washer: 'Washer', dryer: 'Dryer', tv: 'TV', refrigerator: 'Refrigerator', dishwasher: 'Dishwasher', oven: 'Oven', airPurifier: 'Air purifier', robotVacuum: 'Robot vacuum', unknown: 'Unknown' },
+    ar: { airConditioner: 'مكيف', washer: 'غسالة', dryer: 'مجففة', tv: 'تلفزيون', refrigerator: 'ثلاجة', dishwasher: 'غسالة صحون', oven: 'فرن', airPurifier: 'منقي هواء', robotVacuum: 'مكنسة آلية', unknown: 'غير معروف' },
+  };
+  const DEFAULTS = { fan: true, fanAutoSwitch: true, fanTurboSwitch: true, fanSpeedSwitches: false, drySwitch: true, fanOnlySwitch: true,
+    windFree: true, fast: true, quiet: true, sleep: false, smart: false, comfort: false, twoStep: false, motionDirect: false, motionIndirect: false,
+    light: true, beep: false, autoClean: false, humidity: true, filter: true, outdoorTemperature: false, energyEve: true };
+  // Which appliance feature rows make a HomeKit option meaningful.
+  const NEEDS = { fan: ['fan.low', 'fan.auto'], fanAutoSwitch: ['fan.auto'], fanTurboSwitch: ['fan.turbo'], fanSpeedSwitches: ['fan.low', 'fan.medium', 'fan.high'],
+    drySwitch: ['mode.dry'], fanOnlySwitch: ['mode.fan'], windFree: ['preset.windFree'], fast: ['preset.fast'], quiet: ['preset.quiet'], sleep: ['preset.sleep'],
+    smart: ['preset.smart'], comfort: ['preset.comfort'], twoStep: ['preset.twoStep'], motionDirect: ['preset.motionDirect'], motionIndirect: ['preset.motionIndirect'],
+    light: ['light'], beep: ['beep'], autoClean: ['autoClean'], humidity: ['humidity'], filter: ['filter'], outdoorTemperature: ['outdoorTemperature'], energyEve: ['powerWatts', 'energyKWh'] };
+
+  let lang = (localStorage.getItem('sl-lang') || (navigator.language || 'en')).startsWith('ar') ? 'ar' : 'en';
+  const t = (k) => T[lang][k] ?? T.en[k] ?? k;
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const $ = (id) => document.getElementById(id);
+
+  let config = (await homebridge.getPluginConfig())[0] ?? { platform: 'SamsungLocal', name: 'Samsung Local' };
+  config.platform = 'SamsungLocal';
+  config.devices = Array.isArray(config.devices) ? config.devices : [];
+  let status = { devices: [] };
+  let lastProbe = null;
+  let legacyNames = [];
+
+  async function save(message = true) {
+    await homebridge.updatePluginConfig([config]);
+    await homebridge.savePluginConfig();
+    if (message) { homebridge.toast.success(t('saved')); }
+    render();
+  }
+  function errorText(err) {
+    const code = err?.error?.code ?? err?.code;
+    return T[lang][`err_${code}`] ?? err?.message ?? String(err);
+  }
+
+  function featureTable(d) {
+    const rows = (d.features || []).map((r) => {
+      const dev = r.device === true ? `<span class="sl-pill sl-ok">${t('yes')}</span>` : r.device === 'unconfirmed' ? `<span class="sl-pill sl-warn">${t('unconfirmed')}</span>` : `<span class="sl-pill">${t('no')}</span>`;
+      const plug = !r.device ? '—' : r.write ? t('control') : t('readOnly');
+      const where = { home: t('whereHome'), eve: t('whereEve'), 'plugin-ui': t('whereUi'), none: t('whereNone') }[r.where];
+      const word = (x) => String(x).split('/').map((w) => T[lang].v[w] ?? esc(w)).join(' / ');
+      const value = !r.device || r.value === null || r.value === undefined ? '' : r.value === true ? '●' : r.value === false ? '○' : word(r.value);
+      const note = r.note ? (T[lang].n[r.note] ?? word(r.note)) : '';
+      return `<tr><td>${esc(T[lang].f[r.id] ?? r.id)}</td><td>${dev}</td><td>${plug}</td><td>${where}</td><td><span dir="ltr">${value}</span> <span class="sl-muted">${note}</span></td></tr>`;
+    }).join('');
+    return `<div class="sl-scroll"><table class="sl-table"><thead><tr><th>${t('thFeature')}</th><th>${t('thDevice')}</th><th>${t('thPlugin')}</th><th>${t('thWhere')}</th><th>${t('thNote')}</th></tr></thead><tbody>${rows}</tbody></table></div><div class="sl-muted mt-1">${t('testNote')}</div>`;
+  }
+
+  function renderResult() {
+    const box = $('sl-result');
+    if (!lastProbe) { box.innerHTML = ''; return; }
+    const p = lastProbe; const d = p.described;
+    const existing = config.devices.find((x) => x.id && x.id === p.deviceId);
+    const supportClass = d.support === 'experimental' ? 'sl-warn' : d.support === 'unsupported' ? 'sl-bad' : '';
+    const src = { probe: t('sourceProbe'), 'running-plugin': t('sourceRunning'), snapshot: t('sourceSnapshot') }[p.source];
+    let html = `<table class="sl-table"><tbody>
+      <tr><th>${t('kind')}</th><td>${esc(KINDS[lang][d.kind] ?? d.kind)}</td></tr>
+      <tr><th>${t('model')}</th><td dir="ltr">${esc(d.model ?? '—')}</td></tr>
+      <tr><th>${t('id')}</th><td dir="ltr">…${esc(String(p.deviceId ?? '').slice(-8))}</td></tr>
+      <tr><th>${t('support')}</th><td><span class="sl-pill ${supportClass}">${t('support_' + d.support)}</span></td></tr>
+      <tr><th>${t('source')}</th><td>${src}</td></tr></tbody></table>`;
+    if (d.reason) { html += `<div class="alert alert-warning mt-2 mb-2">${t('reason_' + d.reason)}</div>`; }
+    if (d.kind === 'airConditioner') {
+      const feats = { ...DEFAULTS, ...(existing?.features || {}) };
+      const supported = new Set(d.features.filter((r) => r.device === true).map((r) => r.id));
+      const boxes = Object.keys(DEFAULTS).filter((k) => NEEDS[k].some((id) => supported.has(id))).map((k) =>
+        `<label class="mb-0"><input type="checkbox" data-feat="${k}" ${feats[k] ? 'checked' : ''}> ${esc(T[lang].feat[k])}</label>`).join('');
+      html += `<div class="mt-2">${featureTable(d)}</div>
+        <div class="mt-2"><strong>${t('name')}</strong>
+          <input type="text" class="form-control" id="sl-name" list="sl-names" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
+          <datalist id="sl-names">${legacyNames.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
+          <div class="sl-muted">${t('nameNote')}</div></div>
+        <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
+        <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
+    }
+    if (d.unknownResources?.length) {
+      html += `<details class="mt-2"><summary>${t('unknownRes')} (${d.unknownResources.length})</summary><div dir="ltr" class="sl-muted">${d.unknownResources.map(esc).join('<br>')}</div></details>`;
+    }
+    box.innerHTML = html;
+    $('sl-add')?.addEventListener('click', async () => {
+      const features = {};
+      box.querySelectorAll('[data-feat]').forEach((el) => { features[el.dataset.feat] = el.checked; });
+      const entry = { host: p.host, id: p.deviceId, enabled: true, features };
+      const name = $('sl-name').value.trim();
+      if (name) { entry.name = name; }
+      const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
+      if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
+      await save();
+    });
+  }
+
+  function renderDevices() {
+    const box = $('sl-devices');
+    if (!config.devices.length) { box.innerHTML = `<span class="sl-muted">${t('none')}</span>`; return; }
+    box.innerHTML = `<div class="sl-scroll"><table class="sl-table"><tbody>${config.devices.map((dev, i) => {
+      const snap = status.devices.find((s) => s.deviceId && s.deviceId === dev.id) || status.devices.find((s) => s.host === dev.host);
+      const state = !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
+      const energy = snap?.described?.features?.filter((r) => ['powerWatts', 'energyKWh'].includes(r.id) && r.device === true)
+        .map((r) => `${esc(T[lang].f[r.id])}: <span dir="ltr">${esc(r.value ?? '—')}</span>`).join(' · ') ?? '';
+      return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${esc(dev.host)}</div><div class="sl-muted">${energy}</div></td>
+        <td>${state}</td>
+        <td><label class="mb-0"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}></label></td>
+        <td><button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${t('changeIp')}</button>
+            <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${t('diagnostics')}</button>
+            <button class="btn btn-sm btn-outline-danger" data-rm="${i}">${t('remove')}</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+    box.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', async () => { config.devices.splice(Number(b.dataset.rm), 1); await save(); }));
+    box.querySelectorAll('[data-en]').forEach((b) => b.addEventListener('change', async () => { config.devices[Number(b.dataset.en)].enabled = b.checked; await save(); }));
+    box.querySelectorAll('[data-ip]').forEach((b) => b.addEventListener('click', () => { $('sl-host').value = config.devices[Number(b.dataset.ip)].host; $('sl-host').focus(); }));
+    box.querySelectorAll('[data-diag]').forEach((b) => b.addEventListener('click', async () => {
+      try {
+        const dump = await homebridge.request('/diagnostics', { deviceId: config.devices[Number(b.dataset.diag)].id });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+        a.download = 'samsung-local-diagnostics.json'; a.click();
+      } catch (err) { homebridge.toast.error(errorText(err)); }
+    }));
+  }
+
+  function renderRuntime() {
+    const box = $('sl-runtime');
+    const py = status.python ? `${t('pythonFound')}: <span dir="ltr">${esc(status.python.version)} · ${esc(status.arch)}</span>` : `${t('pythonProblem')}: ${esc(T[lang]['err_' + status.pythonError?.code] ?? status.pythonError?.message ?? '')}`;
+    box.innerHTML = status.runtimeReady
+      ? `<span class="sl-pill sl-ok">${t('runtimeReady')}</span> <span class="sl-muted">${py}</span>`
+      : `<span class="sl-pill sl-warn">${t('runtimeMissing')}</span> <span class="sl-muted">${py}</span>
+         <div class="sl-muted mt-1">${t('runtimeNote')}</div>
+         <button class="btn btn-sm btn-primary mt-1" id="sl-prepare" ${status.python ? '' : 'disabled'}>${t('runtimePrepare')}</button>`;
+    $('sl-prepare')?.addEventListener('click', async () => {
+      homebridge.showSpinner(); box.querySelector('.sl-muted.mt-1').textContent = t('runtimePreparing');
+      try { await homebridge.request('/prepare'); await refreshStatus(); } catch (err) { homebridge.toast.error(errorText(err)); } finally { homebridge.hideSpinner(); }
+    });
+  }
+
+  function render() {
+    const root = $('sl-root');
+    root.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    root.lang = lang;
+    root.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
+    $('sl-lang').textContent = t('langButton');
+    $('sl-wipe-list').innerHTML = ['wipe1', 'wipe2', 'wipe3'].map((k) => `<li>${t(k)}</li>`).join('');
+    const bridge = $('sl-bridge');
+    bridge.style.display = config._bridge ? 'none' : '';
+    bridge.textContent = t('bridgeWarn');
+    $('sl-poll').value = config.pollInterval ?? 15;
+    $('sl-push').checked = config.pushUpdates !== false;
+    renderRuntime(); renderResult(); renderDevices();
+  }
+
+  async function refreshStatus() {
+    try { status = await homebridge.request('/status'); } catch { /* keep the previous status */ }
+    render();
+  }
+
+  $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
+  $('sl-poll').addEventListener('change', async (e) => { config.pollInterval = Math.min(300, Math.max(5, Number(e.target.value) || 15)); await save(false); });
+  $('sl-push').addEventListener('change', async (e) => { config.pushUpdates = e.target.checked; await save(false); });
+  $('sl-discover').addEventListener('click', async () => {
+    const host = $('sl-host').value.trim();
+    if (!host) { return; }
+    homebridge.showSpinner(); $('sl-result').innerHTML = `<span class="sl-muted">${t('discovering')}</span>`;
+    try {
+      lastProbe = await homebridge.request('/probe', { host });
+      // Same appliance on a new address: keep one entry, never a duplicate.
+      const known = config.devices.find((x) => x.id && x.id === lastProbe.deviceId);
+      if (known && known.host !== lastProbe.host) { known.host = lastProbe.host; await save(false); homebridge.toast.info(t('sameDevice')); }
+      await refreshStatus();
+    } catch (err) {
+      lastProbe = null;
+      $('sl-result').innerHTML = `<div class="alert alert-danger mb-0">${esc(errorText(err))}</div>`;
+    } finally { homebridge.hideSpinner(); }
+  });
+  $('sl-wipe').addEventListener('click', async () => {
+    if ($('sl-wipe-confirm').value.trim() !== 'DELETE') { homebridge.toast.warning(t('wipeType')); return; }
+    try {
+      const res = await homebridge.request('/wipe', { confirm: 'DELETE' });
+      homebridge.toast.success(res.removed.length ? t('wipeDone') + res.removed.join(', ') : t('wipeNothing'));
+      $('sl-wipe-confirm').value = ''; lastProbe = null; await refreshStatus();
+    } catch (err) { homebridge.toast.error(errorText(err)); }
+  });
+
+  try { legacyNames = (await homebridge.request('/legacy-devices')).names; } catch { legacyNames = []; }
+  await refreshStatus();
+})();
+</script>

@@ -1,0 +1,9 @@
+# Pinned runtime for the helper. The plugin installs these into its own
+# virtual environment inside the Homebridge storage folder. Nothing is
+# installed system-wide and no root access is used.
+smartthings-local==0.1.25
+cbor2==6.3.0
+cryptography==50.0.2
+pyOpenSSL==26.4.0
+cffi==2.1.1
+pycparser==3.12
