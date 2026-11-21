@@ -32,7 +32,7 @@ import zlib
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.0"
+HELPER_VERSION = "0.1.1"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -211,6 +211,10 @@ def find_secure_ports(host):
     try:
         result = probe_dtls_ports(host, ports[:32], preferred_port=preferred, timeout=3.0, retries=2)
         details["probe_outcome"] = result.outcome
+        details["responders"] = [
+            {"dialled": r.port, "kind": r.response_kind, "from": r.responder_port}
+            for r in result.results if r.response_kind is not None
+        ][:12]
         if result.selected_port is not None:
             return [result.selected_port], details
         responders = list(result.responder_ports)
@@ -402,7 +406,29 @@ def open_link(host, port, cert, key, on_notification=None):
     info = classify(last) if last else {"code": "connection", "message": "handshake failed"}
     info["triedPorts"] = tried
     info["details"] = details
+    info["diagnosis"] = diagnose(host, tried[0], cert, key)
     raise HelperError(info.pop("code"), info.pop("message"), **info)
+
+
+def diagnose(host, port, cert, key):
+    """Why a handshake failed, in the appliance's own words (best effort).
+
+    Reports the DTLS outcome and any fatal alert the appliance sent. Never
+    includes key material.
+    """
+    try:
+        from smartthings_local.protocol.dtls_probe import diagnose_dtls_handshake
+
+        result = diagnose_dtls_handshake(host, port, cert_pem=cert, key_pem=key, retries=1, timeout=4.0)
+        alert = result.alert
+        return {
+            "port": port,
+            "outcome": result.outcome,
+            "alert": alert[1] if isinstance(alert, (tuple, list)) and len(alert) > 1 else (str(alert) if alert else None),
+            "flight": [str(m) for m in (result.handshake_msgs or [])][:12],
+        }
+    except Exception as exc:  # noqa: BLE001
+        return {"port": port, "error": type(exc).__name__}
 
 
 def probe(host, cred_dir, port=None):

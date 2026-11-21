@@ -11,7 +11,7 @@
 
 [English](README.md)
 
-> **الحالة: 0.1.0-beta.2 — تجريبي.** نجح الكود في اختباراته الآلية على بيانات أجهزة مسجّلة، لكن هذه النسخة **لم تُجرَّب بعد على جهاز حقيقي** من طرف المشروع. راجع [ما تم اختباره](#ما-تم-اختباره).
+> **الحالة: 0.1.0-beta.3 — تجريبي.** نجح الكود في اختباراته الآلية على بيانات أجهزة مسجّلة، لكن هذه النسخة **لم تُجرَّب بعد على جهاز حقيقي** من طرف المشروع. راجع [ما تم اختباره](#ما-تم-اختباره).
 > مشروع غير رسمي، وليس تابعًا لشركة Samsung أو معتمدًا منها. ليس إضافة Homebridge Verified.
 
 ## ما الذي يقدمه
@@ -70,12 +70,12 @@
 
 ```sh
 cd /var/lib/homebridge
-npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.2.tar.gz
+npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.3.tar.gz
 ```
 
 </div>
 
-يعمل هذا الأمر ما دام المستودع عامًا. إذا كان المستودع خاصًا فانسخ ملف الحزمة إلى مجلد Homebridge وثبّته منه: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.2.tgz`.
+يعمل هذا الأمر ما دام المستودع عامًا. إذا كان المستودع خاصًا فانسخ ملف الحزمة إلى مجلد Homebridge وثبّته منه: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.3.tgz`.
 
 ثم أعد تشغيل Homebridge.
 

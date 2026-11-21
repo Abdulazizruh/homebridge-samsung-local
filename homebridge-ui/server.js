@@ -22,7 +22,17 @@ class UiServer extends HomebridgePluginUiServer {
   }
 
   fail(err) {
-    throw new RequestError(err.message, { code: err.code ?? 'error', detail: err.detail ?? null });
+    throw new RequestError(err.message, {
+      code: err.code ?? 'error',
+      detail: err.detail ?? null,
+      // Technical details for troubleshooting. Ports and DTLS outcomes only.
+      technical: {
+        triedPorts: err.triedPorts ?? null,
+        discovery: err.details ?? null,
+        diagnosis: err.diagnosis ?? null,
+        raw: String(err.message ?? '').slice(0, 300),
+      },
+    });
   }
 
   async status() {
@@ -90,7 +100,7 @@ class UiServer extends HomebridgePluginUiServer {
       });
       helper.stopped = true; // one-shot: never auto-restart
       await helper.start();
-      const result = await helper.request('probe', { host }, 90_000);
+      const result = await helper.request('probe', { host }, 180_000);
       return this.present({
         host, identity: result.identity, resources: result.resources, online: true, updatedAt: Date.now(),
       }, 'probe');

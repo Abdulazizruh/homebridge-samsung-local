@@ -117,7 +117,7 @@ export class SamsungLocalPlatform {
       return;
     }
     try {
-      const probe = await this.helper.request('probe', { host: entry.host, port: entry.port }, 90_000);
+      const probe = await this.helper.request('probe', { host: entry.host, port: entry.port }, 180_000);
       const deviceId = stableDeviceId(probe.identity);
       if (!deviceId) {
         throw Object.assign(new Error('The appliance did not report a stable device id.'), { code: 'no_identity' });

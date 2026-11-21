@@ -2,6 +2,19 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Stable releases are published under the npm tag `latest`. Pre-releases use `beta` once a stable release exists; until then they are also `latest`.
 
+## 0.1.0-beta.3 — 2026-11-22
+
+First fixes from a real installation (Homebridge in Docker on a Raspberry Pi).
+
+### Fixed
+- The settings page now hands its configuration to Homebridge on load, so SAVE works on a fresh install and the child bridge option appears.
+
+### Added
+- A failed discovery shows technical details: which ports were tried, what the appliance advertised, and the DTLS outcome or alert it answered with.
+
+### Changed
+- Discovery may take up to three minutes before giving up (was 90 seconds).
+
 ## 0.1.0-beta.2 — 2026-11-22
 
 No functional change. Still not run against real hardware.

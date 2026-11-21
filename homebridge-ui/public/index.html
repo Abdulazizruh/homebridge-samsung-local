@@ -73,7 +73,7 @@
       bridgeWarn: 'Run this plugin as a child bridge: use the bridge button (⋮ → Bridge Settings) on the plugin card after saving. It keeps this plugin separate from your other plugins.',
       addTitle: 'Add an appliance', discover: 'Test & discover',
       addHint: 'Enter the appliance IP address. Success means the appliance answered an authenticated read of its identity and resources.',
-      discovering: 'Connecting to the appliance…',
+      discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
       generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates',
       kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
@@ -132,7 +132,7 @@
       bridgeWarn: 'شغّل هذه الإضافة كجسر فرعي مستقل: بعد الحفظ استخدم زر الجسر في بطاقة الإضافة (⋮ ← إعدادات الجسر). بذلك تبقى منفصلة عن بقية الإضافات.',
       addTitle: 'إضافة جهاز', discover: 'اختبار واكتشاف',
       addHint: 'أدخل عنوان IP للجهاز. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
-      discovering: 'جارٍ الاتصال بالجهاز…',
+      discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
       generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية',
       kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
@@ -203,6 +203,9 @@
   let config = (await homebridge.getPluginConfig())[0] ?? { platform: 'SamsungLocal', name: 'Samsung Local' };
   config.platform = 'SamsungLocal';
   config.devices = Array.isArray(config.devices) ? config.devices : [];
+  // Hand the config to Homebridge right away, so its SAVE button stores the
+  // platform block even before anything is changed on this page.
+  await homebridge.updatePluginConfig([config]);
   let status = { devices: [] };
   let lastProbe = null;
   let legacyNames = [];
@@ -351,7 +354,10 @@
       await refreshStatus();
     } catch (err) {
       lastProbe = null;
-      $('sl-result').innerHTML = `<div class="alert alert-danger mb-0">${esc(errorText(err))}</div>`;
+      const tech = err?.error?.technical;
+      const code = err?.error?.code ?? err?.code ?? 'error';
+      const techHtml = `<details class="mt-2" open><summary>${t('techDetails')}</summary><pre dir="ltr" style="white-space:pre-wrap;font-size:.78rem;margin:6px 0 0">${esc(JSON.stringify({ code, ...(tech || { raw: err?.message }) }, null, 1))}</pre></details>`;
+      $('sl-result').innerHTML = `<div class="alert alert-danger mb-0">${esc(errorText(err))}${techHtml}</div>`;
     } finally { homebridge.hideSpinner(); }
   });
   $('sl-wipe').addEventListener('click', async () => {
