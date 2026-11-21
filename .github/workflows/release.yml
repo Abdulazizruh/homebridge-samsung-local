@@ -1,5 +1,5 @@
 # Publishes to npm when a GitHub release is published.
-# Pre-releases go to the "beta" tag, full releases to "latest".
+# Full releases go to "latest"; pre-releases go to "beta" once a stable version exists.
 # Requires the repository secret NPM_TOKEN (an npm automation token).
 name: Release
 on:
@@ -21,6 +21,18 @@ jobs:
       - run: npm run check && npm test
       - name: Check tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
-      - run: npm publish --provenance --access public --tag ${{ github.event.release.prerelease && 'beta' || 'latest' }}
+      # A pre-release goes to the "beta" tag once a stable version exists.
+      # Until then it is also "latest", so the Homebridge plugin search can
+      # find and install the package.
+      - name: Choose npm tag
+        id: tag
+        run: |
+          current="$(npm view homebridge-samsung-local dist-tags.latest 2>/dev/null || true)"
+          if [ "${{ github.event.release.prerelease }}" = "true" ] && [ -n "$current" ] && [ "${current#*-}" = "$current" ]; then
+            echo "tag=beta" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

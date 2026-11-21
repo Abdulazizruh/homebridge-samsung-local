@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 0.1.0-beta.1 — experimental.** The code passes its automated tests against recorded appliance data, but this release has **not yet been run against a real appliance** by the project. See [What has been tested](#what-has-been-tested).
+> **Status: 0.1.0-beta.2 — experimental.** The code passes its automated tests against recorded appliance data, but this release has **not yet been run against a real appliance** by the project. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
@@ -66,10 +66,10 @@ Beta, before npm publication — in the Homebridge terminal:
 
 ```sh
 cd /var/lib/homebridge
-npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.1.tar.gz
+npm install --save https://github.com/Abdulazizruh/homebridge-samsung-local/archive/refs/tags/v0.1.0-beta.2.tar.gz
 ```
 
-This works while the repository is public. While it is private, copy the release package into the Homebridge folder and install it from there: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.1.tgz`.
+This works while the repository is public. While it is private, copy the release package into the Homebridge folder and install it from there: `npm install --save /homebridge/homebridge-samsung-local-0.1.0-beta.2.tgz`.
 
 Then restart Homebridge.
 

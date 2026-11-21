@@ -1,6 +1,15 @@
 # Changelog
 
-Versions follow [Semantic Versioning](https://semver.org/). Pre-releases are published under the npm tag `beta`; stable releases under `latest`.
+Versions follow [Semantic Versioning](https://semver.org/). Stable releases are published under the npm tag `latest`. Pre-releases use `beta` once a stable release exists; until then they are also `latest`.
+
+## 0.1.0-beta.2 — 2026-11-22
+
+No functional change. Still not run against real hardware.
+
+### Changed
+- First version published to npm, so it can be found and installed from the Homebridge Plugins search.
+- Supported Node.js stated as 22.12+ and 24 (the versions tested in CI).
+- Install instructions corrected.
 
 ## 0.1.0-beta.1 — 2026-11-22
 
