@@ -91,11 +91,9 @@ Then restart Homebridge.
    A TV asks for one more step before that: press **Pair with the TV** and choose "Allow" on the TV screen.
 5. On the plugin card open **⋮ → Bridge Settings** and enable the **child bridge**. Restart, then scan the child bridge's own QR code in the Home app.
 
-<p>
-  <img src="assets/screenshots/setup-page.png" alt="The plugin settings page: the setup steps with what is done, the connection engine, and the field to add an appliance" width="360">
-</p>
-
 The settings page shows these steps with a tick beside each one that is done, the version, the engine in use and how many appliances are connected.
+
+<p><img src="assets/screenshots/setup-page.png" alt="The plugin settings page: the setup steps with what is done, the connection engine, and the field to add an appliance" width="360"></p>
 
 Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
 
@@ -142,31 +140,35 @@ Behaviour rules:
 
 Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + optional-mode switches + light + humidity) is the same idea. The display light has no brightness here.
 
-### An air conditioner and a washer in Apple Home
+### An air conditioner in Apple Home
 
-<p>
-  <img src="assets/screenshots/ac-thermostat.png" alt="Air conditioner in Apple Home: target temperature, current temperature, humidity and mode" width="240">
-  <img src="assets/screenshots/ac-parts.png" alt="The parts of one air conditioner in Apple Home: thermostat, fan, Fast, WindFree, humidity and Light Display" width="400">
-</p>
+The thermostat: target temperature, current temperature, humidity and the mode.
 
-Left: the thermostat of an air conditioner. Right: the parts of the same air conditioner, each of which can be switched off in the plugin settings.
+<p><img src="assets/screenshots/ac-thermostat.png" alt="Air conditioner in Apple Home: target temperature, current temperature, humidity and mode" width="280"></p>
 
-<p>
-  <img src="assets/screenshots/washer-home.png" alt="Washer in Apple Home: a cycle tile and the finished sensor" width="260">
-</p>
+The parts of the same air conditioner. Each one can be switched off in the plugin settings.
 
-A washer: the cycle tile (on while a cycle runs, with the time remaining inside it) and the sensor that turns on when the cycle has finished, for a notification or an automation. On a washer that announces the end of a cycle itself, only that announcement turns the sensor on, so a cancelled cycle gives no notice. The washer is read only; nothing is sent to it.
+<p><img src="assets/screenshots/ac-parts.png" alt="The parts of one air conditioner in Apple Home: thermostat, fan, Fast, WindFree, humidity and Light Display" width="420"></p>
+
+### A washer in Apple Home
+
+The cycle tile is on while a cycle runs, with the time remaining inside it. The sensor turns on when the cycle has finished, for a notification or an automation. On a washer that announces the end of a cycle itself, only that announcement turns the sensor on, so a cancelled cycle gives no notice. The washer is read only; nothing is sent to it.
+
+<p><img src="assets/screenshots/washer-home.png" alt="Washer in Apple Home: a cycle tile and the finished sensor" width="280"></p>
 
 ### A Samsung TV in Apple Home
 
-As a TV tile the TV has its own power button and input list, and the remote in Control Centre. Apple wants every TV tile added on its own: after you add the TV in the plugin settings, its code appears beside it in the list of configured appliances, as a picture to scan with the digits under it. In the Home app choose **+ → Add Accessory** and scan it, or choose **More options**, pick the TV and type the digits. The remote is then in Control Centre: open the remote and choose the TV at the top.
+As a TV tile the TV has its own power button and input list.
+
+<p><img src="assets/screenshots/tv-tile.png" alt="A Samsung TV as a tile in Apple Home: power and inputs" width="280"></p>
+
+The remote is in Control Centre: open the remote and choose the TV at the top. Volume up and down are the side buttons of the iPhone or iPad while the remote is open.
+
+<p><img src="assets/screenshots/tv-remote.png" alt="The Control Centre remote for the TV: arrows, back, play and pause, info, mute and power" width="280"></p>
+
+Apple wants every TV tile added on its own. After you add the TV in the plugin settings, its code appears beside it in the list of configured appliances (see [the TV options](#tv-options) below).
 
 Give each TV a fixed address in your router (a DHCP reservation). An air conditioner or washer whose address changes is found again by the plugin; a TV is not, because a TV that is switched off does not answer at all and cannot be told apart from one that moved. If a TV's address does change, press **Change IP** beside it.
-
-<p>
-  <img src="assets/screenshots/tv-tile.png" alt="A Samsung TV as a tile in Apple Home: power and inputs" width="240">
-  <img src="assets/screenshots/tv-remote.png" alt="The Control Centre remote for the TV: arrows, back, play and pause, info, mute and power" width="240">
-</p>
 
 ## Options for each appliance
 
@@ -174,13 +176,25 @@ Every appliance has its own options. Press **Options** under it in the plugin se
 
 A name is changed in place with the pencil beside it. **Remove** asks to be pressed twice.
 
-<p>
-  <img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="300">
-  <img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings" width="300">
-  <img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings" width="300">
-</p>
+### Air conditioner options
 
-First: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display, humidity, power and energy). Second: a washer (cycle tile with time remaining, cycle finished sensor, how the cycle tile behaves). Third: a TV. Above its options is its code for the Home app: **scan the picture** with the iPhone or iPad camera from the Home app (+ → Add Accessory), **or type the digits by hand** (More options → pick the TV). Either way works. The code in the picture is an example. Under it: the TV's name, and whether it appears as a TV tile with the remote or as switches inside the bridge.
+Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter, power and energy.
+
+<p><img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="320"></p>
+
+### Washer options
+
+Cycle tile with time remaining, cycle finished sensor, progress, child lock status, fault alert, and how the cycle tile behaves when tapped.
+
+<p><img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings" width="320"></p>
+
+### TV options
+
+Above the options is the TV's code for the Home app. **Scan the picture** with the iPhone or iPad camera from the Home app (+ → Add Accessory), **or type the digits by hand** (More options → pick the TV). Either way works. The code in the picture is an example.
+
+Under it: the TV's name, and whether it appears as a TV tile with the remote or as switches inside the bridge.
+
+<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings, with the Home app code above them" width="320"></p>
 
 ## What has been tested
 
