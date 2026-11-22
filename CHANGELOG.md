@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.0-beta.1
+
+Beta of 1.0.14 for trying the JavaScript connection engine: everything is the same, except that the JavaScript engine is the default, so no Python is downloaded or needed. Python stays available under General → Connection engine.
+
+**بالعربية**
+
+نسخة تجريبية من 1.0.14 لتجربة محرك الاتصال بلغة JavaScript: كل شيء كما هو، والفرق أن محرك JavaScript هو الافتراضي، فلا يُنزَّل Python ولا يُحتاج إليه. يبقى Python متاحًا من «عام ← محرك الاتصال».
+
 ## 1.0.14
 
 - Samsung TVs (Tizen, 2016 and later) can now be added. Enter the TV's address and press Test & discover: the page recognises a TV and shows the steps. Stand in front of the TV, press "Pair with the TV" and choose "Allow" on its screen. This is done once; the pairing is kept in the plugin's own folder.
