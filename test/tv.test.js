@@ -176,3 +176,22 @@ test('TV that never names its power state: on while it answers', async (t) => {
   const active = platform.tvs[0].services.get('tv').getCharacteristic(api.hap.Characteristic.Active);
   await waitFor(() => active.value === 1);
 });
+
+test('TV remote: the channel stays open between presses and is closed when the TV goes off', async (t) => {
+  const tv = await fakeTv();
+  const { api, platform } = await bootTv(tv, 'tile');
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const C = api.hap.Characteristic;
+  const tile = handler.services.get('tv');
+  await waitFor(() => tile.getCharacteristic(C.Active).value === 1);
+  await tile.getCharacteristic(C.RemoteKey).handleSetRequest(C.RemoteKey.ARROW_UP);
+  await new Promise((r) => { setTimeout(r, 150); });
+  await tile.getCharacteristic(C.RemoteKey).handleSetRequest(C.RemoteKey.ARROW_DOWN);
+  await waitFor(() => tv.keys.length === 2);
+  assert.equal(tv.tokens.length, 1); // one connection served both presses
+  assert.ok(handler.remote.idleMs >= 60_000);
+  tv.power = 'standby';
+  await handler.poll();
+  assert.equal(handler.remote.socket, null);
+});

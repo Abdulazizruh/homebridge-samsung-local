@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.11
+
+- TV remote: the channel to the TV stays open for five minutes after the last press instead of twenty seconds, so presses no longer wait for a new secure connection each time. It is closed as soon as the TV goes off.
+
+**بالعربية**
+
+- ريموت التلفزيون: تبقى قناة الاتصال بالتلفزيون مفتوحة خمس دقائق بعد آخر ضغطة بدل عشرين ثانية، فلا تنتظر الضغطات اتصالًا آمنًا جديدًا في كل مرة. وتُغلق حالما يُطفأ التلفزيون.
+
 ## 1.1.10
 
 Settings page, easier to use. Nothing changes in the saved settings or in Apple Home.

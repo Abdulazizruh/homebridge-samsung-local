@@ -1,6 +1,9 @@
 import { TizenRemote, tvInfo, wake } from '../tv/tizenClient.js';
 
 const POLL_MS = 4000;
+// The remote channel stays open this long after the last key, so the next
+// press goes out at once instead of waiting for a new secure connection.
+const REMOTE_IDLE_MS = 5 * 60_000;
 const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
 const INPUTS = [
   { id: 1, name: 'TV', key: 'KEY_TV' },
@@ -44,7 +47,7 @@ export class TvAccessory {
     this.onReportsPower = onReportsPower;
     this.services = new Map();
     this.remote = new TizenRemote({
-      host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken,
+      host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken, idleMs: REMOTE_IDLE_MS,
     });
     if (mode === 'tile') {
       this.#buildTile();
@@ -98,6 +101,8 @@ export class TvAccessory {
       this.on = on;
       if (!on) {
         this.muted = false;
+        // An open channel must not keep a TV that was switched off awake.
+        this.remote.close();
       }
       this.#push();
     }
