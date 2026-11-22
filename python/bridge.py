@@ -32,7 +32,7 @@ import zlib
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.1"
+HELPER_VERSION = "0.1.2"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -48,6 +48,8 @@ READ_TIMEOUT_S = 10.0
 WRITE_TIMEOUT_S = 8.0
 CONNECT_TIMEOUT_S = 12.0
 BACKOFF_STEPS_S = (5, 10, 20, 40, 60)
+QUIET_RECONNECT_DELAY_S = 1.0
+QUIET_RECONNECT_WAIT_S = 12.0
 
 OBSERVE_HREFS = (
     "/power/vs/0",
@@ -465,6 +467,8 @@ class DeviceWorker(threading.Thread):
         self._wake_at = None
         self._link = None
         self._link_lock = threading.Lock()
+        self._linked = threading.Event()
+        self._reconnecting = False
         self.notifications = 0
 
     # -- called from other threads -----------------------------------------
@@ -477,6 +481,10 @@ class DeviceWorker(threading.Thread):
         self._wake.set()
 
     def write(self, path, body):
+        if self._reconnecting:
+            # A session that just dropped is being reopened: wait for it
+            # rather than failing the command.
+            self._linked.wait(QUIET_RECONNECT_WAIT_S)
         with self._link_lock:
             link = self._link
         if link is None:
@@ -496,8 +504,13 @@ class DeviceWorker(threading.Thread):
 
     def run(self):
         failures = 0
+        was_online = False
         while not self._stop.is_set():
             link = None
+            # A healthy session that drops gets one immediate, silent
+            # reconnect before the appliance is reported as unreachable.
+            quiet = was_online
+            was_online = False
             try:
                 cert, key = ensure_credentials(self.cred_dir)
                 link, _ = open_link(self.host, self.port, cert, key,
@@ -513,6 +526,9 @@ class DeviceWorker(threading.Thread):
                 resources, _mode = link.read_resources()
                 with self._link_lock:
                     self._link = link
+                self._linked.set()
+                self._reconnecting = False
+                was_online = True
                 failures = 0
                 emit({"ev": "status", "key": self.key, "online": True, "port": link.port,
                       "identity": identity})
@@ -527,17 +543,28 @@ class DeviceWorker(threading.Thread):
                 self._loop(link)
             except Exception as exc:  # noqa: BLE001
                 info = classify(exc)
-                emit({"ev": "status", "key": self.key, "online": False, "error": info})
+                quiet = was_online and not info.get("fatal") and not self._stop.is_set()
+                if not quiet:
+                    self._reconnecting = False
+                    emit({"ev": "status", "key": self.key, "online": False, "error": info})
                 if info.get("fatal"):
                     # Wrong appliance at this address: retry slowly, never spam it.
                     failures = len(BACKOFF_STEPS_S)
+            else:
+                quiet = False
             finally:
+                self._linked.clear()
                 with self._link_lock:
                     self._link = None
                 if link is not None:
                     link.close()
             if self._stop.is_set():
                 break
+            if quiet:
+                self._reconnecting = True
+                if self._sleep(QUIET_RECONNECT_DELAY_S):
+                    break
+                continue
             step = BACKOFF_STEPS_S[min(failures, len(BACKOFF_STEPS_S) - 1)]
             failures += 1
             if self._sleep(step + random.uniform(0, step * 0.2)):

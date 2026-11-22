@@ -217,6 +217,21 @@
     if (message) { homebridge.toast.success(t('saved')); }
     render();
   }
+  // The list is re-read from the saved Homebridge config before every change,
+  // so a settings page left open elsewhere never writes an old copy back
+  // (which used to undo a name typed later).
+  const keyOf = (dev) => dev.id || dev.host;
+  async function change(fn, message = true) {
+    try {
+      const saved = await homebridge.request('/saved-devices');
+      if (Array.isArray(saved?.devices)) {
+        config.devices = saved.devices;
+        for (const k of ['pollInterval', 'pushUpdates']) { if (saved[k] !== undefined) { config[k] = saved[k]; } }
+      }
+    } catch { /* keep the copy in memory */ }
+    await fn();
+    await save(message);
+  }
   function errorText(err) {
     const code = err?.error?.code ?? err?.code;
     return T[lang][`err_${code}`] ?? err?.message ?? String(err);
@@ -272,9 +287,10 @@
       const entry = { host: p.host, id: p.deviceId, enabled: true, features };
       const name = $('sl-name').value.trim();
       if (name) { entry.name = name; }
-      const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
-      if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
-      await save();
+      await change(() => {
+        const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
+        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
+      });
     });
   }
 
@@ -294,8 +310,14 @@
             <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${t('diagnostics')}</button>
             <button class="btn btn-sm btn-outline-danger" data-rm="${i}">${t('remove')}</button></td></tr>`;
     }).join('')}</tbody></table></div>`;
-    box.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', async () => { config.devices.splice(Number(b.dataset.rm), 1); await save(); }));
-    box.querySelectorAll('[data-en]').forEach((b) => b.addEventListener('change', async () => { config.devices[Number(b.dataset.en)].enabled = b.checked; await save(); }));
+    box.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', async () => {
+      const key = keyOf(config.devices[Number(b.dataset.rm)]);
+      await change(() => { config.devices = config.devices.filter((x) => keyOf(x) !== key); });
+    }));
+    box.querySelectorAll('[data-en]').forEach((b) => b.addEventListener('change', async () => {
+      const key = keyOf(config.devices[Number(b.dataset.en)]);
+      await change(() => { const dev = config.devices.find((x) => keyOf(x) === key); if (dev) { dev.enabled = b.checked; } });
+    }));
     box.querySelectorAll('[data-cfg]').forEach((b) => b.addEventListener('click', () => {
       const dev = config.devices[Number(b.dataset.cfg)];
       const snap = status.devices.find((x) => x.deviceId && x.deviceId === dev.id) || status.devices.find((x) => x.host === dev.host);
@@ -356,8 +378,8 @@
   }
 
   $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
-  $('sl-poll').addEventListener('change', async (e) => { config.pollInterval = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await save(false); });
-  $('sl-push').addEventListener('change', async (e) => { config.pushUpdates = e.target.checked; await save(false); });
+  $('sl-poll').addEventListener('change', async (e) => { const v = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await change(() => { config.pollInterval = v; }, false); });
+  $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();
     if (!host) { return; }
@@ -365,8 +387,11 @@
     try {
       lastProbe = await homebridge.request('/probe', { host });
       // Same appliance on a new address: keep one entry, never a duplicate.
-      const known = config.devices.find((x) => x.id && x.id === lastProbe.deviceId);
-      if (known && known.host !== lastProbe.host) { known.host = lastProbe.host; await save(false); homebridge.toast.info(t('sameDevice')); }
+      const moved = config.devices.find((x) => x.id && x.id === lastProbe.deviceId && x.host !== lastProbe.host);
+      if (moved) {
+        await change(() => { const dev = config.devices.find((x) => x.id === lastProbe.deviceId); if (dev) { dev.host = lastProbe.host; } }, false);
+        homebridge.toast.info(t('sameDevice'));
+      }
       await refreshStatus();
     } catch (err) {
       lastProbe = null;

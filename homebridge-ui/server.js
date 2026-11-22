@@ -18,6 +18,7 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/diagnostics', (payload) => this.diagnostics(payload));
     this.onRequest('/legacy-devices', () => this.legacyDevices());
     this.onRequest('/wipe', (payload) => this.wipe(payload));
+    this.onRequest('/saved-devices', () => this.savedDevices());
     this.ready();
   }
 
@@ -117,6 +118,25 @@ class UiServer extends HomebridgePluginUiServer {
       throw new RequestError('No stored reading for this appliance yet.', { code: 'no_snapshot' });
     }
     return diagnosticsDump(snap.identity, snap.resources);
+  }
+
+  /**
+   * This plugin's saved appliance list, straight from the Homebridge config
+   * file. Read-only, and only this plugin's own platform block is returned.
+   */
+  savedDevices() {
+    try {
+      const all = JSON.parse(fs.readFileSync(this.homebridgeConfigPath, 'utf8'));
+      const block = (all.platforms || []).find((p) => p?.platform === 'SamsungLocal');
+      if (!block) { return {}; }
+      return {
+        devices: Array.isArray(block.devices) ? block.devices : [],
+        pollInterval: block.pollInterval,
+        pushUpdates: block.pushUpdates,
+      };
+    } catch {
+      return {};
+    }
   }
 
   /**

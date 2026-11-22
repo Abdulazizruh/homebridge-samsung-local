@@ -63,5 +63,75 @@ class Credentials(unittest.TestCase):
             self.assertIn("PRIVATE KEY", key)
 
 
+class FakeLink:
+    """A session that reads fine a set number of times, then times out."""
+
+    def __init__(self, reads):
+        self.port, self.reads, self.closed = 49152, reads, False
+
+    def read_identity(self):
+        return {"di": "device-1", "pi": None}
+
+    def read_resources(self):
+        if self.reads <= 0:
+            raise TimeoutError("session operation timed out")
+        self.reads -= 1
+        return {"/power/vs/0": {"x.com.samsung.da.power": "On"}}, "batch"
+
+    def subscribe(self, href):
+        pass
+
+    def post(self, path, body):
+        return 0x44, None
+
+    def close(self):
+        self.closed = True
+
+
+class Reconnect(unittest.TestCase):
+    def run_worker(self, links, until):
+        events, opened = [], []
+        saved = (bridge.open_link, bridge.emit, bridge.ensure_credentials,
+                 bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S)
+
+        def open_link(host, port, cert, key, on_notification=None):
+            link = links.pop(0) if links else None
+            opened.append(link)
+            if link is None:
+                raise TimeoutError("session operation timed out")
+            return link, []
+
+        worker = bridge.DeviceWorker("k", "10.0.0.5", None, "/nonexistent", "device-1", 2, False)
+        worker.poll_interval = 0.02
+
+        def emit(msg):
+            events.append(msg)
+            if until(events):
+                worker.stop()
+
+        bridge.open_link, bridge.emit = open_link, emit
+        bridge.ensure_credentials = lambda cred_dir: ("cert", "key")
+        bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S = 0.01, (0.01,)
+        try:
+            worker.start()
+            worker.join(timeout=10)
+            self.assertFalse(worker.is_alive())
+        finally:
+            (bridge.open_link, bridge.emit, bridge.ensure_credentials,
+             bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S) = saved
+        return [e for e in events if e.get("ev") == "status"]
+
+    def test_a_dropped_session_reconnects_once_without_reporting_offline(self):
+        first, second = FakeLink(reads=2), FakeLink(reads=50)
+        status = self.run_worker([first, second], lambda ev: sum(1 for e in ev if e.get("online")) >= 2)
+        self.assertTrue(first.closed)
+        self.assertEqual([e["online"] for e in status], [True, True])
+
+    def test_offline_is_reported_when_the_reconnect_fails_too(self):
+        status = self.run_worker([FakeLink(reads=2)], lambda ev: any(e.get("online") is False for e in ev))
+        self.assertEqual([e["online"] for e in status], [True, False])
+        self.assertEqual(status[-1]["error"]["code"], "timeout")
+
+
 if __name__ == "__main__":
     unittest.main()
