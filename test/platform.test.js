@@ -386,3 +386,34 @@ test('washer: read-only tile with time remaining, and a sensor when the cycle en
   assert.equal(valve.getCharacteristic(C.Active).value, 0);
   assert.equal(valve.getCharacteristic(C.RemainingDuration).value, 0);
 });
+
+test('a failed helper start is retried on its own; appliances connect once it works', async (t) => {
+  const api = makeApi(tmpDir());
+  let starts = 0;
+  const good = helperFactory([ac('10.0.0.5')]);
+  const platform = new SamsungLocalPlatform(quietLog, { platform: PLATFORM_NAME, devices: [{ host: '10.0.0.5' }] }, api, {
+    helperRetryMs: [80],
+    createHelper: (paths) => {
+      starts += 1;
+      if (starts === 1) { throw Object.assign(new Error('Could not download the Python packages.'), { code: 'pip' }); }
+      return good(paths);
+    },
+  });
+  t.after(() => platform.stop());
+  await platform.start();
+  assert.equal(platform.devices.size, 0);
+  await online(platform);
+  assert.equal(starts, 2);
+});
+
+test('readings file: unchanged readings are not written again and again', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const file = path.join(platform.paths.state, fs.readdirSync(platform.paths.state)[0]);
+  await waitFor(() => fs.existsSync(file));
+  const first = fs.statSync(file).mtimeMs;
+  // The simulated appliance reports every 60 ms; ten identical reports later the file is untouched.
+  await new Promise((r) => { setTimeout(r, 700); });
+  assert.equal(fs.statSync(file).mtimeMs, first);
+});

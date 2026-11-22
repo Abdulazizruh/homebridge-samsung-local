@@ -10,6 +10,9 @@ import { PLATFORM_NAME, PLUGIN_NAME, UUID_NAMESPACE } from './settings.js';
 import { ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './storage.js';
 
 const RETRY_STEPS_MS = [15_000, 30_000, 60_000, 120_000, 300_000];
+const HELPER_RETRY_MS = [30_000, 60_000, 120_000, 300_000, 600_000];
+const SNAPSHOT_CHANGED_MS = 3_000; // changed readings reach the disk this soon
+const SNAPSHOT_SAME_MS = 60_000; // unchanged readings only refresh the file's time
 
 /**
  * Homebridge dynamic platform. Glue only: it reads the config, keeps the
@@ -98,11 +101,35 @@ export class SamsungLocalPlatform {
       return;
     }
 
+    await this.#connect(entries, 0);
+  }
+
+  /** Start the helper and connect; a failed start is retried, since its usual
+   * cause (no internet for the first download, a slow disk) passes on its own. */
+  async #connect(entries, attempt) {
+    if (this.stopping) {
+      return;
+    }
     try {
       this.helper = await this.#startHelper();
     } catch (err) {
+      if (this.stopping) {
+        return;
+      }
+      const steps = this.overrides.helperRetryMs ?? HELPER_RETRY_MS;
+      const delay = steps[Math.min(attempt, steps.length - 1)];
       this.log.error(`${err.message}${err.detail ? `\n${err.detail}` : ''}`);
-      this.log.error('The plugin cannot talk to appliances until this is fixed. See "Requirements" in the README.');
+      this.log.error(`The plugin cannot talk to appliances until this is fixed. Trying again in ${Math.round(delay / 1000)}s. See "Requirements" in the README.`);
+      const timer = setTimeout(() => {
+        this.retryTimers.delete(timer);
+        this.#connect(entries, attempt + 1);
+      }, delay);
+      timer.unref?.();
+      this.retryTimers.add(timer);
+      return;
+    }
+    if (this.stopping) {
+      await this.helper.stop();
       return;
     }
     for (const device of this.devices.values()) {
@@ -182,6 +209,54 @@ export class SamsungLocalPlatform {
     }
   }
 
+  /**
+   * Keep the readings file for the settings page without wearing the disk:
+   * HomeKit is updated at once, the file a moment later. Changed readings are
+   * saved within seconds, unchanged ones only refresh the file once a minute.
+   */
+  #saveSnapshot(deviceId, build, resources) {
+    this.snapshots ??= new Map();
+    const slot = this.snapshots.get(deviceId) ?? {};
+    const text = JSON.stringify(resources);
+    const changed = text !== slot.saved;
+    slot.build = build;
+    slot.text = text;
+    const due = Date.now() + (changed ? SNAPSHOT_CHANGED_MS : SNAPSHOT_SAME_MS);
+    if (slot.timer && slot.due <= due) {
+      this.snapshots.set(deviceId, slot);
+      return;
+    }
+    clearTimeout(slot.timer);
+    slot.due = slot.first === undefined ? Date.now() : due;
+    slot.first = false;
+    slot.timer = setTimeout(() => this.#flushSnapshot(deviceId), Math.max(0, slot.due - Date.now()));
+    slot.timer.unref?.();
+    this.snapshots.set(deviceId, slot);
+  }
+
+  #flushSnapshot(deviceId) {
+    const slot = this.snapshots?.get(deviceId);
+    if (!slot?.timer) {
+      return;
+    }
+    clearTimeout(slot.timer);
+    slot.timer = null;
+    try {
+      writeJson(snapshotFile(this.paths, deviceId), slot.build());
+      slot.saved = slot.text;
+    } catch (err) {
+      this.log.debug(`could not save readings: ${err.message}`);
+    }
+  }
+
+  #dropPendingSnapshot(deviceId) {
+    const slot = this.snapshots?.get(deviceId);
+    if (slot?.timer) {
+      clearTimeout(slot.timer);
+      slot.timer = null;
+    }
+  }
+
   #snapshot(entry, deviceId, source, online) {
     return {
       deviceId,
@@ -242,7 +317,7 @@ export class SamsungLocalPlatform {
       ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name })
       : new AcAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features });
     link.on('update', (resources) => {
-      writeJson(snapshotFile(this.paths, deviceId), this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true));
+      this.#saveSnapshot(deviceId, () => this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true), resources);
     });
     link.on('address', ({ host, mac, from }) => {
       if (from && from !== host) {
@@ -265,6 +340,7 @@ export class SamsungLocalPlatform {
     this.retryTimers.add(pushCheck);
     link.on('availability', (online) => {
       if (!online) {
+        this.#dropPendingSnapshot(deviceId);
         writeJson(snapshotFile(this.paths, deviceId),
           { ...this.#snapshot(entry, deviceId, { identity: link.identity, resources: link.resources ?? accessory.context.resources }, false), error: link.lastError?.code ?? null });
       }
@@ -312,6 +388,9 @@ export class SamsungLocalPlatform {
       clearTimeout(timer);
     }
     this.retryTimers.clear();
+    for (const deviceId of this.snapshots?.keys() ?? []) {
+      this.#flushSnapshot(deviceId);
+    }
     const helper = this.helper;
     this.helper = null;
     if (helper) {

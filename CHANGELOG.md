@@ -7,12 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 - Washers, dryers and dishwashers now get a HomeKit accessory for following the cycle: a tile that shows the cycle running with the time remaining, a "Finished" sensor that turns on for ten minutes when the cycle ends (use it for a notification or an automation), and power and energy readings in Eve. Nothing is sent to the appliance; the cycle is started at the appliance itself.
 - Add the appliance the same way as an air conditioner: enter its address, press Test & discover, give it a name, press Add.
 - Diagnostics file: the machine state of laundry appliances is no longer hidden by mistake.
+- If the Python runtime cannot start when Homebridge boots (for example no internet for the first download), the plugin now tries again on its own, at growing intervals, without a restart.
+- Readings are saved to disk far less often: Apple Home is still updated at once, changed readings are saved within seconds, unchanged ones once a minute. This is kinder to a Raspberry Pi memory card.
 
 **بالعربية**
 
 - صار للغسالات والمجففات وغسالات الصحون ملحق في HomeKit لمتابعة الدورة: بطاقة تبيّن أن الدورة تعمل مع الوقت المتبقي، وحساس «Finished» يتفعّل عشر دقائق عند انتهاء الدورة (استخدمه لإشعار أو أتمتة)، وقراءات القدرة والطاقة في Eve. لا تُرسل الإضافة أي أمر إلى الجهاز، وتبدأ الدورة من الجهاز نفسه.
 - أضف الجهاز بالطريقة نفسها كالمكيف: أدخل عنوانه، اضغط «اختبار واكتشاف»، سمِّه، ثم اضغط «إضافة».
 - ملف التشخيص: لم تعد حالة الآلة في أجهزة الغسيل تُحجب بالخطأ.
+- إذا تعذّر تشغيل بيئة Python عند إقلاع Homebridge (مثل انقطاع الإنترنت عند أول تنزيل)، تعيد الإضافة المحاولة تلقائيًا بفواصل متزايدة دون إعادة تشغيل.
+- قلّ حفظ القراءات على القرص كثيرًا: يتحدث Apple Home فورًا كما كان، وتُحفظ القراءات المتغيرة خلال ثوانٍ، وغير المتغيرة مرة كل دقيقة. هذا أرفق ببطاقة ذاكرة Raspberry Pi.
 
 ## 1.0.12
 
