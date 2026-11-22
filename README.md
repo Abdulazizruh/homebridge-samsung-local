@@ -131,6 +131,21 @@ Behaviour rules:
 
 Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + optional-mode switches + light + humidity) is the same idea. The display light has no brightness here.
 
+### An air conditioner and a washer in Apple Home
+
+<p>
+  <img src="assets/screenshots/ac-thermostat.png" alt="Air conditioner in Apple Home: target temperature, current temperature, humidity and mode" width="240">
+  <img src="assets/screenshots/ac-parts.png" alt="The parts of one air conditioner in Apple Home: thermostat, fan, Fast, WindFree, humidity and Light Display" width="400">
+</p>
+
+Left: the thermostat of an air conditioner. Right: the parts of the same air conditioner, each of which can be switched off in the plugin settings.
+
+<p>
+  <img src="assets/screenshots/washer-home.png" alt="Washer in Apple Home: a cycle tile and the finished sensor" width="260">
+</p>
+
+A washer: the cycle tile (on while a cycle runs, with the time remaining inside it) and the sensor that turns on when the cycle has finished, for a notification or an automation. The washer is read only; nothing is sent to it.
+
 ### A Samsung TV in Apple Home
 
 As a TV tile the TV has its own power button and input list, and the remote in Control Centre. Apple wants every TV tile added on its own: after you add the TV in the plugin settings, its code appears beside it in the list of configured appliances, as a picture to scan with the digits under it. In the Home app choose **+ → Add Accessory** and scan it, or choose **More options**, pick the TV and type the digits. The remote is then in Control Centre: open the remote and choose the TV at the top.
