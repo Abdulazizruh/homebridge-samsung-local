@@ -26,7 +26,9 @@ const { decodeCbor, encodeCbor } = require('./vendor/ocf/cbor.js');
 const { discoverSecurePorts } = require('./vendor/ocf/portdiscovery.js');
 const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/cert.js');
 
-export const HELPER_VERSION = 'js-0.1.0';
+export const HELPER_VERSION = 'js-0.1.1';
+const SUBSCRIBE_CONFIRM_MS = 3000;
+const DISCOVERY_ROUNDS = [2500, 4000];
 const FALLBACK_PORTS = [49152, 49153, 49154, 49155, 49156, 49157, 49158, 49159, 49160];
 const MULTICAST_SECURE_PORT = 5684;
 const LEGACY_HTTP_PORT = 8888;
@@ -254,8 +256,31 @@ class Link {
     return { code: res.code, text };
   }
 
-  subscribe(href) {
-    return this.session.observe(segments(href), () => this.onNotification?.(href));
+  /**
+   * Ask the appliance to push changes of one resource. Appliances drop
+   * requests that arrive in a burst, so each one waits for the appliance's
+   * first answer and is sent once more when none comes.
+   */
+  async subscribe(href) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      let confirmed = false;
+      let confirm;
+      const first = new Promise((resolve) => { confirm = resolve; });
+      const cancel = await this.session.observe(segments(href), () => {
+        if (!confirmed) {
+          confirmed = true;
+          confirm();
+          return; // the first answer only confirms the registration
+        }
+        this.onNotification?.(href);
+      });
+      await Promise.race([first, sleep(SUBSCRIBE_CONFIRM_MS)]);
+      if (confirmed || this.dead) {
+        return confirmed;
+      }
+      cancel();
+    }
+    return false;
   }
 
   async readIdentity() {
@@ -350,10 +375,16 @@ async function openLink(host, port, cred, onNotification) {
       return { link, details };
     }
   }
+  // Some appliances answer the port question late or only on the second ask.
   let advertised = [];
-  try {
-    advertised = await discoverSecurePorts(host, { timeoutMs: 2500, ...(DISCOVERY_PORT ? { discoveryPort: DISCOVERY_PORT } : {}) });
-  } catch { /* discovery is best effort */ }
+  for (const timeoutMs of DISCOVERY_ROUNDS) {
+    try {
+      advertised = await discoverSecurePorts(host, { timeoutMs, ...(DISCOVERY_PORT ? { discoveryPort: DISCOVERY_PORT } : {}) });
+    } catch { /* discovery is best effort */ }
+    if (advertised.length) {
+      break;
+    }
+  }
   details.advertised = advertised;
   details.plaintext_answered = advertised.length > 0;
   for (const candidate of advertised.filter((p) => p !== MULTICAST_SECURE_PORT && !tried.includes(p))) {
@@ -362,6 +393,18 @@ async function openLink(host, port, cred, onNotification) {
       details.probe_outcome = 'selected';
       return { link, details };
     }
+  }
+  if (!advertised.length && port) {
+    // A known appliance that is silent for a moment: its port does not change
+    // while it stays powered, so ask there again instead of walking every port.
+    tried.length = 0;
+    const link = await attempt(port, CONNECT_TIMEOUT_MS);
+    if (link) {
+      return { link, details };
+    }
+    const info = last ? classify(last) : { code: 'connection', message: 'handshake failed' };
+    throw new HelperError(info.code === 'connection' ? 'timeout' : info.code,
+      `The appliance did not answer on its usual port (${info.message}).`, { triedPorts: [port], details });
   }
   if (!advertised.length) {
     // Nothing advertised: knock briefly on the usual ports.
@@ -515,11 +558,15 @@ class DeviceWorker {
         emit({ ev: 'status', key: this.key, online: true, port: link.port, identity, host: this.host, mac: this.mac });
         emit({ ev: 'state', key: this.key, resources });
         if (this.push) {
-          for (const href of OBSERVE_HREFS) {
-            if (href in resources && !this.stopping) {
-              await link.subscribe(href).catch(() => {}); // push is optional
+          // In the background: polling starts at once, push joins when ready.
+          this.subscriptions = 0;
+          (async () => {
+            for (const href of OBSERVE_HREFS) {
+              if (href in resources && !this.stopping && !link.dead && this.link === link) {
+                this.subscriptions += await link.subscribe(href).catch(() => false) ? 1 : 0; // push is optional
+              }
             }
-          }
+          })();
         }
         await this.#loop(link);
       } catch (err) {
@@ -615,7 +662,8 @@ class DeviceWorker {
       }
       this.wakeAt = null;
       const resources = await this.#read(link);
-      emit({ ev: 'state', key: this.key, resources, pushes: this.notifications });
+      // Accepted registrations count too: a quiet appliance pushes nothing for hours.
+      emit({ ev: 'state', key: this.key, resources, pushes: this.notifications + (this.subscriptions ?? 0) });
       nextPoll = Date.now() + this.pollMs;
     }
   }
