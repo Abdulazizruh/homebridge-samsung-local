@@ -276,7 +276,7 @@ export class AcAccessory {
 
     const light = this.#service('light', Service.Lightbulb, LABELS.light, Boolean(s.light) && f.light);
     light?.getCharacteristic(Characteristic.On)
-      .onGet(() => Boolean(this.#requireOnline().light))
+      .onGet(() => lightShown(this.#requireOnline()))
       .onSet((value) => this.#command('light', Boolean(value), 'display light'));
 
     const humidity = this.#service('humidity', Service.HumiditySensor, LABELS.humidity, s.humidity === true && f.humidity);
@@ -573,7 +573,7 @@ export class AcAccessory {
       }
     }
     if (free('light')) {
-      get('light')?.updateCharacteristic(Characteristic.On, Boolean(st.light));
+      get('light')?.updateCharacteristic(Characteristic.On, lightShown(st));
     }
     if (st.humidity !== null && st.humidity !== undefined) {
       get('humidity')?.updateCharacteristic(Characteristic.CurrentRelativeHumidity, st.humidity);
@@ -584,6 +584,14 @@ export class AcAccessory {
       get('outdoor')?.updateCharacteristic(Characteristic.CurrentTemperature, st.outdoorTemperature);
     }
   }
+}
+
+/**
+ * The display is dark while the air conditioner is off, whatever its light
+ * setting says. Showing it "on" then would make the tile read "Powered On".
+ */
+function lightShown(state) {
+  return Boolean(state.power) && Boolean(state.light);
 }
 
 /** The accessory is named exactly as the user typed it. */

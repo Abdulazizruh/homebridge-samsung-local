@@ -197,3 +197,10 @@ test('naming: the accessory is named exactly as typed', () => {
   assert.equal(accessoryName('  Bedroom Local '), 'Bedroom Local');
   assert.equal(accessoryName(''), 'Samsung AC');
 });
+
+test('display light: shown off while the air conditioner is off, even if its light setting is on', async () => {
+  const off = setup({ on: false });
+  assert.equal(await off.get('light', off.C.On), false);
+  const on = setup({ on: true });
+  assert.equal(await on.get('light', on.C.On), true);
+});

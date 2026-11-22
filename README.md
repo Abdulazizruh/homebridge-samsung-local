@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.4.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.5.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
