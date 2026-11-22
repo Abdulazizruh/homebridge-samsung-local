@@ -143,6 +143,9 @@ export class AcAccessory {
       this.pending.set(key, {
         check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label,
       });
+      if (kind === 'power') {
+        this.#showRequestedPower(Boolean(value));
+      }
     };
     let late = false;
     let timer;
@@ -170,6 +173,27 @@ export class AcAccessory {
       late = true;
       hold(); // keep the requested value on screen while the appliance catches up
     }
+  }
+
+  /**
+   * A power command is shown on every tile of the accessory at once. Without
+   * this the fan, switches and light stay "on" until the appliance reports,
+   * and the Home app reads "Powered On" for some seconds after switching off.
+   */
+  #showRequestedPower(on) {
+    const { Characteristic } = this.hap;
+    this.services.get('fan')?.updateCharacteristic(Characteristic.Active, on ? 1 : 0);
+    if (on) {
+      return;
+    }
+    this.services.get('thermostat')?.updateCharacteristic(
+      Characteristic.CurrentHeatingCoolingState, Characteristic.CurrentHeatingCoolingState.OFF);
+    for (const service of this.services.values()) {
+      if (service.sl?.isOn) {
+        service.updateCharacteristic(Characteristic.On, false);
+      }
+    }
+    this.services.get('light')?.updateCharacteristic(Characteristic.On, false);
   }
 
   #showRealState() {

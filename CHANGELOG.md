@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.2
+
+- Air conditioner: switching off from the Home app now shows off on every tile of the accessory at once. Before, the fan and switches stayed on until the appliance reported, so the tile read "Powered On" for a few seconds and then went to Off. Both engines.
+
+**بالعربية**
+
+- المكيف: الإطفاء من تطبيق Home يظهر الآن على كل بطاقات الجهاز فورًا. كانت المروحة والمفاتيح تبقى «تعمل» حتى يبلّغ الجهاز، فتظهر البطاقة «Powered On» ثوانيَ ثم تعود إلى Off. يشمل المحركين.
+
 ## 1.1.1
 
 JavaScript engine only; the Python engine is unchanged.

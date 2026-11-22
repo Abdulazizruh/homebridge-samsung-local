@@ -139,6 +139,18 @@ test('unintended shutdown: the fan tile and mode switches cannot power off the u
   assert.ok(link.sent.every((w) => w.path[0] !== 'power'));
 });
 
+test('power off: every tile of the accessory shows off at once, before the appliance reports', async () => {
+  const { set, svc, C, res } = setup({ features: { light: true } });
+  res['/mode/convenient/vs/0'][`${V}modes`] = 'Speed';
+  assert.equal(svc('fan').getCharacteristic(C.Active).value, 1);
+  await set('thermostat', C.TargetHeatingCoolingState, C.TargetHeatingCoolingState.OFF);
+  assert.equal(svc('fan').getCharacteristic(C.Active).value, 0);
+  assert.equal(svc('thermostat').getCharacteristic(C.CurrentHeatingCoolingState).value, C.CurrentHeatingCoolingState.OFF);
+  for (const key of ['fast', 'windFree', 'quiet', 'dry', 'fanOnly', 'fanAuto', 'fanTurbo', 'light']) {
+    assert.equal(svc(key).getCharacteristic(C.On).value, false, key);
+  }
+});
+
 test('external change: remote or Samsung app changes show up in HomeKit', () => {
   const { link, svc, C, res } = setup();
   res['/power/vs/0'][`${V}power`] = 'Off';
