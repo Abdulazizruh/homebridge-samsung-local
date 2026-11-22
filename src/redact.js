@@ -1,7 +1,7 @@
 /** Redaction for logs and diagnostics. Keeps the shape of the data so a
  * resource can still be supported later, and drops what identifies a home. */
 
-const SECRET_KEY = /(serial|duid|mac|ssid|password|passwd|token|secret|psk|private|email|account|deviceid|presence|location|latitude|longitude|address|bssid|\bip\b|hostname)/i;
+const SECRET_KEY = /(serial|duid|mac(?!hine)|ssid|password|passwd|token|secret|psk|private|email|account|deviceid|presence|location|latitude|longitude|address|bssid|\bip\b|hostname)/i;
 const MAC = /\b[0-9a-f]{2}([:-])[0-9a-f]{2}(\1[0-9a-f]{2}){4}\b/gi;
 const UUID = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
 const IPV4 = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;

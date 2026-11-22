@@ -198,3 +198,11 @@ test('diagnostics: secrets and identifiers are redacted, structure is kept', () 
   assert.ok(text.includes('/wirelessinfo/vs/0'));
   assert.ok(text.includes('ARTIK051_PRAC_20K'));
 });
+
+test('diagnostics: machine state is kept (it is not a MAC address)', async () => {
+  const { redact, REDACTED } = await import('../src/redact.js');
+  const out = redact({ currentMachineState: 'run', machineStates: ['pause', 'run', 'stop'], macaddressWiFi: 'aabbccddeeff' });
+  assert.equal(out.currentMachineState, 'run');
+  assert.deepEqual(out.machineStates, ['pause', 'run', 'stop']);
+  assert.equal(out.macaddressWiFi, REDACTED);
+});
