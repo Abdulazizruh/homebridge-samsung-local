@@ -7,6 +7,7 @@ import { chosenEngine, DEFAULT_ENGINE, helperSpawn, VERSION as PLUGIN_VERSION } 
 import { ensureRuntime, findPython, runtimeStatus } from '../src/runtime/pythonRuntime.js';
 import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePythonRuntime, wipePluginData, writeJson } from '../src/storage.js';
 import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
+import QRCode from 'qrcode-svg';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
 
@@ -62,7 +63,23 @@ class UiServer extends HomebridgePluginUiServer {
       pythonError,
       arch: process.arch,
       devices: listSnapshots(this.paths).map((snap) => this.present(snap)),
+      tvSetup: this.tvSetup(),
     };
+  }
+
+  /** Setup code of each TV tile, with the same code as a picture to scan. */
+  tvSetup() {
+    const out = {};
+    for (const [deviceId, setup] of Object.entries(readJson(this.paths.tvSetup) ?? {})) {
+      let svg = null;
+      if (setup.uri) {
+        try {
+          svg = new QRCode({ content: setup.uri, width: 180, height: 180, padding: 3, ecl: 'M', join: true, container: 'svg-viewbox' }).svg();
+        } catch { /* the digits are enough */ }
+      }
+      out[deviceId] = { pin: setup.pin, paired: Boolean(setup.paired), svg };
+    }
+    return out;
   }
 
   present(snap, source = 'snapshot') {

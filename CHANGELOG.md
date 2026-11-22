@@ -2,6 +2,16 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.6
+
+- TV tile: the code for the Home app is shown on the plugin settings page, beside the TV, as a picture to scan with the digits under it. No more searching the log. It also says whether the TV has been added to Apple Home.
+- Guide: how to add a TV tile and find its remote, with a picture of the tile.
+
+**بالعربية**
+
+- بطاقة التلفزيون: رمز تطبيق Home يظهر في صفحة إعدادات الإضافة بجانب التلفزيون، صورةً للمسح والأرقام تحتها، دون بحث في السجل. ويبيّن هل أُضيف التلفزيون إلى Apple Home.
+- الدليل: طريقة إضافة بطاقة التلفزيون والوصول إلى الريموت، مع صورة للبطاقة.
+
 ## 1.1.5
 
 - Washer "Finished" sensor: on a model that announces the end of a cycle itself ("Finish"), only that announcement triggers the sensor. A cycle that is cancelled or switched off gives no notice and is noted in the log instead. Models that never announce it keep the earlier behaviour.

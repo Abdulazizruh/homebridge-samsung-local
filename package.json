@@ -1,7 +1,7 @@
 {
   "name": "homebridge-samsung-local",
   "displayName": "Samsung Local",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Local, cloud-free control of Samsung appliances over your home network: air conditioners, washer status with a cycle-finished sensor, and Tizen TVs. No SmartThings API subscription, no Home Assistant, no Python required.",
   "type": "module",
   "main": "index.js",
@@ -62,6 +62,7 @@
     "@homebridge/plugin-ui-utils": "^2.3.0",
     "@peculiar/x509": "^1.14.3",
     "cbor-x": "^1.6.9",
+    "qrcode-svg": "^1.1.0",
     "werift-dtls": "^0.5.8",
     "ws": "^8.23.0"
   },

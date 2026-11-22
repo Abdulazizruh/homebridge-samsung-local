@@ -41,3 +41,7 @@ The transport code in `engine/vendor/` (DTLS transport, CoAP, CBOR helpers, port
 ## Trademarks
 
 "Samsung" and "SmartThings" are trademarks of Samsung Electronics Co., Ltd. This is an independent, unofficial project.
+
+## qrcode-svg
+
+MIT licence. Used on the settings page to draw the Home app code of a TV tile. https://github.com/papnkukn/qrcode-svg

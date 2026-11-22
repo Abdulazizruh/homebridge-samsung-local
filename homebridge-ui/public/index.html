@@ -13,6 +13,9 @@
   .sl-table th, .sl-table td { padding: 4px 5px; font-size: .84rem; border-bottom: 1px solid rgba(128,128,128,.2); text-align: start; vertical-align: top; }
   .sl-pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; background: rgba(128,128,128,.18); }
   .sl-ok { background: rgba(40,167,69,.2); } .sl-warn { background: rgba(255,193,7,.25); } .sl-bad { background: rgba(220,53,69,.2); }
+  .sl-tvcode { margin-top: 6px; max-width: 230px; text-align: center; }
+  .sl-qr { background: #fff; border-radius: 8px; padding: 4px; margin: 6px auto; width: 150px; } .sl-qr svg { display: block; width: 100%; height: auto; }
+  .sl-pin { font-size: 1.35rem; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
   .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
   .sl-danger { border-color: rgba(220,53,69,.5); }
   .sl-lang { margin-inline-start: auto; }
@@ -137,6 +140,9 @@
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
       support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
+      tvCodeTitle: 'Add to Apple Home', tvCodePaired: 'Added to Apple Home', tvCodeLater: 'The code for Apple Home appears here after the bridge restarts.',
+      tvCodeNote: 'Home app → + → Add Accessory, then scan this picture. Or choose More options, pick the TV and type the digits.',
+      tvCodePairedNote: 'The same code is used if the TV is ever removed from the Home app and added again.',
       tvTitle: 'This is a Samsung TV', tvSteps: 'Pair it once, standing in front of the TV:',
       tvStep1: 'Switch the TV on and keep its remote in your hand.',
       tvStep2: 'Press "Pair with the TV" below. A message appears on the TV screen.',
@@ -146,7 +152,7 @@
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
       tvMode: 'How it appears in Apple Home',
       tvModeTile: 'TV tile with remote', tvModeSwitches: 'Switches inside the bridge',
-      tvModeTileNote: 'A real TV tile, the remote in Control Centre and input buttons. Apple requires each TV tile to be added on its own: Home app → + → Add Accessory → More options, with this bridge\'s PIN.',
+      tvModeTileNote: 'A real TV tile, the remote in Control Centre and input buttons. Apple requires each TV tile to be added on its own: after you press Add, its code (a picture to scan and the digits) appears beside the TV in the list below.',
       tvModeSwitchesNote: 'Power, Mute, Volume Up and Volume Down appear by themselves with your other appliances. No TV tile and no remote.',
       tvWake: 'Switching on from fully off uses wake-on-network; it works on most models, best with a network cable.',
       err_tv_off: 'The TV does not answer. Switch it on and try again.',
@@ -237,6 +243,9 @@
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
       support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
+      tvCodeTitle: 'أضفه إلى Apple Home', tvCodePaired: 'مضاف إلى Apple Home', tvCodeLater: 'يظهر رمز Apple Home هنا بعد إعادة تشغيل الجسر.',
+      tvCodeNote: 'تطبيق Home ← + ← Add Accessory ثم امسح هذه الصورة. أو اختر More options ثم التلفزيون واكتب الأرقام.',
+      tvCodePairedNote: 'يُستخدم الرمز نفسه إذا حُذف التلفزيون من تطبيق Home وأُضيف من جديد.',
       tvTitle: 'هذا تلفزيون Samsung', tvSteps: 'اقترن به مرة واحدة وأنت أمام التلفزيون:',
       tvStep1: 'شغّل التلفزيون وأمسك الريموت بيدك.',
       tvStep2: 'اضغط «اقتران مع التلفزيون» بالأسفل. تظهر رسالة على شاشة التلفزيون.',
@@ -246,7 +255,7 @@
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
       tvMode: 'شكل الظهور في Apple Home',
       tvModeTile: 'بطاقة تلفزيون مع ريموت', tvModeSwitches: 'مفاتيح داخل الجسر',
-      tvModeTileNote: 'بطاقة تلفزيون حقيقية، وريموت في مركز التحكم، وأزرار للمداخل. تشترط Apple إضافة كل بطاقة تلفزيون بمفردها: تطبيق Home ← + ← إضافة ملحق ← خيارات إضافية، برمز هذا الجسر.',
+      tvModeTileNote: 'بطاقة تلفزيون حقيقية، وريموت في مركز التحكم، وأزرار للمداخل. تشترط Apple إضافة كل بطاقة تلفزيون بمفردها: بعد الضغط على «إضافة» يظهر رمزه (صورة للمسح والأرقام تحتها) بجانب التلفزيون في القائمة بالأسفل.',
       tvModeSwitchesNote: 'تظهر مفاتيح التشغيل والكتم ورفع الصوت وخفضه تلقائيًا مع بقية أجهزتك، دون بطاقة تلفزيون ودون ريموت.',
       tvWake: 'التشغيل من الإطفاء الكامل يعتمد على الإيقاظ عبر الشبكة، ويعمل في أغلب الموديلات، والأفضل مع كيبل الشبكة.',
       err_tv_off: 'التلفزيون لم يستجب. شغّله ثم أعد المحاولة.',
@@ -513,6 +522,17 @@
     });
   }
 
+  /** The Home app code of a TV tile: a picture to scan and the digits under it. */
+  function tvSetupBox(dev) {
+    if (dev.type !== 'tv' || dev.tvMode === 'switches') { return ''; }
+    const setup = status.tvSetup?.[dev.id];
+    if (!setup) { return `<div class="sl-muted">${t('tvCodeLater')}</div>`; }
+    return `<div class="sl-tvcode"><div class="sl-pill ${setup.paired ? 'sl-ok' : 'sl-warn'}">${t(setup.paired ? 'tvCodePaired' : 'tvCodeTitle')}</div>
+      ${setup.svg ? `<div class="sl-qr" dir="ltr">${setup.svg}</div>` : ''}
+      <div class="sl-pin" dir="ltr">${esc(setup.pin)}</div>
+      <div class="sl-muted">${t(setup.paired ? 'tvCodePairedNote' : 'tvCodeNote')}</div></div>`;
+  }
+
   function renderDevices() {
     const box = $('sl-devices');
     if (!config.devices.length) { box.innerHTML = `<span class="sl-muted">${t('none')}</span>`; return; }
@@ -524,7 +544,7 @@
       const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;
       const address = `${esc(moved ? snap.host : dev.host)}${snap?.mac || dev.mac ? ` · ${esc(snap?.mac || dev.mac)}` : ''}`;
       return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${address}</div>
-        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}</td>
+        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}</td>
         <td>${state}</td>
         <td><label class="mb-0"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}></label></td>
         <td><button class="btn btn-sm btn-primary" data-cfg="${i}">${t('configure')}</button>

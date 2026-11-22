@@ -1,3 +1,4 @@
+import { pruneSetup, trackSetup } from './homekit/tvSetup.js';
 import { DropLog } from './dropLog.js';
 import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
 import { WasherAccessory } from './homekit/washerAccessory.js';
@@ -126,6 +127,9 @@ export class SamsungLocalPlatform {
     for (const entry of tvs) {
       this.#attachTv(entry);
     }
+    try {
+      pruneSetup(this.paths.tvSetup, tvs.filter((e) => e.id && e.tvMode !== 'switches').map((e) => e.id));
+    } catch { /* best effort */ }
     this.#pruneAccessories(all.filter((e) => !(e.type === 'tv' && e.tvMode !== 'switches')));
 
     if (!entries.length && tvs.length) {
@@ -339,7 +343,8 @@ export class SamsungLocalPlatform {
     if (mode === 'tile') {
       // Apple requires a TV tile to be its own accessory, added to the Home app separately.
       this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-      this.log.info(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options, with this bridge's PIN.`);
+      this.log.info(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options. Its code is on the plugin settings page, beside the TV.`);
+      trackSetup({ accessory, deviceId: entry.id, name, file: this.paths.tvSetup, timers: this.retryTimers, log: this.log });
     } else if (fresh) {
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       this.log.info(`Added "${name}" (TV switches).`);
