@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.17
+
+- Laundry appliances: three more options, off until you tick them. A progress tile that shows the cycle's percentage on the tile itself (the Home app prints a number only for a few tile types, so it carries a humidity icon). Child lock status. An alert sensor that turns on when the appliance reports a fault.
+- The settings page also shows how many washes the appliance has done.
+- "Reported but not used yet" now lists only what the plugin really does not read.
+- README: screenshots of the per-appliance options.
+
+**بالعربية**
+
+- أجهزة الغسيل: ثلاثة خيارات إضافية، مطفأة حتى تحددها. بطاقة نسبة التقدم التي تعرض نسبة الدورة على وجه البطاقة (تطبيق Home يطبع الرقم لأنواع قليلة من البطاقات، فتظهر بأيقونة الرطوبة). حالة قفل الأطفال. حساس تنبيه يتفعّل عند إعلان الجهاز عن عطل.
+- تعرض صفحة الإعدادات أيضًا عدد الغسلات التي أنجزها الجهاز.
+- قائمة «Reported but not used yet» صارت تعرض ما لا تقرؤه الإضافة فعلًا فقط.
+- الصفحة الرئيسية: صور لخيارات كل جهاز.
+
 ## 1.0.16
 
 - Settings page: the connection engine is now the first step, at the top. A new installation chooses it knowingly before anything else; an installation that already has appliances keeps the engine it runs on.

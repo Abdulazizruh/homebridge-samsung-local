@@ -173,6 +173,21 @@
                   "title": "Laundry: cycle finished sensor",
                   "type": "boolean",
                   "default": true
+                },
+                "progressTile": {
+                  "title": "Laundry: progress tile (percent)",
+                  "type": "boolean",
+                  "default": false
+                },
+                "kidsLockSensor": {
+                  "title": "Laundry: child lock status",
+                  "type": "boolean",
+                  "default": false
+                },
+                "alertSensor": {
+                  "title": "Laundry: alert sensor (appliance faults)",
+                  "type": "boolean",
+                  "default": false
                 }
               }
             },
