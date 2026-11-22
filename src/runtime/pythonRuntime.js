@@ -9,6 +9,9 @@ import { ensureDir, readJson, writeJson } from '../storage.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const HELPER_SCRIPT = path.resolve(here, '../../python/bridge.py');
 export const REQUIREMENTS = path.resolve(here, '../../python/requirements.txt');
+// Same pins with the SHA-256 of every wheel PyPI serves for them. pip refuses
+// any downloaded file whose hash is not listed.
+export const REQUIREMENTS_LOCK = path.resolve(here, '../../python/requirements.lock');
 
 /** An error the UI and log can explain: `code` selects the guidance text. */
 export class RuntimeError extends Error {
@@ -130,15 +133,18 @@ export async function ensureRuntime(paths, { pythonPath, log = () => {} } = {}) 
     const py = venvPython(paths.venv);
     const pip = await run(py, [
       '-m', 'pip', 'install', '--disable-pip-version-check', '--no-input',
-      '--only-binary', ':all:', '-r', REQUIREMENTS,
+      '--only-binary', ':all:', '--require-hashes', '-r', REQUIREMENTS_LOCK,
     ], { timeout: 15 * 60_000 });
     if (!pip.ok) {
       fs.rmSync(paths.venv, { recursive: true, force: true });
       const offline = /Temporary failure|Name or service|ConnectionError|Max retries|timed out/i.test(pip.stderr);
-      throw new RuntimeError(offline ? 'pip_offline' : 'pip_failed',
-        offline
-          ? 'Could not reach PyPI to download the Python packages. Internet access is needed for this one step.'
-          : 'Installing the Python packages failed. Prebuilt packages may not exist for this CPU or Python version.',
+      const tampered = /DO NOT MATCH THE HASHES/i.test(pip.stderr);
+      throw new RuntimeError(tampered ? 'pip_hash' : offline ? 'pip_offline' : 'pip_failed',
+        tampered
+          ? 'A downloaded Python package did not match its expected checksum, so nothing was installed.'
+          : offline
+            ? 'Could not reach PyPI to download the Python packages. Internet access is needed for this one step.'
+            : 'Installing the Python packages failed. Prebuilt packages may not exist for this CPU or Python version.',
         pip.stderr.slice(-800));
     }
     writeJson(paths.runtimeMarker, {
