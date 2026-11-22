@@ -163,6 +163,16 @@
                   "title": "Power and energy for Eve-compatible apps",
                   "type": "boolean",
                   "default": true
+                },
+                "cycleTile": {
+                  "title": "Laundry: cycle tile with time remaining",
+                  "type": "boolean",
+                  "default": true
+                },
+                "finishedSensor": {
+                  "title": "Laundry: cycle finished sensor",
+                  "type": "boolean",
+                  "default": true
                 }
               }
             },

@@ -417,3 +417,22 @@ test('readings file: unchanged readings are not written again and again', async 
   await new Promise((r) => { setTimeout(r, 700); });
   assert.equal(fs.statSync(file).mtimeMs, first);
 });
+
+test('washer options: a part switched off in the settings is removed, energy moves to the part that stays', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const storage = tmpDir();
+  const devices = [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }];
+  const first = await boot({ storage, devices, config: { devices: [{ host: '10.0.0.9', id: W, name: 'Washer' }] } });
+  await online(first.platform, W);
+  const accessory = first.api.registered[0].accessory;
+  await first.platform.stop();
+  const second = await boot({ storage, devices, cached: [accessory], config: { devices: [{ host: '10.0.0.9', id: W, name: 'Washer', features: { cycleTile: false } }] } });
+  t.after(() => second.platform.stop());
+  await online(second.platform, W);
+  const { handler } = second.platform.devices.get(W);
+  const S = second.api.hap.Service;
+  assert.equal(accessory.getServiceById(S.Valve, 'cycle'), undefined);
+  const done = handler.services.get('finished');
+  assert.ok(done);
+  await waitFor(() => done.getCharacteristic(handler.eve.TotalConsumption).value === 1190.4);
+});

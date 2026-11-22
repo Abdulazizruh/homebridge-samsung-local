@@ -164,7 +164,7 @@
       n: { min: 'min', 'stage-none': '', 'stage-weightsensing': 'weighing', 'stage-wash': 'wash', 'stage-rinse': 'rinse', 'stage-spin': 'spin', 'stage-finish': 'finished',
         switch: 'separate switch', 'on-off-only': 'on/off only, no brightness', 'not-reported': 'not reported by this appliance',
         'derived-token': 'derived value, unverified', 'no-known-resource': 'no known local resource', 'reports-zero': 'appliance reports 0: hidden until it measures' },
-      feat: { fan: 'Fan tile', fanAutoSwitch: 'Fan Auto switch', fanTurboSwitch: 'Turbo switch', fanSpeedSwitches: 'Low/Medium/High switches',
+      feat: { cycleTile: 'Cycle tile with time remaining', finishedSensor: 'Cycle finished sensor', fan: 'Fan tile', fanAutoSwitch: 'Fan Auto switch', fanTurboSwitch: 'Turbo switch', fanSpeedSwitches: 'Low/Medium/High switches',
         drySwitch: 'Dry switch', fanOnlySwitch: 'Fan Only switch', windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart',
         comfort: 'Comfort', twoStep: '2-Step', motionDirect: 'Wind follows people', motionIndirect: 'Wind avoids people', light: 'Light Display',
         beep: 'Beep', autoClean: 'Auto clean', humidity: 'Humidity sensor', filter: 'Filter status', outdoorTemperature: 'Outdoor temperature', energyEve: 'Power & energy (Eve)' },
@@ -254,7 +254,7 @@
       n: { min: 'دقيقة', 'stage-none': '', 'stage-weightsensing': 'وزن', 'stage-wash': 'غسيل', 'stage-rinse': 'شطف', 'stage-spin': 'عصر', 'stage-finish': 'انتهت',
         switch: 'مفتاح مستقل', 'on-off-only': 'تشغيل وإطفاء فقط دون سطوع', 'not-reported': 'الجهاز لم يعلن عنه',
         'derived-token': 'قيمة مشتقة غير مؤكدة', 'no-known-resource': 'لم يُعرف له مورد محلي', 'reports-zero': 'الجهاز يُرجع صفرًا: يُخفى حتى يبدأ القياس' },
-      feat: { fan: 'بطاقة المروحة', fanAutoSwitch: 'مفتاح المروحة التلقائية', fanTurboSwitch: 'مفتاح السرعة القصوى', fanSpeedSwitches: 'مفاتيح منخفض/متوسط/مرتفع',
+      feat: { cycleTile: 'بطاقة الدورة مع الوقت المتبقي', finishedSensor: 'حساس انتهاء الدورة', fan: 'بطاقة المروحة', fanAutoSwitch: 'مفتاح المروحة التلقائية', fanTurboSwitch: 'مفتاح السرعة القصوى', fanSpeedSwitches: 'مفاتيح منخفض/متوسط/مرتفع',
         drySwitch: 'مفتاح التجفيف', fanOnlySwitch: 'مفتاح مروحة فقط', windFree: 'WindFree', fast: 'سريع', quiet: 'هادئ', sleep: 'نوم', smart: 'ذكي',
         comfort: 'راحة', twoStep: 'مرحلتان', motionDirect: 'توجيه الهواء نحو الأشخاص', motionIndirect: 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة',
         beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي', humidity: 'حساس الرطوبة', filter: 'حالة الفلتر', outdoorTemperature: 'الحرارة الخارجية', energyEve: 'القدرة والطاقة (Eve)' },
@@ -264,6 +264,7 @@
     en: { airConditioner: 'Air conditioner', washer: 'Washer', dryer: 'Dryer', tv: 'TV', refrigerator: 'Refrigerator', dishwasher: 'Dishwasher', oven: 'Oven', airPurifier: 'Air purifier', robotVacuum: 'Robot vacuum', unknown: 'Unknown' },
     ar: { airConditioner: 'مكيف', washer: 'غسالة', dryer: 'مجففة', tv: 'تلفزيون', refrigerator: 'ثلاجة', dishwasher: 'غسالة صحون', oven: 'فرن', airPurifier: 'منقي هواء', robotVacuum: 'مكنسة آلية', unknown: 'غير معروف' },
   };
+  const LAUNDRY_DEFAULTS = { cycleTile: true, finishedSensor: true, energyEve: true };
   const DEFAULTS = { fan: true, fanAutoSwitch: true, fanTurboSwitch: true, fanSpeedSwitches: false, drySwitch: true, fanOnlySwitch: true,
     windFree: true, fast: true, quiet: true, sleep: false, smart: false, comfort: false, twoStep: false, motionDirect: false, motionIndirect: false,
     light: true, beep: false, autoClean: false, humidity: true, filter: true, outdoorTemperature: false, energyEve: true };
@@ -420,10 +421,14 @@
         <button class="btn btn-success mt-2" id="sl-add-tv" ${ready ? '' : 'disabled'}>${existing ? t('update') : t('add')}</button>`;
     }
     if (d.kind !== 'airConditioner' && d.kind !== 'tv' && d.support === 'experimental') {
+      const feats = { ...LAUNDRY_DEFAULTS, ...(existing?.features || {}) };
+      const boxes = Object.keys(LAUNDRY_DEFAULTS).map((k) =>
+        `<label class="mb-0"><input type="checkbox" data-feat="${k}" ${feats[k] ? 'checked' : ''}> ${esc(T[lang].feat[k])}</label>`).join('');
       html += `<div class="mt-2">${featureTable(d, 'laundryNote')}</div>
         <div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
           <div class="sl-muted">${t('nameNote')}</div></div>
+        <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
     html += `<div class="mt-2"><button class="btn btn-sm btn-outline-secondary" id="sl-result-diag">${t('diagFile')}</button>

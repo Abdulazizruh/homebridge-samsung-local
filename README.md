@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.14. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.15. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -127,14 +127,14 @@ Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (64 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (65 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
 | Control from Apple Home (power, temperature, fan, modes) | **Confirmed on all five units** |
 | Reconnect on real hardware | **Pass**: short drops recover within seconds |
-| A washer (`DA_WM_TP1_21_COMMON`) | Answers locally; its accessory is built from its real capture and from cycle captures of other models |
+| A washer (`DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage and time remaining |
 
 **It depends on your appliance.** Each model reports its own set of features. Use "Test & discover" in the settings: the table it shows is what your own appliance reports, and that is what appears in Apple Home.
 
