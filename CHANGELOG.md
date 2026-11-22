@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.0-beta.2
+
+Beta of 1.0.15 for trying the JavaScript connection engine: everything is the same, except that the JavaScript engine is the default, so no Python is downloaded or needed. Python stays available under General → Connection engine.
+
+**بالعربية**
+
+نسخة تجريبية من 1.0.15 لتجربة محرك الاتصال بلغة JavaScript: كل شيء كما هو، والفرق أن محرك JavaScript هو الافتراضي، فلا يُنزَّل Python ولا يُحتاج إليه. يبقى Python متاحًا من «عام ← محرك الاتصال».
+
 ## 1.0.15
 
 - Laundry appliances now have their own options, like air conditioners: show or hide the cycle tile, the "Finished" sensor, and the power and energy readings. Open the appliance with Configuration, tick what you want, press Update. A part that is switched off is removed from Apple Home; the energy readings move to the part that stays.
