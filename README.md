@@ -91,6 +91,12 @@ Then restart Homebridge.
    A TV asks for one more step before that: press **Pair with the TV** and choose "Allow" on the TV screen.
 5. On the plugin card open **⋮ → Bridge Settings** and enable the **child bridge**. Restart, then scan the child bridge's own QR code in the Home app.
 
+<p>
+  <img src="assets/screenshots/setup-page.png" alt="The plugin settings page: the setup steps with what is done, the connection engine, and the field to add an appliance" width="360">
+</p>
+
+The settings page shows these steps with a tick beside each one that is done, the version, the engine in use and how many appliances are connected.
+
 Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
 
 A static DHCP lease for each appliance is recommended. An air conditioner or washer whose address changes is found again by the plugin. To set an address yourself, press **Change IP** beside the appliance, enter the new one and press **Test & discover**: the existing entry is updated.
