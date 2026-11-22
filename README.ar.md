@@ -168,9 +168,10 @@ npm install --save homebridge-samsung-local
 <p>
   <img src="assets/screenshots/options-air-conditioner.png" alt="خيارات المكيف في إعدادات الإضافة" width="300">
   <img src="assets/screenshots/options-washer.png" alt="خيارات الغسالة في إعدادات الإضافة" width="300">
+  <img src="assets/screenshots/options-tv.png" alt="خيارات التلفزيون في إعدادات الإضافة" width="300">
 </p>
 
-الأولى: مكيف (بطاقة المروحة، مفاتيح الأوضاع، WindFree، Fast، Light Display، الرطوبة، القدرة والطاقة). الثانية: غسالة (بطاقة الدورة مع الوقت المتبقي، حساس انتهاء الدورة، القدرة والطاقة).
+الأولى: مكيف (بطاقة المروحة، مفاتيح الأوضاع، WindFree، Fast، Light Display، الرطوبة، القدرة والطاقة). الثانية: غسالة (بطاقة الدورة مع الوقت المتبقي، حساس انتهاء الدورة، طريقة عمل بطاقة الدورة). الثالثة: تلفزيون (اسمه، وهل يظهر بطاقة تلفزيون مع ريموت أم مفاتيح داخل الجسر).
 
 ## ما تم اختباره
 

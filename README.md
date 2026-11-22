@@ -164,9 +164,10 @@ Every appliance has its own options. Press **Configuration** next to it in the p
 <p>
   <img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="300">
   <img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings" width="300">
+  <img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings" width="300">
 </p>
 
-Left: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display, humidity, power and energy). Right: a washer (cycle tile with time remaining, cycle finished sensor, power and energy).
+First: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display, humidity, power and energy). Second: a washer (cycle tile with time remaining, cycle finished sensor, how the cycle tile behaves). Third: a TV (its name, and whether it appears as a TV tile with the remote or as switches inside the bridge).
 
 ## What has been tested
 
