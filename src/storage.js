@@ -18,6 +18,37 @@ export function pluginPaths(homebridgeStoragePath) {
   };
 }
 
+/** Size of the plugin's own Python runtime folder, in bytes (0 when absent). */
+export function folderSize(dir) {
+  let total = 0;
+  let entries = [];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return 0;
+  }
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      total += folderSize(full);
+    } else if (entry.isFile()) {
+      total += fs.statSync(full).size;
+    }
+  }
+  return total;
+}
+
+/**
+ * Remove only the Python runtime this plugin downloaded into its own folder.
+ * Python itself, the certificate, the settings and every other file stay.
+ */
+export function removePythonRuntime(paths) {
+  const freed = folderSize(paths.venv);
+  fs.rmSync(paths.venv, { recursive: true, force: true });
+  fs.rmSync(paths.runtimeMarker, { force: true });
+  return { freed };
+}
+
 export function ensureDir(dir, mode = 0o700) {
   fs.mkdirSync(dir, { recursive: true, mode });
 }

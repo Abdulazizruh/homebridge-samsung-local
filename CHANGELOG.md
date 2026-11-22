@@ -5,10 +5,12 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 ## 1.0.16
 
 - Settings page: the connection engine is now the first step, at the top. A new installation chooses it knowingly before anything else; an installation that already has appliances keeps the engine it runs on.
+- With the JavaScript engine chosen, the page shows how much space the unused Python runtime still takes and offers one button to remove it. Only the runtime this plugin downloaded is removed; Python itself, the certificate and the settings stay. This also makes Homebridge backups smaller.
 
 **بالعربية**
 
 - صفحة الإعدادات: صار محرك الاتصال الخطوة الأولى في أعلى الصفحة. التثبيت الجديد يختاره عن علم قبل أي شيء آخر، والتثبيت الذي فيه أجهزة يبقى على محركه الحالي.
+- عند اختيار محرك JavaScript تعرض الصفحة المساحة التي ما زالت تشغلها بيئة Python غير المستخدمة، مع زر واحد لحذفها. يُحذف ما نزّلته الإضافة فقط، ويبقى Python نفسه والشهادة والإعدادات. بذلك تصغر نسخ Homebridge الاحتياطية أيضًا.
 
 ## 1.0.15
 

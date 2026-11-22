@@ -103,6 +103,9 @@
       engineNeed: 'Choose the connection engine first. The next steps open after that.',
       engineNote: 'Both engines give the same features. Python downloads its runtime once. JavaScript needs no download and is new. You can switch here at any time; restart the bridge after changing it.',
       engineJsReady: 'JavaScript engine: nothing to prepare',
+      pyLeft: 'The Python runtime of this plugin is still on disk:', pyLeftNote: 'It is not used now and is included in every Homebridge backup. Remove it once you are sure the JavaScript engine works for you; switching back to Python later downloads it again.',
+      pyRemove: 'Remove the Python runtime', pyRemoved: 'Removed. Space freed:',
+      err_runtime_in_use: 'The Python runtime is in use. Switch to the JavaScript engine first.',
       generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 2 seconds; 5 or more is gentler on the appliance.',
       kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
       sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
@@ -194,6 +197,9 @@
       engineNeed: 'اختر محرك الاتصال أولًا. تُفتح الخطوات التالية بعد ذلك.',
       engineNote: 'المحركان يقدمان المزايا نفسها. Python ينزّل بيئته مرة واحدة. JavaScript لا يحتاج تنزيلًا وهو جديد. يمكنك التبديل من هنا في أي وقت، وأعد تشغيل الجسر بعد التغيير.',
       engineJsReady: 'محرك JavaScript: لا يحتاج تجهيزًا',
+      pyLeft: 'بيئة Python الخاصة بالإضافة ما زالت على القرص:', pyLeftNote: 'هي غير مستخدمة الآن وتدخل في كل نسخة احتياطية من Homebridge. احذفها بعد تأكدك من أن محرك JavaScript يعمل عندك، والرجوع إلى Python لاحقًا ينزّلها من جديد.',
+      pyRemove: 'احذف بيئة Python', pyRemoved: 'تم الحذف. المساحة المحررة:',
+      err_runtime_in_use: 'بيئة Python مستخدمة الآن. انتقل إلى محرك JavaScript أولًا.',
       generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى ثانيتان؛ 5 ثوانٍ فأكثر أخف على الجهاز.',
       kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
       sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
@@ -556,12 +562,18 @@
     $('sl-discover').disabled = !chosen;
     box.style.display = chosen ? '' : 'none';
     box.innerHTML = !chosen ? '' : status.engine === 'javascript'
-      ? `<span class="sl-pill sl-ok">${t('engineJsReady')}</span>`
+      ? `<span class="sl-pill sl-ok">${t('engineJsReady')}</span>${status.pythonRuntimeMb > 0
+        ? `<div class="sl-muted mt-1">${t('pyLeft')} <span dir="ltr">${status.pythonRuntimeMb} MB</span>. ${t('pyLeftNote')}</div>
+           <button class="btn btn-sm btn-outline-danger mt-1" id="sl-py-remove">${t('pyRemove')}</button>` : ''}`
       : status.runtimeReady
       ? `<span class="sl-pill sl-ok">${t('runtimeReady')}</span> <span class="sl-muted">${py}</span>`
       : `<span class="sl-pill sl-warn">${t('runtimeMissing')}</span> <span class="sl-muted">${py}</span>
          <div class="sl-muted mt-1">${t('runtimeNote')}</div>
          <button class="btn btn-sm btn-primary mt-1" id="sl-prepare" ${status.python ? '' : 'disabled'}>${t('runtimePrepare')}</button>`;
+    $('sl-py-remove')?.addEventListener('click', async () => {
+      homebridge.showSpinner();
+      try { const r = await homebridge.request('/remove-runtime'); homebridge.toast.success(`${t('pyRemoved')} ${r.freedMb} MB`); await refreshStatus(); } catch (err) { homebridge.toast.error(errorText(err)); } finally { homebridge.hideSpinner(); }
+    });
     $('sl-prepare')?.addEventListener('click', async () => {
       homebridge.showSpinner(); box.querySelector('.sl-muted.mt-1').textContent = t('runtimePreparing');
       try { await homebridge.request('/prepare'); await refreshStatus(); } catch (err) { homebridge.toast.error(errorText(err)); } finally { homebridge.hideSpinner(); }
