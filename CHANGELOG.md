@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.18
+
+JavaScript engine, after its first run on real appliances (five air conditioners and a washer connected and answered commands):
+
+- Push updates: each registration is now confirmed by the appliance before the next one is sent, and sent once more when no answer comes. Before, some appliances silently dropped registrations that arrived in a burst and then reported changes only at the polling interval.
+- Reconnecting: a known appliance is asked again on its own port instead of walking every usual port, so a short silence no longer shows as "not reachable" for a minute.
+- First contact: the appliance is asked for its port twice, with a longer wait the second time, for appliances that answer late (seen on a washer).
+
+**بالعربية**
+
+محرك JavaScript بعد أول تشغيل له على أجهزة حقيقية (اتصلت خمسة مكيفات وغسالة واستجابت للأوامر):
+
+- التحديثات الفورية: صار كل تسجيل يُؤكَّد من الجهاز قبل إرسال التالي، ويُعاد مرة إذا لم يصل الرد. كانت بعض الأجهزة تتجاهل التسجيلات المرسلة دفعة واحدة، فتظهر التغييرات عند فاصل القراءة فقط.
+- إعادة الاتصال: الجهاز المعروف يُسأل مجددًا على منفذه نفسه دون المرور على كل المنافذ المعتادة، فلا يظهر صمت قصير على أنه «not reachable» لمدة دقيقة.
+- الاتصال الأول: يُسأل الجهاز عن منفذه مرتين، بانتظار أطول في الثانية، للأجهزة التي تتأخر في الرد (ظهر ذلك مع الغسالة).
+
 ## 1.0.17
 
 - Laundry appliances: three more options, off until you tick them. A progress tile that shows the cycle's percentage on the tile itself (the Home app prints a number only for a few tile types, so it carries a humidity icon). Child lock status. An alert sensor that turns on when the appliance reports a fault.

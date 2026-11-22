@@ -58,6 +58,8 @@ test('JavaScript engine: session events, a write that reaches the appliance, and
   await helper.request('open', { key: di, host: '127.0.0.1', port: sim.port, expectedDi: di, pollInterval: 2, push: true });
   await waitFor(() => events.some((e) => e.ev === 'status' && e.online), 20_000);
   await waitFor(() => events.some((e) => e.ev === 'state' && e.resources?.['/power/vs/0']), 20_000);
+  // Push registrations are confirmed by the appliance and reported with the readings.
+  await waitFor(() => events.some((e) => e.ev === 'state' && e.pushes > 0), 30_000);
   const answer = await helper.request('write', { key: di, path: ['power', 'vs', '0'], body: { [`${V}power`]: 'On' } }, 20_000);
   assert.equal(answer.accepted, true);
   assert.equal(sim.writes.length, 1);
