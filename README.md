@@ -135,6 +135,8 @@ Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + 
 
 As a TV tile the TV has its own power button and input list, and the remote in Control Centre. Apple wants every TV tile added on its own: after you add the TV in the plugin settings, its code appears beside it in the list of configured appliances, as a picture to scan with the digits under it. In the Home app choose **+ → Add Accessory** and scan it, or choose **More options**, pick the TV and type the digits. The remote is then in Control Centre: open the remote and choose the TV at the top.
 
+Give each TV a fixed address in your router (a DHCP reservation). An air conditioner or washer whose address changes is found again by the plugin; a TV is not, because a TV that is switched off does not answer at all and cannot be told apart from one that moved. If a TV's address does change, press **Change IP** beside it.
+
 <p>
   <img src="assets/screenshots/tv-tile.png" alt="A Samsung TV as a tile in Apple Home: power and inputs" width="240">
   <img src="assets/screenshots/tv-remote.png" alt="The Control Centre remote for the TV: arrows, back, play and pause, info, mute and power" width="240">
