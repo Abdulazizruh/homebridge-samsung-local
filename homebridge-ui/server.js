@@ -4,7 +4,8 @@ import { HomebridgePluginUiServer, RequestError } from '@homebridge/plugin-ui-ut
 import { describeDevice, diagnosticsDump, stableDeviceId } from '../src/capabilities/index.js';
 import { HelperClient } from '../src/runtime/helperClient.js';
 import { ensureRuntime, findPython, HELPER_SCRIPT, runtimeStatus } from '../src/runtime/pythonRuntime.js';
-import { ensureDir, listSnapshots, pluginPaths, wipePluginData } from '../src/storage.js';
+import { ensureDir, listSnapshots, pluginPaths, readJson, wipePluginData, writeJson } from '../src/storage.js';
+import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
 
@@ -20,6 +21,7 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/legacy-devices', () => this.legacyDevices());
     this.onRequest('/wipe', (payload) => this.wipe(payload));
     this.onRequest('/saved-devices', () => this.savedDevices());
+    this.onRequest('/tv-pair', (payload) => this.tvPair(payload));
     this.ready();
   }
 
@@ -100,6 +102,11 @@ class UiServer extends HomebridgePluginUiServer {
     if (live) {
       return this.present(live, 'running-plugin');
     }
+    // A TV answers on its own local channel and needs no Python runtime.
+    const tv = /^\d{1,3}(\.\d{1,3}){3}$/.test(host) ? await tvInfo(host, { timeoutMs: 1500 }) : null;
+    if (tv) {
+      return this.presentTv(host, tv);
+    }
     let helper;
     try {
       const { python } = await ensureRuntime(this.paths, {});
@@ -124,6 +131,48 @@ class UiServer extends HomebridgePluginUiServer {
     } finally {
       await helper?.stop();
     }
+  }
+
+  presentTv(host, tv) {
+    const deviceId = tv.id ? `tv-${tv.id}` : tv.mac ? `tv-${tv.mac.replace(/:/g, '')}` : null;
+    const tokens = readJson(this.paths.tvTokens) ?? {};
+    return {
+      host, deviceId, mac: tv.mac, source: 'probe',
+      described: { kind: 'tv', deviceId, model: tv.model, support: 'experimental', reason: null, features: [], unknownResources: [] },
+      // Models without token support connect after one approval and hand out no token.
+      tv: { name: tv.name, power: tv.power, tokenAuth: tv.tokenAuth, paired: Boolean(deviceId && tokens[deviceId]) },
+    };
+  }
+
+  /** Ask the TV for permission; the owner answers "Allow" on its screen. */
+  async tvPair({ host } = {}) {
+    if (typeof host !== 'string' || !/^\d{1,3}(\.\d{1,3}){3}$/.test(host.trim())) {
+      throw new RequestError('Enter a valid IP address.', { code: 'bad_host' });
+    }
+    host = host.trim();
+    const tv = await tvInfo(host);
+    if (!tv) {
+      throw new RequestError('The TV does not answer. Switch it on and try again.', { code: 'tv_off' });
+    }
+    const { deviceId } = this.presentTv(host, tv);
+    if (!deviceId) {
+      throw new RequestError('The TV did not report an identity.', { code: 'no_identity' });
+    }
+    const tokens = readJson(this.paths.tvTokens) ?? {};
+    let token = tokens[deviceId] ?? null;
+    const remote = new TizenRemote({ host, token, onToken: (t) => { token = t; } });
+    try {
+      await remote.open(60_000);
+    } catch (err) {
+      throw new RequestError(err.message, { code: err.code ?? 'tv_error' });
+    } finally {
+      remote.close();
+    }
+    if (token) {
+      ensureDir(this.paths.root);
+      writeJson(this.paths.tvTokens, { ...(readJson(this.paths.tvTokens) ?? {}), [deviceId]: token });
+    }
+    return { paired: true, deviceId };
   }
 
   /** Resolve a MAC address to its current IP address on the local network. */

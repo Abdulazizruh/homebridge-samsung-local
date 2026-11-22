@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.14
+
+- Samsung TVs (Tizen, 2016 and later) can now be added. Enter the TV's address and press Test & discover: the page recognises a TV and shows the steps. Stand in front of the TV, press "Pair with the TV" and choose "Allow" on its screen. This is done once; the pairing is kept in the plugin's own folder.
+- Choose how the TV appears in Apple Home: a TV tile with the Control Centre remote and input buttons (Apple requires each TV tile to be added to the Home app on its own, with the bridge's PIN), or switches inside the bridge (power, mute, volume up, volume down) that appear by themselves.
+- Switching a TV on from fully off uses wake-on-network.
+- A TV needs no Python runtime.
+
+**بالعربية**
+
+- صار بالإمكان إضافة تلفزيونات Samsung (نظام Tizen، من 2016 فأحدث). أدخل عنوان التلفزيون واضغط «اختبار واكتشاف»: تتعرّف الصفحة على التلفزيون وتعرض الخطوات. قف أمام التلفزيون، واضغط «اقتران مع التلفزيون»، ثم اختر «سماح» على شاشته. يتم ذلك مرة واحدة، ويُحفظ الاقتران في مجلد الإضافة.
+- اختر شكل ظهور التلفزيون في Apple Home: بطاقة تلفزيون مع ريموت مركز التحكم وأزرار المداخل (تشترط Apple إضافة كل بطاقة تلفزيون بمفردها في تطبيق Home برمز الجسر)، أو مفاتيح داخل الجسر (تشغيل، كتم، رفع الصوت، خفض الصوت) تظهر تلقائيًا.
+- تشغيل التلفزيون من الإطفاء الكامل يعتمد على الإيقاظ عبر الشبكة.
+- التلفزيون لا يحتاج بيئة Python.
+
 ## 1.0.13
 
 - Washers, dryers and dishwashers now get a HomeKit accessory for following the cycle: a tile that shows the cycle running with the time remaining, a "Finished" sensor that turns on for ten minutes when the cycle ends (use it for a notification or an automation), and power and energy readings in Eve. Nothing is sent to the appliance; the cycle is started at the appliance itself.

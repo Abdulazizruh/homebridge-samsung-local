@@ -1,7 +1,7 @@
 {
   "name": "homebridge-samsung-local",
   "displayName": "Samsung Local",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Local, cloud-free control of Samsung SmartThings-compatible appliances (air conditioners first) over your home network. No SmartThings API subscription, no Home Assistant.",
   "type": "module",
   "main": "index.js",
@@ -58,7 +58,8 @@
     "prepublishOnly": "npm run check && npm test"
   },
   "dependencies": {
-    "@homebridge/plugin-ui-utils": "^2.3.0"
+    "@homebridge/plugin-ui-utils": "^2.3.0",
+    "ws": "^8.23.0"
   },
   "devDependencies": {
     "homebridge": "^2.5.0"

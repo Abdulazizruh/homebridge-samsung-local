@@ -14,6 +14,7 @@ export function pluginPaths(homebridgeStoragePath) {
     runtimeMarker: path.join(root, 'runtime.json'),
     // Where each appliance was last found (it may differ from the settings).
     addresses: path.join(root, 'addresses.json'),
+    tvTokens: path.join(root, 'tv-tokens.json'),
   };
 }
 

@@ -26,6 +26,8 @@ export function makeApi(storagePath = tmpDir()) {
   api.registerPlatformAccessories = (plugin, platform, list) => api.registered.push(...list.map((a) => ({ plugin, platform, accessory: a })));
   api.unregisterPlatformAccessories = (plugin, platform, list) => api.unregistered.push(...list);
   api.updatePlatformAccessories = () => {};
+  api.external = [];
+  api.publishExternalAccessories = (plugin, list) => api.external.push(...list);
   return api;
 }
 

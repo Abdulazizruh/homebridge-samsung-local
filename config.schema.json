@@ -165,6 +165,34 @@
                   "default": true
                 }
               }
+            },
+            "type": {
+              "title": "Appliance type",
+              "type": "string",
+              "description": "Set by the plugin settings page. \"tv\" for a Samsung TV; leave empty for other appliances."
+            },
+            "tvMode": {
+              "title": "How a TV appears in Apple Home",
+              "type": "string",
+              "default": "tile",
+              "oneOf": [
+                {
+                  "title": "TV tile with remote (added to the Home app on its own)",
+                  "enum": [
+                    "tile"
+                  ]
+                },
+                {
+                  "title": "Switches inside the bridge (power, mute, volume)",
+                  "enum": [
+                    "switches"
+                  ]
+                }
+              ]
+            },
+            "model": {
+              "title": "Model",
+              "type": "string"
             }
           }
         }

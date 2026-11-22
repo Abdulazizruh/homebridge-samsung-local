@@ -1,6 +1,7 @@
 import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
 import { WasherAccessory } from './homekit/washerAccessory.js';
 import { LAUNDRY_KINDS } from './capabilities/washer.js';
+import { TvAccessory } from './homekit/tvAccessory.js';
 import { describeDevice, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
 import { shortId } from './redact.js';
@@ -85,16 +86,26 @@ export class SamsungLocalPlatform {
 
   async start() {
     ensureDir(this.paths.root);
-    const entries = this.entries();
+    let entries = this.entries();
 
     // Known appliances come back immediately from the cache, before any
     // network or Python work, so a slow or offline start never removes them.
+    const all = entries;
+    const tvs = all.filter((e) => e.type === 'tv');
+    entries = all.filter((e) => e.type !== 'tv');
     for (const entry of entries) {
       if (entry.id) {
         this.#attach(entry, entry.id, null);
       }
     }
-    this.#pruneAccessories(entries);
+    for (const entry of tvs) {
+      this.#attachTv(entry);
+    }
+    this.#pruneAccessories(all.filter((e) => !(e.type === 'tv' && e.tvMode !== 'switches')));
+
+    if (!entries.length && tvs.length) {
+      return; // TVs need no Python runtime
+    }
 
     if (!entries.length) {
       this.log.info('No appliances configured yet. Open the plugin settings and add an IP address.');
@@ -271,6 +282,53 @@ export class SamsungLocalPlatform {
     };
   }
 
+  /** A TV talks its own protocol: no Python helper, no OCF session. */
+  #attachTv(entry) {
+    if (!entry.id) {
+      this.log.warn(`${entry.host}: this TV has not been paired yet. Open the plugin settings, press Test & discover and follow the steps.`);
+      return;
+    }
+    const mode = entry.tvMode === 'switches' ? 'switches' : 'tile';
+    const name = String(entry.name || '').trim() || 'Samsung TV';
+    const uuid = this.api.hap.uuid.generate(UUID_NAMESPACE + entry.id + (mode === 'tile' ? ':tv' : ''));
+    let accessory = mode === 'switches' ? this.cached.get(uuid) : null;
+    const fresh = !accessory;
+    if (fresh) {
+      accessory = new this.api.platformAccessory(name, uuid,
+        mode === 'tile' ? this.api.hap.Categories.TELEVISION : this.api.hap.Categories.SWITCH);
+    } else if (accessory.displayName !== name) {
+      accessory.updateDisplayName?.(name);
+      accessory.displayName = name;
+    }
+    accessory.context.deviceId = entry.id;
+    accessory.context.kind = 'tv';
+    accessory.context.model = entry.model ?? accessory.context.model ?? null;
+    const tokens = readJson(this.paths.tvTokens) ?? {};
+    const handler = new TvAccessory({
+      api: this.api, log: this.log, accessory, entry, mode, token: tokens[entry.id] ?? null,
+      saveToken: (token) => {
+        try {
+          writeJson(this.paths.tvTokens, { ...(readJson(this.paths.tvTokens) ?? {}), [entry.id]: token });
+        } catch (err) {
+          this.log.debug(`could not save the TV token: ${err.message}`);
+        }
+      },
+      ...(this.overrides.tv ?? {}),
+    });
+    if (mode === 'tile') {
+      // Apple requires a TV tile to be its own accessory, added to the Home app separately.
+      this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+      this.log.info(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options, with this bridge's PIN.`);
+    } else if (fresh) {
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      this.log.info(`Added "${name}" (TV switches).`);
+    } else {
+      this.api.updatePlatformAccessories([accessory]);
+    }
+    this.tvs ??= [];
+    this.tvs.push(handler);
+  }
+
   /** Create (or reuse) the accessory and link for one appliance. */
   #attach(entry, deviceId, probe) {
     const uuid = this.api.hap.uuid.generate(UUID_NAMESPACE + deviceId);
@@ -388,6 +446,9 @@ export class SamsungLocalPlatform {
       clearTimeout(timer);
     }
     this.retryTimers.clear();
+    for (const tv of this.tvs ?? []) {
+      tv.stop();
+    }
     for (const deviceId of this.snapshots?.keys() ?? []) {
       this.#flushSnapshot(deviceId);
     }

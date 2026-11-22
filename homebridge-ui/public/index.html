@@ -105,6 +105,22 @@
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
       support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
+      tvTitle: 'This is a Samsung TV', tvSteps: 'Pair it once, standing in front of the TV:',
+      tvStep1: 'Switch the TV on and keep its remote in your hand.',
+      tvStep2: 'Press "Pair with the TV" below. A message appears on the TV screen.',
+      tvStep3: 'Choose "Allow" on the TV within one minute.',
+      tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
+      tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
+      tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
+      tvMode: 'How it appears in Apple Home',
+      tvModeTile: 'TV tile with remote', tvModeSwitches: 'Switches inside the bridge',
+      tvModeTileNote: 'A real TV tile, the remote in Control Centre and input buttons. Apple requires each TV tile to be added on its own: Home app → + → Add Accessory → More options, with this bridge\'s PIN.',
+      tvModeSwitchesNote: 'Power, Mute, Volume Up and Volume Down appear by themselves with your other appliances. No TV tile and no remote.',
+      tvWake: 'Switching on from fully off uses wake-on-network; it works on most models, best with a network cable.',
+      err_tv_off: 'The TV does not answer. Switch it on and try again.',
+      err_tv_timeout: 'Nobody chose "Allow" on the TV in time. Press Pair again and answer on the TV screen.',
+      err_tv_denied: 'The TV refused. On the TV open Settings → General → External Device Manager → Device Connection Manager → Device List, remove the old entry, then pair again.',
+      err_tv_unreachable: 'The TV did not accept the connection. Check that it is on and on the same network.',
       reason_tv: 'Samsung TVs need an OCF credential that owners cannot obtain yet. Keep the TV on your current plugin.',
       'reason_not-mapped-yet': 'The appliance answered locally, but this version has no HomeKit mapping for this type yet. Send the diagnostics file to get it supported.',
       'reason_unknown-type': 'The appliance answered, but its type is not recognized.',
@@ -176,6 +192,22 @@
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
       support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
+      tvTitle: 'هذا تلفزيون Samsung', tvSteps: 'اقترن به مرة واحدة وأنت أمام التلفزيون:',
+      tvStep1: 'شغّل التلفزيون وأمسك الريموت بيدك.',
+      tvStep2: 'اضغط «اقتران مع التلفزيون» بالأسفل. تظهر رسالة على شاشة التلفزيون.',
+      tvStep3: 'اختر «سماح» على التلفزيون خلال دقيقة.',
+      tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
+      tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
+      tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
+      tvMode: 'شكل الظهور في Apple Home',
+      tvModeTile: 'بطاقة تلفزيون مع ريموت', tvModeSwitches: 'مفاتيح داخل الجسر',
+      tvModeTileNote: 'بطاقة تلفزيون حقيقية، وريموت في مركز التحكم، وأزرار للمداخل. تشترط Apple إضافة كل بطاقة تلفزيون بمفردها: تطبيق Home ← + ← إضافة ملحق ← خيارات إضافية، برمز هذا الجسر.',
+      tvModeSwitchesNote: 'تظهر مفاتيح التشغيل والكتم ورفع الصوت وخفضه تلقائيًا مع بقية أجهزتك، دون بطاقة تلفزيون ودون ريموت.',
+      tvWake: 'التشغيل من الإطفاء الكامل يعتمد على الإيقاظ عبر الشبكة، ويعمل في أغلب الموديلات، والأفضل مع كيبل الشبكة.',
+      err_tv_off: 'التلفزيون لم يستجب. شغّله ثم أعد المحاولة.',
+      err_tv_timeout: 'لم يُضغط «سماح» على التلفزيون في الوقت المحدد. اضغط «اقتران» مرة أخرى وأجب على شاشة التلفزيون.',
+      err_tv_denied: 'رفض التلفزيون الاتصال. افتح في التلفزيون: الإعدادات ← عام ← إدارة الأجهزة الخارجية ← إدارة اتصال الأجهزة ← قائمة الأجهزة، واحذف الإدخال القديم، ثم اقترن من جديد.',
+      err_tv_unreachable: 'لم يقبل التلفزيون الاتصال. تأكد أنه يعمل وعلى الشبكة نفسها.',
       reason_tv: 'تلفزيونات Samsung تحتاج بيانات اعتماد OCF يتعذر على المالك الحصول عليها حاليًا. أبقِ التلفزيون على الإضافة الحالية.',
       'reason_not-mapped-yet': 'استجاب الجهاز محليًا، لكن هذه النسخة لم تُضف له خدمات HomeKit بعد. أرسل ملف التشخيص لدعمه.',
       'reason_unknown-type': 'استجاب الجهاز، لكن نوعه غير معروف.',
@@ -240,6 +272,7 @@
   await homebridge.updatePluginConfig([config]);
   let status = { devices: [] };
   let lastProbe = null;
+  const tvPaired = new Set();
   let legacyNames = [];
 
   async function save(message = true) {
@@ -353,7 +386,26 @@
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
-    if (d.kind !== 'airConditioner' && d.support === 'experimental') {
+    if (d.kind === 'tv' && p.tv) {
+      const mode = existing?.tvMode === 'switches' ? 'switches' : 'tile';
+      // Models without token support need one approval on screen and nothing stored.
+      const ready = p.tv.paired || tvPaired.has(p.deviceId);
+      html += `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
+          <ol class="mb-1">${[1, 2, 3, 4].map((n) => `<li>${t('tvStep' + n)}</li>`).join('')}</ol>
+          ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>
+        <button class="btn btn-primary" id="sl-tv-pair">${t('tvPair')}</button>
+        <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>
+        <div class="mt-2"><strong>${t('name')}</strong>
+          <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>
+        <div class="mt-2"><strong>${t('tvMode')}</strong>
+          <div><label class="mb-0"><input type="radio" name="sl-tv-mode" value="tile" ${mode === 'tile' ? 'checked' : ''}> ${t('tvModeTile')}</label>
+            <div class="sl-muted">${t('tvModeTileNote')}</div></div>
+          <div class="mt-1"><label class="mb-0"><input type="radio" name="sl-tv-mode" value="switches" ${mode === 'switches' ? 'checked' : ''}> ${t('tvModeSwitches')}</label>
+            <div class="sl-muted">${t('tvModeSwitchesNote')}</div></div></div>
+        <div class="sl-muted mt-1">${t('tvWake')}</div>
+        <button class="btn btn-success mt-2" id="sl-add-tv" ${ready ? '' : 'disabled'}>${existing ? t('update') : t('add')}</button>`;
+    }
+    if (d.kind !== 'airConditioner' && d.kind !== 'tv' && d.support === 'experimental') {
       html += `<div class="mt-2">${featureTable(d, 'laundryNote')}</div>
         <div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
@@ -367,6 +419,29 @@
     }
     box.innerHTML = html;
     $('sl-result-diag')?.addEventListener('click', () => downloadDiagnostics({ deviceId: p.deviceId, host: p.host }));
+    $('sl-tv-pair')?.addEventListener('click', async () => {
+      const state = $('sl-tv-state'); const button = $('sl-tv-pair');
+      button.disabled = true; state.className = 'sl-pill sl-warn'; state.textContent = t('tvPairing');
+      try {
+        await homebridge.request('/tv-pair', { host: p.host });
+        tvPaired.add(p.deviceId);
+        state.className = 'sl-pill sl-ok'; state.textContent = t('tvPaired');
+        $('sl-add-tv').disabled = false;
+      } catch (err) {
+        state.className = 'sl-pill sl-bad'; state.textContent = errorText(err);
+      } finally { button.disabled = false; }
+    });
+    $('sl-add-tv')?.addEventListener('click', async () => {
+      const entry = { host: p.host, id: p.deviceId, type: 'tv', enabled: true,
+        tvMode: box.querySelector('[name="sl-tv-mode"]:checked')?.value === 'switches' ? 'switches' : 'tile' };
+      if (p.mac) { entry.mac = p.mac; }
+      if (d.model) { entry.model = d.model; }
+      entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
+      await change(() => {
+        const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
+        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
+      });
+    });
     $('sl-add')?.addEventListener('click', async () => {
       const features = {};
       box.querySelectorAll('[data-feat]').forEach((el) => { features[el.dataset.feat] = el.checked; });
@@ -386,7 +461,7 @@
     if (!config.devices.length) { box.innerHTML = `<span class="sl-muted">${t('none')}</span>`; return; }
     box.innerHTML = `<div class="sl-scroll"><table class="sl-table"><tbody>${config.devices.map((dev, i) => {
       const snap = status.devices.find((s) => s.deviceId && s.deviceId === dev.id) || status.devices.find((s) => s.host === dev.host);
-      const state = !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
+      const state = dev.type === 'tv' ? `<span class="sl-pill">${esc(KINDS[lang].tv)}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
       const energy = snap?.described?.features?.filter((r) => ['powerWatts', 'energyKWh'].includes(r.id) && r.device === true)
         .map((r) => `${esc(T[lang].f[r.id])}: <span dir="ltr">${esc(r.value ?? '—')}</span>`).join(' · ') ?? '';
       const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;

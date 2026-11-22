@@ -1,0 +1,239 @@
+import { TizenRemote, tvInfo, wake } from '../tv/tizenClient.js';
+
+const POLL_MS = 10_000;
+const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
+const INPUTS = [
+  { id: 1, name: 'TV', key: 'KEY_TV' },
+  { id: 2, name: 'HDMI', key: 'KEY_HDMI' },
+  { id: 3, name: 'Sources', key: 'KEY_SOURCE' },
+  { id: 4, name: 'Home', key: 'KEY_HOME' },
+];
+
+function remoteKeys(Characteristic) {
+  const R = Characteristic.RemoteKey;
+  return new Map([
+    [R.REWIND, 'KEY_REWIND'], [R.FAST_FORWARD, 'KEY_FF'], [R.NEXT_TRACK, 'KEY_CHUP'], [R.PREVIOUS_TRACK, 'KEY_CHDOWN'],
+    [R.ARROW_UP, 'KEY_UP'], [R.ARROW_DOWN, 'KEY_DOWN'], [R.ARROW_LEFT, 'KEY_LEFT'], [R.ARROW_RIGHT, 'KEY_RIGHT'],
+    [R.SELECT, 'KEY_ENTER'], [R.BACK, 'KEY_RETURN'], [R.EXIT, 'KEY_EXIT'], [R.PLAY_PAUSE, 'KEY_PLAY'], [R.INFORMATION, 'KEY_HOME'],
+  ]);
+}
+
+/**
+ * A Samsung TV in HomeKit, in one of two shapes chosen in the settings:
+ *  - 'tile'     a real TV tile with the Control Centre remote (Apple requires
+ *               it to be added to the Home app on its own)
+ *  - 'switches' plain switches inside the bridge: power, mute, volume up/down
+ */
+export class TvAccessory {
+  constructor({ api, log, accessory, entry, mode, token, saveToken, ports = {}, pollMs = POLL_MS }) {
+    this.api = api;
+    this.hap = api.hap;
+    this.log = log;
+    this.accessory = accessory;
+    this.entry = entry;
+    this.mode = mode;
+    this.displayName = accessory.displayName;
+    this.context = accessory.context;
+    this.ports = ports;
+    this.on = false;
+    this.muted = false;
+    this.reachable = null;
+    this.holdUntil = 0;
+    this.services = new Map();
+    this.remote = new TizenRemote({
+      host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken,
+    });
+    if (mode === 'tile') {
+      this.#buildTile();
+    } else {
+      this.#buildSwitches();
+    }
+    this.timer = setInterval(() => this.poll(), pollMs);
+    this.timer.unref?.();
+    this.poll();
+  }
+
+  stop() {
+    clearInterval(this.timer);
+    this.remote.close();
+  }
+
+  async poll() {
+    const info = await tvInfo(this.entry.host, { httpPort: this.ports.httpPort });
+    if (info?.mac && !this.context.mac) {
+      this.context.mac = info.mac;
+    }
+    const reachable = Boolean(info);
+    if (reachable !== this.reachable && this.reachable !== null) {
+      this.log.debug(`[${this.displayName}] ${reachable ? 'answers' : 'stopped answering'} on the network.`);
+    }
+    this.reachable = reachable;
+    if (Date.now() < this.holdUntil) {
+      return;
+    }
+    const on = Boolean(info?.power);
+    if (on !== this.on) {
+      this.on = on;
+      if (!on) {
+        this.muted = false;
+      }
+      this.#push();
+    }
+  }
+
+  async #setPower(want) {
+    if (want === this.on) {
+      return;
+    }
+    const mac = this.entry.mac ?? this.context.mac;
+    try {
+      if (want && !this.reachable) {
+        await wake(mac);
+      } else {
+        // Reachable: on, or in a standby that still listens.
+        await this.#key('KEY_POWER');
+      }
+    } catch (err) {
+      this.log.warn(`[${this.displayName}] power ${want ? 'on' : 'off'} failed: ${err.message}`);
+      const { HapStatusError, HAPStatus } = this.hap;
+      throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+    this.on = want;
+    this.holdUntil = Date.now() + POWER_HOLD_MS;
+    this.#push();
+  }
+
+  async #key(code) {
+    try {
+      await this.remote.key(code);
+    } catch (err) {
+      if (err.code === 'tv_denied') {
+        this.log.warn(`[${this.displayName}] the TV no longer accepts this plugin. Open the plugin settings and pair the TV again.`);
+      }
+      throw err;
+    }
+  }
+
+  async #press(code, label) {
+    if (!this.on) {
+      return;
+    }
+    try {
+      await this.#key(code);
+    } catch (err) {
+      this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}`);
+      const { HapStatusError, HAPStatus } = this.hap;
+      throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+  }
+
+  // ------------------------------------------------------------- TV tile
+
+  #buildTile() {
+    const { Service, Characteristic } = this.hap;
+    this.#info();
+    const tv = this.accessory.getService(Service.Television) ?? this.accessory.addService(Service.Television, this.displayName, 'tv');
+    tv.setCharacteristic(Characteristic.ConfiguredName, this.displayName)
+      .setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE)
+      .setCharacteristic(Characteristic.ActiveIdentifier, 1);
+    tv.getCharacteristic(Characteristic.Active).onGet(() => (this.on ? 1 : 0)).onSet((v) => this.#setPower(v === 1));
+    tv.getCharacteristic(Characteristic.ActiveIdentifier).onSet((id) => {
+      const input = INPUTS.find((i) => i.id === id);
+      return input ? this.#press(input.key, `input ${input.name}`) : undefined;
+    });
+    const keys = remoteKeys(Characteristic);
+    tv.getCharacteristic(Characteristic.RemoteKey).onSet((k) => (keys.has(k) ? this.#press(keys.get(k), 'remote key') : undefined));
+    this.services.set('tv', tv);
+
+    const speaker = this.accessory.getService(Service.TelevisionSpeaker)
+      ?? this.accessory.addService(Service.TelevisionSpeaker, `${this.displayName} Speaker`, 'speaker');
+    speaker.setCharacteristic(Characteristic.Active, 1)
+      .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.RELATIVE);
+    speaker.getCharacteristic(Characteristic.Mute).onGet(() => this.muted).onSet(async (v) => {
+      if (Boolean(v) !== this.muted) {
+        await this.#press('KEY_MUTE', 'mute');
+        this.muted = Boolean(v);
+      }
+    });
+    speaker.getCharacteristic(Characteristic.VolumeSelector).onSet((v) => this.#press(
+      v === Characteristic.VolumeSelector.INCREMENT ? 'KEY_VOLUP' : 'KEY_VOLDOWN', 'volume'));
+    tv.addLinkedService(speaker);
+    this.services.set('speaker', speaker);
+
+    for (const input of INPUTS) {
+      const src = this.accessory.getServiceById(Service.InputSource, `input-${input.id}`)
+        ?? this.accessory.addService(Service.InputSource, input.name, `input-${input.id}`);
+      src.setCharacteristic(Characteristic.Identifier, input.id)
+        .setCharacteristic(Characteristic.ConfiguredName, input.name)
+        .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
+        .setCharacteristic(Characteristic.InputSourceType, input.id === 2 ? Characteristic.InputSourceType.HDMI : Characteristic.InputSourceType.OTHER)
+        .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
+      tv.addLinkedService(src);
+    }
+  }
+
+  // ------------------------------------------------------------ switches
+
+  #applyName(key, service, name) {
+    const { Characteristic } = this.hap;
+    const applied = (this.context.appliedNames ??= {});
+    if (!service.testCharacteristic(Characteristic.ConfiguredName)) {
+      service.addOptionalCharacteristic(Characteristic.ConfiguredName);
+    }
+    const current = service.getCharacteristic(Characteristic.ConfiguredName).value;
+    if (!current || current === applied[key]) {
+      service.updateCharacteristic(Characteristic.ConfiguredName, name);
+      service.updateCharacteristic(Characteristic.Name, name);
+      applied[key] = name;
+    }
+  }
+
+  #switch(key, suffix) {
+    const { Service } = this.hap;
+    const name = suffix ? `${this.displayName} ${suffix}` : this.displayName;
+    const service = this.accessory.getServiceById(Service.Switch, key) ?? this.accessory.addService(Service.Switch, name, key);
+    this.#applyName(key, service, name);
+    this.services.set(key, service);
+    return service.getCharacteristic(this.hap.Characteristic.On);
+  }
+
+  #buildSwitches() {
+    this.#info();
+    this.#switch('power', '').onGet(() => this.on).onSet((v) => this.#setPower(Boolean(v)));
+    this.#switch('mute', 'Mute').onGet(() => this.muted).onSet(async (v) => {
+      if (Boolean(v) !== this.muted && this.on) {
+        await this.#press('KEY_MUTE', 'mute');
+        this.muted = Boolean(v);
+      } else if (!this.on) {
+        setTimeout(() => this.#push(), 300).unref?.();
+      }
+    });
+    // Momentary: each press is one volume step.
+    for (const [key, suffix, code] of [['volumeUp', 'Volume Up', 'KEY_VOLUP'], ['volumeDown', 'Volume Down', 'KEY_VOLDOWN']]) {
+      this.#switch(key, suffix).onGet(() => false).onSet(async (v) => {
+        if (v) {
+          setTimeout(() => this.services.get(key).updateCharacteristic(this.hap.Characteristic.On, false), 400).unref?.();
+          await this.#press(code, 'volume');
+        }
+      });
+    }
+  }
+
+  #info() {
+    const { Service, Characteristic } = this.hap;
+    this.accessory.getService(Service.AccessoryInformation)
+      ?.setCharacteristic(Characteristic.Manufacturer, 'Samsung')
+      .setCharacteristic(Characteristic.Model, String(this.context.model ?? 'TV').slice(0, 64));
+  }
+
+  #push() {
+    const { Characteristic } = this.hap;
+    if (this.mode === 'tile') {
+      this.services.get('tv').updateCharacteristic(Characteristic.Active, this.on ? 1 : 0);
+      this.services.get('speaker').updateCharacteristic(Characteristic.Mute, this.muted);
+    } else {
+      this.services.get('power').updateCharacteristic(Characteristic.On, this.on);
+      this.services.get('mute').updateCharacteristic(Characteristic.On, this.muted);
+    }
+  }
+}
