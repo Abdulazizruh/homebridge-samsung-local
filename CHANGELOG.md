@@ -2,6 +2,16 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.15
+
+- Laundry appliances now have their own options, like air conditioners: show or hide the cycle tile, the "Finished" sensor, and the power and energy readings. Open the appliance with Configuration, tick what you want, press Update. A part that is switched off is removed from Apple Home; the energy readings move to the part that stays.
+- The washer accessory is confirmed on a real washer (`DA_WM_TP1_21_COMMON`): running state, wash stage and time remaining.
+
+**بالعربية**
+
+- صار لأجهزة الغسيل خياراتها مثل المكيفات: أظهر أو أخفِ بطاقة الدورة، وحساس «Finished»، وقراءات القدرة والطاقة. افتح الجهاز من «Configuration»، وحدّد ما تريد، ثم اضغط «Update». الجزء الذي تُطفئه يُزال من Apple Home، وتنتقل قراءات الطاقة إلى الجزء الباقي.
+- تأكد ملحق الغسالة على غسالة حقيقية (`DA_WM_TP1_21_COMMON`): حالة التشغيل ومرحلة الغسيل والوقت المتبقي.
+
 ## 1.0.14
 
 - Samsung TVs (Tizen, 2016 and later) can now be added. Enter the TV's address and press Test & discover: the page recognises a TV and shows the steps. Stand in front of the TV, press "Pair with the TV" and choose "Allow" on its screen. This is done once; the pairing is kept in the plugin's own folder.

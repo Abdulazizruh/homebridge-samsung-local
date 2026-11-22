@@ -3,6 +3,7 @@ import { eveCharacteristics } from './eve.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = { cycle: '', finished: 'Finished' };
+export const WASHER_FEATURES = { cycleTile: true, finishedSensor: true, energyEve: true };
 
 /**
  * A washer, dryer or dishwasher as a read-only HomeKit accessory:
@@ -12,7 +13,8 @@ const LABELS = { cycle: '', finished: 'Finished' };
  * Nothing is written to the appliance.
  */
 export class WasherAccessory {
-  constructor({ api, log, accessory, link, displayName, finishedHoldMs = FINISHED_HOLD_MS }) {
+  constructor({ api, log, accessory, link, displayName, features = {}, finishedHoldMs = FINISHED_HOLD_MS }) {
+    this.features = { ...WASHER_FEATURES, ...features };
     this.api = api;
     this.hap = api.hap;
     this.log = log;
@@ -78,19 +80,41 @@ export class WasherAccessory {
     info?.setCharacteristic(Characteristic.Manufacturer, 'Samsung')
       .setCharacteristic(Characteristic.Model, String(this.context.model ?? 'Laundry appliance').slice(0, 64));
 
-    const valve = this.#service('cycle', Service.Valve, 'cycle');
-    valve.setCharacteristic(Characteristic.ValveType, Characteristic.ValveType.GENERIC_VALVE);
-    valve.getCharacteristic(Characteristic.RemainingDuration).setProps({ maxValue: 86400 });
-    valve.getCharacteristic(Characteristic.Active).onSet(() => {
-      // Read-only: the appliance does not accept a remote start. Show the truth again.
-      setTimeout(() => this.#push(), 300).unref?.();
-    });
+    // Each part can be switched off in the settings; a part that is off is removed.
+    const drop = (type, subtype) => {
+      const old = this.accessory.getServiceById(type, subtype);
+      if (old) {
+        this.accessory.removeService(old);
+      }
+    };
+    if (this.features.cycleTile) {
+      const valve = this.#service('cycle', Service.Valve, 'cycle');
+      valve.setCharacteristic(Characteristic.ValveType, Characteristic.ValveType.GENERIC_VALVE);
+      valve.getCharacteristic(Characteristic.RemainingDuration).setProps({ maxValue: 86400 });
+      valve.getCharacteristic(Characteristic.Active).onSet(() => {
+        // Read-only: the appliance does not accept a remote start. Show the truth again.
+        setTimeout(() => this.#push(), 300).unref?.();
+      });
+    } else {
+      drop(Service.Valve, 'cycle');
+    }
+    if (this.features.finishedSensor) {
+      this.#service('finished', Service.OccupancySensor, 'finished');
+    } else {
+      drop(Service.OccupancySensor, 'finished');
+    }
+    // Power and energy ride on whichever tile is shown.
+    this.energyHost = this.services.get('cycle') ?? this.services.get('finished') ?? null;
     for (const C of [this.eve.Consumption, this.eve.TotalConsumption]) {
-      if (!valve.testCharacteristic(C)) {
-        valve.addOptionalCharacteristic(C);
+      for (const service of this.services.values()) {
+        const wanted = this.features.energyEve && service === this.energyHost;
+        if (wanted && !service.testCharacteristic(C)) {
+          service.addOptionalCharacteristic(C);
+        } else if (!wanted && service.testCharacteristic(C)) {
+          service.removeCharacteristic(service.getCharacteristic(C));
+        }
       }
     }
-    this.#service('finished', Service.OccupancySensor, 'finished');
   }
 
   #onUpdate(resources) {
@@ -133,21 +157,29 @@ export class WasherAccessory {
     const { Characteristic, HapStatusError, HAPStatus } = this.hap;
     this.services.get('cycle')?.updateCharacteristic(Characteristic.Active,
       new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+    if (!this.services.has('cycle')) {
+      this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected,
+        new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+    }
   }
 
   #push() {
     const { Characteristic } = this.hap;
     const st = this.model?.state ?? { inCycle: false, running: false, remainingSeconds: 0, powerWatts: null, energyKWh: null };
     const valve = this.services.get('cycle');
-    valve.updateCharacteristic(Characteristic.Active, st.inCycle ? 1 : 0);
-    valve.updateCharacteristic(Characteristic.InUse, st.running ? 1 : 0);
-    valve.updateCharacteristic(Characteristic.RemainingDuration, Math.min(86400, Math.max(0, st.remainingSeconds)));
-    if (st.powerWatts !== null) {
-      valve.updateCharacteristic(this.eve.Consumption, st.powerWatts);
+    if (valve) {
+      valve.updateCharacteristic(Characteristic.Active, st.inCycle ? 1 : 0);
+      valve.updateCharacteristic(Characteristic.InUse, st.running ? 1 : 0);
+      valve.updateCharacteristic(Characteristic.RemainingDuration, Math.min(86400, Math.max(0, st.remainingSeconds)));
     }
-    if (st.energyKWh !== null) {
-      valve.updateCharacteristic(this.eve.TotalConsumption, st.energyKWh);
+    if (this.features.energyEve && this.energyHost) {
+      if (st.powerWatts !== null) {
+        this.energyHost.updateCharacteristic(this.eve.Consumption, st.powerWatts);
+      }
+      if (st.energyKWh !== null) {
+        this.energyHost.updateCharacteristic(this.eve.TotalConsumption, st.energyKWh);
+      }
     }
-    this.services.get('finished').updateCharacteristic(Characteristic.OccupancyDetected, this.finished ? 1 : 0);
+    this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected, this.finished ? 1 : 0);
   }
 }
