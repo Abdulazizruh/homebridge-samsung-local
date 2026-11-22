@@ -18,8 +18,9 @@ export class CommandError extends Error {
  * Events: 'update' (resources), 'availability' (online, error?)
  */
 export class DeviceLink extends EventEmitter {
-  constructor({ helper, key, host, port = null, mac = null, expectedDi = null, pollInterval = 15, push = true, log }) {
+  constructor({ helper, key, host, port = null, mac = null, expectedDi = null, pollInterval = 15, push = true, follow = true, log }) {
     super();
+    this.follow = follow;
     this.helper = null;
     this.key = key;
     this.host = host;
@@ -138,6 +139,7 @@ export class DeviceLink extends EventEmitter {
       expectedDi: this.expectedDi,
       pollInterval: this.pollInterval,
       push: this.push,
+      follow: this.follow,
     });
   }
 

@@ -260,6 +260,12 @@
         "type": "boolean",
         "default": true
       },
+      "followAddress": {
+        "title": "Find an appliance again when its address changes",
+        "type": "boolean",
+        "default": true,
+        "description": "When an appliance stops answering, the plugin asks every address of the home network (/24) where it went, at most once every five minutes. Nothing leaves your network."
+      },
       "engine": {
         "title": "Connection engine",
         "type": "string",

@@ -4,6 +4,8 @@
 
 # homebridge-samsung-local
 
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+
 تحكم محلي بأجهزة Samsung المتوافقة مع SmartThings من تطبيق Apple Home، دون السحابة.
 
 **Apple Home ← Homebridge ← الجهاز مباشرة عبر شبكة المنزل.**

@@ -248,6 +248,17 @@ class FollowAddress(unittest.TestCase):
         self.assertEqual(found, {"host": "192.168.0.77", "mac": "aa:bb:cc:00:11:22"})
         self.assertEqual(asked, [])
 
+    def test_with_following_switched_off_the_network_is_never_searched(self):
+        asked = []
+        saved = bridge.locate
+        bridge.locate = lambda *a, **k: asked.append(k) or None
+        try:
+            worker = bridge.DeviceWorker("k", "10.0.0.5", None, "/nonexistent", "device-1", 15, False, follow=False)
+            self.assertFalse(worker._relocate())
+        finally:
+            bridge.locate = saved
+        self.assertEqual(asked, [])
+
 
 if __name__ == "__main__":
     unittest.main()

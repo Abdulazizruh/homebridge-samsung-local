@@ -611,8 +611,9 @@ def locate(cred_dir, di=None, mac=None, hints=(), exclude=()):
 
 class DeviceWorker(threading.Thread):
     def __init__(self, key, host, port, cred_dir, expected_di, poll_interval, push,
-                 mac=None, other_hosts=lambda: ()):
+                 mac=None, other_hosts=lambda: (), follow=True):
         super().__init__(daemon=True, name=f"device-{key}")
+        self.follow = follow
         self.mac = normalize_mac(mac)
         self._other_hosts = other_hosts
         self._last_relocate = 0.0
@@ -747,7 +748,7 @@ class DeviceWorker(threading.Thread):
 
     def _relocate(self):
         """The appliance stopped answering here: see whether it moved."""
-        if not self.expected_di or self._stopping.is_set():
+        if not self.follow or not self.expected_di or self._stopping.is_set():
             return False
         now = time.monotonic()
         if self._last_relocate and now - self._last_relocate < RELOCATE_MIN_INTERVAL_S:
@@ -836,7 +837,7 @@ class Helper:
             worker = DeviceWorker(key, str(req["host"]), req.get("port"), self.cred_dir,
                                   req.get("expectedDi"), req.get("pollInterval", 15),
                                   bool(req.get("push", True)), mac=req.get("mac"),
-                                  other_hosts=self.hosts)
+                                  other_hosts=self.hosts, follow=bool(req.get("follow", True)))
             with self.lock:
                 self.workers[key] = worker
             worker.start()

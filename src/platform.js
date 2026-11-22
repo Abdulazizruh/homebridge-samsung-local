@@ -365,6 +365,9 @@ export class SamsungLocalPlatform {
       expectedDi: deviceId,
       pollInterval: Math.max(2, Number(this.config.pollInterval) || 15),
       push: this.config.pushUpdates !== false,
+      // Looking for an appliance that changed address sends one small question to
+      // every address of the home network; the owner can switch that off.
+      follow: this.config.followAddress !== false,
       log: this.log,
     });
     const handler = laundry
