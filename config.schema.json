@@ -210,6 +210,25 @@
         "type": "boolean",
         "default": true
       },
+      "engine": {
+        "title": "Connection engine",
+        "type": "string",
+        "description": "Both give the same features. The JavaScript engine (beta) needs no Python. Leave empty for the default of the installed version.",
+        "oneOf": [
+          {
+            "title": "Python (stable)",
+            "enum": [
+              "python"
+            ]
+          },
+          {
+            "title": "JavaScript (beta, no Python needed)",
+            "enum": [
+              "javascript"
+            ]
+          }
+        ]
+      },
       "pythonPath": {
         "title": "Python interpreter (optional)",
         "type": "string",

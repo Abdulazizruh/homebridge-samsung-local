@@ -3,12 +3,12 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const roots = ['index.js', 'src', 'homebridge-ui/server.js', 'test', 'scripts'];
+const roots = ['index.js', 'src', 'engine', 'homebridge-ui/server.js', 'test', 'scripts'];
 const files = [];
 const walk = (p) => {
   if (fs.statSync(p).isDirectory()) {
     fs.readdirSync(p).forEach((n) => walk(path.join(p, n)));
-  } else if (p.endsWith('.js')) {
+  } else if (/\.m?js$/.test(p)) {
     files.push(p);
   }
 };

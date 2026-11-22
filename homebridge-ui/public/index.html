@@ -56,6 +56,14 @@
       <label class="mb-0"><input type="checkbox" id="sl-push"> <span data-t="push"></span></label>
     </div>
     <div class="sl-muted mt-1" data-t="pollNote"></div>
+    <div class="sl-row mt-2">
+      <label class="mb-0" data-t="engine"></label>
+      <select class="form-control" id="sl-engine" style="max-width:260px">
+        <option value="python" data-t="enginePython"></option>
+        <option value="javascript" data-t="engineJs"></option>
+      </select>
+    </div>
+    <div class="sl-muted mt-1" data-t="engineNote"></div>
   </div>
 
   <div class="sl-card sl-danger">
@@ -88,6 +96,9 @@
       addHint: 'Enter the appliance IP address or its MAC address, whichever you know. If the address changes later, the plugin finds the appliance again by itself. Success means the appliance answered an authenticated read of its identity and resources.',
       discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
+      engine: 'Connection engine', enginePython: 'Python (stable)', engineJs: 'JavaScript (beta, no Python needed)',
+      engineNote: 'Both engines give the same features. The JavaScript engine needs no Python download; it is new, so switch back to Python here if an appliance stops answering. Restart the bridge after changing it.',
+      engineJsReady: 'JavaScript engine: nothing to prepare',
       generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 2 seconds; 5 or more is gentler on the appliance.',
       kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
       sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
@@ -175,6 +186,9 @@
       addHint: 'أدخل عنوان IP للجهاز أو عنوان MAC، أيهما تعرف. إن تغيّر العنوان لاحقًا تجد الإضافة الجهاز من جديد تلقائيًا. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
       discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
+      engine: 'محرك الاتصال', enginePython: 'Python (مستقر)', engineJs: 'JavaScript (تجريبي، دون Python)',
+      engineNote: 'المحركان يقدمان المزايا نفسها. محرك JavaScript لا يحتاج تنزيل Python، وهو جديد، فارجع إلى Python من هنا إذا توقف جهاز عن الاستجابة. أعد تشغيل الجسر بعد التغيير.',
+      engineJsReady: 'محرك JavaScript: لا يحتاج تجهيزًا',
       generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى ثانيتان؛ 5 ثوانٍ فأكثر أخف على الجهاز.',
       kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
       sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
@@ -290,7 +304,7 @@
       const saved = await homebridge.request('/saved-devices');
       if (Array.isArray(saved?.devices)) {
         config.devices = saved.devices;
-        for (const k of ['pollInterval', 'pushUpdates']) { if (saved[k] !== undefined) { config[k] = saved[k]; } }
+        for (const k of ['pollInterval', 'pushUpdates', 'engine']) { if (saved[k] !== undefined) { config[k] = saved[k]; } }
       }
     } catch { /* keep the copy in memory */ }
     await fn();
@@ -525,7 +539,9 @@
   function renderRuntime() {
     const box = $('sl-runtime');
     const py = status.python ? `${t('pythonFound')}: <span dir="ltr">${esc(status.python.version)} · ${esc(status.arch)}</span>` : `${t('pythonProblem')}: ${esc(T[lang]['err_' + status.pythonError?.code] ?? status.pythonError?.message ?? '')}`;
-    box.innerHTML = status.runtimeReady
+    box.innerHTML = status.engine === 'javascript'
+      ? `<span class="sl-pill sl-ok">${t('engineJsReady')}</span>`
+      : status.runtimeReady
       ? `<span class="sl-pill sl-ok">${t('runtimeReady')}</span> <span class="sl-muted">${py}</span>`
       : `<span class="sl-pill sl-warn">${t('runtimeMissing')}</span> <span class="sl-muted">${py}</span>
          <div class="sl-muted mt-1">${t('runtimeNote')}</div>
@@ -546,6 +562,7 @@
     renderSteps();
     $('sl-poll').value = config.pollInterval ?? 15;
     $('sl-push').checked = config.pushUpdates !== false;
+    $('sl-engine').value = config.engine ?? status.engine ?? 'python';
     renderRuntime(); renderResult(); renderDevices();
   }
 
@@ -556,6 +573,7 @@
 
   $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
   $('sl-poll').addEventListener('change', async (e) => { const v = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await change(() => { config.pollInterval = v; }, false); });
+  $('sl-engine').addEventListener('change', async (e) => { const v = e.target.value; await change(() => { config.engine = v; }, false); await refreshStatus(); });
   $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();

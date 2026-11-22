@@ -30,6 +30,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 cbor2 (MIT), cryptography (Apache-2.0 OR BSD-3-Clause), pyOpenSSL (Apache-2.0), cffi (MIT), pycparser (BSD-3-Clause). Downloaded from PyPI by pip into the plugin's own environment; not redistributed here.
 
+## JavaScript engine
+
+The transport code in `engine/vendor/` (DTLS transport, CoAP, CBOR helpers, port discovery, client certificate) and the simulated appliance in `test/sim/` come from [homebridge-samsung-ocf](https://github.com/aziz66/homebridge-samsung-ocf) by aziz66 (MIT); see `engine/vendor/LICENSE` and `engine/vendor/NOTICE.md`. npm packages used by the engine and by TV support: werift-dtls (MIT), @peculiar/x509 (MIT), cbor-x (MIT), ws (MIT).
+
 ## Icon
 
 `assets/icon.svg` is an original design made for this project. It contains no Samsung, SmartThings or Homebridge logo.

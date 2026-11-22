@@ -6,7 +6,7 @@ import { describeDevice, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
 import { shortId } from './redact.js';
 import { HelperClient } from './runtime/helperClient.js';
-import { ensureRuntime, HELPER_SCRIPT } from './runtime/pythonRuntime.js';
+import { helperSpawn } from './runtime/engine.js';
 import { PLATFORM_NAME, PLUGIN_NAME, UUID_NAMESPACE } from './settings.js';
 import { ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './storage.js';
 
@@ -157,17 +157,9 @@ export class SamsungLocalPlatform {
       await helper.start();
       return helper;
     }
-    const { python } = await ensureRuntime(this.paths, {
-      pythonPath: this.config.pythonPath,
-      log: (m) => this.log.info(m),
-    });
-    ensureDir(this.paths.credentials);
-    const helper = new HelperClient({
-      command: python,
-      args: ['-u', HELPER_SCRIPT],
-      env: { SAMSUNG_LOCAL_CRED_DIR: this.paths.credentials },
-      log: this.log,
-    });
+    const spawn = await helperSpawn(this.paths, this.config, (m) => this.log.info(m));
+    this.log.info(`Engine: ${spawn.engine === 'javascript' ? 'JavaScript (beta, no Python)' : 'Python'}.`);
+    const helper = new HelperClient({ command: spawn.command, args: spawn.args, env: spawn.env, log: this.log });
     await helper.start();
     return helper;
   }

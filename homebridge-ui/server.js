@@ -3,7 +3,8 @@ import path from 'node:path';
 import { HomebridgePluginUiServer, RequestError } from '@homebridge/plugin-ui-utils';
 import { describeDevice, diagnosticsDump, stableDeviceId } from '../src/capabilities/index.js';
 import { HelperClient } from '../src/runtime/helperClient.js';
-import { ensureRuntime, findPython, HELPER_SCRIPT, runtimeStatus } from '../src/runtime/pythonRuntime.js';
+import { chosenEngine, DEFAULT_ENGINE, helperSpawn } from '../src/runtime/engine.js';
+import { ensureRuntime, findPython, runtimeStatus } from '../src/runtime/pythonRuntime.js';
 import { ensureDir, listSnapshots, pluginPaths, readJson, wipePluginData, writeJson } from '../src/storage.js';
 import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
 
@@ -47,8 +48,12 @@ class UiServer extends HomebridgePluginUiServer {
     } catch (err) {
       pythonError = { code: err.code, message: err.message };
     }
+    const engine = chosenEngine(await this.pluginConfig());
     return {
-      runtimeReady: runtimeStatus(this.paths).ready,
+      engine,
+      defaultEngine: DEFAULT_ENGINE,
+      // The JavaScript engine has nothing to prepare.
+      runtimeReady: engine === 'javascript' || runtimeStatus(this.paths).ready,
       python,
       pythonError,
       arch: process.arch,
@@ -109,14 +114,8 @@ class UiServer extends HomebridgePluginUiServer {
     }
     let helper;
     try {
-      const { python } = await ensureRuntime(this.paths, {});
-      ensureDir(this.paths.credentials);
-      helper = new HelperClient({
-        command: python,
-        args: ['-u', HELPER_SCRIPT],
-        env: { SAMSUNG_LOCAL_CRED_DIR: this.paths.credentials },
-        restartDelaysMs: [],
-      });
+      const spawn = await helperSpawn(this.paths, await this.pluginConfig());
+      helper = new HelperClient({ command: spawn.command, args: spawn.args, env: spawn.env, restartDelaysMs: [] });
       helper.stopped = true; // one-shot: never auto-restart
       await helper.start();
       const result = await helper.request('probe', { host }, 180_000);
@@ -179,14 +178,8 @@ class UiServer extends HomebridgePluginUiServer {
   async locate(mac) {
     let helper;
     try {
-      const { python } = await ensureRuntime(this.paths, {});
-      ensureDir(this.paths.credentials);
-      helper = new HelperClient({
-        command: python,
-        args: ['-u', HELPER_SCRIPT],
-        env: { SAMSUNG_LOCAL_CRED_DIR: this.paths.credentials },
-        restartDelaysMs: [],
-      });
+      const spawn = await helperSpawn(this.paths, await this.pluginConfig());
+      helper = new HelperClient({ command: spawn.command, args: spawn.args, env: spawn.env, restartDelaysMs: [] });
       helper.stopped = true;
       await helper.start();
       const hints = listSnapshots(this.paths).map((s) => s.host).filter(Boolean).slice(0, 3);
@@ -213,6 +206,17 @@ class UiServer extends HomebridgePluginUiServer {
    * This plugin's saved appliance list, straight from the Homebridge config
    * file. Read-only, and only this plugin's own platform block is returned.
    */
+  /** This plugin's own block of the Homebridge configuration. */
+  async pluginConfig() {
+    try {
+      const all = JSON.parse(fs.readFileSync(this.homebridgeConfigPath, 'utf8'));
+      const block = (all.platforms || []).find((p) => p?.platform === 'SamsungLocal') ?? {};
+      return { engine: block.engine, pythonPath: block.pythonPath };
+    } catch {
+      return {};
+    }
+  }
+
   savedDevices() {
     try {
       const all = JSON.parse(fs.readFileSync(this.homebridgeConfigPath, 'utf8'));
@@ -222,6 +226,7 @@ class UiServer extends HomebridgePluginUiServer {
         devices: Array.isArray(block.devices) ? block.devices : [],
         pollInterval: block.pollInterval,
         pushUpdates: block.pushUpdates,
+        engine: block.engine,
       };
     } catch {
       return {};

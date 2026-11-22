@@ -8,6 +8,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 - Choose how the TV appears in Apple Home: a TV tile with the Control Centre remote and input buttons (Apple requires each TV tile to be added to the Home app on its own, with the bridge's PIN), or switches inside the bridge (power, mute, volume up, volume down) that appear by themselves.
 - Switching a TV on from fully off uses wake-on-network.
 - A TV needs no Python runtime.
+- New, optional: a JavaScript connection engine that needs no Python at all. It gives the same features and uses the same certificate, so appliances see no difference. Choose it under General → Connection engine and restart the bridge; switch back the same way. It is a beta: tested against a simulated appliance over real encryption, awaiting reports from real appliances. Its transport code comes from homebridge-samsung-ocf by aziz66 (MIT).
 
 **بالعربية**
 
@@ -15,6 +16,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 - اختر شكل ظهور التلفزيون في Apple Home: بطاقة تلفزيون مع ريموت مركز التحكم وأزرار المداخل (تشترط Apple إضافة كل بطاقة تلفزيون بمفردها في تطبيق Home برمز الجسر)، أو مفاتيح داخل الجسر (تشغيل، كتم، رفع الصوت، خفض الصوت) تظهر تلقائيًا.
 - تشغيل التلفزيون من الإطفاء الكامل يعتمد على الإيقاظ عبر الشبكة.
 - التلفزيون لا يحتاج بيئة Python.
+- جديد واختياري: محرك اتصال بلغة JavaScript لا يحتاج Python إطلاقًا. يقدّم المزايا نفسها ويستخدم الشهادة نفسها، فلا يتغير شيء من جهة الأجهزة. اختره من «عام ← محرك الاتصال» ثم أعد تشغيل الجسر، وارجع بالطريقة نفسها. هو تجريبي: اختُبر على جهاز محاكى بتشفير حقيقي، وننتظر نتائج الأجهزة الحقيقية. كود النقل فيه مأخوذ من homebridge-samsung-ocf لصاحبه aziz66 (رخصة MIT).
 
 ## 1.0.13
 
