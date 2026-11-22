@@ -123,7 +123,24 @@ class UiServer extends HomebridgePluginUiServer {
     if (typedMac) {
       const known = listSnapshots(this.paths).find((s) => s.mac === typedMac && s.host);
       host = known ? known.host : await this.locate(typedMac);
+      if (known) {
+        // The remembered address may be out of date: when the appliance does
+        // not answer there, it is looked up again by its MAC address.
+        try {
+          return await this.probeHost(host, typedMac);
+        } catch (err) {
+          const fresh = await this.locate(typedMac).catch(() => null);
+          if (!fresh || fresh === host) {
+            throw err;
+          }
+          host = fresh;
+        }
+      }
     }
+    return this.probeHost(host, typedMac);
+  }
+
+  async probeHost(host, typedMac = null) {
     // The running plugin already holds a session to this appliance: reuse its
     // latest reading instead of opening a second connection to the device.
     const live = listSnapshots(this.paths).find((s) => s.host === host && s.online && Date.now() - s.updatedAt < 90_000);
@@ -133,7 +150,9 @@ class UiServer extends HomebridgePluginUiServer {
     // A TV answers on its own local channel and needs no Python runtime.
     const tv = /^\d{1,3}(\.\d{1,3}){3}$/.test(host) ? await tvInfo(host, { timeoutMs: 1500 }) : null;
     if (tv) {
-      return this.presentTv(host, tv);
+      // A MAC address typed by the owner is the interface the TV is really
+      // connected with (it may be the cable, not Wi-Fi): waking uses that one.
+      return this.presentTv(host, typedMac ? { ...tv, mac: typedMac } : tv);
     }
     let helper;
     try {

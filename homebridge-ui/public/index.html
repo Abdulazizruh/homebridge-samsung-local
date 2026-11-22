@@ -16,6 +16,14 @@
   .sl-tvcode { margin-top: 6px; max-width: 230px; text-align: center; }
   .sl-qr { background: #fff; border-radius: 8px; padding: 4px; margin: 6px auto; width: 150px; } .sl-qr svg { display: block; width: 100%; height: auto; }
   .sl-pin { font-size: 1.35rem; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+  .sl-dev { padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,.25); } .sl-dev:last-child { border-bottom: 0; }
+  .sl-dev-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } .sl-dev-head .sl-grow { flex: 1; min-width: 0; }
+  .sl-act { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, auto); gap: 6px; margin-top: 8px; align-items: stretch; }
+  @media (max-width: 520px) { .sl-act { grid-template-columns: repeat(3, minmax(0, 1fr)); } .sl-act .sl-main { grid-column: 1 / -1; } }
+  .sl-ico { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .7rem; line-height: 1.2; min-width: 68px; padding: 4px 6px; text-transform: none; }
+  .sl-ico svg, .sl-mini svg, .sl-main svg { width: 18px; height: 18px; flex: none; } .sl-main svg { vertical-align: -4px; }
+  .sl-mini { padding: 2px 6px; line-height: 1; }
+  .sl-inline { border: 2px solid rgba(128,90,213,.55); border-radius: 8px; padding: 10px; margin-top: 8px; }
   .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
   .sl-danger { border-color: rgba(220,53,69,.5); }
   .sl-lang { margin-inline-start: auto; }
@@ -56,8 +64,8 @@
       <input type="text" class="form-control" id="sl-host" placeholder="192.168.1.50 / AA:BB:CC:DD:EE:FF" dir="ltr">
       <button class="btn btn-primary" id="sl-discover" data-t="discover"></button>
     </div>
-    <div class="sl-muted mt-1" data-t="addHint"></div>
     <div id="sl-result" class="mt-2"></div>
+    <div class="sl-muted mt-1" data-t="addHint"></div>
   </div>
 
   <div class="sl-card">
@@ -127,7 +135,7 @@
       name: 'Name', namePh: 'e.g. Living Room AC', nameNote: 'Shown in HomeKit exactly as typed.',
       showInHome: 'Shown in HomeKit', add: 'Add to configuration', update: 'Update configuration',
       followed: 'Address changed, followed automatically:', err_not_found: 'No appliance with this MAC address was found on the local network. Check that it is on and on the same network.',
-      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', removeConfirm: 'Press again to remove', diagnostics: 'Diagnostics', changeIp: 'Change IP', configure: 'Configuration',
+      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', options: 'Options', enabled: 'On', rename: 'Rename', saveName: 'Save name', cancel: 'Cancel', found: 'Found', reportsTitle: 'What the appliance reports', removeConfirm: 'Press again to remove', diagnostics: 'Diagnostics', changeIp: 'Change IP', configure: 'Configuration',
       online: 'connected', offline: 'not reachable', unknownState: 'not contacted yet',
       thFeature: 'Function / reading', thDevice: 'Appliance', thPlugin: 'Plugin', thWhere: 'Shown in', thNote: 'Value / limits',
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
@@ -230,7 +238,7 @@
       name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'يظهر في HomeKit كما تكتبه تمامًا.',
       showInHome: 'ما يظهر في HomeKit', add: 'أضف إلى الإعدادات', update: 'حدّث الإعدادات',
       followed: 'تغيّر العنوان وتُوبع تلقائيًا:', err_not_found: 'لم يُعثر على جهاز بهذا العنوان الفيزيائي في الشبكة المحلية. تأكد أنه يعمل وعلى الشبكة نفسها.',
-      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', removeConfirm: 'اضغط مرة أخرى للحذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان', configure: 'الإعدادات',
+      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', options: 'الخيارات', enabled: 'مفعّل', rename: 'تغيير الاسم', saveName: 'حفظ الاسم', cancel: 'إلغاء', found: 'تم العثور عليه', reportsTitle: 'ما يعلنه الجهاز', removeConfirm: 'اضغط مرة أخرى للحذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان', configure: 'الإعدادات',
       online: 'متصل', offline: 'غير متاح', unknownState: 'لم يُتصل به بعد',
       thFeature: 'الوظيفة أو القياس', thDevice: 'الجهاز', thPlugin: 'الإضافة', thWhere: 'مكان الظهور', thNote: 'القيمة والقيود',
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
@@ -327,6 +335,19 @@
   await homebridge.updatePluginConfig([config]);
   let status = { devices: [] };
   let lastProbe = null;
+  let openKey = null; // the configured appliance whose options are open under its own row
+  let renaming = null; // the configured appliance whose name is being typed
+  const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ICON = {
+    edit: svg('<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>'),
+    address: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'),
+    download: svg('<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>'),
+    trash: svg('<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>'),
+    check: svg('<path d="M5 12l5 5L20 7"/>'),
+    close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+    down: svg('<path d="M6 9l6 6 6-6"/>'),
+    up: svg('<path d="M6 15l6-6 6 6"/>'),
+  };
   const tvPaired = new Set();
   let legacyNames = [];
 
@@ -415,13 +436,23 @@
   }
 
   function renderResult() {
-    const box = $('sl-result');
+    // Options of a configured appliance open under its own row; a fresh
+    // discovery shows right under the address field. Never both at once.
+    const inline = openKey ? $('sl-inline') : null;
+    if (openKey && !inline) { openKey = null; lastProbe = null; }
+    const box = inline ?? $('sl-result');
+    if (inline) { $('sl-result').innerHTML = ''; }
     if (!lastProbe) { box.innerHTML = ''; return; }
     const p = lastProbe; const d = p.described;
+    const done = () => { lastProbe = null; openKey = null; if (!inline) { $('sl-host').value = ''; } };
     const existing = config.devices.find((x) => x.id && x.id === p.deviceId);
     const supportClass = d.support === 'experimental' ? 'sl-warn' : d.support === 'unsupported' ? 'sl-bad' : '';
     const src = { probe: t('sourceProbe'), 'running-plugin': t('sourceRunning'), snapshot: t('sourceSnapshot') }[p.source];
-    let html = `<table class="sl-table"><tbody>
+    let reports = '';
+    let html = `<div class="sl-row">${inline ? '' : `<span class="sl-pill sl-ok">${t('found')}</span>`}
+      <strong>${esc(KINDS[lang][d.kind] ?? d.kind)}</strong> <span class="sl-muted" dir="ltr">${esc(d.model ?? '')}</span>
+      ${d.support === 'supported' ? '' : `<span class="sl-pill ${supportClass}">${t('support_' + d.support)}</span>`}</div>`;
+    const identity = `<table class="sl-table mt-2"><tbody>
       <tr><th>${t('kind')}</th><td>${esc(KINDS[lang][d.kind] ?? d.kind)}</td></tr>
       <tr><th>${t('model')}</th><td dir="ltr">${esc(d.model ?? '—')}</td></tr>
       <tr><th>${t('id')}</th><td dir="ltr">…${esc(String(p.deviceId ?? '').slice(-8))}</td></tr>
@@ -433,8 +464,8 @@
       const supported = new Set(d.features.filter((r) => r.device === true).map((r) => r.id));
       const boxes = Object.keys(DEFAULTS).filter((k) => NEEDS[k].some((id) => supported.has(id))).map((k) =>
         `<label class="mb-0"><input type="checkbox" data-feat="${k}" ${feats[k] ? 'checked' : ''}> ${esc(T[lang].feat[k])}</label>`).join('');
-      html += `<div class="mt-2">${featureTable(d)}</div>
-        <div class="mt-2"><strong>${t('name')}</strong>
+      reports = featureTable(d);
+      html += `<div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" list="sl-names" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
           <datalist id="sl-names">${legacyNames.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
           <div class="sl-muted">${t('nameNote')}</div></div>
@@ -466,8 +497,8 @@
       const needs = { progressTile: 'progress', kidsLockSensor: 'kidsLock', alertSensor: 'alarms', energyEve: 'energyKWh' };
       const boxes = Object.keys(LAUNDRY_DEFAULTS).filter((k) => !needs[k] || has.has(needs[k])).map((k) =>
         `<label class="mb-0"><input type="checkbox" data-feat="${k}" ${feats[k] ? 'checked' : ''}> ${esc(T[lang].feat[k])}</label>`).join('');
-      html += `<div class="mt-2">${featureTable(d, 'laundryNote')}</div>
-        <div class="mt-2"><strong>${t('name')}</strong>
+      reports = featureTable(d, 'laundryNote');
+      html += `<div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
@@ -477,11 +508,14 @@
           <div class="sl-muted">${t('cycleStyleNote')}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
-    html += `<div class="mt-2"><button class="btn btn-sm btn-outline-secondary" id="sl-result-diag">${t('diagFile')}</button>
+    // What the appliance reports stays one tap away: open after a discovery,
+    // folded when only the options of a known appliance are being changed.
+    let more = `${reports}${identity}<div class="mt-2"><button class="btn btn-sm btn-outline-secondary" id="sl-result-diag">${t('diagFile')}</button>
       <div class="sl-muted">${t('diagNote')}</div></div>`;
     if (d.unknownResources?.length) {
-      html += `<details class="mt-2"><summary>${t('unknownRes')} (${d.unknownResources.length})</summary><div dir="ltr" class="sl-muted">${d.unknownResources.map(esc).join('<br>')}</div></details>`;
+      more += `<details class="mt-2"><summary>${t('unknownRes')} (${d.unknownResources.length})</summary><div dir="ltr" class="sl-muted">${d.unknownResources.map(esc).join('<br>')}</div></details>`;
     }
+    html += `<details class="mt-2" ${inline ? '' : 'open'}><summary>${t('reportsTitle')}</summary>${more}</details>`;
     box.innerHTML = html;
     $('sl-result-diag')?.addEventListener('click', () => downloadDiagnostics({ deviceId: p.deviceId, host: p.host }));
     $('sl-tv-pair')?.addEventListener('click', async () => {
@@ -502,6 +536,7 @@
       if (p.mac) { entry.mac = p.mac; }
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
+      done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
         if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
@@ -515,6 +550,7 @@
       const name = $('sl-name').value.trim();
       if (name) { entry.name = name; }
       if ($('sl-cycle-style')) { entry.cycleStyle = $('sl-cycle-style').value; }
+      done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
         if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
@@ -536,31 +572,62 @@
   function renderDevices() {
     const box = $('sl-devices');
     if (!config.devices.length) { box.innerHTML = `<span class="sl-muted">${t('none')}</span>`; return; }
-    box.innerHTML = `<div class="sl-scroll"><table class="sl-table"><tbody>${config.devices.map((dev, i) => {
+    box.innerHTML = config.devices.map((dev, i) => {
+      const key = keyOf(dev);
       const snap = status.devices.find((s) => s.deviceId && s.deviceId === dev.id) || status.devices.find((s) => s.host === dev.host);
       const state = dev.type === 'tv' ? `<span class="sl-pill">${esc(KINDS[lang].tv)}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
       const energy = snap?.described?.features?.filter((r) => ['powerWatts', 'energyKWh'].includes(r.id) && r.device === true)
         .map((r) => `${esc(T[lang].f[r.id])}: <span dir="ltr">${esc(r.value ?? '—')}</span>`).join(' · ') ?? '';
       const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;
       const address = `${esc(moved ? snap.host : dev.host)}${snap?.mac || dev.mac ? ` · ${esc(snap?.mac || dev.mac)}` : ''}`;
-      return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${address}</div>
-        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}</td>
-        <td>${state}</td>
-        <td><label class="mb-0"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}></label></td>
-        <td><button class="btn btn-sm btn-primary" data-cfg="${i}">${t('configure')}</button>
-            <button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${t('changeIp')}</button>
-            <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${t('diagnostics')}</button>
-            <button class="btn btn-sm btn-outline-danger" data-rm="${i}">${t('remove')}</button></td></tr>`;
-    }).join('')}</tbody></table></div>`;
+      const shown = dev.name || snap?.described?.model || '—';
+      const open = openKey === key;
+      const title = renaming === key
+        ? `<input type="text" class="form-control sl-grow" id="sl-rename" value="${esc(dev.name ?? '')}" placeholder="${esc(shown)}" aria-label="${t('rename')}">
+           <button class="btn btn-sm btn-success sl-mini" data-rn-save="${i}" aria-label="${t('saveName')}" title="${t('saveName')}">${ICON.check}</button>
+           <button class="btn btn-sm btn-outline-secondary sl-mini" data-rn-cancel="${i}" aria-label="${t('cancel')}" title="${t('cancel')}">${ICON.close}</button>`
+        : `<strong>${esc(shown)}</strong>
+           <button class="btn btn-sm btn-link sl-mini" data-rn="${i}" aria-label="${t('rename')}" title="${t('rename')}">${ICON.edit}</button>
+           <span class="sl-grow"></span>${state}
+           <label class="mb-0 sl-muted"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}> ${t('enabled')}</label>`;
+      return `<div class="sl-dev"><div class="sl-dev-head">${title}</div>
+        <div class="sl-muted" dir="ltr" style="text-align:start">${address}</div>
+        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}
+        <div class="sl-act">
+          <button class="btn btn-sm ${open ? 'btn-primary' : 'btn-outline-primary'} sl-main" data-cfg="${i}" aria-expanded="${open}">${t('options')} ${open ? ICON.up : ICON.down}</button>
+          <button class="btn btn-sm btn-outline-secondary sl-ico" data-ip="${i}">${ICON.address}<span>${t('changeIp')}</span></button>
+          <button class="btn btn-sm btn-outline-secondary sl-ico" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${ICON.download}<span>${t('diagnostics')}</span></button>
+          <button class="btn btn-sm btn-outline-danger sl-ico" data-rm="${i}">${ICON.trash}<span>${t('remove')}</span></button>
+        </div>
+        ${open ? '<div class="sl-inline" id="sl-inline"></div>' : ''}</div>`;
+    }).join('');
+    const saveName = async (i) => {
+      const key = keyOf(config.devices[i]);
+      const name = $('sl-rename').value.trim();
+      renaming = null;
+      if (!name || name === config.devices[i].name) { render(); return; }
+      await change(() => { const dev = config.devices.find((x) => keyOf(x) === key); if (dev) { dev.name = name; } });
+    };
+    box.querySelectorAll('[data-rn]').forEach((b) => b.addEventListener('click', () => {
+      renaming = keyOf(config.devices[Number(b.dataset.rn)]);
+      render();
+      $('sl-rename')?.focus(); $('sl-rename')?.select();
+    }));
+    box.querySelectorAll('[data-rn-save]').forEach((b) => b.addEventListener('click', () => saveName(Number(b.dataset.rnSave))));
+    box.querySelectorAll('[data-rn-cancel]').forEach((b) => b.addEventListener('click', () => { renaming = null; render(); }));
+    $('sl-rename')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { saveName(config.devices.findIndex((x) => keyOf(x) === renaming)); }
+      if (e.key === 'Escape') { renaming = null; render(); }
+    });
     box.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', async () => {
       // Two presses: the first asks, the second (within a few seconds) removes.
       if (b.dataset.armed !== '1') {
         b.dataset.armed = '1';
-        b.className = 'btn btn-sm btn-danger';
-        b.textContent = t('removeConfirm');
+        b.className = 'btn btn-sm btn-danger sl-ico';
+        b.querySelector('span').textContent = t('removeConfirm');
         setTimeout(() => {
           if (b.isConnected && b.dataset.armed === '1') {
-            b.dataset.armed = ''; b.className = 'btn btn-sm btn-outline-danger'; b.textContent = t('remove');
+            b.dataset.armed = ''; b.className = 'btn btn-sm btn-outline-danger sl-ico'; b.querySelector('span').textContent = t('remove');
           }
         }, 5000);
         return;
@@ -575,18 +642,25 @@
     box.querySelectorAll('[data-cfg]').forEach((b) => b.addEventListener('click', () => {
       const dev = config.devices[Number(b.dataset.cfg)];
       const snap = status.devices.find((x) => x.deviceId && x.deviceId === dev.id) || status.devices.find((x) => x.host === dev.host);
-      if (snap?.described) {
-        // Known appliance: open its options straight away, without a new discovery.
+      if (openKey === keyOf(dev)) {
+        openKey = null; lastProbe = null; render();
+      } else if (snap?.described) {
+        // Known appliance: its options open under its own row, without a new discovery.
+        openKey = keyOf(dev);
         lastProbe = { ...snap, host: dev.host, deviceId: dev.id ?? snap.deviceId, source: 'snapshot' };
-        renderResult();
-        $('sl-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        $('sl-name')?.focus({ preventScroll: true });
+        render();
+        $('sl-inline')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
         $('sl-host').value = dev.host;
         $('sl-discover').click();
+        $('sl-host').scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }));
-    box.querySelectorAll('[data-ip]').forEach((b) => b.addEventListener('click', () => { $('sl-host').value = config.devices[Number(b.dataset.ip)].host; $('sl-host').focus(); }));
+    box.querySelectorAll('[data-ip]').forEach((b) => b.addEventListener('click', () => {
+      $('sl-host').value = config.devices[Number(b.dataset.ip)].host;
+      $('sl-host').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('sl-host').focus({ preventScroll: true });
+    }));
     box.querySelectorAll('[data-diag]').forEach((b) => b.addEventListener('click', () => {
       const dev = config.devices[Number(b.dataset.diag)];
       downloadDiagnostics({ deviceId: dev.id, host: dev.host });
@@ -661,7 +735,7 @@
     $('sl-push').checked = config.pushUpdates !== false;
     $('sl-follow').checked = config.followAddress !== false;
     $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
-    renderRuntime(); renderResult(); renderDevices();
+    renderRuntime(); renderDevices(); renderResult();
   }
 
   async function refreshStatus() {
@@ -677,6 +751,7 @@
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();
     if (!host) { return; }
+    if (openKey) { openKey = null; lastProbe = null; renderDevices(); }
     homebridge.showSpinner(); $('sl-result').innerHTML = `<span class="sl-muted">${t('discovering')}</span>`;
     try {
       lastProbe = await homebridge.request('/probe', { host });

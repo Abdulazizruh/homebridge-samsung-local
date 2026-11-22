@@ -15,7 +15,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.1.9. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.1.10. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -36,7 +36,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
 | Washers, dryers, dishwashers | **Cycle follow-up** (new in 1.0.13) | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. The cycle is started at the appliance |
 | Refrigerators, ovens, … | **Diagnostics only** | Connects and lists what the appliance reports |
-| Samsung TVs (Tizen, 2016 and later) | **Tested on one TV** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
+| Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
 | Appliances that refuse the automatic certificate | **Not supported** | Detected and reported with the reason |
 
@@ -157,7 +157,8 @@ Left: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display
 |---|---|
 | Unit and simulation tests (83 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
-| A real Samsung Tizen TV as a TV tile: pairing on its screen, adding to the Home app, power, arrows, back, mute, volume with the device's side buttons, inputs | **Pass** (one TV) |
+| Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
+| Adding an appliance by its MAC address instead of its IP address, on a real home network: the plugin found the address itself | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |

@@ -2,6 +2,28 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.10
+
+Settings page, easier to use. Nothing changes in the saved settings or in Apple Home.
+
+- The options of a configured appliance open under the appliance itself, and close with the same button. Before, they opened at the top of the page.
+- After Test & discover, the name, the options and the Add button come right under the address field. What the appliance reports is under them.
+- A name can be changed in place: press the pencil beside it.
+- Each appliance has one Options button and three small labelled buttons: Change IP, Diagnostics, Remove.
+- Test & discover with a MAC address: when the appliance no longer answers at the address remembered for it, it is looked up again by its MAC address.
+- A TV added by its MAC address is woken through that address (the interface it is really connected with).
+
+**بالعربية**
+
+صفحة الإعدادات أسهل استخدامًا، دون أي تغيير في الإعدادات المحفوظة أو في Apple Home.
+
+- خيارات الجهاز المضاف تُفتح تحت الجهاز نفسه وتُغلق بالزر نفسه. كانت تُفتح أعلى الصفحة.
+- بعد «اختبار واكتشاف» يأتي الاسم والخيارات وزر الإضافة تحت حقل العنوان مباشرة، وتحتها ما يعلنه الجهاز.
+- يمكن تغيير الاسم في مكانه: اضغط القلم بجانبه.
+- لكل جهاز زر «الخيارات» وثلاثة أزرار صغيرة مكتوب تحتها: تغيير العنوان، التشخيص، حذف.
+- «اختبار واكتشاف» بعنوان MAC: إذا لم يجب الجهاز على العنوان المحفوظ له، يُبحث عنه من جديد بعنوان MAC.
+- التلفزيون المضاف بعنوان MAC يُوقَظ عبر هذا العنوان (الواجهة المتصل بها فعلًا).
+
 ## 1.1.9
 
 - TV shown as on while it was off: some TVs name their power state while on and in standby, then go into a deeper sleep in which they still answer but no longer name it. That is now taken as off. What is learned about a TV is kept across restarts. A model that never names its power state is still taken as on while it answers.
