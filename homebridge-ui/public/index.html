@@ -31,6 +31,16 @@
   </div>
 
   <div class="sl-card" id="sl-steps"></div>
+  <div class="sl-card" id="sl-engine-card">
+    <h6 data-t="engine"></h6>
+    <select class="form-control" id="sl-engine" style="max-width:320px">
+      <option value="" data-t="engineChoose"></option>
+      <option value="python" data-t="enginePython"></option>
+      <option value="javascript" data-t="engineJs"></option>
+    </select>
+    <div class="sl-muted mt-1" data-t="engineNote"></div>
+    <div class="sl-pill sl-warn mt-1" id="sl-engine-need" data-t="engineNeed" style="display:none"></div>
+  </div>
   <div class="sl-card" id="sl-runtime"></div>
 
   <div class="sl-card">
@@ -56,14 +66,7 @@
       <label class="mb-0"><input type="checkbox" id="sl-push"> <span data-t="push"></span></label>
     </div>
     <div class="sl-muted mt-1" data-t="pollNote"></div>
-    <div class="sl-row mt-2">
-      <label class="mb-0" data-t="engine"></label>
-      <select class="form-control" id="sl-engine" style="max-width:260px">
-        <option value="python" data-t="enginePython"></option>
-        <option value="javascript" data-t="engineJs"></option>
-      </select>
-    </div>
-    <div class="sl-muted mt-1" data-t="engineNote"></div>
+
   </div>
 
   <div class="sl-card sl-danger">
@@ -87,7 +90,7 @@
       runtimeNote: 'One-time download of pinned packages from PyPI into the plugin folder. No root access, nothing installed system-wide.',
       pythonFound: 'Python found', pythonProblem: 'Python problem',
       stepsTitle: 'Getting started', stepsDone: 'Setup complete', stepDone: 'done', stepNow: 'do this now', stepsOrder: 'Steps 2 and 3 work in either order.',
-      step1: 'Prepare the plugin', step1Text: 'Press "Prepare now" in the box below. It downloads what the plugin needs into its own folder (one time, it can take a few minutes).',
+      step1: 'Choose the engine and prepare it', step1Text: 'Choose the connection engine in the box below. Python then asks you to press "Prepare now" once (it can take a few minutes); JavaScript needs nothing more.',
       step2: 'Add your appliance', step2Text: 'Find the appliance IP address in your router\'s device list, type it under "Add an appliance", press "Test & discover", then "Add to configuration".',
       step3: 'Turn on the child bridge', step3Text: 'Press SAVE at the bottom. On the plugin card open ⋮ → Bridge Settings, switch the bridge on, save, and restart Homebridge.',
       step4: 'Add it to the Home app', step4Text: 'In ⋮ → Bridge Settings a QR code appears. In the Home app choose + → Add Accessory and scan it. Later changes here only need a restart of the child bridge.',
@@ -96,8 +99,9 @@
       addHint: 'Enter the appliance IP address or its MAC address, whichever you know. If the address changes later, the plugin finds the appliance again by itself. Success means the appliance answered an authenticated read of its identity and resources.',
       discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
-      engine: 'Connection engine', enginePython: 'Python (stable)', engineJs: 'JavaScript (beta, no Python needed)',
-      engineNote: 'Both engines give the same features. The JavaScript engine needs no Python download; it is new, so switch back to Python here if an appliance stops answering. Restart the bridge after changing it.',
+      engine: 'Connection engine', engineChoose: 'Choose…', enginePython: 'Python (stable, tested on real appliances)', engineJs: 'JavaScript (beta, no Python needed)',
+      engineNeed: 'Choose the connection engine first. The next steps open after that.',
+      engineNote: 'Both engines give the same features. Python downloads its runtime once. JavaScript needs no download and is new. You can switch here at any time; restart the bridge after changing it.',
       engineJsReady: 'JavaScript engine: nothing to prepare',
       generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 2 seconds; 5 or more is gentler on the appliance.',
       kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
@@ -177,7 +181,7 @@
       runtimeNote: 'تنزيل لمرة واحدة لحزم محددة الإصدار من PyPI داخل مجلد الإضافة. لا يحتاج صلاحيات المدير، ولا يثبّت شيئًا على مستوى النظام.',
       pythonFound: 'Python الموجود', pythonProblem: 'مشكلة في Python',
       stepsTitle: 'خطوات البدء', stepsDone: 'اكتمل الإعداد', stepDone: 'تم', stepNow: 'نفّذ هذه الآن', stepsOrder: 'الخطوتان 2 و3 تصحّان بأي ترتيب.',
-      step1: 'جهّز الإضافة', step1Text: 'اضغط «جهّزها الآن» في المربع أدناه. ينزّل ما تحتاجه الإضافة داخل مجلدها الخاص (مرة واحدة، قد يستغرق دقائق).',
+      step1: 'اختر المحرك وجهّزه', step1Text: 'اختر محرك الاتصال في المربع أدناه. مع Python اضغط بعدها «جهّزها الآن» مرة واحدة (قد يأخذ دقائق)، ومع JavaScript لا تحتاج شيئًا آخر.',
       step2: 'أضف جهازك', step2Text: 'خذ عنوان الجهاز من قائمة الأجهزة في الراوتر، اكتبه تحت «إضافة جهاز»، اضغط «اختبار واكتشاف»، ثم «أضف إلى الإعدادات».',
       step3: 'فعّل الجسر الفرعي', step3Text: 'اضغط SAVE في الأسفل. من بطاقة الإضافة افتح ⋮ ← Bridge Settings، فعّل الجسر، احفظ، ثم أعد تشغيل Homebridge.',
       step4: 'أضفه إلى تطبيق Home', step4Text: 'في ⋮ ← Bridge Settings يظهر رمز QR. في تطبيق Home اختر + ← Add Accessory وامسحه. أي تعديل لاحق هنا يكفيه إعادة تشغيل الجسر الفرعي.',
@@ -186,8 +190,9 @@
       addHint: 'أدخل عنوان IP للجهاز أو عنوان MAC، أيهما تعرف. إن تغيّر العنوان لاحقًا تجد الإضافة الجهاز من جديد تلقائيًا. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
       discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
-      engine: 'محرك الاتصال', enginePython: 'Python (مستقر)', engineJs: 'JavaScript (تجريبي، دون Python)',
-      engineNote: 'المحركان يقدمان المزايا نفسها. محرك JavaScript لا يحتاج تنزيل Python، وهو جديد، فارجع إلى Python من هنا إذا توقف جهاز عن الاستجابة. أعد تشغيل الجسر بعد التغيير.',
+      engine: 'محرك الاتصال', engineChoose: 'اختر…', enginePython: 'Python (مستقر، مجرَّب على أجهزة حقيقية)', engineJs: 'JavaScript (تجريبي، دون Python)',
+      engineNeed: 'اختر محرك الاتصال أولًا. تُفتح الخطوات التالية بعد ذلك.',
+      engineNote: 'المحركان يقدمان المزايا نفسها. Python ينزّل بيئته مرة واحدة. JavaScript لا يحتاج تنزيلًا وهو جديد. يمكنك التبديل من هنا في أي وقت، وأعد تشغيل الجسر بعد التغيير.',
       engineJsReady: 'محرك JavaScript: لا يحتاج تجهيزًا',
       generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى ثانيتان؛ 5 ثوانٍ فأكثر أخف على الجهاز.',
       kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
@@ -524,8 +529,10 @@
   }
 
   // A short checklist that shows what is done and what to do next.
+  // A new installation must pick its engine knowingly; one that already has appliances keeps the engine it runs on.
+  const engineChosen = () => Boolean(config.engine) || config.devices.length > 0;
   function renderSteps() {
-    const done = [Boolean(status.runtimeReady), config.devices.length > 0, Boolean(config._bridge)];
+    const done = [engineChosen() && Boolean(status.runtimeReady), config.devices.length > 0, Boolean(config._bridge)];
     const next = done.indexOf(false);
     const steps = [1, 2, 3, 4].map((n, i) => {
       const isDone = i < 3 && done[i];
@@ -544,7 +551,11 @@
   function renderRuntime() {
     const box = $('sl-runtime');
     const py = status.python ? `${t('pythonFound')}: <span dir="ltr">${esc(status.python.version)} · ${esc(status.arch)}</span>` : `${t('pythonProblem')}: ${esc(T[lang]['err_' + status.pythonError?.code] ?? status.pythonError?.message ?? '')}`;
-    box.innerHTML = status.engine === 'javascript'
+    const chosen = engineChosen();
+    $('sl-engine-need').style.display = chosen ? 'none' : '';
+    $('sl-discover').disabled = !chosen;
+    box.style.display = chosen ? '' : 'none';
+    box.innerHTML = !chosen ? '' : status.engine === 'javascript'
       ? `<span class="sl-pill sl-ok">${t('engineJsReady')}</span>`
       : status.runtimeReady
       ? `<span class="sl-pill sl-ok">${t('runtimeReady')}</span> <span class="sl-muted">${py}</span>`
@@ -567,7 +578,7 @@
     renderSteps();
     $('sl-poll').value = config.pollInterval ?? 15;
     $('sl-push').checked = config.pushUpdates !== false;
-    $('sl-engine').value = config.engine ?? status.engine ?? 'python';
+    $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
     renderRuntime(); renderResult(); renderDevices();
   }
 
@@ -578,7 +589,7 @@
 
   $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
   $('sl-poll').addEventListener('change', async (e) => { const v = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await change(() => { config.pollInterval = v; }, false); });
-  $('sl-engine').addEventListener('change', async (e) => { const v = e.target.value; await change(() => { config.engine = v; }, false); await refreshStatus(); });
+  $('sl-engine').addEventListener('change', async (e) => { const v = e.target.value; if (!v) { return; } await change(() => { config.engine = v; }, false); await refreshStatus(); });
   $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();
