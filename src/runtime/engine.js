@@ -11,7 +11,7 @@ import { ensureRuntime, HELPER_SCRIPT } from './pythonRuntime.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const JS_HELPER_SCRIPT = path.join(root, 'engine', 'bridge.mjs');
-const VERSION = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+export const VERSION = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
 
 /** A beta release tries the JavaScript engine unless told otherwise. */
 export const DEFAULT_ENGINE = /-(alpha|beta)/.test(VERSION) ? 'javascript' : 'python';
