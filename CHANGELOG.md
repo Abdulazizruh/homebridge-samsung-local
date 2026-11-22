@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.9
+
+- TV shown as on while it was off: some TVs name their power state while on and in standby, then go into a deeper sleep in which they still answer but no longer name it. That is now taken as off. What is learned about a TV is kept across restarts. A model that never names its power state is still taken as on while it answers.
+
+**بالعربية**
+
+- التلفزيون يظهر «يعمل» وهو مطفأ: بعض التلفزيونات تذكر حالتها وهي تعمل وفي الاستعداد، ثم تدخل سباتًا أعمق تبقى تجيب فيه دون ذكر الحالة. صار ذلك يُعدّ إطفاءً. وما يُعرف عن التلفزيون يُحفظ بعد إعادة التشغيل. الموديل الذي لا يذكر حالته أبدًا يبقى «يعمل» ما دام يجيب.
+
 ## 1.1.8
 
 - Settings page: removing an appliance asks first. The Remove button has to be pressed twice within a few seconds.

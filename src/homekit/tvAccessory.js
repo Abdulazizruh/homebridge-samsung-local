@@ -25,7 +25,7 @@ function remoteKeys(Characteristic) {
  *  - 'switches' plain switches inside the bridge: power, mute, volume up/down
  */
 export class TvAccessory {
-  constructor({ api, log, accessory, entry, mode, token, saveToken, ports = {}, pollMs = POLL_MS }) {
+  constructor({ api, log, accessory, entry, mode, token, saveToken, ports = {}, pollMs = POLL_MS, reportsPower = false, onReportsPower = null }) {
     this.api = api;
     this.hap = api.hap;
     this.log = log;
@@ -39,6 +39,9 @@ export class TvAccessory {
     this.muted = false;
     this.reachable = null;
     this.holdUntil = 0;
+    // Learned from the TV and kept across restarts: it names its power state.
+    this.reportsPower = Boolean(reportsPower);
+    this.onReportsPower = onReportsPower;
     this.services = new Map();
     this.remote = new TizenRemote({
       host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken,
@@ -70,12 +73,19 @@ export class TvAccessory {
     this.reachable = reachable;
     // What the TV itself says is written to the log whenever it changes, so
     // a tile that disagrees with the screen can be explained.
+    if (info?.powerState && !this.reportsPower) {
+      this.reportsPower = true;
+      this.onReportsPower?.();
+    }
+    // A TV that names its power state when on or in standby, and then stops
+    // naming it while still answering, has gone into a deeper sleep: it is
+    // off. Only a model that never names it is taken as on while it answers.
+    const on = Boolean(info?.power) && (Boolean(info?.powerState) || !this.reportsPower);
     const said = !reachable ? 'does not answer' : info.powerState ? `says "${info.powerState}"` : 'answers without a power state';
     if (said !== this.said) {
-      this.log.info(`[${this.displayName}] the TV ${said}; shown as ${info?.power ? 'on' : 'off'}.`);
+      this.log.info(`[${this.displayName}] the TV ${said}; shown as ${on ? 'on' : 'off'}.`);
       this.said = said;
     }
-    const on = Boolean(info?.power);
     if (Date.now() < this.holdUntil) {
       // Just switched from Apple Home: the TV needs a while to follow. A
       // report that agrees ends the wait; one that disagrees is not believed yet.

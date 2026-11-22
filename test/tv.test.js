@@ -13,7 +13,7 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
   const tv = { keys: [], tokens: [], power, allow };
   const web = http.createServer((req, res) => {
     res.setHeader('content-type', 'application/json');
-    res.end(JSON.stringify({ device: { id: 'uuid:tv-test-1', name: 'Living Room TV', modelName: 'QA65TEST', wifiMac: 'aa:bb:cc:00:11:22', TokenAuthSupport: 'true', PowerState: tv.power } }));
+    res.end(JSON.stringify({ device: { id: 'uuid:tv-test-1', name: 'Living Room TV', modelName: 'QA65TEST', wifiMac: 'aa:bb:cc:00:11:22', TokenAuthSupport: 'true', ...(tv.power ? { PowerState: tv.power } : {}) } }));
   });
   const wss = new WebSocketServer({ port: 0 });
   wss.on('connection', (socket, req) => {
@@ -141,4 +141,38 @@ test('TV tile follows the TV: switched with its own remote, the tile changes; th
   tv.power = 'on';
   await handler.poll();
   assert.equal(active.value, 1);
+});
+
+test('TV in deep sleep: a TV that named its power state and then answers without one is off, also after a restart', async (t) => {
+  const tv = await fakeTv();
+  const first = await bootTv(tv, 'tile');
+  const C = first.api.hap.Characteristic;
+  const handler = first.platform.tvs[0];
+  const active = handler.services.get('tv').getCharacteristic(C.Active);
+  await waitFor(() => active.value === 1);
+  tv.power = 'standby';
+  await handler.poll();
+  assert.equal(active.value, 0);
+  tv.power = null; // still answers, but no longer says anything about power
+  await handler.poll();
+  assert.equal(active.value, 0);
+  assert.equal(readJson(pluginPaths(first.storage).tvFacts)['tv-tv-test-1'].reportsPower, true);
+  first.platform.stop();
+  // The bridge restarts while the TV sleeps: it must not come back as "on".
+  const second = await bootTv(tv, 'tile', first.storage);
+  t.after(() => { second.platform.stop(); tv.close(); });
+  const again = second.platform.tvs[0];
+  await again.poll();
+  assert.equal(again.services.get('tv').getCharacteristic(C.Active).value, 0);
+  tv.power = 'on';
+  await again.poll();
+  assert.equal(again.services.get('tv').getCharacteristic(C.Active).value, 1);
+});
+
+test('TV that never names its power state: on while it answers', async (t) => {
+  const tv = await fakeTv({ power: null });
+  const { api, platform } = await bootTv(tv, 'tile');
+  t.after(() => { platform.stop(); tv.close(); });
+  const active = platform.tvs[0].services.get('tv').getCharacteristic(api.hap.Characteristic.Active);
+  await waitFor(() => active.value === 1);
 });

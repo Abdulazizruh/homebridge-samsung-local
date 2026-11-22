@@ -338,6 +338,13 @@ export class SamsungLocalPlatform {
           this.log.debug(`could not save the TV token: ${err.message}`);
         }
       },
+      reportsPower: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.reportsPower),
+      onReportsPower: () => {
+        try {
+          const facts = readJson(this.paths.tvFacts) ?? {};
+          writeJson(this.paths.tvFacts, { ...facts, [entry.id]: { ...facts[entry.id], reportsPower: true } });
+        } catch { /* learned again after the next start */ }
+      },
       ...(this.overrides.tv ?? {}),
     });
     if (mode === 'tile') {

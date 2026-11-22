@@ -15,6 +15,8 @@ export function pluginPaths(homebridgeStoragePath) {
     // Where each appliance was last found (it may differ from the settings).
     addresses: path.join(root, 'addresses.json'),
     tvTokens: path.join(root, 'tv-tokens.json'),
+    // What was learned about each TV (for example that it names its power state).
+    tvFacts: path.join(root, 'tv-facts.json'),
     // Setup code of each TV tile, shown on the settings page.
     tvSetup: path.join(root, 'tv-setup.json'),
     // Connection losses counted for the daily line in the log.
