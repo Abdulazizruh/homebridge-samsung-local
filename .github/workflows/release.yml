@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install --only-binary :all: --require-hashes -r python/requirements.lock
+      - run: "pip install --only-binary :all: --require-hashes -r python/requirements.lock"
       - run: python -m unittest discover -s test/python -v
       - name: Check tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
