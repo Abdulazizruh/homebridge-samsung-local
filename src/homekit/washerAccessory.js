@@ -2,8 +2,12 @@ import { buildWasherModel } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
-const LABELS = { cycle: '', finished: 'Finished' };
-export const WASHER_FEATURES = { cycleTile: true, finishedSensor: true, energyEve: true };
+const LABELS = { cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert' };
+export const WASHER_FEATURES = {
+  cycleTile: true, finishedSensor: true, energyEve: true,
+  // Extras, off until the owner asks for them.
+  progressTile: false, kidsLockSensor: false, alertSensor: false,
+};
 
 /**
  * A washer, dryer or dishwasher as a read-only HomeKit accessory:
@@ -30,10 +34,10 @@ export class WasherAccessory {
     this.finishTimer = null;
     this.wasInCycle = null;
 
-    this.#buildServices();
     if (this.context.resources) {
       this.model = buildWasherModel(this.context.resources);
     }
+    this.#buildServices();
     link.on('update', (resources) => this.#onUpdate(resources));
     link.on('availability', (online, error) => this.#onAvailability(online, error));
     if (link.resources) {
@@ -106,6 +110,29 @@ export class WasherAccessory {
     } else {
       drop(Service.OccupancySensor, 'finished');
     }
+    const supports = this.model?.supports ?? {};
+    // A percentage is the only number the Home app prints on a tile, so the
+    // cycle's progress is shown as one (the tile carries a humidity icon).
+    if (this.features.progressTile && supports.progress !== false) {
+      this.#service('progress', Service.HumiditySensor, 'progress');
+    } else {
+      drop(Service.HumiditySensor, 'progress');
+      this.services.delete('progress');
+    }
+    if (this.features.kidsLockSensor && supports.kidsLock !== false) {
+      const lock = this.#service('kidsLock', Service.LockMechanism, 'kidsLock');
+      // Read-only: the lock is set on the appliance. Show the truth again.
+      lock.getCharacteristic(Characteristic.LockTargetState).onSet(() => { setTimeout(() => this.#push(), 300).unref?.(); });
+    } else {
+      drop(Service.LockMechanism, 'kidsLock');
+      this.services.delete('kidsLock');
+    }
+    if (this.features.alertSensor && supports.alarms !== false) {
+      this.#service('alert', Service.OccupancySensor, 'alert');
+    } else {
+      drop(Service.OccupancySensor, 'alert');
+      this.services.delete('alert');
+    }
     // Power and energy ride on whichever tile is shown.
     this.energyHost = this.services.get('cycle') ?? this.services.get('finished') ?? null;
     for (const C of [this.eve.Consumption, this.eve.TotalConsumption]) {
@@ -168,7 +195,7 @@ export class WasherAccessory {
 
   #push() {
     const { Characteristic } = this.hap;
-    const st = this.model?.state ?? { inCycle: false, running: false, remainingSeconds: 0, powerWatts: null, energyKWh: null };
+    const st = this.model?.state ?? { inCycle: false, running: false, remainingSeconds: 0, powerWatts: null, energyKWh: null, percent: 0, kidsLock: false, alarms: [] };
     const valve = this.services.get('cycle');
     if (valve) {
       valve.updateCharacteristic(Characteristic.Active, st.inCycle ? 1 : 0);
@@ -188,5 +215,18 @@ export class WasherAccessory {
       }
     }
     this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected, this.finished ? 1 : 0);
+    this.services.get('progress')?.updateCharacteristic(Characteristic.CurrentRelativeHumidity, st.percent ?? 0);
+    const lock = this.services.get('kidsLock');
+    if (lock) {
+      const value = st.kidsLock ? Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;
+      lock.updateCharacteristic(Characteristic.LockCurrentState, value);
+      lock.updateCharacteristic(Characteristic.LockTargetState, value);
+    }
+    const alarms = st.alarms ?? [];
+    if (alarms.length && !this.alarmed) {
+      this.log.warn(`[${this.displayName}] the appliance reports: ${alarms.join(', ')}`);
+    }
+    this.alarmed = alarms.length > 0;
+    this.services.get('alert')?.updateCharacteristic(Characteristic.OccupancyDetected, this.alarmed ? 1 : 0);
   }
 }

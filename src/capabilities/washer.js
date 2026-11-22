@@ -9,6 +9,42 @@
  */
 const V = 'x.com.samsung.da.';
 export const LAUNDRY_KINDS = new Set(['washer', 'dryer', 'dishwasher']);
+/** Resources this model reads; anything else is listed as not used yet. */
+export const LAUNDRY_CONSUMED = new Set([
+  '/operational/state/vs/0', '/operational/state/0', '/energy/consumption/vs/0', '/information/vs/0',
+  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/course/vs/0',
+]);
+const UNLOCKED = new Set(['ready', 'off', 'false', 'unlock', 'unlocked', 'none', 'disable', 'disabled', '']);
+
+/** Child lock: the plain boolean when present, else the vendor word. */
+function kidsLock(resources) {
+  const plain = resources['/kidslock/0']?.value;
+  const word = resources['/kidslock/vs/0']?.[`${V}kidsLock`];
+  if (typeof plain !== 'boolean' && word === undefined) {
+    return null;
+  }
+  return plain === true || (word !== undefined && !UNLOCKED.has(lower(String(word))));
+}
+
+/** Active alarm codes; rows ending in _OFF are placeholders. */
+function alarmCodes(resources) {
+  const items = resources['/alarms/vs/0']?.[`${V}items`];
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return items
+    .filter((i) => i && typeof i === 'object' && !['deleted', 'none'].includes(lower(String(i[`${V}state`] ?? ''))))
+    .map((i) => String(i[`${V}code`] ?? ''))
+    .filter((code) => code && !/_OFF$/i.test(code));
+}
+
+/** A numeric option such as "WashingTimes_211" from the course resource. */
+function optionNumber(resources, prefix) {
+  const options = resources['/course/vs/0']?.[`${V}options`];
+  const token = Array.isArray(options) ? options.find((o) => typeof o === 'string' && o.startsWith(`${prefix}_`)) : null;
+  const n = token ? Number(token.slice(prefix.length + 1)) : NaN;
+  return Number.isFinite(n) ? n : null;
+}
 
 const RUNNING = new Set(['run', 'running', 'active']);
 const PAUSED = new Set(['pause', 'paused']);
@@ -46,6 +82,10 @@ export function buildWasherModel(resources = {}) {
   const total = number(energy[`${V}cumulativePower`]);
   const unit = lower(energy[`${V}cumulativeUnit`]) || 'wh';
   const hasState = states.length > 0;
+  const locked = kidsLock(resources);
+  const alarms = alarmCodes(resources);
+  const percent = number(vs[`${V}progressPercentage`] ?? std.progressPercentage);
+  const washCount = optionNumber(resources, 'WashingTimes');
 
   return {
     model: info[`${V}description`] || null,
@@ -54,6 +94,10 @@ export function buildWasherModel(resources = {}) {
       remainingTime: remaining !== null,
       powerWatts: watts !== null,
       energyKWh: total !== null,
+      kidsLock: locked !== null,
+      progress: percent !== null,
+      alarms: '/alarms/vs/0' in resources,
+      washCount: washCount !== null,
     },
     state: {
       running,
@@ -61,7 +105,11 @@ export function buildWasherModel(resources = {}) {
       finished,
       inCycle: running || paused,
       progress: progress || null,
-      percent: number(vs[`${V}progressPercentage`] ?? std.progressPercentage),
+      // Outside a cycle the appliance keeps a stale figure; show nothing then.
+      percent: running || paused ? Math.min(100, Math.max(0, percent ?? 0)) : 0,
+      kidsLock: locked === true,
+      alarms,
+      washCount,
       // The idle value is the length of the selected course, not a countdown.
       remainingSeconds: running || paused ? (remaining ?? 0) : 0,
       // Idle appliances report a negative placeholder.
@@ -80,6 +128,10 @@ export function washerFeatureRows(model) {
     row('cycle', s.cycle, 'home', st.running ? 'running' : st.paused ? 'paused' : 'idle', st.progress ? `stage-${st.progress}` : null),
     row('remainingTime', s.remainingTime, 'home', Math.round(st.remainingSeconds / 60), 'min'),
     row('cycleFinished', s.cycle, 'home', st.finished),
+    row('progress', s.progress, 'home', st.percent, '%'),
+    row('kidsLock', s.kidsLock, 'home', st.kidsLock),
+    row('alarms', s.alarms, 'home', st.alarms.join(', ') || 'none'),
+    row('washCount', s.washCount, 'plugin-ui', st.washCount),
     row('powerWatts', s.powerWatts, 'eve', st.powerWatts, 'W'),
     row('energyKWh', s.energyKWh, 'eve', st.energyKWh, 'kWh'),
   ];

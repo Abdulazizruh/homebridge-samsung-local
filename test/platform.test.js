@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
+import { describeDevice } from '../src/capabilities/index.js';
 import { SamsungLocalPlatform } from '../src/platform.js';
 import { HelperClient } from '../src/runtime/helperClient.js';
 import { PLATFORM_NAME, PLUGIN_NAME, STORAGE_DIR_NAME, UUID_NAMESPACE } from '../src/settings.js';
@@ -453,4 +454,34 @@ test('removing the Python runtime touches only that folder', async () => {
   assert.equal(fs.existsSync(paths.runtimeMarker), false);
   assert.equal(fs.readFileSync(path.join(paths.credentials, 'client.key'), 'utf8'), 'key');
   assert.ok(fs.existsSync(paths.addresses));
+});
+
+test('washer extras: progress, child lock and alert appear only when asked for, and follow the appliance', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { progressTile: true, kidsLockSensor: true, alertSensor: true } }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const progress = handler.services.get('progress').getCharacteristic(C.CurrentRelativeHumidity);
+  const lock = handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState);
+  const alert = handler.services.get('alert').getCharacteristic(C.OccupancyDetected);
+  assert.equal(handler.services.get('progress').getCharacteristic(C.ConfiguredName).value, 'Washer Progress');
+  // Idle: the stale 1 % is not shown, the lock is open, nothing is wrong.
+  assert.deepEqual([progress.value, lock.value, alert.value], [0, C.LockCurrentState.UNSECURED, 0]);
+  const sim = (p, body) => platform.helper.request('sim', { key: W, action: 'remote', path: p, body });
+  await sim(['operational', 'state', 'vs', '0'], { [`${V}state`]: 'Run', [`${V}progressPercentage`]: '68' });
+  await sim(['kidslock', '0'], { value: true });
+  await sim(['alarms', 'vs', '0'], { [`${V}items`]: [{ [`${V}code`]: 'DoorOpen_ON' }, { [`${V}code`]: 'Drain_OFF' }] });
+  await waitFor(() => progress.value === 68 && lock.value === C.LockCurrentState.SECURED && alert.value === 1);
+});
+
+test('washer: extras stay away by default, and the not-used list names only what is not read', async () => {
+  const fx = fixture('washer_topload');
+  const described = describeDevice(fx.identity, fx.resources);
+  assert.ok(!described.unknownResources.includes('/operational/state/vs/0'));
+  assert.ok(!described.unknownResources.includes('/energy/consumption/vs/0'));
+  assert.ok(described.unknownResources.includes('/washer/vs/0'));
+  assert.equal(described.features.find((r) => r.id === 'washCount').value, 211);
 });

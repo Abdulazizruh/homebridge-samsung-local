@@ -1,6 +1,6 @@
 import { buildAcModel, looksLikeAc, HREF } from './ac.js';
 import { redact } from '../redact.js';
-import { buildWasherModel, LAUNDRY_KINDS, washerFeatureRows } from './washer.js';
+import { buildWasherModel, LAUNDRY_CONSUMED, LAUNDRY_KINDS, washerFeatureRows } from './washer.js';
 
 /** Support levels shown to the user. Nothing is called "confirmed" until it
  * has been exercised on real hardware by the project. */
@@ -85,6 +85,7 @@ export function describeDevice(identity, resources) {
   if (LAUNDRY_KINDS.has(kind) && buildWasherModel(resources).supports.cycle) {
     base.support = SUPPORT.experimental;
     base.features = washerFeatureRows(buildWasherModel(resources));
+    base.unknownResources = hrefs.filter((h) => !LAUNDRY_CONSUMED.has(h) && !IGNORED.has(h));
     return base;
   }
   if (kind === 'tv') {
