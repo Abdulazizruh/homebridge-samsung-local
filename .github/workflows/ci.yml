@@ -15,12 +15,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - run: npm install --no-audit --no-fund
       - run: npm run check
       - run: npm test
-      - run: pip install -r python/requirements.txt
-      - run: npm run test:python
       - run: npm pack --dry-run
+  # The helper runs on whatever Python the user has: test every supported one,
+  # installed exactly as the plugin installs it (checksum-verified).
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install --only-binary :all: --require-hashes -r python/requirements.lock
+      - run: python -m unittest discover -s test/python -v

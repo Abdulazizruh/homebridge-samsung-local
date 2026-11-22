@@ -32,7 +32,7 @@ import zlib
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.2"
+HELPER_VERSION = "0.1.3"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -462,7 +462,7 @@ class DeviceWorker(threading.Thread):
         self.cred_dir, self.expected_di = cred_dir, expected_di
         self.poll_interval = max(2.0, float(poll_interval))
         self.push = push
-        self._stop = threading.Event()
+        self._stopping = threading.Event()
         self._wake = threading.Event()
         self._wake_at = None
         self._link = None
@@ -473,7 +473,7 @@ class DeviceWorker(threading.Thread):
 
     # -- called from other threads -----------------------------------------
     def stop(self):
-        self._stop.set()
+        self._stopping.set()
         self._wake.set()
 
     def request_refresh(self, delay=0.0):
@@ -500,12 +500,12 @@ class DeviceWorker(threading.Thread):
         self.request_refresh(0.3)
 
     def _sleep(self, seconds):
-        return self._stop.wait(seconds)
+        return self._stopping.wait(seconds)
 
     def run(self):
         failures = 0
         was_online = False
-        while not self._stop.is_set():
+        while not self._stopping.is_set():
             link = None
             # A healthy session that drops gets one immediate, silent
             # reconnect before the appliance is reported as unreachable.
@@ -535,7 +535,7 @@ class DeviceWorker(threading.Thread):
                 emit({"ev": "state", "key": self.key, "resources": resources})
                 if self.push:
                     for href in OBSERVE_HREFS:
-                        if href in resources and not self._stop.is_set():
+                        if href in resources and not self._stopping.is_set():
                             try:
                                 link.subscribe(href)
                             except Exception:  # noqa: BLE001 - push is optional
@@ -543,7 +543,7 @@ class DeviceWorker(threading.Thread):
                 self._loop(link)
             except Exception as exc:  # noqa: BLE001
                 info = classify(exc)
-                quiet = was_online and not info.get("fatal") and not self._stop.is_set()
+                quiet = was_online and not info.get("fatal") and not self._stopping.is_set()
                 if not quiet:
                     self._reconnecting = False
                     emit({"ev": "status", "key": self.key, "online": False, "error": info})
@@ -558,7 +558,7 @@ class DeviceWorker(threading.Thread):
                     self._link = None
                 if link is not None:
                     link.close()
-            if self._stop.is_set():
+            if self._stopping.is_set():
                 break
             if quiet:
                 self._reconnecting = True
@@ -572,7 +572,7 @@ class DeviceWorker(threading.Thread):
 
     def _loop(self, link):
         next_poll = time.monotonic() + self.poll_interval
-        while not self._stop.is_set():
+        while not self._stopping.is_set():
             # Clear before reading the deadline so a refresh request that
             # lands in between still wakes the wait below.
             self._wake.clear()

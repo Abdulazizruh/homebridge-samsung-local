@@ -19,6 +19,12 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm install --no-audit --no-fund
       - run: npm run check && npm test
+      # Nothing is published unless the Python helper passes its tests too.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --only-binary :all: --require-hashes -r python/requirements.lock
+      - run: python -m unittest discover -s test/python -v
       - name: Check tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
       # A pre-release goes to the "beta" tag once a stable version exists.
