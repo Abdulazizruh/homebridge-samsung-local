@@ -7,7 +7,9 @@
   "footerDisplay": "Unofficial project, not affiliated with Samsung. Run this plugin as a child bridge.",
   "schema": {
     "type": "object",
-    "required": ["name"],
+    "required": [
+      "name"
+    ],
     "properties": {
       "name": {
         "title": "Name",
@@ -19,12 +21,13 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["host"],
+          "required": [
+            "host"
+          ],
           "properties": {
             "host": {
               "title": "IP address",
               "type": "string",
-              "format": "ipv4",
               "placeholder": "192.168.1.50"
             },
             "name": {
@@ -36,6 +39,11 @@
               "title": "Device ID (filled by discovery)",
               "type": "string",
               "description": "Stable ID read from the appliance. Keeps one accessory when the IP address changes. Do not edit."
+            },
+            "mac": {
+              "title": "MAC address (filled by discovery)",
+              "type": "string",
+              "description": "Used to find the appliance again if its IP address changes."
             },
             "enabled": {
               "title": "Enabled",

@@ -12,6 +12,8 @@ export function pluginPaths(homebridgeStoragePath) {
     credentials: path.join(root, 'credentials'),
     state: path.join(root, 'state'),
     runtimeMarker: path.join(root, 'runtime.json'),
+    // Where each appliance was last found (it may differ from the settings).
+    addresses: path.join(root, 'addresses.json'),
   };
 }
 

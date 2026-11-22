@@ -18,12 +18,13 @@ export class CommandError extends Error {
  * Events: 'update' (resources), 'availability' (online, error?)
  */
 export class DeviceLink extends EventEmitter {
-  constructor({ helper, key, host, port = null, expectedDi = null, pollInterval = 15, push = true, log }) {
+  constructor({ helper, key, host, port = null, mac = null, expectedDi = null, pollInterval = 15, push = true, log }) {
     super();
     this.helper = null;
     this.key = key;
     this.host = host;
     this.port = port;
+    this.mac = mac;
     this.expectedDi = expectedDi;
     this.pollInterval = pollInterval;
     this.push = push;
@@ -47,6 +48,13 @@ export class DeviceLink extends EventEmitter {
       this.#setOnline(true);
       this.emit('update', this.resources);
     };
+    // The helper found the appliance at another address (same device id).
+    this.onMoved = (msg) => {
+      if (msg.key !== this.key || this.closed) {
+        return;
+      }
+      this.#address(msg.host, msg.mac, msg.from ?? null);
+    };
     this.onStatus = (msg) => {
       if (msg.key !== this.key || this.closed) {
         return;
@@ -54,6 +62,7 @@ export class DeviceLink extends EventEmitter {
       if (msg.online) {
         this.port = msg.port ?? this.port;
         this.identity = msg.identity ?? this.identity;
+        this.#address(msg.host, msg.mac);
         this.#setOnline(true);
       } else {
         this.#setOnline(false, msg.error ?? null);
@@ -74,6 +83,7 @@ export class DeviceLink extends EventEmitter {
     this.helper = helper;
     helper.on('state', this.onState);
     helper.on('status', this.onStatus);
+    helper.on('moved', this.onMoved);
     helper.on('down', this.onDown);
     helper.on('restarted', this.onRestarted);
   }
@@ -84,6 +94,7 @@ export class DeviceLink extends EventEmitter {
     }
     this.helper.off('state', this.onState);
     this.helper.off('status', this.onStatus);
+    this.helper.off('moved', this.onMoved);
     this.helper.off('down', this.onDown);
     this.helper.off('restarted', this.onRestarted);
   }
@@ -104,11 +115,26 @@ export class DeviceLink extends EventEmitter {
     }
   }
 
+  /** Remember where the appliance is now; tell listeners when that changed. */
+  #address(host, mac, from = null) {
+    const changed = (host && host !== this.host) || (mac && mac !== this.mac);
+    const previous = this.host;
+    if (host && host !== this.host) {
+      this.host = host;
+      this.port = null;
+    }
+    this.mac = mac || this.mac;
+    if (changed) {
+      this.emit('address', { host: this.host, mac: this.mac, from: from ?? (previous !== this.host ? previous : null) });
+    }
+  }
+
   open() {
     return this.#request('open', {
       key: this.key,
       host: this.host,
       port: this.port,
+      mac: this.mac,
       expectedDi: this.expectedDi,
       pollInterval: this.pollInterval,
       push: this.push,

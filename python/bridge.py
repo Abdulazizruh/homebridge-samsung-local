@@ -32,7 +32,7 @@ import zlib
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.4"
+HELPER_VERSION = "0.1.5"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -459,12 +459,163 @@ def probe(host, cred_dir, port=None):
 
 
 # --------------------------------------------------------------------------
+# Finding an appliance again after its address changed
+# --------------------------------------------------------------------------
+# An appliance is known by the device id it reports. Its IP address is only
+# where it was last seen, and its MAC address is a shortcut for finding it
+# again. Nothing here changes any network setting; it only looks.
+
+OCF_PORT = 5683
+ARP_FILE = "/proc/net/arp"
+RELOCATE_AFTER_ROUNDS = 2       # failed reconnect rounds before looking elsewhere
+RELOCATE_MIN_INTERVAL_S = 300.0
+RELOCATE_MAX_CANDIDATES = 12
+# CoAP NON GET /oic/res: any OCF device answers it, and merely sending it
+# makes the kernel resolve the neighbour's MAC address.
+_OIC_RES_GET = bytes([0x50, 0x01, 0x53, 0x4C, 0xB3]) + b"oic" + bytes([0x03]) + b"res"
+
+
+def normalize_mac(text):
+    """'AA-BB-CC-DD-EE-FF', 'aabb.ccdd.eeff', ... -> 'aa:bb:cc:dd:ee:ff' or None."""
+    digits = "".join(ch for ch in str(text or "").lower() if ch in "0123456789abcdef")
+    raw = str(text or "").strip().lower()
+    if len(digits) != 12 or any(ch not in "0123456789abcdef:-. " for ch in raw):
+        return None
+    if digits in ("000000000000", "ffffffffffff"):
+        return None
+    return ":".join(digits[i:i + 2] for i in range(0, 12, 2))
+
+
+def parse_arp(text):
+    """{ip: mac} from the kernel's neighbour table (/proc/net/arp format)."""
+    table = {}
+    for line in str(text or "").splitlines()[1:]:
+        parts = line.split()
+        if len(parts) < 4:
+            continue
+        mac = normalize_mac(parts[3])
+        try:
+            complete = int(parts[2], 16) & 0x2
+        except ValueError:
+            complete = 0
+        if mac and complete:
+            table[parts[0]] = mac
+    return table
+
+
+def arp_table():
+    try:
+        with open(ARP_FILE, encoding="ascii", errors="replace") as fh:
+            return parse_arp(fh.read())
+    except OSError:
+        return {}
+
+
+def primary_ipv4():
+    """This machine's address on its default route (no packet is sent)."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.connect(("192.0.2.1", 9))
+        return sock.getsockname()[0]
+    except OSError:
+        return None
+    finally:
+        sock.close()
+
+
+def sweep_networks(hints):
+    """The /24 networks worth searching: around each hint and around us."""
+    nets = []
+    for host in list(hints or ()) + [primary_ipv4()]:
+        try:
+            net = ipaddress.ip_network(f"{ipaddress.IPv4Address(host)}/24", strict=False)
+        except (ipaddress.AddressValueError, ValueError, TypeError):
+            continue
+        if net.is_private and net not in nets:
+            nets.append(net)
+    return nets[:4]
+
+
+def sweep(networks, wait=2.0):
+    """Ask every address on the given networks for /oic/res once.
+
+    Returns the set of addresses that answered. One small UDP datagram per
+    address; private networks only.
+    """
+    answered = set()
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    except OSError:
+        return answered
+    try:
+        sock.setblocking(False)
+        for net in networks:
+            for addr in net.hosts():
+                try:
+                    sock.sendto(_OIC_RES_GET, (str(addr), OCF_PORT))
+                except OSError:
+                    continue
+        deadline = time.monotonic() + wait
+        while time.monotonic() < deadline:
+            try:
+                _data, peer = sock.recvfrom(2048)
+                answered.add(peer[0])
+            except (BlockingIOError, InterruptedError):
+                time.sleep(0.05)
+            except OSError:
+                break
+    finally:
+        sock.close()
+    return answered
+
+
+def identity_at(host, cred_dir):
+    """The device id answering at this address, or None."""
+    link = None
+    try:
+        cert, key = ensure_credentials(cred_dir)
+        link, _ = open_link(host, None, cert, key)
+        return link.read_identity().get("di")
+    except Exception:  # noqa: BLE001 - not our appliance, or not reachable
+        return None
+    finally:
+        if link is not None:
+            link.close()
+
+
+def locate(cred_dir, di=None, mac=None, hints=(), exclude=()):
+    """Find where an appliance is now.
+
+    Looks for its MAC address first, then at every OCF device that answers.
+    When a device id is given, an address is returned only after the
+    appliance there proved to be that device over the authenticated session.
+    Returns {"host", "mac"} or None.
+    """
+    mac = normalize_mac(mac)
+    answered = sweep(sweep_networks(hints))
+    table = arp_table()
+    skip = set(exclude or ())
+    candidates = [ip for ip, seen in table.items() if mac and seen == mac and ip not in skip]
+    if di:
+        candidates += sorted(ip for ip in answered if ip not in skip and ip not in candidates)
+    for host in candidates[:RELOCATE_MAX_CANDIDATES]:
+        if di and identity_at(host, cred_dir) != di:
+            continue
+        return {"host": host, "mac": table.get(host) or mac}
+    return None
+
+
+# --------------------------------------------------------------------------
 # Long-lived device workers
 # --------------------------------------------------------------------------
 
 class DeviceWorker(threading.Thread):
-    def __init__(self, key, host, port, cred_dir, expected_di, poll_interval, push):
+    def __init__(self, key, host, port, cred_dir, expected_di, poll_interval, push,
+                 mac=None, other_hosts=lambda: ()):
         super().__init__(daemon=True, name=f"device-{key}")
+        self.mac = normalize_mac(mac)
+        self._other_hosts = other_hosts
+        self._last_relocate = 0.0
         self.key, self.host, self.port = key, host, port
         self.cred_dir, self.expected_di = cred_dir, expected_di
         self.poll_interval = max(2.0, float(poll_interval))
@@ -511,6 +662,7 @@ class DeviceWorker(threading.Thread):
 
     def run(self):
         failures = 0
+        offline_rounds = 0
         was_online = False
         grace_until = None  # while set and in the future, reconnects are silent
         while not self._stopping.is_set():
@@ -539,8 +691,10 @@ class DeviceWorker(threading.Thread):
                 was_online = True
                 grace_until = None
                 failures = 0
+                offline_rounds = 0
+                self.mac = arp_table().get(self.host) or self.mac
                 emit({"ev": "status", "key": self.key, "online": True, "port": link.port,
-                      "identity": identity})
+                      "identity": identity, "host": self.host, "mac": self.mac})
                 emit({"ev": "state", "key": self.key, "resources": resources})
                 if self.push:
                     for href in OBSERVE_HREFS:
@@ -561,9 +715,12 @@ class DeviceWorker(threading.Thread):
                     grace_until = None
                     self._reconnecting = False
                     emit({"ev": "status", "key": self.key, "online": False, "error": info})
+                if not quiet:
+                    offline_rounds += 1
                 if info.get("fatal"):
                     # Wrong appliance at this address: retry slowly, never spam it.
                     failures = len(BACKOFF_STEPS_S)
+                    offline_rounds = max(offline_rounds, RELOCATE_AFTER_ROUNDS)
             else:
                 quiet = False
             finally:
@@ -574,6 +731,10 @@ class DeviceWorker(threading.Thread):
                     link.close()
             if self._stopping.is_set():
                 break
+            if not quiet and offline_rounds >= RELOCATE_AFTER_ROUNDS and self._relocate():
+                failures = 0
+                offline_rounds = 0
+                continue
             if quiet:
                 self._reconnecting = True
                 if self._sleep(QUIET_RECONNECT_DELAY_S):
@@ -583,6 +744,26 @@ class DeviceWorker(threading.Thread):
             failures += 1
             if self._sleep(step + random.uniform(0, step * 0.2)):
                 break
+
+    def _relocate(self):
+        """The appliance stopped answering here: see whether it moved."""
+        if not self.expected_di or self._stopping.is_set():
+            return False
+        now = time.monotonic()
+        if self._last_relocate and now - self._last_relocate < RELOCATE_MIN_INTERVAL_S:
+            return False
+        self._last_relocate = now
+        try:
+            found = locate(self.cred_dir, di=self.expected_di, mac=self.mac, hints=[self.host],
+                           exclude=[h for h in self._other_hosts() if h != self.host] + [self.host])
+        except Exception:  # noqa: BLE001 - looking is best effort
+            return False
+        if not found:
+            return False
+        previous, self.host, self.port = self.host, found["host"], None
+        self.mac = found.get("mac") or self.mac
+        emit({"ev": "moved", "key": self.key, "from": previous, "host": self.host, "mac": self.mac})
+        return True
 
     def _read(self, link):
         """One poll. A timeout is retried on the same session, so a brief
@@ -636,7 +817,15 @@ class Helper:
             return {"helper": HELPER_VERSION, "python": sys.version.split()[0],
                     "library": version("smartthings-local")}
         if op == "probe":
-            return probe(str(req["host"]), self.cred_dir, req.get("port"))
+            result = probe(str(req["host"]), self.cred_dir, req.get("port"))
+            result["mac"] = arp_table().get(result["host"])
+            return result
+        if op == "locate":
+            found = locate(self.cred_dir, di=req.get("di"), mac=req.get("mac"),
+                           hints=req.get("hints") or (), exclude=req.get("exclude") or ())
+            if not found:
+                raise HelperError("not_found", "No appliance with this address was found on the local network.")
+            return found
         if op == "open":
             key = str(req["key"])
             with self.lock:
@@ -646,7 +835,8 @@ class Helper:
                 old.join(timeout=10)
             worker = DeviceWorker(key, str(req["host"]), req.get("port"), self.cred_dir,
                                   req.get("expectedDi"), req.get("pollInterval", 15),
-                                  bool(req.get("push", True)))
+                                  bool(req.get("push", True)), mac=req.get("mac"),
+                                  other_hosts=self.hosts)
             with self.lock:
                 self.workers[key] = worker
             worker.start()
@@ -668,6 +858,10 @@ class Helper:
                 return {"scheduled": True}
             return worker.write(req["path"], req["body"])
         raise HelperError("bad_request", f"unknown op {op!r}")
+
+    def hosts(self):
+        with self.lock:
+            return [w.host for w in self.workers.values()]
 
     def dispatch(self, req):
         rid = req.get("id")

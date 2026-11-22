@@ -36,7 +36,7 @@
   <div class="sl-card">
     <h6 data-t="addTitle"></h6>
     <div class="sl-row">
-      <input type="text" class="form-control" id="sl-host" inputmode="decimal" placeholder="192.168.1.50" dir="ltr">
+      <input type="text" class="form-control" id="sl-host" placeholder="192.168.1.50 / AA:BB:CC:DD:EE:FF" dir="ltr">
       <button class="btn btn-primary" id="sl-discover" data-t="discover"></button>
     </div>
     <div class="sl-muted mt-1" data-t="addHint"></div>
@@ -85,7 +85,7 @@
       step4: 'Add it to the Home app', step4Text: 'In ⋮ → Bridge Settings a QR code appears. In the Home app choose + → Add Accessory and scan it. Later changes here only need a restart of the child bridge.',
       bridgeWarn: 'Run this plugin as a child bridge: use the bridge button (⋮ → Bridge Settings) on the plugin card after saving. It keeps this plugin separate from your other plugins.',
       addTitle: 'Add an appliance', discover: 'Test & discover',
-      addHint: 'Enter the appliance IP address. Success means the appliance answered an authenticated read of its identity and resources.',
+      addHint: 'Enter the appliance IP address or its MAC address, whichever you know. If the address changes later, the plugin finds the appliance again by itself. Success means the appliance answered an authenticated read of its identity and resources.',
       discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
       generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 2 seconds; 5 or more is gentler on the appliance.',
@@ -93,6 +93,7 @@
       sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
       name: 'Name', namePh: 'e.g. Living Room AC', nameNote: 'Shown in HomeKit exactly as typed.',
       showInHome: 'Shown in HomeKit', add: 'Add to configuration', update: 'Update configuration',
+      followed: 'Address changed, followed automatically:', err_not_found: 'No appliance with this MAC address was found on the local network. Check that it is on and on the same network.',
       saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', diagnostics: 'Diagnostics', changeIp: 'Change IP', configure: 'Configuration',
       online: 'connected', offline: 'not reachable', unknownState: 'not contacted yet',
       thFeature: 'Function / reading', thDevice: 'Appliance', thPlugin: 'Plugin', thWhere: 'Shown in', thNote: 'Value / limits',
@@ -152,7 +153,7 @@
       step4: 'أضفه إلى تطبيق Home', step4Text: 'في ⋮ ← Bridge Settings يظهر رمز QR. في تطبيق Home اختر + ← Add Accessory وامسحه. أي تعديل لاحق هنا يكفيه إعادة تشغيل الجسر الفرعي.',
       bridgeWarn: 'شغّل هذه الإضافة كجسر فرعي مستقل: بعد الحفظ استخدم زر الجسر في بطاقة الإضافة (⋮ ← إعدادات الجسر). بذلك تبقى منفصلة عن بقية الإضافات.',
       addTitle: 'إضافة جهاز', discover: 'اختبار واكتشاف',
-      addHint: 'أدخل عنوان IP للجهاز. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
+      addHint: 'أدخل عنوان IP للجهاز أو عنوان MAC، أيهما تعرف. إن تغيّر العنوان لاحقًا تجد الإضافة الجهاز من جديد تلقائيًا. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
       discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
       generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى ثانيتان؛ 5 ثوانٍ فأكثر أخف على الجهاز.',
@@ -160,6 +161,7 @@
       sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
       name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'يظهر في HomeKit كما تكتبه تمامًا.',
       showInHome: 'ما يظهر في HomeKit', add: 'أضف إلى الإعدادات', update: 'حدّث الإعدادات',
+      followed: 'تغيّر العنوان وتُوبع تلقائيًا:', err_not_found: 'لم يُعثر على جهاز بهذا العنوان الفيزيائي في الشبكة المحلية. تأكد أنه يعمل وعلى الشبكة نفسها.',
       saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان', configure: 'الإعدادات',
       online: 'متصل', offline: 'غير متاح', unknownState: 'لم يُتصل به بعد',
       thFeature: 'الوظيفة أو القياس', thDevice: 'الجهاز', thPlugin: 'الإضافة', thWhere: 'مكان الظهور', thNote: 'القيمة والقيود',
@@ -356,6 +358,7 @@
       const features = {};
       box.querySelectorAll('[data-feat]').forEach((el) => { features[el.dataset.feat] = el.checked; });
       const entry = { host: p.host, id: p.deviceId, enabled: true, features };
+      if (p.mac) { entry.mac = p.mac; }
       const name = $('sl-name').value.trim();
       if (name) { entry.name = name; }
       await change(() => {
@@ -373,7 +376,10 @@
       const state = !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
       const energy = snap?.described?.features?.filter((r) => ['powerWatts', 'energyKWh'].includes(r.id) && r.device === true)
         .map((r) => `${esc(T[lang].f[r.id])}: <span dir="ltr">${esc(r.value ?? '—')}</span>`).join(' · ') ?? '';
-      return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${esc(dev.host)}</div><div class="sl-muted">${energy}</div></td>
+      const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;
+      const address = `${esc(moved ? snap.host : dev.host)}${snap?.mac || dev.mac ? ` · ${esc(snap?.mac || dev.mac)}` : ''}`;
+      return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${address}</div>
+        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div></td>
         <td>${state}</td>
         <td><label class="mb-0"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}></label></td>
         <td><button class="btn btn-sm btn-primary" data-cfg="${i}">${t('configure')}</button>

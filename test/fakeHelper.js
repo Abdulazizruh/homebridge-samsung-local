@@ -61,7 +61,7 @@ function connect(key) {
     out({ ev: 'status', key, online: false, error: { code: 'identity_mismatch', message: 'different appliance', fatal: true } });
     return;
   }
-  out({ ev: 'status', key, online: true, port: 49154, identity: dev.identity });
+  out({ ev: 'status', key, online: true, port: 49154, identity: dev.identity, host: session.host, mac: session.mac ?? null });
   out({ ev: 'state', key, resources: dev.resources });
   session.timer = setInterval(() => out({ ev: 'state', key, resources: dev.resources }), Number(process.env.FAKE_POLL_MS ?? 200));
 }
@@ -108,6 +108,11 @@ function handle(req) {
       if (req.action === 'remote') { applyWrite(dev, req.path, req.body); }
       if (req.action === 'move') { devices.set(req.to, dev); devices.delete(host); }
       for (const [key, session] of open) {
+        // "follow" plays the real helper finding the appliance at its new address.
+        if (req.action === 'move' && req.follow && session.host === host) {
+          session.host = req.to;
+          out({ ev: 'moved', key, from: host, host: req.to, mac: req.mac ?? null });
+        }
         if (session.host === host || session.host === req.to) { connect(key); }
       }
       return { done: true };

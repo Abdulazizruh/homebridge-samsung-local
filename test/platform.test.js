@@ -296,3 +296,29 @@ test('every part is named after its appliance; tiles from earlier versions follo
   assert.equal(name(third.platform, 'fan'), 'Guest AC Fan');
   assert.equal(name(third.platform, 'fast'), 'تبريد سريع');
 });
+
+test('an appliance that moves to a new address is followed, and found there again after a restart', async (t) => {
+  const storage = tmpDir();
+  const config = { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] };
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config });
+  await online(first.platform);
+  const cachedAccessory = first.api.registered[0].accessory;
+  await first.platform.helper.request('sim', { key: DI, action: 'move', to: '10.0.0.9', follow: true, mac: 'aa:bb:cc:00:4f:2a' });
+  await waitFor(() => first.platform.devices.get(DI).link.host === '10.0.0.9' && first.platform.devices.get(DI).link.online);
+  const saved = JSON.parse(fs.readFileSync(path.join(storage, STORAGE_DIR_NAME, 'addresses.json'), 'utf8'));
+  assert.deepEqual(saved[DI], { configHost: '10.0.0.5', host: '10.0.0.9', mac: 'aa:bb:cc:00:4f:2a' });
+  assert.equal(first.api.registered.length, 1, 'same accessory, no duplicate');
+  await first.platform.stop();
+
+  // Restart with the settings unchanged: it connects straight to the new address.
+  const second = await boot({ storage, devices: [ac('10.0.0.9')], config, cached: [cachedAccessory] });
+  await online(second.platform);
+  assert.equal(second.platform.devices.get(DI).link.host, '10.0.0.9');
+  await second.platform.stop();
+
+  // An address typed in the settings afterwards wins over the remembered one.
+  const third = await boot({ storage, devices: [ac('10.0.0.20')], config: { devices: [{ host: '10.0.0.20', id: DI, name: 'Layla AC' }] }, cached: [cachedAccessory] });
+  t.after(() => third.platform.stop());
+  await online(third.platform);
+  assert.equal(third.platform.devices.get(DI).link.host, '10.0.0.20');
+});

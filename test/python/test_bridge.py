@@ -153,5 +153,101 @@ class Reconnect(unittest.TestCase):
         self.assertEqual(status[-1]["error"]["code"], "timeout")
 
 
+class FollowAddress(unittest.TestCase):
+    ARP = (
+        "IP address       HW type     Flags       HW address            Mask     Device\n"
+        "192.168.0.151    0x1         0x2         AA:BB:CC:00:4F:2A     *        eth0\n"
+        "192.168.0.77     0x1         0x2         aa:bb:cc:00:11:22     *        eth0\n"
+        "192.168.0.9      0x1         0x0         00:00:00:00:00:00     *        eth0\n"
+    )
+
+    def test_mac_addresses_are_normalized_and_junk_is_refused(self):
+        self.assertEqual(bridge.normalize_mac("AA-BB-CC-00-4F-2A"), "aa:bb:cc:00:4f:2a")
+        self.assertEqual(bridge.normalize_mac("aabb.cc00.4f2a"), "aa:bb:cc:00:4f:2a")
+        for junk in ("192.168.0.144", "", None, "aa:bb:cc", "00:00:00:00:00:00", "zz:bb:cc:00:4f:2a"):
+            self.assertIsNone(bridge.normalize_mac(junk), junk)
+
+    def test_the_neighbour_table_is_read_and_incomplete_rows_are_skipped(self):
+        table = bridge.parse_arp(self.ARP)
+        self.assertEqual(table, {"192.168.0.151": "aa:bb:cc:00:4f:2a", "192.168.0.77": "aa:bb:cc:00:11:22"})
+
+    def locate(self, identities, **kwargs):
+        saved = (bridge.sweep, bridge.arp_table, bridge.identity_at)
+        asked = []
+        bridge.sweep = lambda networks, wait=2.0: set(identities)
+        bridge.arp_table = lambda: bridge.parse_arp(self.ARP)
+
+        def identity_at(host, cred_dir):
+            asked.append(host)
+            return identities.get(host)
+
+        bridge.identity_at = identity_at
+        try:
+            return bridge.locate("/nonexistent", **kwargs), asked
+        finally:
+            bridge.sweep, bridge.arp_table, bridge.identity_at = saved
+
+    def test_an_appliance_is_found_by_mac_and_confirmed_by_device_id(self):
+        found, asked = self.locate({"192.168.0.151": "device-1", "192.168.0.77": "device-2"},
+                                   di="device-1", mac="AA:BB:CC:00:4F:2A", hints=["192.168.0.144"])
+        self.assertEqual(found, {"host": "192.168.0.151", "mac": "aa:bb:cc:00:4f:2a"})
+        self.assertEqual(asked, ["192.168.0.151"], "the MAC match is tried first")
+
+    def test_without_a_mac_it_is_found_by_device_id_among_the_answers(self):
+        found, _ = self.locate({"192.168.0.77": "device-2", "192.168.0.151": "device-1"}, di="device-1")
+        self.assertEqual(found["host"], "192.168.0.151")
+
+    def test_another_appliance_on_the_old_mac_or_address_is_never_accepted(self):
+        found, _ = self.locate({"192.168.0.151": "someone-else"}, di="device-1", mac="aa:bb:cc:00:4f:2a")
+        self.assertIsNone(found)
+        found, _ = self.locate({"192.168.0.151": "device-1"}, di="device-1", exclude=["192.168.0.151"])
+        self.assertIsNone(found, "an address another appliance already uses is skipped")
+
+    def test_a_worker_follows_its_appliance_to_a_new_address(self):
+        events = []
+        saved = (bridge.open_link, bridge.emit, bridge.ensure_credentials, bridge.locate,
+                 bridge.arp_table, bridge.BACKOFF_STEPS_S)
+        worker = bridge.DeviceWorker("k", "10.0.0.5", None, "/nonexistent", "device-1", 2, False,
+                                     other_hosts=lambda: ["10.0.0.5", "10.0.0.6"])
+        worker.poll_interval = 0.02
+        asked = {}
+
+        def open_link(host, port, cert, key, on_notification=None):
+            if host == "10.0.0.5":
+                raise TimeoutError("session operation timed out")
+            return FakeLink(reads=50), []
+
+        def locate(cred_dir, di=None, mac=None, hints=(), exclude=()):
+            asked.update(di=di, hints=list(hints), exclude=sorted(exclude))
+            return {"host": "10.0.0.9", "mac": "aa:bb:cc:00:4f:2a"}
+
+        def emit(msg):
+            events.append(msg)
+            if msg.get("ev") == "status" and msg.get("online"):
+                worker.stop()
+
+        bridge.open_link, bridge.emit, bridge.locate = open_link, emit, locate
+        bridge.ensure_credentials = lambda cred_dir: ("cert", "key")
+        bridge.arp_table = lambda: {}
+        bridge.BACKOFF_STEPS_S = (0.01,)
+        try:
+            worker.start()
+            worker.join(timeout=10)
+            self.assertFalse(worker.is_alive())
+        finally:
+            (bridge.open_link, bridge.emit, bridge.ensure_credentials, bridge.locate,
+             bridge.arp_table, bridge.BACKOFF_STEPS_S) = saved
+        moved = [e for e in events if e.get("ev") == "moved"]
+        self.assertEqual([(e["from"], e["host"]) for e in moved], [("10.0.0.5", "10.0.0.9")])
+        self.assertEqual(asked, {"di": "device-1", "hints": ["10.0.0.5"], "exclude": ["10.0.0.5", "10.0.0.6"]})
+        last = [e for e in events if e.get("ev") == "status"][-1]
+        self.assertEqual((last["online"], last["host"], last["mac"]), (True, "10.0.0.9", "aa:bb:cc:00:4f:2a"))
+
+    def test_a_mac_alone_resolves_to_its_current_address(self):
+        found, asked = self.locate({}, mac="aa-bb-cc-00-11-22")
+        self.assertEqual(found, {"host": "192.168.0.77", "mac": "aa:bb:cc:00:11:22"})
+        self.assertEqual(asked, [])
+
+
 if __name__ == "__main__":
     unittest.main()

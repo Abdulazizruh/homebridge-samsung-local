@@ -5,7 +5,7 @@ import { shortId } from './redact.js';
 import { HelperClient } from './runtime/helperClient.js';
 import { ensureRuntime, HELPER_SCRIPT } from './runtime/pythonRuntime.js';
 import { PLATFORM_NAME, PLUGIN_NAME, UUID_NAMESPACE } from './settings.js';
-import { ensureDir, pluginPaths, snapshotFile, writeJson } from './storage.js';
+import { ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './storage.js';
 
 const RETRY_STEPS_MS = [15_000, 30_000, 60_000, 120_000, 300_000];
 
@@ -45,10 +45,37 @@ export class SamsungLocalPlatform {
     this.cached.set(accessory.UUID, accessory);
   }
 
+  /**
+   * Configured appliances, each with the address it was last found at.
+   * The settings hold the address the user typed; if the appliance has moved
+   * since (same device id), the remembered address is used instead. Typing a
+   * new address in the settings always wins over a remembered one.
+   */
   entries() {
     const list = Array.isArray(this.config.devices) ? this.config.devices : [];
+    this.addresses ??= readJson(this.paths.addresses, {}) ?? {};
     return list.filter((d) => d && typeof d.host === 'string' && d.host.trim() && d.enabled !== false)
-      .map((d) => ({ ...d, host: d.host.trim() }));
+      .map((d) => {
+        const configHost = d.host.trim();
+        const known = d.id ? this.addresses[d.id] : null;
+        const follow = known && known.configHost === configHost;
+        return { ...d, host: follow && known.host ? known.host : configHost, configHost, mac: d.mac ?? known?.mac ?? null };
+      });
+  }
+
+  #rememberAddress(deviceId, entry, { host, mac }) {
+    this.addresses ??= {};
+    const previous = this.addresses[deviceId];
+    const next = { configHost: entry.configHost ?? entry.host, host: host ?? entry.host, mac: mac ?? previous?.mac ?? null };
+    if (previous && previous.configHost === next.configHost && previous.host === next.host && previous.mac === next.mac) {
+      return;
+    }
+    this.addresses[deviceId] = next;
+    try {
+      writeJson(this.paths.addresses, this.addresses);
+    } catch (err) {
+      this.log.debug(`could not save addresses: ${err.message}`);
+    }
   }
 
   async start() {
@@ -157,6 +184,8 @@ export class SamsungLocalPlatform {
     return {
       deviceId,
       host: entry.host,
+      configHost: entry.configHost ?? entry.host,
+      mac: entry.mac ?? null,
       name: entry.name ?? null,
       identity: source?.identity ?? null,
       resources: source?.resources ?? null,
@@ -196,6 +225,7 @@ export class SamsungLocalPlatform {
       key: deviceId,
       host: entry.host,
       port: entry.port ?? null,
+      mac: entry.mac ?? null,
       expectedDi: deviceId,
       pollInterval: Math.max(2, Number(this.config.pollInterval) || 15),
       push: this.config.pushUpdates !== false,
@@ -206,6 +236,14 @@ export class SamsungLocalPlatform {
     });
     link.on('update', (resources) => {
       writeJson(snapshotFile(this.paths, deviceId), this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true));
+    });
+    link.on('address', ({ host, mac, from }) => {
+      if (from && from !== host) {
+        this.log.info(`[${name}] found at a new address: ${from} → ${host}. Following it; the settings can stay as they are.`);
+      }
+      entry.host = host;
+      entry.mac = mac ?? entry.mac;
+      this.#rememberAddress(deviceId, entry, { host, mac });
     });
     // Say once whether the appliance delivers push updates, so a slow
     // reaction to the remote can be explained from the log.

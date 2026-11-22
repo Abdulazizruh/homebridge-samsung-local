@@ -58,6 +58,8 @@ class UiServer extends HomebridgePluginUiServer {
     const described = snap.resources ? describeDevice(snap.identity, snap.resources) : null;
     return {
       host: snap.host,
+      configHost: snap.configHost ?? null,
+      mac: snap.mac ?? null,
       name: snap.name ?? null,
       deviceId: snap.deviceId ?? (snap.identity ? stableDeviceId(snap.identity) : null),
       online: Boolean(snap.online),
@@ -80,10 +82,18 @@ class UiServer extends HomebridgePluginUiServer {
   /** Reads identity and resources for one address. Success means the
    * appliance answered an authenticated read, never just a ping. */
   async probe({ host } = {}) {
-    if (typeof host !== 'string' || !/^[0-9a-zA-Z.:-]{3,253}$/.test(host.trim())) {
-      throw new RequestError('Enter a valid IP address.', { code: 'bad_host' });
+    if (typeof host !== 'string' || !/^[0-9a-zA-Z.: -]{3,253}$/.test(host.trim())) {
+      throw new RequestError('Enter a valid IP address or MAC address.', { code: 'bad_host' });
     }
     host = host.trim();
+    // A MAC address instead of an IP address: look up where it is now.
+    const macDigits = host.replace(/[^0-9a-fA-F]/g, '');
+    const typedMac = macDigits.length === 12 && /^[0-9a-fA-F:.\- ]+$/.test(host) && !/^\d{1,3}(\.\d{1,3}){3}$/.test(host)
+      ? macDigits.toLowerCase().match(/../g).join(':') : null;
+    if (typedMac) {
+      const known = listSnapshots(this.paths).find((s) => s.mac === typedMac && s.host);
+      host = known ? known.host : await this.locate(typedMac);
+    }
     // The running plugin already holds a session to this appliance: reuse its
     // latest reading instead of opening a second connection to the device.
     const live = listSnapshots(this.paths).find((s) => s.host === host && s.online && Date.now() - s.updatedAt < 90_000);
@@ -107,8 +117,32 @@ class UiServer extends HomebridgePluginUiServer {
       // appliance that is not (or cannot yet be) configured.
       this.lastProbes.set(host, { identity: result.identity, resources: result.resources });
       return this.present({
-        host, identity: result.identity, resources: result.resources, online: true, updatedAt: Date.now(),
+        host, mac: result.mac ?? typedMac ?? null, identity: result.identity, resources: result.resources, online: true, updatedAt: Date.now(),
       }, 'probe');
+    } catch (err) {
+      return this.fail(err);
+    } finally {
+      await helper?.stop();
+    }
+  }
+
+  /** Resolve a MAC address to its current IP address on the local network. */
+  async locate(mac) {
+    let helper;
+    try {
+      const { python } = await ensureRuntime(this.paths, {});
+      ensureDir(this.paths.credentials);
+      helper = new HelperClient({
+        command: python,
+        args: ['-u', HELPER_SCRIPT],
+        env: { SAMSUNG_LOCAL_CRED_DIR: this.paths.credentials },
+        restartDelaysMs: [],
+      });
+      helper.stopped = true;
+      await helper.start();
+      const hints = listSnapshots(this.paths).map((s) => s.host).filter(Boolean).slice(0, 3);
+      const found = await helper.request('locate', { mac, hints }, 60_000);
+      return found.host;
     } catch (err) {
       return this.fail(err);
     } finally {
