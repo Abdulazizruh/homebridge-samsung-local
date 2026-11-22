@@ -89,10 +89,11 @@ class FakeLink:
 
 
 class Reconnect(unittest.TestCase):
-    def run_worker(self, links, until):
+    def run_worker(self, links, until, grace=5.0):
         events, opened = [], []
         saved = (bridge.open_link, bridge.emit, bridge.ensure_credentials,
-                 bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S)
+                 bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S,
+                 bridge.READ_RETRY_PAUSE_S, bridge.OFFLINE_GRACE_S)
 
         def open_link(host, port, cert, key, on_notification=None):
             link = links.pop(0) if links else None
@@ -112,13 +113,15 @@ class Reconnect(unittest.TestCase):
         bridge.open_link, bridge.emit = open_link, emit
         bridge.ensure_credentials = lambda cred_dir: ("cert", "key")
         bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S = 0.01, (0.01,)
+        bridge.READ_RETRY_PAUSE_S, bridge.OFFLINE_GRACE_S = 0.01, grace
         try:
             worker.start()
             worker.join(timeout=10)
             self.assertFalse(worker.is_alive())
         finally:
             (bridge.open_link, bridge.emit, bridge.ensure_credentials,
-             bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S) = saved
+             bridge.QUIET_RECONNECT_DELAY_S, bridge.BACKOFF_STEPS_S,
+             bridge.READ_RETRY_PAUSE_S, bridge.OFFLINE_GRACE_S) = saved
         return [e for e in events if e.get("ev") == "status"]
 
     def test_a_dropped_session_reconnects_once_without_reporting_offline(self):
@@ -127,8 +130,25 @@ class Reconnect(unittest.TestCase):
         self.assertTrue(first.closed)
         self.assertEqual([e["online"] for e in status], [True, True])
 
+    def test_a_single_timed_out_read_is_retried_on_the_same_session(self):
+        class Flaky(FakeLink):
+            def __init__(self):
+                super().__init__(reads=50)
+                self.calls = 0
+
+            def read_resources(self):
+                self.calls += 1
+                if self.calls == 3:
+                    raise TimeoutError("session operation timed out")
+                return super().read_resources()
+
+        link, opened = Flaky(), []
+        status = self.run_worker([link], lambda ev: sum(1 for e in ev if e.get("ev") == "state") >= 6)
+        self.assertGreaterEqual(link.calls, 6)
+        self.assertEqual([e["online"] for e in status], [True], "no reconnect, no offline report")
+
     def test_offline_is_reported_when_the_reconnect_fails_too(self):
-        status = self.run_worker([FakeLink(reads=2)], lambda ev: any(e.get("online") is False for e in ev))
+        status = self.run_worker([FakeLink(reads=2)], lambda ev: any(e.get("online") is False for e in ev), grace=0.2)
         self.assertEqual([e["online"] for e in status], [True, False])
         self.assertEqual(status[-1]["error"]["code"], "timeout")
 

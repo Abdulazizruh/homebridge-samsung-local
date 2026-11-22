@@ -32,7 +32,7 @@ import zlib
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.3"
+HELPER_VERSION = "0.1.4"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -48,7 +48,14 @@ READ_TIMEOUT_S = 10.0
 WRITE_TIMEOUT_S = 8.0
 CONNECT_TIMEOUT_S = 12.0
 BACKOFF_STEPS_S = (5, 10, 20, 40, 60)
-QUIET_RECONNECT_DELAY_S = 1.0
+QUIET_RECONNECT_DELAY_S = 2.0
+# A short gap (a few lost packets) must not cost the session: a read that
+# times out is retried on the same session before any reconnect.
+READ_RETRIES = 2
+READ_RETRY_PAUSE_S = 1.5
+# After a working session drops, reconnects stay silent for this long. The
+# appliance is reported unreachable only if it is still gone afterwards.
+OFFLINE_GRACE_S = 30.0
 QUIET_RECONNECT_WAIT_S = 12.0
 
 OBSERVE_HREFS = (
@@ -505,11 +512,12 @@ class DeviceWorker(threading.Thread):
     def run(self):
         failures = 0
         was_online = False
+        grace_until = None  # while set and in the future, reconnects are silent
         while not self._stopping.is_set():
             link = None
-            # A healthy session that drops gets one immediate, silent
-            # reconnect before the appliance is reported as unreachable.
-            quiet = was_online
+            quiet = False
+            if was_online:
+                grace_until = time.monotonic() + OFFLINE_GRACE_S
             was_online = False
             try:
                 cert, key = ensure_credentials(self.cred_dir)
@@ -529,6 +537,7 @@ class DeviceWorker(threading.Thread):
                 self._linked.set()
                 self._reconnecting = False
                 was_online = True
+                grace_until = None
                 failures = 0
                 emit({"ev": "status", "key": self.key, "online": True, "port": link.port,
                       "identity": identity})
@@ -543,8 +552,13 @@ class DeviceWorker(threading.Thread):
                 self._loop(link)
             except Exception as exc:  # noqa: BLE001
                 info = classify(exc)
-                quiet = was_online and not info.get("fatal") and not self._stopping.is_set()
+                if was_online:
+                    grace_until = time.monotonic() + OFFLINE_GRACE_S
+                    was_online = False
+                quiet = (grace_until is not None and time.monotonic() < grace_until
+                         and not info.get("fatal") and not self._stopping.is_set())
                 if not quiet:
+                    grace_until = None
                     self._reconnecting = False
                     emit({"ev": "status", "key": self.key, "online": False, "error": info})
                 if info.get("fatal"):
@@ -570,6 +584,20 @@ class DeviceWorker(threading.Thread):
             if self._sleep(step + random.uniform(0, step * 0.2)):
                 break
 
+    def _read(self, link):
+        """One poll. A timeout is retried on the same session, so a brief
+        network gap does not force a new handshake."""
+        for attempt in range(READ_RETRIES + 1):
+            try:
+                resources, _mode = link.read_resources()
+                return resources
+            except Exception as exc:  # noqa: BLE001
+                if (attempt == READ_RETRIES or self._stopping.is_set()
+                        or classify(exc).get("code") != "timeout"):
+                    raise
+                if self._sleep(READ_RETRY_PAUSE_S):
+                    raise
+
     def _loop(self, link):
         next_poll = time.monotonic() + self.poll_interval
         while not self._stopping.is_set():
@@ -583,7 +611,7 @@ class DeviceWorker(threading.Thread):
                 self._wake.wait(due - now)
                 continue
             self._wake_at = None
-            resources, _mode = link.read_resources()
+            resources = self._read(link)
             emit({"ev": "state", "key": self.key, "resources": resources, "pushes": self.notifications})
             next_poll = time.monotonic() + self.poll_interval
 
