@@ -2,13 +2,13 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## 1.1.0-beta.2
+## 1.1.0-beta.3
 
-Beta of 1.0.15 for trying the JavaScript connection engine: everything is the same, except that the JavaScript engine is the default, so no Python is downloaded or needed. Python stays available under General → Connection engine.
+Beta of 1.0.16 for trying the JavaScript connection engine: everything is the same, except that the JavaScript engine is the default, so no Python is downloaded or needed. Python stays available under General → Connection engine.
 
 **بالعربية**
 
-نسخة تجريبية من 1.0.15 لتجربة محرك الاتصال بلغة JavaScript: كل شيء كما هو، والفرق أن محرك JavaScript هو الافتراضي، فلا يُنزَّل Python ولا يُحتاج إليه. يبقى Python متاحًا من «عام ← محرك الاتصال».
+نسخة تجريبية من 1.0.16 لتجربة محرك الاتصال بلغة JavaScript: كل شيء كما هو، والفرق أن محرك JavaScript هو الافتراضي، فلا يُنزَّل Python ولا يُحتاج إليه. يبقى Python متاحًا من «عام ← محرك الاتصال».
 
 ## 1.0.15
 
