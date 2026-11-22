@@ -2,6 +2,8 @@ import { EventEmitter } from 'node:events';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+const RETRY_REFUSED_MS = 600;
+
 /** Raised when a command could not be delivered or was refused. */
 export class CommandError extends Error {
   constructor(code, message) {
@@ -177,6 +179,13 @@ export class DeviceLink extends EventEmitter {
         const started = Date.now();
         try {
           result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
+          if (!result.accepted && result.code === '4.00') {
+            // Seen on a real air conditioner with both engines: a correct
+            // command is now and then answered 4.00. It is asked once more.
+            await sleep(RETRY_REFUSED_MS);
+            result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
+            this.emit('retried', write.path.join('/'), result.accepted);
+          }
           this.#timed(Date.now() - started);
         } catch (err) {
           throw new CommandError(err.code ?? 'error', err.message);

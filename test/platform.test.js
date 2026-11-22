@@ -99,6 +99,22 @@ test('a late acknowledgement does not hold Apple Home: quick reply, value kept, 
   assert.ok(link.commandMs >= 2000, `measured ${link.commandMs} ms`);
 });
 
+test('a 4.00 answer to a correct command is asked once more and then succeeds', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler, link } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  const retried = [];
+  link.on('retried', (path, accepted) => retried.push([path, accepted]));
+  await platform.helper.request('sim', { key: DI, action: 'refuse', value: 'once' });
+  const target = handler.services.get('thermostat').getCharacteristic(C.TargetHeatingCoolingState);
+  await target.handleSetRequest(C.TargetHeatingCoolingState.OFF);
+  await waitFor(() => retried.length === 1, 4000);
+  assert.deepEqual(retried, [['power/vs/0', true]]);
+  await waitFor(() => handler.model.state.power === false, 4000);
+});
+
 test('a late refusal puts the tile back to the real state', async (t) => {
   const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
   t.after(() => platform.stop());

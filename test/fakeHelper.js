@@ -94,6 +94,7 @@ function handle(req) {
       if (!dev || !dev.reachable) { throw Object.assign(new Error('offline'), { code: 'offline' }); }
       const answer = () => {
         record({ path: req.path, body: req.body });
+        if (dev.refuse === 'once') { dev.refuse = false; dev.refusedOnce = (dev.refusedOnce ?? 0) + 1; return { code: '4.00', accepted: false, detail: null }; }
         if (dev.refuse) { return { code: '4.05', accepted: false, detail: 'Control fail' }; }
         if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
         setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
@@ -107,7 +108,7 @@ function handle(req) {
       const dev = devices.get(host);
       if (req.action === 'offline') { dev.reachable = false; }
       if (req.action === 'online') { dev.reachable = true; }
-      if (req.action === 'refuse') { dev.refuse = Boolean(req.value); }
+      if (req.action === 'refuse') { dev.refuse = req.value === 'once' ? 'once' : Boolean(req.value); }
       if (req.action === 'ignore') { dev.ignore = Boolean(req.value); }
       if (req.action === 'delay') { dev.delay = Number(req.value) || 0; }
       if (req.action === 'remote') { applyWrite(dev, req.path, req.body); }

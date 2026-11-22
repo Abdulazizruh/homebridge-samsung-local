@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.3
+
+- A command answered 4.00 is asked once more after a short pause. On a real air conditioner a correct power command was now and then refused with 4.00, with the Python engine as well as the JavaScript one, so the cause is the appliance and not the engine. The log says when this happens and how the second ask ended.
+
+**بالعربية**
+
+- الأمر الذي يُجاب بالرمز 4.00 يُعاد مرة واحدة بعد مهلة قصيرة. على مكيف حقيقي رُفض أمر تشغيل صحيح بالرمز 4.00 أحيانًا، مع محرك Python كما مع JavaScript، فالسبب من الجهاز وليس من المحرك. يذكر السجل متى حدث ذلك وكيف انتهت المحاولة الثانية.
+
 ## 1.1.2
 
 - Air conditioner: switching off from the Home app now shows off on every tile of the accessory at once. Before, the fan and switches stayed on until the appliance reported, so the tile read "Powered On" for a few seconds and then went to Off. Both engines.
