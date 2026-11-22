@@ -338,7 +338,9 @@ test('an appliance that moves to a new address is followed, and found there agai
   await first.platform.helper.request('sim', { key: DI, action: 'move', to: '10.0.0.9', follow: true, mac: 'aa:bb:cc:00:4f:2a' });
   await waitFor(() => first.platform.devices.get(DI).link.host === '10.0.0.9' && first.platform.devices.get(DI).link.online);
   const saved = JSON.parse(fs.readFileSync(path.join(storage, STORAGE_DIR_NAME, 'addresses.json'), 'utf8'));
-  assert.deepEqual(saved[DI], { configHost: '10.0.0.5', host: '10.0.0.9', mac: 'aa:bb:cc:00:4f:2a' });
+  // The port is remembered with the address, so the next start skips the search.
+  assert.deepEqual({ ...saved[DI], port: undefined }, { configHost: '10.0.0.5', host: '10.0.0.9', mac: 'aa:bb:cc:00:4f:2a', port: undefined });
+  assert.ok('port' in saved[DI]);
   assert.equal(first.api.registered.length, 1, 'same accessory, no duplicate');
   await first.platform.stop();
 

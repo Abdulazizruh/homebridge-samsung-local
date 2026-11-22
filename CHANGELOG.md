@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.20
+
+- Faster start: the port each appliance uses is remembered with its address, so the next start connects straight to it instead of searching first. If the appliance changed its port (after a power cut, for example) the search runs as before.
+- The log now says how long each connection took, and with the JavaScript engine where the time went (secure session, identity, first reading).
+- Confirmed on a real washer: tapping the cycle tile flips it and it returns at once, with no error.
+
+**بالعربية**
+
+- تشغيل أسرع: يُحفظ منفذ كل جهاز مع عنوانه، فيتصل التشغيل التالي به مباشرة دون بحث. وإذا غيّر الجهاز منفذه (بعد انقطاع الكهرباء مثلًا) يجري البحث كما كان.
+- صار السجل يذكر مدة كل اتصال، ومع محرك JavaScript أين ذهب الوقت (الجلسة المشفرة، الهوية، القراءة الأولى).
+- تأكد على غسالة حقيقية: الضغط على بطاقة الدورة يقلبها وتعود فورًا دون خطأ.
+
 ## 1.0.19
 
 - Laundry: the read-only cycle tile from 1.0.18 is withdrawn. On a real washer the Home app still sent the tap, got a refusal and showed "No Response" for some seconds. The tile accepts the tap again and undoes it at once, with no error. To have nothing happen at all on a tap, choose "Running sensor" under Configuration → "How the cycle tile behaves" (it has no countdown).

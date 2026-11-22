@@ -29,6 +29,7 @@ const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/ce
 export const HELPER_VERSION = 'js-0.1.1';
 const SUBSCRIBE_CONFIRM_MS = 3000;
 const SEND_RATE_PER_S = 25;
+const KNOWN_PORT_TIMEOUT_MS = 6000;
 const DISCOVERY_ROUNDS = [2500, 4000];
 const FALLBACK_PORTS = [49152, 49153, 49154, 49155, 49156, 49157, 49158, 49159, 49160];
 const MULTICAST_SECURE_PORT = 5684;
@@ -374,8 +375,11 @@ async function openLink(host, port, cred, onNotification) {
     }
   };
   if (port) {
-    const link = await attempt(port, CONNECT_TIMEOUT_MS);
+    // The port an appliance uses stays the same while it is powered, so the one
+    // remembered from last time is tried first, briefly: it saves the search.
+    const link = await attempt(port, KNOWN_PORT_TIMEOUT_MS);
     if (link) {
+      details.probe_outcome = 'remembered';
       return { link, details };
     }
   }
@@ -542,11 +546,15 @@ class DeviceWorker {
       }
       wasOnline = false;
       try {
+        const started = Date.now();
         const cred = await ensureCredentials(this.credDir);
-        ({ link } = await openLink(this.host, this.port, cred, this.push ? () => { this.notifications += 1; this.requestRefresh(300); } : null));
+        let details;
+        ({ link, details } = await openLink(this.host, this.port, cred, this.push ? () => { this.notifications += 1; this.requestRefresh(300); } : null));
         this.port = link.port;
         link.onDead = () => this.wake?.();
+        const sessionAt = Date.now();
         const identity = await link.readIdentity();
+        const identityAt = Date.now();
         if (this.expectedDi && identity.di && identity.di !== this.expectedDi) {
           throw new HelperError('identity_mismatch',
             'A different appliance answered at this address. Update the IP address in the plugin settings.', { fatal: true });
@@ -560,7 +568,12 @@ class DeviceWorker {
         failures = 0;
         offlineRounds = 0;
         this.mac = arpTable()[this.host] ?? this.mac;
-        emit({ ev: 'status', key: this.key, online: true, port: link.port, identity, host: this.host, mac: this.mac });
+        // Where the time of a connection goes, for the log.
+        const timing = {
+          totalMs: Date.now() - started, sessionMs: sessionAt - started, identityMs: identityAt - sessionAt,
+          readingMs: Date.now() - identityAt, port: details?.probe_outcome ?? 'searched',
+        };
+        emit({ ev: 'status', key: this.key, online: true, port: link.port, identity, host: this.host, mac: this.mac, timing });
         emit({ ev: 'state', key: this.key, resources });
         if (this.push) {
           // In the background: polling starts at once, push joins when ready.

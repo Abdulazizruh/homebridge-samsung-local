@@ -65,15 +65,24 @@ export class SamsungLocalPlatform {
         const configHost = d.host.trim();
         const known = d.id ? this.addresses[d.id] : null;
         const follow = known && known.configHost === configHost;
-        return { ...d, host: follow && known.host ? known.host : configHost, configHost, mac: d.mac ?? known?.mac ?? null };
+        const host = follow && known.host ? known.host : configHost;
+        return {
+          ...d, host, configHost, mac: d.mac ?? known?.mac ?? null,
+          port: d.port ?? (known && known.host === host ? known.port ?? null : null),
+        };
       });
   }
 
-  #rememberAddress(deviceId, entry, { host, mac }) {
+  #rememberAddress(deviceId, entry, { host, mac, port = null }) {
     this.addresses ??= {};
     const previous = this.addresses[deviceId];
-    const next = { configHost: entry.configHost ?? entry.host, host: host ?? entry.host, mac: mac ?? previous?.mac ?? null };
-    if (previous && previous.configHost === next.configHost && previous.host === next.host && previous.mac === next.mac) {
+    const next = {
+      configHost: entry.configHost ?? entry.host, host: host ?? entry.host, mac: mac ?? previous?.mac ?? null,
+      // Remembered so the next start goes straight to it instead of searching.
+      port: port ?? (previous && previous.host === (host ?? entry.host) ? previous.port ?? null : null),
+    };
+    if (previous && previous.configHost === next.configHost && previous.host === next.host && previous.mac === next.mac
+      && (previous.port ?? null) === next.port) {
       return;
     }
     this.addresses[deviceId] = next;
@@ -396,6 +405,17 @@ export class SamsungLocalPlatform {
     pushCheck.unref?.();
     this.retryTimers.add(pushCheck);
     link.on('availability', (online) => {
+      if (online) {
+        this.#rememberAddress(deviceId, entry, { host: link.host, mac: link.mac, port: link.port });
+        const tm = link.timing;
+        if (tm) {
+          const s = (ms) => (ms / 1000).toFixed(1);
+          this.log.info(tm.sessionMs === undefined
+            ? `[${name}] connection took ${s(tm.totalMs)}s.`
+            : `[${name}] connection took ${s(tm.totalMs)}s (secure session ${s(tm.sessionMs)}s, port ${tm.port}; identity ${s(tm.identityMs)}s; first reading ${s(tm.readingMs)}s).`);
+          link.timing = null;
+        }
+      }
       if (!online) {
         this.#dropPendingSnapshot(deviceId);
         writeJson(snapshotFile(this.paths, deviceId),

@@ -62,6 +62,7 @@ export class DeviceLink extends EventEmitter {
       }
       if (msg.online) {
         this.port = msg.port ?? this.port;
+        this.timing = msg.timing ?? null;
         this.identity = msg.identity ?? this.identity;
         this.#address(msg.host, msg.mac);
         this.#setOnline(true);

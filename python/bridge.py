@@ -672,6 +672,7 @@ class DeviceWorker(threading.Thread):
             if was_online:
                 grace_until = time.monotonic() + OFFLINE_GRACE_S
             was_online = False
+            started = time.monotonic()
             try:
                 cert, key = ensure_credentials(self.cred_dir)
                 link, _ = open_link(self.host, self.port, cert, key,
@@ -695,7 +696,8 @@ class DeviceWorker(threading.Thread):
                 offline_rounds = 0
                 self.mac = arp_table().get(self.host) or self.mac
                 emit({"ev": "status", "key": self.key, "online": True, "port": link.port,
-                      "identity": identity, "host": self.host, "mac": self.mac})
+                      "identity": identity, "host": self.host, "mac": self.mac,
+                      "timing": {"totalMs": int((time.monotonic() - started) * 1000)}})
                 emit({"ev": "state", "key": self.key, "resources": resources})
                 if self.push:
                     for href in OBSERVE_HREFS:
