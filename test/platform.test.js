@@ -260,3 +260,39 @@ test('a name given in the Home app survives restarts and settings changes', asyn
     await next.platform.stop();
   }
 });
+
+test('every part is named after its appliance; tiles from earlier versions follow unless renamed in the Home app', async (t) => {
+  const storage = tmpDir();
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] } });
+  await online(first.platform);
+  const cachedAccessory = first.api.registered[0].accessory;
+  const C = first.api.hap.Characteristic;
+  const name = (platform, key) => platform.devices.get(DI).handler.services.get(key).getCharacteristic(C.ConfiguredName).value;
+  assert.equal(name(first.platform, 'thermostat'), 'Layla AC');
+  assert.equal(name(first.platform, 'fan'), 'Layla AC Fan');
+  assert.equal(name(first.platform, 'fast'), 'Layla AC Fast');
+  assert.equal(name(first.platform, 'humidity'), 'Layla AC Humidity');
+  assert.equal(name(first.platform, 'light'), 'Layla AC Light Display');
+  // Rewind to what an earlier version left behind: bare names, no record.
+  const services = first.platform.devices.get(DI).handler.services;
+  services.get('fan').getCharacteristic(C.ConfiguredName).updateValue('Fan');
+  services.get('light').getCharacteristic(C.ConfiguredName).updateValue('Display Light');
+  services.get('fast').getCharacteristic(C.ConfiguredName).updateValue('تبريد سريع'); // typed in the Home app
+  delete cachedAccessory.context.appliedNames;
+  await first.platform.stop();
+
+  const second = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] }, cached: [cachedAccessory] });
+  await online(second.platform);
+  assert.equal(name(second.platform, 'fan'), 'Layla AC Fan');
+  assert.equal(name(second.platform, 'light'), 'Layla AC Light Display');
+  assert.equal(name(second.platform, 'fast'), 'تبريد سريع');
+  await second.platform.stop();
+
+  // Renaming the appliance in the settings carries the untouched parts along.
+  const third = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Guest AC' }] }, cached: [cachedAccessory] });
+  t.after(() => third.platform.stop());
+  await online(third.platform);
+  assert.equal(name(third.platform, 'thermostat'), 'Guest AC');
+  assert.equal(name(third.platform, 'fan'), 'Guest AC Fan');
+  assert.equal(name(third.platform, 'fast'), 'تبريد سريع');
+});

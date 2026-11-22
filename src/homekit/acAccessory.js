@@ -32,9 +32,13 @@ const LABELS = {
   fanLow: 'Fan Low', fanMedium: 'Fan Medium', fanHigh: 'Fan High',
   windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart', comfort: 'Comfort',
   twoStep: '2-Step', motionDirect: 'Wind Follows', motionIndirect: 'Wind Avoids',
-  light: 'Display Light', beep: 'Beep', autoClean: 'Auto Clean', humidity: 'Humidity', filter: 'Filter',
+  light: 'Light Display', beep: 'Beep', autoClean: 'Auto Clean', humidity: 'Humidity', filter: 'Filter',
   outdoor: 'Outdoor Temperature',
 };
+
+// What earlier versions called each part, before the appliance name was put
+// in front. Used once, to tell a name the plugin gave from one the user typed.
+const LEGACY_LABELS = { ...LABELS, light: 'Display Light' };
 
 const SETTLE_MS = 4500; // how long a just-written value is shielded from stale reads
 const CONFIRM_MS = 12000; // after this an unconfirmed write is reported and dropped
@@ -178,17 +182,48 @@ export class AcAccessory {
     }
     const { Characteristic } = this.hap;
     service.setCharacteristic(Characteristic.Name, name);
-    if (!service.testCharacteristic(Characteristic.ConfiguredName)) {
-      service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-      service.setCharacteristic(Characteristic.ConfiguredName, name);
-    }
+    this.#applyName(key, service, name);
     this.services.set(key, service);
     return service;
   }
 
+  /**
+   * Names a tile. The plugin's name is followed (appliance renamed in the
+   * settings, new naming scheme) only while the tile still carries the name
+   * this plugin last gave it. A name typed in the Home app is kept through
+   * updates and restarts; only resetting the accessory brings ours back.
+   */
+  #applyName(key, service, name) {
+    const { Characteristic } = this.hap;
+    const applied = (this.context.appliedNames ??= {});
+    if (!service.testCharacteristic(Characteristic.ConfiguredName)) {
+      service.addOptionalCharacteristic(Characteristic.ConfiguredName);
+      service.setCharacteristic(Characteristic.ConfiguredName, name);
+      applied[key] = name;
+      return;
+    }
+    // Tiles made by earlier versions carry no record: fall back to what
+    // those versions wrote.
+    const last = applied[key] ?? (key === 'thermostat' ? this.context.appliedName : LEGACY_LABELS[key]);
+    const current = service.getCharacteristic(Characteristic.ConfiguredName).value;
+    if (last === undefined || current === last) {
+      if (current !== name) {
+        service.setCharacteristic(Characteristic.ConfiguredName, name);
+      }
+      applied[key] = name;
+    } else {
+      applied[key] = last;
+    }
+  }
+
+  /** Every part carries the appliance name, so each one is unique for Siri. */
+  #label(key) {
+    return `${this.displayName} ${LABELS[key] ?? key}`;
+  }
+
   #switch(key, wanted, isOn, setOn) {
     const { Service, Characteristic } = this.hap;
-    const service = this.#service(key, Service.Switch, LABELS[key] ?? key, wanted);
+    const service = this.#service(key, Service.Switch, this.#label(key), wanted);
     if (!service) {
       return;
     }
@@ -274,20 +309,20 @@ export class AcAccessory {
     this.#switch('beep', Boolean(s.beep) && f.beep, (st) => st.beep, (on) => this.#command('beep', on));
     this.#switch('autoClean', Boolean(s.autoClean) && f.autoClean, (st) => st.autoClean, (on) => this.#command('autoClean', on, 'auto clean'));
 
-    const light = this.#service('light', Service.Lightbulb, LABELS.light, Boolean(s.light) && f.light);
+    const light = this.#service('light', Service.Lightbulb, this.#label('light'), Boolean(s.light) && f.light);
     light?.getCharacteristic(Characteristic.On)
       .onGet(() => lightShown(this.#requireOnline()))
       .onSet((value) => this.#command('light', Boolean(value), 'display light'));
 
-    const humidity = this.#service('humidity', Service.HumiditySensor, LABELS.humidity, s.humidity === true && f.humidity);
+    const humidity = this.#service('humidity', Service.HumiditySensor, this.#label('humidity'), s.humidity === true && f.humidity);
     humidity?.getCharacteristic(Characteristic.CurrentRelativeHumidity)
       .onGet(() => this.#requireOnline().humidity ?? 0);
 
-    const filter = this.#service('filter', Service.FilterMaintenance, LABELS.filter, Boolean(s.filter) && f.filter);
+    const filter = this.#service('filter', Service.FilterMaintenance, this.#label('filter'), Boolean(s.filter) && f.filter);
     filter?.getCharacteristic(Characteristic.FilterChangeIndication).onGet(() => this.#filterIndication(this.#requireOnline()));
     filter?.getCharacteristic(Characteristic.FilterLifeLevel).onGet(() => this.#filterLife(this.#requireOnline()));
 
-    const outdoor = this.#service('outdoor', Service.TemperatureSensor, LABELS.outdoor,
+    const outdoor = this.#service('outdoor', Service.TemperatureSensor, this.#label('outdoor'),
       Boolean(s.outdoorTemperature) && f.outdoorTemperature);
     outdoor?.getCharacteristic(Characteristic.CurrentTemperature)
       .setProps({ minValue: -55, maxValue: 100 })
@@ -300,18 +335,6 @@ export class AcAccessory {
     const T = Characteristic.TargetHeatingCoolingState;
     const service = this.#service('thermostat', Service.Thermostat, this.displayName, true);
     service.setPrimaryService(true);
-    // A name change made in the plugin settings is followed only while the
-    // tile still carries the name this plugin gave it. Once the user renames
-    // the tile in the Home app, that name is kept through updates and
-    // restarts; only resetting the accessory brings the settings name back.
-    if (this.context.appliedName !== this.displayName) {
-      const current = service.getCharacteristic(Characteristic.ConfiguredName).value;
-      const renamedInHome = this.context.appliedName !== undefined && current !== this.context.appliedName;
-      if (!renamedInHome) {
-        service.setCharacteristic(Characteristic.ConfiguredName, this.displayName);
-        this.context.appliedName = this.displayName;
-      }
-    }
 
     const valid = [T.OFF];
     if (s.modes?.heat) {
@@ -375,7 +398,7 @@ export class AcAccessory {
 
   #buildFan(wanted) {
     const { Service, Characteristic } = this.hap;
-    const service = this.#service('fan', Service.Fanv2, LABELS.fan, wanted);
+    const service = this.#service('fan', Service.Fanv2, this.#label('fan'), wanted);
     if (!service) {
       return;
     }
