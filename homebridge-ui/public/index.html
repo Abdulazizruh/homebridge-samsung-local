@@ -99,6 +99,7 @@
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
       whereHome: 'Apple Home', whereEve: 'Eve + this page', whereUi: 'this page', whereNone: '—',
       testNote: 'All rows are mapped from LocalThings data and still need confirmation on your appliance.',
+      diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
       support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
@@ -165,6 +166,7 @@
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
       whereHome: 'Apple Home', whereEve: 'Eve وهذه الصفحة', whereUi: 'هذه الصفحة', whereNone: '—',
       testNote: 'جميع الصفوف مبنية على خرائط LocalThings، وتحتاج تأكيدًا على جهازك.',
+      diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
       support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
@@ -261,10 +263,46 @@
   async function downloadDiagnostics(target) {
     try {
       const dump = await homebridge.request('/diagnostics', target);
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
-      a.download = `samsung-local-diagnostics-${String(dump.kind || 'appliance')}.json`; a.click();
+      const text = JSON.stringify(dump, null, 2);
+      const name = `samsung-local-diagnostics-${String(dump.kind || 'appliance')}.json`;
+      // Phones often block a file download started inside the settings frame,
+      // so the text is also shown here with Share and Copy buttons.
+      showDiagnostics(text, name);
+      try {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+        a.download = name; a.click();
+      } catch { /* the panel below still has the text */ }
     } catch (err) { homebridge.toast.error(errorText(err)); }
+  }
+
+  function showDiagnostics(text, name) {
+    let box = $('sl-diag-panel');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'sl-diag-panel';
+      box.className = 'sl-card';
+      $('sl-result').parentElement.after(box);
+    }
+    const canShare = typeof navigator.share === 'function' && typeof File === 'function';
+    box.innerHTML = `<h6>${t('diagTitle')}</h6><div class="sl-muted mb-2">${t('diagHelp')}</div>
+      <div class="sl-row mb-2">
+        ${canShare ? `<button class="btn btn-sm btn-primary" id="sl-diag-share">${t('diagShare')}</button>` : ''}
+        <button class="btn btn-sm btn-outline-secondary" id="sl-diag-copy">${t('diagCopy')}</button>
+      </div>
+      <textarea class="form-control" id="sl-diag-text" readonly dir="ltr" rows="8" style="font-family:monospace;font-size:.75rem"></textarea>`;
+    $('sl-diag-text').value = text;
+    $('sl-diag-copy').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(text); } catch { $('sl-diag-text').select(); document.execCommand('copy'); }
+      homebridge.toast.success(t('diagCopied'));
+    });
+    $('sl-diag-share')?.addEventListener('click', async () => {
+      try {
+        const file = new File([text], name, { type: 'application/json' });
+        if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: name }); } else { await navigator.share({ title: name, text }); }
+      } catch { /* cancelled */ }
+    });
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function featureTable(d) {
