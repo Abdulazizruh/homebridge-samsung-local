@@ -437,3 +437,20 @@ test('washer options: a part switched off in the settings is removed, energy mov
   assert.ok(done);
   await waitFor(() => done.getCharacteristic(handler.eve.TotalConsumption).value === 1190.4);
 });
+
+test('removing the Python runtime touches only that folder', async () => {
+  const { removePythonRuntime } = await import('../src/storage.js');
+  const paths = pluginPaths(tmpDir());
+  fs.mkdirSync(path.join(paths.venv, 'lib'), { recursive: true });
+  fs.writeFileSync(path.join(paths.venv, 'lib', 'big.so'), Buffer.alloc(4096));
+  fs.writeFileSync(paths.runtimeMarker, '{}');
+  fs.mkdirSync(paths.credentials, { recursive: true });
+  fs.writeFileSync(path.join(paths.credentials, 'client.key'), 'key');
+  fs.writeFileSync(paths.addresses, '{}');
+  const { freed } = removePythonRuntime(paths);
+  assert.equal(freed, 4096);
+  assert.equal(fs.existsSync(paths.venv), false);
+  assert.equal(fs.existsSync(paths.runtimeMarker), false);
+  assert.equal(fs.readFileSync(path.join(paths.credentials, 'client.key'), 'utf8'), 'key');
+  assert.ok(fs.existsSync(paths.addresses));
+});

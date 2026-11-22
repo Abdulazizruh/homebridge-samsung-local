@@ -5,7 +5,7 @@ import { describeDevice, diagnosticsDump, stableDeviceId } from '../src/capabili
 import { HelperClient } from '../src/runtime/helperClient.js';
 import { chosenEngine, DEFAULT_ENGINE, helperSpawn } from '../src/runtime/engine.js';
 import { ensureRuntime, findPython, runtimeStatus } from '../src/runtime/pythonRuntime.js';
-import { ensureDir, listSnapshots, pluginPaths, readJson, wipePluginData, writeJson } from '../src/storage.js';
+import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePythonRuntime, wipePluginData, writeJson } from '../src/storage.js';
 import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
@@ -23,6 +23,7 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/wipe', (payload) => this.wipe(payload));
     this.onRequest('/saved-devices', () => this.savedDevices());
     this.onRequest('/tv-pair', (payload) => this.tvPair(payload));
+    this.onRequest('/remove-runtime', () => this.removeRuntime());
     this.ready();
   }
 
@@ -52,6 +53,8 @@ class UiServer extends HomebridgePluginUiServer {
     return {
       engine,
       defaultEngine: DEFAULT_ENGINE,
+      // Megabytes the unused Python runtime still takes (also in every backup).
+      pythonRuntimeMb: Math.round(folderSize(this.paths.venv) / 1e6),
       // The JavaScript engine has nothing to prepare.
       runtimeReady: engine === 'javascript' || runtimeStatus(this.paths).ready,
       python,
@@ -206,6 +209,15 @@ class UiServer extends HomebridgePluginUiServer {
    * This plugin's saved appliance list, straight from the Homebridge config
    * file. Read-only, and only this plugin's own platform block is returned.
    */
+  /** Free the space of a Python runtime that is no longer in use. */
+  async removeRuntime() {
+    if (chosenEngine(await this.pluginConfig()) !== 'javascript') {
+      throw new RequestError('The Python runtime is in use. Switch to the JavaScript engine first.', { code: 'runtime_in_use' });
+    }
+    const { freed } = removePythonRuntime(this.paths);
+    return { freedMb: Math.round(freed / 1e6) };
+  }
+
   /** This plugin's own block of the Homebridge configuration. */
   async pluginConfig() {
     try {
