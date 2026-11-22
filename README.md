@@ -15,7 +15,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.1.3. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.1.4. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -48,11 +48,11 @@ An IP address alone is **not** enough for every appliance. Discovery only report
 |---|---|
 | Homebridge | 2.x (tested on 2.5). 1.8+ is expected to work but is untested |
 | Node.js | 22.12 or newer, or 24 |
-| Python | **3.11 or newer** with `venv` and `pip` |
+| Connection engine | Chosen in the plugin settings. **JavaScript** works as installed and needs nothing else. **Python** needs Python **3.11 or newer** with `venv` and `pip` |
 | CPU | 64-bit ARM (Raspberry Pi 4/5 with a 64-bit OS) or x86-64. **32-bit systems are not supported** (no prebuilt packages) |
 | Network | The Homebridge host must reach the appliances directly. In Docker use `network_mode: host` |
 
-The **official Homebridge Docker image (Ubuntu 24.04 based) already contains Python 3.12, pip and venv**, so nothing extra is needed there. The older Ubuntu 22.04 variant of the image ships Python 3.10, which is too old.
+The rest of this section applies to the Python engine only. The **official Homebridge Docker image (Ubuntu 24.04 based) already contains Python 3.12, pip and venv**, so nothing extra is needed there. The older Ubuntu 22.04 variant of the image ships Python 3.10, which is too old.
 
 On first start the plugin creates a private Python environment in `<homebridge storage>/samsung-local/venv` and downloads pinned packages into it (about 32 MB). It runs as the Homebridge user, needs no root, and installs nothing system-wide. Nothing is installed during `npm install`.
 
@@ -82,7 +82,7 @@ Then restart Homebridge.
 
 ## Set up
 
-1. Open the plugin settings. If the Python runtime is not ready yet, press **Prepare now**.
+1. Open the plugin settings and choose the connection engine. JavaScript works straight away. With Python, press **Prepare now** if its runtime is not ready yet.
 2. Enter the appliance IP address and press **Test & discover**.
 3. Review the table of functions the appliance reports, give it a name (optional) and tick what should appear in HomeKit.
 4. Press **Add to configuration**.
@@ -146,7 +146,7 @@ Left: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (75 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (76 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |

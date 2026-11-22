@@ -1,3 +1,4 @@
+import { DropLog } from './dropLog.js';
 import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
 import { WasherAccessory } from './homekit/washerAccessory.js';
 import { LAUNDRY_KINDS } from './capabilities/washer.js';
@@ -34,6 +35,14 @@ export class SamsungLocalPlatform {
     this.cached = new Map(); // uuid -> PlatformAccessory restored by Homebridge
     this.devices = new Map(); // deviceId -> {link, handler, accessory, entry}
     this.retryTimers = new Set();
+    this.drops = new DropLog();
+    const daily = setInterval(() => {
+      for (const line of this.drops.report()) {
+        this.log.info(line);
+      }
+    }, 24 * 60 * 60 * 1000);
+    daily.unref?.();
+    this.retryTimers.add(daily);
     this.paths = pluginPaths(api.user.storagePath());
     this.helper = null;
     this.stopping = false;
@@ -408,6 +417,9 @@ export class SamsungLocalPlatform {
     pushCheck.unref?.();
     this.retryTimers.add(pushCheck);
     link.on('availability', (online) => {
+      if (!this.stopping) {
+        this.drops.note(name, online);
+      }
       if (online) {
         this.#rememberAddress(deviceId, entry, { host: link.host, mac: link.mac, port: link.port });
         const tm = link.timing;

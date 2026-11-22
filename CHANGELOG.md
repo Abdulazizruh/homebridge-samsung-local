@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.4
+
+- Once every 24 hours the log states, for each appliance, how many times the connection was lost and the longest gap. Restarts of the bridge are not counted.
+- Guide: the requirements start from the choice of engine. JavaScript works as installed; Python 3.11 or newer is needed only for the Python engine.
+- Package description now covers air conditioners, the washer and TVs.
+
+**بالعربية**
+
+- يكتب السجل كل 24 ساعة، لكل جهاز، عدد مرات فقد الاتصال وأطول انقطاع. إعادة تشغيل الجسر لا تُحتسب.
+- الدليل: تبدأ المتطلبات من اختيار المحرك. يعمل JavaScript مباشرة بعد التثبيت، و Python 3.11 أو أحدث مطلوب لمحرك Python فقط.
+- وصف الحزمة صار يشمل المكيفات والغسالة والتلفزيونات.
+
 ## 1.1.3
 
 - A command answered 4.00 is asked once more after a short pause. On a real air conditioner a correct power command was now and then refused with 4.00, with the Python engine as well as the JavaScript one, so the cause is the appliance and not the engine. The log says when this happens and how the second ask ended.
