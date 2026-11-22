@@ -14,6 +14,13 @@
   .sl-danger { border-color: rgba(220,53,69,.5); }
   .sl-lang { margin-inline-start: auto; }
   .sl-scroll { overflow-x: auto; }
+  .sl-step { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
+  .sl-step:last-child { border-bottom: 0; }
+  .sl-num { flex: 0 0 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .82rem; background: rgba(128,128,128,.2); }
+  .sl-step.done .sl-num { background: rgba(40,167,69,.3); }
+  .sl-step.now .sl-num { background: #0d6efd; color: #fff; }
+  .sl-step.now .sl-step-title { font-weight: 700; }
+  .sl-step.done .sl-step-text { display: none; }
 </style>
 
 <div class="sl-wrap" id="sl-root">
@@ -23,8 +30,8 @@
     <button class="btn btn-sm btn-outline-secondary sl-lang" id="sl-lang"></button>
   </div>
 
+  <div class="sl-card" id="sl-steps"></div>
   <div class="sl-card" id="sl-runtime"></div>
-  <div class="sl-card" id="sl-bridge" style="display:none"></div>
 
   <div class="sl-card">
     <h6 data-t="addTitle"></h6>
@@ -71,6 +78,11 @@
       runtimePrepare: 'Prepare now', runtimePreparing: 'Preparing… this can take a few minutes on a Raspberry Pi',
       runtimeNote: 'One-time download of pinned packages from PyPI into the plugin folder. No root access, nothing installed system-wide.',
       pythonFound: 'Python found', pythonProblem: 'Python problem',
+      stepsTitle: 'Getting started', stepsDone: 'Setup complete', stepDone: 'done', stepNow: 'do this now', stepsOrder: 'Steps 2 and 3 work in either order.',
+      step1: 'Prepare the plugin', step1Text: 'Press "Prepare now" in the box below. It downloads what the plugin needs into its own folder (one time, it can take a few minutes).',
+      step2: 'Add your appliance', step2Text: 'Find the appliance IP address in your router\'s device list, type it under "Add an appliance", press "Test & discover", then "Add to configuration".',
+      step3: 'Turn on the child bridge', step3Text: 'Press SAVE at the bottom. On the plugin card open ⋮ → Bridge Settings, switch the bridge on, save, and restart Homebridge.',
+      step4: 'Add it to the Home app', step4Text: 'In ⋮ → Bridge Settings a QR code appears. In the Home app choose + → Add Accessory and scan it. Later changes here only need a restart of the child bridge.',
       bridgeWarn: 'Run this plugin as a child bridge: use the bridge button (⋮ → Bridge Settings) on the plugin card after saving. It keeps this plugin separate from your other plugins.',
       addTitle: 'Add an appliance', discover: 'Test & discover',
       addHint: 'Enter the appliance IP address. Success means the appliance answered an authenticated read of its identity and resources.',
@@ -131,6 +143,11 @@
       runtimePrepare: 'جهّزها الآن', runtimePreparing: 'جارٍ التجهيز… قد يستغرق دقائق على Raspberry Pi',
       runtimeNote: 'تنزيل لمرة واحدة لحزم محددة الإصدار من PyPI داخل مجلد الإضافة. لا يحتاج صلاحيات المدير، ولا يثبّت شيئًا على مستوى النظام.',
       pythonFound: 'Python الموجود', pythonProblem: 'مشكلة في Python',
+      stepsTitle: 'خطوات البدء', stepsDone: 'اكتمل الإعداد', stepDone: 'تم', stepNow: 'نفّذ هذه الآن', stepsOrder: 'الخطوتان 2 و3 تصحّان بأي ترتيب.',
+      step1: 'جهّز الإضافة', step1Text: 'اضغط «جهّزها الآن» في المربع أدناه. ينزّل ما تحتاجه الإضافة داخل مجلدها الخاص (مرة واحدة، قد يستغرق دقائق).',
+      step2: 'أضف جهازك', step2Text: 'خذ عنوان الجهاز من قائمة الأجهزة في الراوتر، اكتبه تحت «إضافة جهاز»، اضغط «اختبار واكتشاف»، ثم «أضف إلى الإعدادات».',
+      step3: 'فعّل الجسر الفرعي', step3Text: 'اضغط SAVE في الأسفل. من بطاقة الإضافة افتح ⋮ ← Bridge Settings، فعّل الجسر، احفظ، ثم أعد تشغيل Homebridge.',
+      step4: 'أضفه إلى تطبيق Home', step4Text: 'في ⋮ ← Bridge Settings يظهر رمز QR. في تطبيق Home اختر + ← Add Accessory وامسحه. أي تعديل لاحق هنا يكفيه إعادة تشغيل الجسر الفرعي.',
       bridgeWarn: 'شغّل هذه الإضافة كجسر فرعي مستقل: بعد الحفظ استخدم زر الجسر في بطاقة الإضافة (⋮ ← إعدادات الجسر). بذلك تبقى منفصلة عن بقية الإضافات.',
       addTitle: 'إضافة جهاز', discover: 'اختبار واكتشاف',
       addHint: 'أدخل عنوان IP للجهاز. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
@@ -353,6 +370,24 @@
     }));
   }
 
+  // A short checklist that shows what is done and what to do next.
+  function renderSteps() {
+    const done = [Boolean(status.runtimeReady), config.devices.length > 0, Boolean(config._bridge)];
+    const next = done.indexOf(false);
+    const steps = [1, 2, 3, 4].map((n, i) => {
+      const isDone = i < 3 && done[i];
+      const isNow = i === next || (i === 3 && next === -1);
+      const tag = isDone ? `<span class="sl-pill sl-ok">${t('stepDone')}</span>` : isNow && i < 3 ? `<span class="sl-pill sl-warn">${t('stepNow')}</span>` : '';
+      return `<div class="sl-step ${isDone ? 'done' : ''} ${isNow ? 'now' : ''}"><div class="sl-num">${isDone ? '✓' : n}</div>
+        <div><div class="sl-step-title">${t('step' + n)} ${tag}</div><div class="sl-step-text sl-muted">${t('step' + n + 'Text')}</div></div></div>`;
+    }).join('');
+    const body = `${steps}<div class="sl-muted mt-1">${t('stepsOrder')}</div>`;
+    // Once everything detectable is done the guide folds away, still one tap from view.
+    $('sl-steps').innerHTML = next === -1
+      ? `<details><summary><strong>${t('stepsDone')}</strong> <span class="sl-pill sl-ok">✓</span></summary><div class="mt-2">${body}</div></details>`
+      : `<h6>${t('stepsTitle')}</h6>${body}`;
+  }
+
   function renderRuntime() {
     const box = $('sl-runtime');
     const py = status.python ? `${t('pythonFound')}: <span dir="ltr">${esc(status.python.version)} · ${esc(status.arch)}</span>` : `${t('pythonProblem')}: ${esc(T[lang]['err_' + status.pythonError?.code] ?? status.pythonError?.message ?? '')}`;
@@ -374,9 +409,7 @@
     root.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
     $('sl-lang').textContent = t('langButton');
     $('sl-wipe-list').innerHTML = ['wipe1', 'wipe2', 'wipe3'].map((k) => `<li>${t(k)}</li>`).join('');
-    const bridge = $('sl-bridge');
-    bridge.style.display = config._bridge ? 'none' : '';
-    bridge.textContent = t('bridgeWarn');
+    renderSteps();
     $('sl-poll').value = config.pollInterval ?? 15;
     $('sl-push').checked = config.pushUpdates !== false;
     renderRuntime(); renderResult(); renderDevices();
