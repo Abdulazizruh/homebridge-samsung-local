@@ -127,7 +127,7 @@
       name: 'Name', namePh: 'e.g. Living Room AC', nameNote: 'Shown in HomeKit exactly as typed.',
       showInHome: 'Shown in HomeKit', add: 'Add to configuration', update: 'Update configuration',
       followed: 'Address changed, followed automatically:', err_not_found: 'No appliance with this MAC address was found on the local network. Check that it is on and on the same network.',
-      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', diagnostics: 'Diagnostics', changeIp: 'Change IP', configure: 'Configuration',
+      saved: 'Saved. Restart the child bridge to apply.', remove: 'Remove', removeConfirm: 'Press again to remove', diagnostics: 'Diagnostics', changeIp: 'Change IP', configure: 'Configuration',
       online: 'connected', offline: 'not reachable', unknownState: 'not contacted yet',
       thFeature: 'Function / reading', thDevice: 'Appliance', thPlugin: 'Plugin', thWhere: 'Shown in', thNote: 'Value / limits',
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
@@ -230,7 +230,7 @@
       name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'يظهر في HomeKit كما تكتبه تمامًا.',
       showInHome: 'ما يظهر في HomeKit', add: 'أضف إلى الإعدادات', update: 'حدّث الإعدادات',
       followed: 'تغيّر العنوان وتُوبع تلقائيًا:', err_not_found: 'لم يُعثر على جهاز بهذا العنوان الفيزيائي في الشبكة المحلية. تأكد أنه يعمل وعلى الشبكة نفسها.',
-      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان', configure: 'الإعدادات',
+      saved: 'تم الحفظ. أعد تشغيل الجسر الفرعي للتطبيق.', remove: 'حذف', removeConfirm: 'اضغط مرة أخرى للحذف', diagnostics: 'التشخيص', changeIp: 'تغيير العنوان', configure: 'الإعدادات',
       online: 'متصل', offline: 'غير متاح', unknownState: 'لم يُتصل به بعد',
       thFeature: 'الوظيفة أو القياس', thDevice: 'الجهاز', thPlugin: 'الإضافة', thWhere: 'مكان الظهور', thNote: 'القيمة والقيود',
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
@@ -553,6 +553,18 @@
             <button class="btn btn-sm btn-outline-danger" data-rm="${i}">${t('remove')}</button></td></tr>`;
     }).join('')}</tbody></table></div>`;
     box.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', async () => {
+      // Two presses: the first asks, the second (within a few seconds) removes.
+      if (b.dataset.armed !== '1') {
+        b.dataset.armed = '1';
+        b.className = 'btn btn-sm btn-danger';
+        b.textContent = t('removeConfirm');
+        setTimeout(() => {
+          if (b.isConnected && b.dataset.armed === '1') {
+            b.dataset.armed = ''; b.className = 'btn btn-sm btn-outline-danger'; b.textContent = t('remove');
+          }
+        }, 5000);
+        return;
+      }
       const key = keyOf(config.devices[Number(b.dataset.rm)]);
       await change(() => { config.devices = config.devices.filter((x) => keyOf(x) !== key); });
     }));

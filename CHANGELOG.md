@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.8
+
+- Settings page: removing an appliance asks first. The Remove button has to be pressed twice within a few seconds.
+
+**بالعربية**
+
+- صفحة الإعدادات: حذف جهاز يطلب تأكيدًا أولًا. يلزم الضغط على زر الحذف مرتين خلال ثوانٍ.
+
 ## 1.1.7
 
 TV tile and TV switches:
