@@ -141,6 +141,7 @@ npm install --save homebridge-samsung-local
 
 <p>
   <img src="assets/screenshots/tv-tile.png" alt="تلفزيون Samsung بطاقةً في Apple Home: التشغيل والمداخل" width="240">
+  <img src="assets/screenshots/tv-remote.png" alt="ريموت مركز التحكم للتلفزيون: الأسهم والرجوع والتشغيل والإيقاف المؤقت والمعلومات والكتم والتشغيل" width="240">
 </p>
 
 ## خيارات كل جهاز

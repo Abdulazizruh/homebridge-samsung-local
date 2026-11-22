@@ -137,6 +137,7 @@ As a TV tile the TV has its own power button and input list, and the remote in C
 
 <p>
   <img src="assets/screenshots/tv-tile.png" alt="A Samsung TV as a tile in Apple Home: power and inputs" width="240">
+  <img src="assets/screenshots/tv-remote.png" alt="The Control Centre remote for the TV: arrows, back, play and pause, info, mute and power" width="240">
 </p>
 
 ## Options for each appliance
