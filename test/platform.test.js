@@ -351,3 +351,38 @@ test('an appliance that moves to a new address is followed, and found there agai
   await online(third.platform);
   assert.equal(third.platform.devices.get(DI).link.host, '10.0.0.20');
 });
+
+test('washer: read-only tile with time remaining, and a sensor when the cycle ends', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const { api, platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  assert.equal(api.registered.length, 1);
+  const { handler } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const valve = handler.services.get('cycle');
+  const done = handler.services.get('finished');
+  assert.equal(valve.getCharacteristic(C.ConfiguredName).value, 'Washer');
+  assert.equal(done.getCharacteristic(C.ConfiguredName).value, 'Washer Finished');
+  // Idle: off, no countdown (57 minutes is only the length of the selected course), no negative power.
+  assert.equal(valve.getCharacteristic(C.Active).value, 0);
+  assert.equal(valve.getCharacteristic(C.RemainingDuration).value, 0);
+  assert.equal(valve.getCharacteristic(handler.eve.Consumption).value, 0);
+  assert.equal(valve.getCharacteristic(handler.eve.TotalConsumption).value, 1190.4);
+  assert.equal(done.getCharacteristic(C.OccupancyDetected).value, 0);
+
+  const state = (body) => platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body });
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Wash', [`${V}remainingTime`]: '00:41:00' });
+  await waitFor(() => valve.getCharacteristic(C.InUse).value === 1);
+  assert.equal(valve.getCharacteristic(C.Active).value, 1);
+  assert.equal(valve.getCharacteristic(C.RemainingDuration).value, 41 * 60);
+
+  // Tapping the tile changes nothing at the appliance and the tile shows the truth again.
+  await valve.getCharacteristic(C.Active).handleSetRequest(0);
+  await waitFor(() => valve.getCharacteristic(C.Active).value === 1);
+
+  await state({ [`${V}state`]: 'Ready', [`${V}progress`]: 'None', [`${V}remainingTime`]: '00:57:00' });
+  await waitFor(() => done.getCharacteristic(C.OccupancyDetected).value === 1);
+  assert.equal(valve.getCharacteristic(C.Active).value, 0);
+  assert.equal(valve.getCharacteristic(C.RemainingDuration).value, 0);
+});

@@ -100,6 +100,7 @@
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
       whereHome: 'Apple Home', whereEve: 'Eve + this page', whereUi: 'this page', whereNone: '—',
       testNote: 'Tested on real air conditioners. Available features differ from one model to another.',
+      laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
@@ -129,10 +130,12 @@
         swing: 'Swing', 'preset.windFree': 'WindFree', 'preset.fast': 'Fast', 'preset.quiet': 'Quiet', 'preset.sleep': 'Sleep',
         'preset.smart': 'Smart', 'preset.comfort': 'Comfort', 'preset.twoStep': '2-Step', 'preset.motionDirect': 'Wind follows people',
         'preset.motionIndirect': 'Wind avoids people', light: 'Light Display', beep: 'Beep', autoClean: 'Auto clean',
+        cycle: 'Cycle', remainingTime: 'Time remaining', cycleFinished: 'Cycle finished (sensor)',
         filter: 'Filter usage (%)', alarms: 'Alarms', powerWatts: 'Power now (W)', energyKWh: 'Energy total (kWh)',
         voltage: 'Voltage (V)', current: 'Current (A)', outdoorTemperature: 'Outdoor temperature (°C)', occupancy: 'Motion / occupancy' },
-      v: { off: 'off', both: 'both', vertical: 'vertical', horizontal: 'horizontal', normal: 'normal', wash: 'wash', replace: 'replace', none: 'none' },
-      n: { switch: 'separate switch', 'on-off-only': 'on/off only, no brightness', 'not-reported': 'not reported by this appliance',
+      v: { running: 'running', paused: 'paused', idle: 'idle', off: 'off', both: 'both', vertical: 'vertical', horizontal: 'horizontal', normal: 'normal', wash: 'wash', replace: 'replace', none: 'none' },
+      n: { min: 'min', 'stage-none': '', 'stage-weightsensing': 'weighing', 'stage-wash': 'wash', 'stage-rinse': 'rinse', 'stage-spin': 'spin', 'stage-finish': 'finished',
+        switch: 'separate switch', 'on-off-only': 'on/off only, no brightness', 'not-reported': 'not reported by this appliance',
         'derived-token': 'derived value, unverified', 'no-known-resource': 'no known local resource', 'reports-zero': 'appliance reports 0: hidden until it measures' },
       feat: { fan: 'Fan tile', fanAutoSwitch: 'Fan Auto switch', fanTurboSwitch: 'Turbo switch', fanSpeedSwitches: 'Low/Medium/High switches',
         drySwitch: 'Dry switch', fanOnlySwitch: 'Fan Only switch', windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart',
@@ -168,6 +171,7 @@
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
       whereHome: 'Apple Home', whereEve: 'Eve وهذه الصفحة', whereUi: 'هذه الصفحة', whereNone: '—',
       testNote: 'مجرَّب على مكيفات حقيقية. تختلف المزايا المتاحة من طراز إلى آخر.',
+      laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
@@ -197,10 +201,12 @@
         swing: 'التأرجح', 'preset.windFree': 'WindFree', 'preset.fast': 'سريع', 'preset.quiet': 'هادئ', 'preset.sleep': 'نوم',
         'preset.smart': 'ذكي', 'preset.comfort': 'راحة', 'preset.twoStep': 'مرحلتان', 'preset.motionDirect': 'توجيه الهواء نحو الأشخاص',
         'preset.motionIndirect': 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة', beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي',
+        cycle: 'الدورة', remainingTime: 'الوقت المتبقي', cycleFinished: 'انتهاء الدورة (حساس)',
         filter: 'استهلاك الفلتر (%)', alarms: 'التنبيهات والأعطال', powerWatts: 'القدرة اللحظية (واط)', energyKWh: 'الطاقة التراكمية (كيلوواط ساعة)',
         voltage: 'الجهد (فولت)', current: 'التيار (أمبير)', outdoorTemperature: 'الحرارة الخارجية (°م)', occupancy: 'الحركة والإشغال' },
-      v: { off: 'متوقف', both: 'الاتجاهان', vertical: 'رأسي', horizontal: 'أفقي', normal: 'سليم', wash: 'يحتاج غسلًا', replace: 'يحتاج استبدالًا', none: 'لا يوجد' },
-      n: { switch: 'مفتاح مستقل', 'on-off-only': 'تشغيل وإطفاء فقط دون سطوع', 'not-reported': 'الجهاز لم يعلن عنه',
+      v: { running: 'تعمل', paused: 'متوقفة مؤقتًا', idle: 'خاملة', off: 'متوقف', both: 'الاتجاهان', vertical: 'رأسي', horizontal: 'أفقي', normal: 'سليم', wash: 'يحتاج غسلًا', replace: 'يحتاج استبدالًا', none: 'لا يوجد' },
+      n: { min: 'دقيقة', 'stage-none': '', 'stage-weightsensing': 'وزن', 'stage-wash': 'غسيل', 'stage-rinse': 'شطف', 'stage-spin': 'عصر', 'stage-finish': 'انتهت',
+        switch: 'مفتاح مستقل', 'on-off-only': 'تشغيل وإطفاء فقط دون سطوع', 'not-reported': 'الجهاز لم يعلن عنه',
         'derived-token': 'قيمة مشتقة غير مؤكدة', 'no-known-resource': 'لم يُعرف له مورد محلي', 'reports-zero': 'الجهاز يُرجع صفرًا: يُخفى حتى يبدأ القياس' },
       feat: { fan: 'بطاقة المروحة', fanAutoSwitch: 'مفتاح المروحة التلقائية', fanTurboSwitch: 'مفتاح السرعة القصوى', fanSpeedSwitches: 'مفاتيح منخفض/متوسط/مرتفع',
         drySwitch: 'مفتاح التجفيف', fanOnlySwitch: 'مفتاح مروحة فقط', windFree: 'WindFree', fast: 'سريع', quiet: 'هادئ', sleep: 'نوم', smart: 'ذكي',
@@ -307,17 +313,17 @@
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function featureTable(d) {
+  function featureTable(d, noteKey = 'testNote') {
     const rows = (d.features || []).map((r) => {
       const dev = r.device === true ? `<span class="sl-pill sl-ok">${t('yes')}</span>` : r.device === 'unconfirmed' ? `<span class="sl-pill sl-warn">${t('unconfirmed')}</span>` : `<span class="sl-pill">${t('no')}</span>`;
       const plug = !r.device ? '—' : r.write ? t('control') : t('readOnly');
       const where = { home: t('whereHome'), eve: t('whereEve'), 'plugin-ui': t('whereUi'), none: t('whereNone') }[r.where];
       const word = (x) => String(x).split('/').map((w) => T[lang].v[w] ?? esc(w)).join(' / ');
       const value = !r.device || r.value === null || r.value === undefined ? '' : r.value === true ? '●' : r.value === false ? '○' : word(r.value);
-      const note = r.note ? (T[lang].n[r.note] ?? word(r.note)) : '';
+      const note = r.note ? (T[lang].n[r.note] ?? word(String(r.note).replace(/^stage-/, ''))) : '';
       return `<tr><td>${esc(T[lang].f[r.id] ?? r.id)}</td><td>${dev}</td><td>${plug}</td><td>${where}</td><td><span dir="ltr">${value}</span> <span class="sl-muted">${note}</span></td></tr>`;
     }).join('');
-    return `<div class="sl-scroll"><table class="sl-table"><thead><tr><th>${t('thFeature')}</th><th>${t('thDevice')}</th><th>${t('thPlugin')}</th><th>${t('thWhere')}</th><th>${t('thNote')}</th></tr></thead><tbody>${rows}</tbody></table></div><div class="sl-muted mt-1">${t('testNote')}</div>`;
+    return `<div class="sl-scroll"><table class="sl-table"><thead><tr><th>${t('thFeature')}</th><th>${t('thDevice')}</th><th>${t('thPlugin')}</th><th>${t('thWhere')}</th><th>${t('thNote')}</th></tr></thead><tbody>${rows}</tbody></table></div><div class="sl-muted mt-1">${t(noteKey)}</div>`;
   }
 
   function renderResult() {
@@ -345,6 +351,13 @@
           <datalist id="sl-names">${legacyNames.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
+        <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
+    }
+    if (d.kind !== 'airConditioner' && d.support === 'experimental') {
+      html += `<div class="mt-2">${featureTable(d, 'laundryNote')}</div>
+        <div class="mt-2"><strong>${t('name')}</strong>
+          <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
+          <div class="sl-muted">${t('nameNote')}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
     html += `<div class="mt-2"><button class="btn btn-sm btn-outline-secondary" id="sl-result-diag">${t('diagFile')}</button>

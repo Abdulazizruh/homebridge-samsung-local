@@ -1,4 +1,6 @@
 import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
+import { WasherAccessory } from './homekit/washerAccessory.js';
+import { LAUNDRY_KINDS } from './capabilities/washer.js';
 import { describeDevice, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
 import { shortId } from './redact.js';
@@ -154,9 +156,9 @@ export class SamsungLocalPlatform {
           { code: 'identity_mismatch' });
       }
       const described = describeDevice(probe.identity, probe.resources);
-      if (described.kind !== 'airConditioner') {
+      if (described.kind !== 'airConditioner' && !(LAUNDRY_KINDS.has(described.kind) && described.support === 'experimental')) {
         this.log.warn(`${entry.host}: found a ${described.kind} (${described.model ?? 'unknown model'}). `
-          + 'This version only creates HomeKit accessories for air conditioners; the device is listed in the plugin settings for diagnostics.');
+          + 'This version has no HomeKit accessory for it; the device is listed in the plugin settings for diagnostics.');
         writeJson(snapshotFile(this.paths, deviceId), this.#snapshot(entry, deviceId, probe, false));
         return;
       }
@@ -198,7 +200,10 @@ export class SamsungLocalPlatform {
   #attach(entry, deviceId, probe) {
     const uuid = this.api.hap.uuid.generate(UUID_NAMESPACE + deviceId);
     let accessory = this.cached.get(uuid);
-    const model = probe ? describeDevice(probe.identity, probe.resources).model : accessory?.context.model;
+    const described = probe ? describeDevice(probe.identity, probe.resources) : null;
+    const model = described ? described.model : accessory?.context.model;
+    const kind = described?.kind ?? accessory?.context.kind ?? 'airConditioner';
+    const laundry = LAUNDRY_KINDS.has(kind);
     const name = accessoryName(entry.name || accessory?.context.baseName || model);
     let fresh = false;
     if (!accessory) {
@@ -206,7 +211,8 @@ export class SamsungLocalPlatform {
         // Configured id with nothing cached: wait for the first real contact.
         return null;
       }
-      accessory = new this.api.platformAccessory(name, uuid, this.api.hap.Categories.AIR_CONDITIONER);
+      accessory = new this.api.platformAccessory(name, uuid,
+        laundry ? this.api.hap.Categories.OTHER : this.api.hap.Categories.AIR_CONDITIONER);
       fresh = true;
     }
     if (!fresh && accessory.displayName !== name) {
@@ -214,6 +220,7 @@ export class SamsungLocalPlatform {
       accessory.displayName = name;
     }
     accessory.context.deviceId = deviceId;
+    accessory.context.kind = kind;
     accessory.context.baseName = entry.name || accessory.context.baseName || model || null;
     accessory.context.model = model ?? accessory.context.model ?? null;
     if (probe) {
@@ -231,9 +238,9 @@ export class SamsungLocalPlatform {
       push: this.config.pushUpdates !== false,
       log: this.log,
     });
-    const handler = new AcAccessory({
-      api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features,
-    });
+    const handler = laundry
+      ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name })
+      : new AcAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features });
     link.on('update', (resources) => {
       writeJson(snapshotFile(this.paths, deviceId), this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true));
     });

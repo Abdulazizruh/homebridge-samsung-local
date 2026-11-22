@@ -206,3 +206,19 @@ test('diagnostics: machine state is kept (it is not a MAC address)', async () =>
   assert.deepEqual(out.machineStates, ['pause', 'run', 'stop']);
   assert.equal(out.macaddressWiFi, REDACTED);
 });
+
+test('washer model: tolerant state words, idle placeholders ignored', async () => {
+  const { buildWasherModel, parseDuration } = await import('../src/capabilities/washer.js');
+  const base = fixture('washer_topload').resources;
+  const idle = buildWasherModel(base).state;
+  assert.deepEqual([idle.inCycle, idle.remainingSeconds, idle.powerWatts, idle.energyKWh], [false, 0, 0, 1190.4]);
+  const with_ = (vs, std = {}) => buildWasherModel({ ...base,
+    '/operational/state/vs/0': { ...base['/operational/state/vs/0'], ...vs },
+    '/operational/state/0': { ...base['/operational/state/0'], ...std } }).state;
+  assert.equal(with_({ 'x.com.samsung.da.state': 'Run' }).running, true);
+  assert.equal(with_({ 'x.com.samsung.da.state': 'Pause' }).paused, true);
+  assert.equal(with_({}, { currentMachineState: 'Running' }).running, true);
+  assert.equal(with_({ 'x.com.samsung.da.state': 'Finish' }).finished, true);
+  assert.equal(parseDuration('01:07:00'), 4020);
+  assert.equal(parseDuration('soon'), null);
+});

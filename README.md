@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.12. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.13. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -28,7 +28,8 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Appliance | Level | Notes |
 |---|---|---|
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
-| Washers, dryers, refrigerators, ovens, … | **Diagnostics only** | Connects, lists what the appliance reports, creates no HomeKit accessory yet |
+| Washers, dryers, dishwashers | **Cycle follow-up** (new in 1.0.13) | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. The cycle is started at the appliance |
+| Refrigerators, ovens, … | **Diagnostics only** | Connects and lists what the appliance reports |
 | Samsung TVs | **Not supported** | TVs need an OCF credential owners cannot obtain yet. Keep them on your current plugin |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
 | Appliances that refuse the automatic certificate | **Not supported** | Detected and reported with the reason |
@@ -120,20 +121,20 @@ Behaviour rules:
 - Changes made with the remote or the Samsung app appear in HomeKit.
 - When an appliance is unreachable its accessory shows **No Response** and is kept. Accessories are only removed when you remove the appliance from the plugin settings.
 
-Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + optional-mode switches + light + humidity) is the same idea. The display light has no brightness here, and washers and TVs are not exposed yet.
+Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + optional-mode switches + light + humidity) is the same idea. The display light has no brightness here.
 
 ## What has been tested
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (51 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (54 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
 | Control from Apple Home (power, temperature, fan, modes) | **Confirmed on all five units** |
 | Reconnect on real hardware | **Pass**: short drops recover within seconds |
-| A washer (`DA_WM_TP1_21_COMMON`) | Answers locally and is read in diagnostics |
+| A washer (`DA_WM_TP1_21_COMMON`) | Answers locally; its accessory is built from its real capture and from cycle captures of other models |
 
 **It depends on your appliance.** Each model reports its own set of features. Use "Test & discover" in the settings: the table it shows is what your own appliance reports, and that is what appears in Apple Home.
 
