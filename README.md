@@ -123,6 +123,17 @@ Behaviour rules:
 
 Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + optional-mode switches + light + humidity) is the same idea. The display light has no brightness here.
 
+## Options for each appliance
+
+Every appliance has its own options. Press **Configuration** next to it in the plugin settings, tick what you want to see in Apple Home, then press **Update configuration**. Only the functions your own appliance reports are offered. A part you switch off is removed from Apple Home; the rest stays as it is.
+
+<p>
+  <img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="300">
+  <img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings" width="300">
+</p>
+
+Left: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display, humidity, power and energy). Right: a washer (cycle tile with time remaining, cycle finished sensor, power and energy).
+
 ## What has been tested
 
 | Kind of test | Status |
