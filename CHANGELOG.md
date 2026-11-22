@@ -13,11 +13,13 @@ Beta of 1.0.15 for trying the JavaScript connection engine: everything is the sa
 ## 1.0.15
 
 - Laundry appliances now have their own options, like air conditioners: show or hide the cycle tile, the "Finished" sensor, and the power and energy readings. Open the appliance with Configuration, tick what you want, press Update. A part that is switched off is removed from Apple Home; the energy readings move to the part that stays.
+- The cycle tile now also reports the cycle's length, which the Home app needs before it shows the time remaining on a valve tile.
 - The washer accessory is confirmed on a real washer (`DA_WM_TP1_21_COMMON`): running state, wash stage and time remaining.
 
 **بالعربية**
 
 - صار لأجهزة الغسيل خياراتها مثل المكيفات: أظهر أو أخفِ بطاقة الدورة، وحساس «Finished»، وقراءات القدرة والطاقة. افتح الجهاز من «Configuration»، وحدّد ما تريد، ثم اضغط «Update». الجزء الذي تُطفئه يُزال من Apple Home، وتنتقل قراءات الطاقة إلى الجزء الباقي.
+- صارت بطاقة الدورة تعلن مدة الدورة أيضًا، وهذا ما يحتاجه تطبيق Home ليعرض الوقت المتبقي على بطاقة الصمام.
 - تأكد ملحق الغسالة على غسالة حقيقية (`DA_WM_TP1_21_COMMON`): حالة التشغيل ومرحلة الغسيل والوقت المتبقي.
 
 ## 1.0.14
