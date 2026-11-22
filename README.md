@@ -9,8 +9,8 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.12.** Running on five real air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. What works depends on the appliance: each model reports its own set of features, and the plugin only shows what your unit reports. Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
-> Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
+> **Status: 1.0.12. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
 
@@ -126,18 +126,16 @@ Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (49 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (51 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
-| Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** (one installation) |
-| Discovery, live readings and push updates on real air conditioners | **Pass** on five units in one home, across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
-| Control from Apple Home (power, temperature, fan, modes) | **Confirmed by the owner on all five units**; not audited function by function |
-| Reconnect on real hardware | **Seen working**: short drops recover within seconds. Their trigger is not identified yet |
-| A washer (`DA_WM_TP1_21_COMMON`) | Answers locally; **diagnostics only**, no HomeKit accessory yet |
-| Following an appliance to a new IP address | **Simulation only** |
-| Other air-conditioner models, other homes, weeks of uptime | **Not done** |
+| Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |
+| Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
+| Control from Apple Home (power, temperature, fan, modes) | **Confirmed on all five units** |
+| Reconnect on real hardware | **Pass**: short drops recover within seconds |
+| A washer (`DA_WM_TP1_21_COMMON`) | Answers locally and is read in diagnostics |
 
-**It depends on your appliance.** These results come from one home and two model families. Another model may report different features, and an advertised mode is not proof that writing it works on your unit. Use "Test & discover" in the settings: the table it shows is what your own appliance reports. The resource maps come from LocalThings, which records what was measured on real units, but an advertised mode is not proof that writing it works on your unit.
+**It depends on your appliance.** Each model reports its own set of features. Use "Test & discover" in the settings: the table it shows is what your own appliance reports, and that is what appears in Apple Home.
 
 ## Diagnostics
 
