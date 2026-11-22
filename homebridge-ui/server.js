@@ -12,6 +12,7 @@ class UiServer extends HomebridgePluginUiServer {
   constructor() {
     super();
     this.paths = pluginPaths(this.homebridgeStoragePath);
+    this.lastProbes = new Map();
     this.onRequest('/status', () => this.status());
     this.onRequest('/prepare', () => this.prepare());
     this.onRequest('/probe', (payload) => this.probe(payload));
@@ -102,6 +103,9 @@ class UiServer extends HomebridgePluginUiServer {
       helper.stopped = true; // one-shot: never auto-restart
       await helper.start();
       const result = await helper.request('probe', { host }, 180_000);
+      // Kept in memory only, so a diagnostics file can be saved for an
+      // appliance that is not (or cannot yet be) configured.
+      this.lastProbes.set(host, { identity: result.identity, resources: result.resources });
       return this.present({
         host, identity: result.identity, resources: result.resources, online: true, updatedAt: Date.now(),
       }, 'probe');
@@ -112,8 +116,10 @@ class UiServer extends HomebridgePluginUiServer {
     }
   }
 
-  diagnostics({ deviceId } = {}) {
-    const snap = listSnapshots(this.paths).find((s) => s.deviceId === deviceId);
+  diagnostics({ deviceId, host } = {}) {
+    const snap = (deviceId && listSnapshots(this.paths).find((s) => s.deviceId === deviceId))
+      || (host && this.lastProbes.get(host))
+      || (host && listSnapshots(this.paths).find((s) => s.host === host));
     if (!snap?.resources) {
       throw new RequestError('No stored reading for this appliance yet.', { code: 'no_snapshot' });
     }

@@ -87,6 +87,7 @@
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
       whereHome: 'Apple Home', whereEve: 'Eve + this page', whereUi: 'this page', whereNone: '—',
       testNote: 'All rows are mapped from LocalThings data and still need confirmation on your appliance.',
+      diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
       support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
       reason_tv: 'Samsung TVs need an OCF credential that owners cannot obtain yet. Keep the TV on your current plugin.',
@@ -146,6 +147,7 @@
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
       whereHome: 'Apple Home', whereEve: 'Eve وهذه الصفحة', whereUi: 'هذه الصفحة', whereNone: '—',
       testNote: 'جميع الصفوف مبنية على خرائط LocalThings، وتحتاج تأكيدًا على جهازك.',
+      diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
       support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
       reason_tv: 'تلفزيونات Samsung تحتاج بيانات اعتماد OCF يتعذر على المالك الحصول عليها حاليًا. أبقِ التلفزيون على الإضافة الحالية.',
@@ -237,6 +239,15 @@
     return T[lang][`err_${code}`] ?? err?.message ?? String(err);
   }
 
+  async function downloadDiagnostics(target) {
+    try {
+      const dump = await homebridge.request('/diagnostics', target);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+      a.download = `samsung-local-diagnostics-${String(dump.kind || 'appliance')}.json`; a.click();
+    } catch (err) { homebridge.toast.error(errorText(err)); }
+  }
+
   function featureTable(d) {
     const rows = (d.features || []).map((r) => {
       const dev = r.device === true ? `<span class="sl-pill sl-ok">${t('yes')}</span>` : r.device === 'unconfirmed' ? `<span class="sl-pill sl-warn">${t('unconfirmed')}</span>` : `<span class="sl-pill">${t('no')}</span>`;
@@ -277,10 +288,13 @@
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
+    html += `<div class="mt-2"><button class="btn btn-sm btn-outline-secondary" id="sl-result-diag">${t('diagFile')}</button>
+      <div class="sl-muted">${t('diagNote')}</div></div>`;
     if (d.unknownResources?.length) {
       html += `<details class="mt-2"><summary>${t('unknownRes')} (${d.unknownResources.length})</summary><div dir="ltr" class="sl-muted">${d.unknownResources.map(esc).join('<br>')}</div></details>`;
     }
     box.innerHTML = html;
+    $('sl-result-diag')?.addEventListener('click', () => downloadDiagnostics({ deviceId: p.deviceId, host: p.host }));
     $('sl-add')?.addEventListener('click', async () => {
       const features = {};
       box.querySelectorAll('[data-feat]').forEach((el) => { features[el.dataset.feat] = el.checked; });
@@ -333,13 +347,9 @@
       }
     }));
     box.querySelectorAll('[data-ip]').forEach((b) => b.addEventListener('click', () => { $('sl-host').value = config.devices[Number(b.dataset.ip)].host; $('sl-host').focus(); }));
-    box.querySelectorAll('[data-diag]').forEach((b) => b.addEventListener('click', async () => {
-      try {
-        const dump = await homebridge.request('/diagnostics', { deviceId: config.devices[Number(b.dataset.diag)].id });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
-        a.download = 'samsung-local-diagnostics.json'; a.click();
-      } catch (err) { homebridge.toast.error(errorText(err)); }
+    box.querySelectorAll('[data-diag]').forEach((b) => b.addEventListener('click', () => {
+      const dev = config.devices[Number(b.dataset.diag)];
+      downloadDiagnostics({ deviceId: dev.id, host: dev.host });
     }));
   }
 
