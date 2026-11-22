@@ -7,24 +7,24 @@
   "footerDisplay": "Unofficial project, not affiliated with Samsung. Run this plugin as a child bridge.",
   "schema": {
     "type": "object",
+    "required": ["name"],
     "properties": {
       "name": {
         "title": "Name",
         "type": "string",
-        "default": "Samsung Local",
-        "required": true
+        "default": "Samsung Local"
       },
       "devices": {
         "title": "Appliances",
         "type": "array",
         "items": {
           "type": "object",
+          "required": ["host"],
           "properties": {
             "host": {
               "title": "IP address",
               "type": "string",
               "format": "ipv4",
-              "required": true,
               "placeholder": "192.168.1.50"
             },
             "name": {
