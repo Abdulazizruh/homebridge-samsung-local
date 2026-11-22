@@ -35,15 +35,22 @@ export class SamsungLocalPlatform {
     this.cached = new Map(); // uuid -> PlatformAccessory restored by Homebridge
     this.devices = new Map(); // deviceId -> {link, handler, accessory, entry}
     this.retryTimers = new Set();
-    this.drops = new DropLog();
-    const daily = setInterval(() => {
-      for (const line of this.drops.report()) {
-        this.log.info(line);
-      }
-    }, 24 * 60 * 60 * 1000);
-    daily.unref?.();
-    this.retryTimers.add(daily);
     this.paths = pluginPaths(api.user.storagePath());
+    this.drops = new DropLog({
+      load: () => readJson(this.paths.stability),
+      save: (state) => { try { writeJson(this.paths.stability, state); } catch { /* figures are best effort */ } },
+    });
+    this.stabilityNames = new Set();
+    const stability = setInterval(() => {
+      if (this.drops.due()) {
+        this.drops.keepOnly([...this.stabilityNames]);
+        for (const line of this.drops.report()) {
+          this.log.info(line);
+        }
+      }
+    }, 10 * 60 * 1000);
+    stability.unref?.();
+    this.retryTimers.add(stability);
     this.helper = null;
     this.stopping = false;
 
@@ -416,6 +423,8 @@ export class SamsungLocalPlatform {
     }, 120_000);
     pushCheck.unref?.();
     this.retryTimers.add(pushCheck);
+    this.stabilityNames.add(name);
+    this.drops.expect(name);
     link.on('availability', (online) => {
       if (!this.stopping) {
         this.drops.note(name, online);

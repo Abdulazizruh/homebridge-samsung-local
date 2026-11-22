@@ -409,6 +409,55 @@ test('washer: read-only tile with time remaining, and a sensor when the cycle en
   assert.equal(valve.getCharacteristic(C.RemainingDuration).value, 0);
 });
 
+test('washer finished notice: a model that says "Finish" is believed; a cancelled cycle and a restart give no notice', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const storage = tmpDir();
+  const devices = [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }];
+  const config = { devices: [{ host: '10.0.0.9', id: W, name: 'Washer' }] };
+  const first = await boot({ storage, devices, config });
+  await online(first.platform, W);
+  const { handler, accessory } = first.platform.devices.get(W);
+  const C = first.platform.api.hap.Characteristic;
+  const done = handler.services.get('finished').getCharacteristic(C.OccupancyDetected);
+  const state = (platform, body) => platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body });
+  const run = { [`${V}state`]: 'Run', [`${V}progress`]: 'Wash', [`${V}remainingTime`]: '00:41:00' };
+  const ready = { [`${V}state`]: 'Ready', [`${V}progress`]: 'None', [`${V}remainingTime`]: '00:57:00' };
+  const finish = { [`${V}state`]: 'Finish', [`${V}progress`]: 'Finish', [`${V}remainingTime`]: '00:00:00' };
+
+  // A complete cycle: the appliance says Finish.
+  await state(first.platform, run);
+  await waitFor(() => accessory.context.washerSeen?.inCycle === true);
+  await state(first.platform, finish);
+  await waitFor(() => done.value === 1);
+  assert.equal(accessory.context.sendsFinish, true);
+
+  // A cancelled cycle on the same washer: Run, then straight back to Ready.
+  await state(first.platform, run);
+  await waitFor(() => done.value === 0);
+  await state(first.platform, ready);
+  await waitFor(() => accessory.context.washerSeen?.inCycle === false);
+  assert.equal(done.value, 0);
+
+  // Left showing Finish, then the bridge restarts: the notice is not given again.
+  await state(first.platform, run);
+  await waitFor(() => accessory.context.washerSeen?.inCycle === true);
+  await state(first.platform, finish);
+  await waitFor(() => done.value === 1);
+  await first.platform.stop();
+  // After the restart the washer still shows Finish.
+  const still = structuredClone(fixture('washer_topload'));
+  Object.assign(still.resources['/operational/state/vs/0'], finish);
+  const stillFile = path.join(tmpDir(), 'washer_finish.json');
+  fs.writeFileSync(stillFile, JSON.stringify(still));
+  const second = await boot({ storage, devices: [{ host: '10.0.0.9', fixture: stillFile }], cached: [accessory], config });
+  t.after(() => second.platform.stop());
+  await online(second.platform, W);
+  const again = second.platform.devices.get(W).handler.services.get('finished').getCharacteristic(C.OccupancyDetected);
+  await new Promise((r) => { setTimeout(r, 400); });
+  assert.equal(second.platform.devices.get(W).handler.model.state.finished, true);
+  assert.equal(again.value, 0);
+});
+
 test('a failed helper start is retried on its own; appliances connect once it works', async (t) => {
   const api = makeApi(tmpDir());
   let starts = 0;

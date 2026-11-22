@@ -38,7 +38,6 @@ export class WasherAccessory {
     this.model = null;
     this.finished = false;
     this.finishTimer = null;
-    this.wasInCycle = null;
 
     if (this.context.resources) {
       this.model = buildWasherModel(this.context.resources);
@@ -163,15 +162,30 @@ export class WasherAccessory {
     this.model = buildWasherModel(resources);
     this.context.resources = resources;
     const st = this.model.state;
-    if (this.wasInCycle === true && !st.inCycle) {
-      this.#markFinished();
-    } else if (this.wasInCycle === null && st.finished) {
-      // First contact while the appliance still shows "finished".
-      this.#markFinished();
-    } else if (st.inCycle && this.finished) {
-      this.#clearFinished();
+    // What was last seen is kept with the accessory, so a restart of the
+    // bridge neither repeats a notice already given nor misses a cycle that
+    // ended while it was down.
+    const seen = this.context.washerSeen ?? null;
+    if (st.finished) {
+      this.context.sendsFinish = true;
     }
-    this.wasInCycle = st.inCycle;
+    if (st.inCycle) {
+      if (this.finished) {
+        this.#clearFinished();
+      }
+    } else if (st.finished && seen && !seen.finished) {
+      // The appliance itself says the cycle is complete.
+      this.#markFinished();
+    } else if (!st.finished && seen?.inCycle) {
+      if (this.context.sendsFinish) {
+        // This model announces "finished" itself; leaving a cycle without
+        // it means the cycle was cancelled or switched off.
+        this.log.info(`[${this.displayName}] cycle stopped before its end; no "finished" notice.`);
+      } else {
+        this.#markFinished();
+      }
+    }
+    this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished };
     this.#push();
   }
 

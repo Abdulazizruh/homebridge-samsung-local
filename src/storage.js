@@ -15,6 +15,8 @@ export function pluginPaths(homebridgeStoragePath) {
     // Where each appliance was last found (it may differ from the settings).
     addresses: path.join(root, 'addresses.json'),
     tvTokens: path.join(root, 'tv-tokens.json'),
+    // Connection losses counted for the daily line in the log.
+    stability: path.join(root, 'stability.json'),
   };
 }
 

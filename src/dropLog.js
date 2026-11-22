@@ -1,50 +1,109 @@
 /**
  * Counts connection losses per appliance so stability can be judged from one
- * log line a day: how many times the link was lost and the longest gap.
- * Restarts of the bridge are never counted: counting starts after the first
- * connection and nothing is carried across a restart.
+ * log line per appliance a day: how many times the link was lost and the
+ * longest gap.
+ *
+ * - The figures are kept on disk, so an update or restart of the bridge does
+ *   not throw away the day measured so far. The restart itself is never
+ *   counted as a loss, and the time the bridge was down is not measured.
+ * - A loss that continues from one period into the next is counted once, in
+ *   the period it began; the next report names it as continuing.
+ * - An appliance that never connected during the period is reported as such.
  */
-export class DropLog {
-  #devices = new Map();
-  #now;
+const PERIOD_MS = 24 * 60 * 60 * 1000;
 
-  constructor(now = Date.now) {
+export class DropLog {
+  #now;
+  #save;
+  #state;
+  #up = new Map(); // name -> connected in this run of the bridge
+  #since = new Map(); // name -> when the loss still open began (this run)
+  #carried = new Set(); // names whose open loss began in an earlier period
+
+  constructor({ now = Date.now, load = () => null, save = () => {}, periodMs = PERIOD_MS } = {}) {
     this.#now = now;
+    this.#save = save;
+    this.periodMs = periodMs;
+    const stored = load();
+    this.#state = stored && Number.isFinite(stored.periodStart) && stored.devices && typeof stored.devices === 'object'
+      ? stored : { periodStart: now(), devices: {} };
+  }
+
+  #entry(name) {
+    return (this.#state.devices[name] ??= { connected: false, drops: 0, longestMs: 0 });
+  }
+
+  /** Name an appliance that is expected to connect, so its absence shows. */
+  expect(name) {
+    this.#entry(name);
   }
 
   /** Record a change of availability for one appliance. */
   note(name, online) {
-    const entry = this.#devices.get(name) ?? { seen: false, since: null, drops: 0, longestMs: 0 };
-    this.#devices.set(name, entry);
+    const entry = this.#entry(name);
     if (online) {
-      if (entry.since !== null) {
-        entry.longestMs = Math.max(entry.longestMs, this.#now() - entry.since);
-        entry.since = null;
+      if (this.#since.has(name)) {
+        entry.longestMs = Math.max(entry.longestMs, this.#now() - Math.max(this.#since.get(name), this.#state.periodStart));
+        this.#since.delete(name);
       }
-      entry.seen = true;
-    } else if (entry.seen && entry.since === null) {
-      entry.since = this.#now();
+      entry.connected = true;
+      this.#up.set(name, true);
+    } else if (this.#up.get(name) && !this.#since.has(name)) {
+      this.#since.set(name, this.#now());
       entry.drops += 1;
+    } else {
+      return;
     }
+    this.#save(this.#state);
   }
 
-  /** One line per appliance for the period since the last call, then start a new period. */
-  report(period = '24 hours') {
+  /** True once a full period has passed since the last report. */
+  due() {
+    return this.#now() - this.#state.periodStart >= this.periodMs;
+  }
+
+  /** One line per appliance for the period, then a new period starts. */
+  report() {
+    const now = this.#now();
+    const hours = Math.max(1, Math.round((now - this.#state.periodStart) / 3_600_000));
+    const period = `last ${hours} ${hours === 1 ? 'hour' : 'hours'}`;
     const lines = [];
-    for (const [name, entry] of this.#devices) {
-      if (!entry.seen) {
-        continue;
+    for (const [name, entry] of Object.entries(this.#state.devices)) {
+      const open = this.#since.has(name);
+      const carried = this.#carried.has(name);
+      const longest = Math.max(entry.longestMs, open ? now - Math.max(this.#since.get(name), this.#state.periodStart) : 0);
+      const notes = [
+        carried ? 'one loss continued from the period before and is not counted again' : null,
+        open ? 'still not reachable' : null,
+      ].filter(Boolean);
+      const tail = notes.length ? ` (${notes.join('; ')})` : '';
+      if (!entry.connected && !open) {
+        lines.push(`[${name}] ${period}: did not connect during the period.`);
+      } else if (entry.drops === 0 && !open && !carried) {
+        lines.push(`[${name}] ${period}: no connection losses.`);
+      } else {
+        const count = `${entry.drops} new connection ${entry.drops === 1 ? 'loss' : 'losses'}`;
+        lines.push(`[${name}] ${period}: ${count}${longest ? `, longest gap ${span(longest)}` : ''}${tail}.`);
       }
-      const open = entry.since !== null;
-      const longest = Math.max(entry.longestMs, open ? this.#now() - entry.since : 0);
-      lines.push(entry.drops === 0 && !open
-        ? `[${name}] last ${period}: no connection losses.`
-        : `[${name}] last ${period}: ${entry.drops} connection ${entry.drops === 1 ? 'loss' : 'losses'}, longest ${span(longest)}${open ? ' (still not reachable)' : ''}.`);
-      // A loss still open is carried into the next period as its first.
-      entry.drops = open ? 1 : 0;
-      entry.longestMs = 0;
+      if (open) {
+        this.#carried.add(name);
+      } else {
+        this.#carried.delete(name);
+      }
+      this.#state.devices[name] = { connected: Boolean(this.#up.get(name)) && !open, drops: 0, longestMs: 0 };
     }
+    this.#state.periodStart = now;
+    this.#save(this.#state);
     return lines;
+  }
+
+  /** Forget appliances that are no longer configured. */
+  keepOnly(names) {
+    for (const name of Object.keys(this.#state.devices)) {
+      if (!names.includes(name)) {
+        delete this.#state.devices[name];
+      }
+    }
   }
 }
 

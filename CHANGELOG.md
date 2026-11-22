@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.5
+
+- Washer "Finished" sensor: on a model that announces the end of a cycle itself ("Finish"), only that announcement triggers the sensor. A cycle that is cancelled or switched off gives no notice and is noted in the log instead. Models that never announce it keep the earlier behaviour.
+- A washer left showing "Finish" no longer triggers the sensor again every time the bridge restarts; a cycle that ended while the bridge was down is still noticed.
+- Daily stability line: the figures are kept on disk, so an update or restart no longer discards the day measured so far. A loss running across two periods is counted once. An appliance that never connected is listed as "did not connect during the period".
+
+**بالعربية**
+
+- حساس «انتهى» في الغسالة: في الموديل الذي يعلن نهاية الدورة بنفسه («Finish») يُفعَّل الحساس بهذا الإعلان فقط. الدورة الملغاة أو المطفأة لا تعطي إشعارًا، ويُكتب ذلك في السجل. الموديلات التي لا تعلن النهاية تبقى على السلوك السابق.
+- الغسالة المتروكة على «Finish» لم تعد تفعّل الحساس من جديد مع كل إعادة تشغيل للجسر، والدورة التي انتهت والجسر متوقف ما زالت تُلتقط.
+- سطر الاستقرار اليومي: تُحفظ الأرقام على القرص، فلا يضيع قياس اليوم عند التحديث أو إعادة التشغيل. الانقطاع الممتد على فترتين يُحسب مرة واحدة. والجهاز الذي لم يتصل أبدًا يظهر بعبارة «did not connect during the period».
+
 ## 1.1.4
 
 - Once every 24 hours the log states, for each appliance, how many times the connection was lost and the longest gap. Restarts of the bridge are not counted.
