@@ -8,23 +8,24 @@
 [![tests](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml)
 [![license](https://badgen.net/npm/license/homebridge-samsung-local)](LICENSE)
 
-Local, cloud-free control of Samsung SmartThings-compatible appliances from Apple Home.
+Local, cloud-free control of Samsung appliances from Apple Home: air conditioners, washer status with a cycle-finished notice, and TVs with the Control Centre remote.
 
 **Apple Home → Homebridge → the appliance, directly over your home network.**
 No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.2.1. Tested on real air conditioners.** Running daily on five units from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. Control from Apple Home is confirmed on all five. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.2.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
 
 | | |
 |---|---|
-| Connection | CoAP over DTLS on the LAN, through the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library |
-| Setup | Enter an IP address in the plugin settings, press **Test & discover** |
-| Identity | Each appliance is keyed on its own stable device ID, so a new IP address never creates a duplicate |
+| Connection | Air conditioners and washers: CoAP over DTLS on the LAN. TVs: the TV's own local remote-control channel |
+| Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
+| Setup | Enter an IP address or a MAC address in the plugin settings, press **Test & discover** |
+| Identity | Each appliance is keyed on its own stable device ID, so a new IP address never creates a duplicate. An air conditioner or washer whose address changes is found again by itself |
 | Updates | Push (CoAP Observe) where the appliance supports it, polling every 15 s as fallback |
 | Works offline | Yes, after the one-time setup below |
 | Runs beside | `homebridge-smartthings-oauth` and any other plugin, without touching their files |
@@ -34,7 +35,8 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Appliance | Level | Notes |
 |---|---|---|
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
-| Washers, dryers, dishwashers | **Cycle follow-up** (new in 1.0.13) | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. The cycle is started at the appliance |
+| Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it |
+| Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
 | Refrigerators, ovens, … | **Diagnostics only** | Connects and lists what the appliance reports |
 | Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
@@ -60,7 +62,7 @@ On first start the plugin creates a private Python environment in `<homebridge s
 
 | When | Where | Why |
 |---|---|---|
-| First start, and after a plugin update that changes the pins | `pypi.org`, `files.pythonhosted.org` | Download the pinned Python packages |
+| Python engine only: first start, and after a plugin update that changes the pins | `pypi.org`, `files.pythonhosted.org` | Download the pinned Python packages. The JavaScript engine downloads nothing |
 | Normal operation | none | Only the appliances on your LAN are contacted |
 | An appliance stopped answering (optional, on by default) | every address of the home network it was on (its /24), UDP 5683 | One small question to find the appliance at its new address, at most once every five minutes. Nothing leaves your network. Switch it off under General → "Find an appliance again when its address changes" |
 | Samsung TVs | the TV itself, TCP 8001 and 8002; one wake-on-network packet to switch it on | Local remote-control channel of the TV |
@@ -83,14 +85,15 @@ Then restart Homebridge.
 ## Set up
 
 1. Open the plugin settings and choose the connection engine. JavaScript works straight away. With Python, press **Prepare now** if its runtime is not ready yet.
-2. Enter the appliance IP address and press **Test & discover**.
-3. Review the table of functions the appliance reports, give it a name (optional) and tick what should appear in HomeKit.
+2. Enter the appliance IP address, or its MAC address, and press **Test & discover**.
+3. Right under the address field: give it a name (optional) and tick what should appear in HomeKit. The table of functions the appliance reports is under that.
 4. Press **Add to configuration**.
+   A TV asks for one more step before that: press **Pair with the TV** and choose "Allow" on the TV screen.
 5. On the plugin card open **⋮ → Bridge Settings** and enable the **child bridge**. Restart, then scan the child bridge's own QR code in the Home app.
 
 Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
 
-A static DHCP lease for each appliance is recommended. If an address changes, enter the new one and press **Test & discover**: the existing entry is updated.
+A static DHCP lease for each appliance is recommended. An air conditioner or washer whose address changes is found again by the plugin. To set an address yourself, press **Change IP** beside the appliance, enter the new one and press **Test & discover**: the existing entry is updated.
 
 ### Testing beside LocalThings
 
@@ -126,6 +129,8 @@ Behaviour rules:
 - Turning **off** WindFree, Fast or Quiet never powers the air conditioner off, and turning off a mode that is not active does nothing.
 - The fan tile cannot power the air conditioner off (HomeKit sends "off" when the slider is dragged to zero).
 - A command is reported as successful only after the appliance acknowledged it. A refused command shows as failed. If the appliance acknowledges but does not apply a change, HomeKit returns to the real state within seconds.
+- Some air conditioners now and then answer a correct command with a refusal (4.00). The plugin asks once more; the log says when this happened and how it ended.
+- Switching off from Apple Home shows on every tile of the air conditioner at once.
 - Changes made with the remote or the Samsung app appear in HomeKit.
 - When an appliance is unreachable its accessory shows **No Response** and is kept. Accessories are only removed when you remove the appliance from the plugin settings.
 
@@ -144,7 +149,7 @@ Left: the thermostat of an air conditioner. Right: the parts of the same air con
   <img src="assets/screenshots/washer-home.png" alt="Washer in Apple Home: a cycle tile and the finished sensor" width="260">
 </p>
 
-A washer: the cycle tile (on while a cycle runs, with the time remaining inside it) and the sensor that turns on when the cycle has finished, for a notification or an automation. The washer is read only; nothing is sent to it.
+A washer: the cycle tile (on while a cycle runs, with the time remaining inside it) and the sensor that turns on when the cycle has finished, for a notification or an automation. On a washer that announces the end of a cycle itself, only that announcement turns the sensor on, so a cancelled cycle gives no notice. The washer is read only; nothing is sent to it.
 
 ### A Samsung TV in Apple Home
 
@@ -159,7 +164,9 @@ Give each TV a fixed address in your router (a DHCP reservation). An air conditi
 
 ## Options for each appliance
 
-Every appliance has its own options. Press **Configuration** next to it in the plugin settings, tick what you want to see in Apple Home, then press **Update configuration**. Only the functions your own appliance reports are offered. A part you switch off is removed from Apple Home; the rest stays as it is.
+Every appliance has its own options. Press **Options** under it in the plugin settings: they open right there, under the appliance. Tick what you want to see in Apple Home, then press **Update configuration**. Only the functions your own appliance reports are offered. A part you switch off is removed from Apple Home; the rest stays as it is.
+
+A name is changed in place with the pencil beside it. **Remove** asks to be pressed twice.
 
 <p>
   <img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="300">
@@ -182,13 +189,17 @@ First: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Displa
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
 | Control from Apple Home (power, temperature, fan, modes) | **Confirmed on all five units** |
 | Reconnect on real hardware | **Pass**: short drops recover within seconds |
-| A washer (`DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage and time remaining |
+| A washer (`DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage, time remaining and the cycle-finished notice |
+| Both engines on the same six appliances (five air conditioners and the washer) | **Pass**: both connect to all six and receive push updates. In a start-up comparison Python connected about one second sooner |
+| A command refused with 4.00 and asked once more | **Confirmed on a real air conditioner**: accepted on the second ask |
 
 **It depends on your appliance.** Each model reports its own set of features. Use "Test & discover" in the settings: the table it shows is what your own appliance reports, and that is what appears in Apple Home.
 
 ## Diagnostics
 
-- Plugin settings → **Diagnostics** downloads a redacted dump (no serial numbers, MAC or IP addresses, device IDs, Wi-Fi names or keys).
+- Plugin settings → **Diagnostics** downloads a redacted dump (no serial numbers, MAC or IP addresses, device IDs, Wi-Fi names or keys). TVs have none.
+- Once every 24 hours the log states, for each appliance, how many times the connection was lost and the longest gap. Restarts of the bridge are not counted.
+- Each connection is logged with the time it took.
 - Enable Homebridge debug mode for detailed logs. Certificates and keys are never logged.
 
 ## Update
@@ -197,8 +208,8 @@ Use the Homebridge Plugins tab. The settings, the certificate and the accessorie
 
 ## Remove
 
-1. In the Home app, remove the **child bridge** of this plugin (long-press the bridge → Remove Bridge). Uninstalling the plugin does **not** remove its pairing from the Home app.
-2. Optional: plugin settings → **Delete data**. This deletes only the `samsung-local` folder (certificate, cached readings, Python runtime).
+1. In the Home app, remove the **child bridge** of this plugin (long-press the bridge → Remove Bridge). Uninstalling the plugin does **not** remove its pairing from the Home app. A TV added as a TV tile is its own accessory: remove each one in the Home app as well.
+2. Optional: plugin settings → **Delete data**. This deletes only the `samsung-local` folder (certificate, cached readings, TV pairings, Python runtime).
 3. Uninstall from the Homebridge Plugins tab. When the plugin stops, its helper process stops with it; nothing keeps running.
 
 Removal never touches other plugins, Home Assistant, the appliances' network settings or their SmartThings registration.
@@ -209,6 +220,6 @@ See [docs/MIGRATION.md](docs/MIGRATION.md). Apple Home automations do **not** mo
 
 ## Credits and licences
 
-MIT. Built on [SmartThings-Local](https://github.com/QuiteYellow/SmartThings-Local) (MIT, Jack Nagy) and the appliance maps of [LocalThings](https://github.com/mbillow/localthings) (MIT, Marc Billow). HomeKit layout inspired by [homebridge-smartthings-oauth](https://github.com/aziz66/homebridge-smartthings) (Apache-2.0). Details in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT. Built on [SmartThings-Local](https://github.com/QuiteYellow/SmartThings-Local) (MIT, Jack Nagy) and the appliance maps of [LocalThings](https://github.com/mbillow/localthings) (MIT, Marc Billow). The JavaScript engine uses the transport of [homebridge-samsung-ocf](https://github.com/aziz66/homebridge-samsung-ocf) (MIT). HomeKit layout inspired by [homebridge-smartthings-oauth](https://github.com/aziz66/homebridge-smartthings) (Apache-2.0). Details in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 "Samsung" and "SmartThings" are trademarks of Samsung Electronics Co., Ltd., used only to name the hardware this software works with.

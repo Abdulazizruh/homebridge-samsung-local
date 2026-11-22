@@ -11,7 +11,7 @@ Apple Home treats this plugin's accessories as new devices. **Automations, scene
 | 3 | Edit every automation and scene: add the new accessory, remove the old one. The Home app has no bulk replace |
 | 4 | Give the accessory its final name in the plugin settings or in the Home app |
 | 5 | In the old plugin, add the migrated appliance to its ignore list (or remove the plugin if nothing else uses it) |
-| 6 | Keep TVs, washers and anything this plugin does not expose on the old plugin |
+| 6 | Keep on the old plugin only what this plugin does not offer you: starting or stopping a washer cycle (here the washer is read only), and any appliance that this plugin lists as diagnostics only |
 
 This plugin never changes or deletes the old plugin's configuration, tokens, cache or pairing. The only thing it reads is the list of accessory names in Homebridge's accessory cache, read-only, to suggest names on the settings page.
 
@@ -30,6 +30,6 @@ This plugin never changes or deletes the old plugin's configuration, tokens, cac
 | 3 | عدّل كل أتمتة ومشهد: أضف الجهاز الجديد ثم احذف القديم. تطبيق Home لا يوفر استبدالًا جماعيًا |
 | 4 | اكتب الاسم النهائي للجهاز في إعدادات الإضافة أو في تطبيق Home |
 | 5 | في الإضافة القديمة أضف الجهاز المنقول إلى قائمة التجاهل، أو احذف الإضافة إذا لم يبق لها استخدام |
-| 6 | أبقِ التلفزيونات والغسالة وكل ما لم تدعمه هذه الإضافة على الإضافة القديمة |
+| 6 | أبقِ على الإضافة القديمة ما لا تقدمه هذه الإضافة فقط: بدء دورة الغسالة أو إيقافها (الغسالة هنا للقراءة فقط)، وأي جهاز تعرضه هذه الإضافة للتشخيص فقط |
 
 تبقى إعدادات الإضافة القديمة ورموزها وملفاتها واقترانها دون أي تعديل أو حذف. الشيء الوحيد الذي تقرؤه هذه الإضافة هو أسماء الأجهزة من ملف كاش Homebridge، للقراءة فقط، لاقتراح الأسماء في صفحة الإعدادات.
