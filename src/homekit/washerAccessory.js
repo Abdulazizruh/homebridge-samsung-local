@@ -91,6 +91,9 @@ export class WasherAccessory {
       const valve = this.#service('cycle', Service.Valve, 'cycle');
       valve.setCharacteristic(Characteristic.ValveType, Characteristic.ValveType.GENERIC_VALVE);
       valve.getCharacteristic(Characteristic.RemainingDuration).setProps({ maxValue: 86400 });
+      // The Home app only shows a countdown on a valve that also has a set duration.
+      valve.getCharacteristic(Characteristic.SetDuration).setProps({ maxValue: 86400 })
+        .onSet(() => { setTimeout(() => this.#push(), 300).unref?.(); });
       valve.getCharacteristic(Characteristic.Active).onSet(() => {
         // Read-only: the appliance does not accept a remote start. Show the truth again.
         setTimeout(() => this.#push(), 300).unref?.();
@@ -170,7 +173,11 @@ export class WasherAccessory {
     if (valve) {
       valve.updateCharacteristic(Characteristic.Active, st.inCycle ? 1 : 0);
       valve.updateCharacteristic(Characteristic.InUse, st.running ? 1 : 0);
-      valve.updateCharacteristic(Characteristic.RemainingDuration, Math.min(86400, Math.max(0, st.remainingSeconds)));
+      const remaining = Math.min(86400, Math.max(0, st.remainingSeconds));
+      // The cycle's length: the longest time remaining seen since it started.
+      this.cycleLength = st.inCycle ? Math.max(this.cycleLength ?? 0, remaining) : 0;
+      valve.updateCharacteristic(Characteristic.SetDuration, this.cycleLength);
+      valve.updateCharacteristic(Characteristic.RemainingDuration, remaining);
     }
     if (this.features.energyEve && this.energyHost) {
       if (st.powerWatts !== null) {

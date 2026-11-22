@@ -376,6 +376,7 @@ test('washer: read-only tile with time remaining, and a sensor when the cycle en
   await waitFor(() => valve.getCharacteristic(C.InUse).value === 1);
   assert.equal(valve.getCharacteristic(C.Active).value, 1);
   assert.equal(valve.getCharacteristic(C.RemainingDuration).value, 41 * 60);
+  assert.equal(valve.getCharacteristic(C.SetDuration).value, 41 * 60);
 
   // Tapping the tile changes nothing at the appliance and the tile shows the truth again.
   await valve.getCharacteristic(C.Active).handleSetRequest(0);
