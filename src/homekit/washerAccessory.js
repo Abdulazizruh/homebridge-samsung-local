@@ -3,7 +3,7 @@ import { eveCharacteristics } from './eve.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = { cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert' };
-export const CYCLE_STYLES = ['readonly', 'valve', 'sensor'];
+export const CYCLE_STYLES = ['valve', 'sensor'];
 export const WASHER_FEATURES = {
   cycleTile: true, finishedSensor: true, energyEve: true,
   // Extras, off until the owner asks for them.
@@ -18,11 +18,12 @@ export const WASHER_FEATURES = {
  * Nothing is written to the appliance.
  */
 export class WasherAccessory {
-  constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'readonly', finishedHoldMs = FINISHED_HOLD_MS }) {
-    // 'readonly': a valve tile that cannot be tapped on or off (keeps the countdown)
-    // 'valve':    a plain valve tile; a tap is undone at once
-    // 'sensor':   a running sensor; never accepts a tap, has no countdown
-    this.cycleStyle = CYCLE_STYLES.includes(cycleStyle) ? cycleStyle : 'readonly';
+  constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'valve', finishedHoldMs = FINISHED_HOLD_MS }) {
+    // 'valve':  a valve tile with the countdown; a tap is undone at once
+    // 'sensor': a running sensor; never accepts a tap, has no countdown
+    // (A valve without write permission was tried: the Home app still sends the
+    // tap, gets a refusal and shows "No Response" for some seconds.)
+    this.cycleStyle = CYCLE_STYLES.includes(cycleStyle) ? cycleStyle : 'valve';
     this.features = { ...WASHER_FEATURES, ...features };
     this.api = api;
     this.hap = api.hap;
@@ -103,10 +104,9 @@ export class WasherAccessory {
     } else if (this.features.cycleTile) {
       drop(Service.OccupancySensor, 'running');
       const valve = this.#service('cycle', Service.Valve, 'cycle');
-      const readOnly = this.cycleStyle === 'readonly';
-      // Without write permission the Home app has nothing to send when the tile is tapped.
-      const perms = readOnly ? [Perms.PAIRED_READ, Perms.NOTIFY] : [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY];
-      const undo = () => { setTimeout(() => this.#push(), 30).unref?.(); };
+      // Restores write permission on tiles created by 1.0.18, which had none.
+      const perms = [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY];
+      const undo = () => { setImmediate(() => this.#push()); };
       valve.setCharacteristic(Characteristic.ValveType, Characteristic.ValveType.GENERIC_VALVE);
       valve.getCharacteristic(Characteristic.RemainingDuration).setProps({ maxValue: 86400 });
       // The Home app only shows a countdown on a valve that also has a set duration.

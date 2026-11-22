@@ -488,15 +488,15 @@ test('washer: extras stay away by default, and the not-used list names only what
   assert.equal(described.features.find((r) => r.id === 'washCount').value, 211);
 });
 
-test('washer tile styles: read-only by default (nothing to tap), or a running sensor', async (t) => {
+test('washer tile styles: a tile that stays writable (also when 1.0.18 left "readonly" in the settings), or a running sensor', async (t) => {
   const W = fixture('washer_topload').identity.di;
   const devices = [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }];
-  const a = await boot({ devices, config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
+  const a = await boot({ devices, config: { devices: [{ host: '10.0.0.9', name: 'Washer', cycleStyle: 'readonly' }] } });
   await online(a.platform, W);
   const { Characteristic: C, Perms } = a.api.hap;
   const valve = a.platform.devices.get(W).handler.services.get('cycle');
-  assert.ok(!valve.getCharacteristic(C.Active).props.perms.includes(Perms.PAIRED_WRITE));
-  assert.ok(valve.getCharacteristic(C.Active).props.perms.includes(Perms.NOTIFY));
+  // Without write permission the Home app shows "No Response" after a tap.
+  assert.ok(valve.getCharacteristic(C.Active).props.perms.includes(Perms.PAIRED_WRITE));
   await a.platform.stop();
 
   const b = await boot({ devices, config: { devices: [{ host: '10.0.0.9', name: 'Washer', cycleStyle: 'sensor' }] } });

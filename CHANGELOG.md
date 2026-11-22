@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.19
+
+- Laundry: the read-only cycle tile from 1.0.18 is withdrawn. On a real washer the Home app still sent the tap, got a refusal and showed "No Response" for some seconds. The tile accepts the tap again and undoes it at once, with no error. To have nothing happen at all on a tap, choose "Running sensor" under Configuration → "How the cycle tile behaves" (it has no countdown).
+
+**بالعربية**
+
+- أجهزة الغسيل: سُحبت بطاقة الدورة «للقراءة فقط» التي جاءت في 1.0.18. على غسالة حقيقية بقي تطبيق Home يرسل الضغطة، فيُرفض الأمر وتظهر «No Response» ثوانيَ. عادت البطاقة تقبل الضغطة وتلغيها فورًا دون خطأ. وإذا أردت ألا يحدث شيء إطلاقًا عند الضغط فاختر «حساس تشغيل» من «Configuration ← سلوك بطاقة الدورة» (وهو دون عدّاد).
+
 ## 1.0.18
 
 - Laundry: the cycle tile no longer reacts to a tap. The Home app sends an on/off command when a valve tile's icon is tapped; the tile is now read-only, so there is nothing to send, and the countdown inside stays. Under Configuration, "How the cycle tile behaves" also offers a plain tile or a running sensor.

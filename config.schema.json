@@ -222,22 +222,16 @@
             "cycleStyle": {
               "title": "Laundry: how the cycle tile behaves",
               "type": "string",
-              "default": "readonly",
+              "default": "valve",
               "oneOf": [
                 {
-                  "title": "Tile that cannot be tapped on or off (recommended)",
-                  "enum": [
-                    "readonly"
-                  ]
-                },
-                {
-                  "title": "Plain tile (a tap is undone at once)",
+                  "title": "Tile with countdown (a tap is undone at once)",
                   "enum": [
                     "valve"
                   ]
                 },
                 {
-                  "title": "Running sensor (no countdown)",
+                  "title": "Running sensor (no countdown, never reacts to a tap)",
                   "enum": [
                     "sensor"
                   ]
