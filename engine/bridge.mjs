@@ -19,14 +19,14 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { createRequire } from 'node:module';
 
+import { lookupSecurePorts } from './portlookup.mjs';
 const require = createRequire(import.meta.url);
 const { DtlsClientTransport } = require('./vendor/dtls/transport.js');
 const { CoapSession } = require('./vendor/coap/session.js');
 const { decodeCbor, encodeCbor } = require('./vendor/ocf/cbor.js');
-const { discoverSecurePorts } = require('./vendor/ocf/portdiscovery.js');
 const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/cert.js');
 
-export const HELPER_VERSION = 'js-0.1.1';
+export const HELPER_VERSION = 'js-0.1.2';
 const SUBSCRIBE_CONFIRM_MS = 3000;
 const SEND_RATE_PER_S = 25;
 const KNOWN_PORT_TIMEOUT_MS = 6000;
@@ -385,16 +385,17 @@ async function openLink(host, port, cred, onNotification) {
   }
   // Some appliances answer the port question late or only on the second ask.
   let advertised = [];
+  let answered = false;
   for (const timeoutMs of DISCOVERY_ROUNDS) {
-    try {
-      advertised = await discoverSecurePorts(host, { timeoutMs, ...(DISCOVERY_PORT ? { discoveryPort: DISCOVERY_PORT } : {}) });
-    } catch { /* discovery is best effort */ }
+    const found = await lookupSecurePorts(host, { timeoutMs, ...(DISCOVERY_PORT ? { discoveryPort: DISCOVERY_PORT } : {}) });
+    advertised = found.ports;
+    answered = answered || found.answered;
     if (advertised.length) {
       break;
     }
   }
   details.advertised = advertised;
-  details.plaintext_answered = advertised.length > 0;
+  details.plaintext_answered = answered;
   for (const candidate of advertised.filter((p) => p !== MULTICAST_SECURE_PORT && !tried.includes(p))) {
     const link = await attempt(candidate, CONNECT_TIMEOUT_MS);
     if (link) {
@@ -412,7 +413,7 @@ async function openLink(host, port, cred, onNotification) {
     }
     const info = last ? classify(last) : { code: 'connection', message: 'handshake failed' };
     throw new HelperError(info.code === 'connection' ? 'timeout' : info.code,
-      `The appliance did not answer on its usual port (${info.message}).`, { triedPorts: [port], details });
+      `The appliance did not answer on its usual port${info.message ? ` (${info.message})` : ''}.`, { triedPorts: [port], details });
   }
   if (!advertised.length) {
     // Nothing advertised: knock briefly on the usual ports.

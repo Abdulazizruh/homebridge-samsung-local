@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.1
+
+JavaScript engine only; the Python engine is unchanged.
+
+- Port search rewritten to ask the way the Python engine does: the small directory first and then the full one, asking again while the appliance is silent, following answers that arrive in several parts, and reading both ways a port can be written. In 1.1.0 the search found nothing on real appliances and every connection fell back to trying ports one by one (16 to 21 seconds).
+- A command now states the reply format it accepts, exactly as the Python engine sends it. One "power on" was refused with 4.00 under 1.1.0; this was the one difference found between the two engines' commands.
+- The message "did not answer on its usual port" no longer ends with empty brackets.
+
+**بالعربية**
+
+يخص محرك JavaScript فقط، ومحرك Python كما هو.
+
+- أُعيدت كتابة البحث عن المنفذ ليسأل كما يسأل محرك Python: الدليل الصغير أولًا ثم الكامل، مع تكرار السؤال ما دام الجهاز صامتًا، ومتابعة الجواب إذا وصل على أجزاء، وقراءة الصيغتين اللتين يُكتب بهما المنفذ. في 1.1.0 لم يجد البحث شيئًا على الأجهزة الحقيقية، فكان كل اتصال يجرّب المنافذ واحدًا واحدًا (من 16 إلى 21 ثانية).
+- صار الأمر يذكر صيغة الرد التي يقبلها، تمامًا كما يرسله محرك Python. رُفض أمر تشغيل واحد بالرمز 4.00 في 1.1.0، وهذا هو الفرق الوحيد الذي وُجد بين أوامر المحركين.
+- رسالة «did not answer on its usual port» لم تعد تنتهي بقوسين فارغين.
+
 ## 1.1.0
 
 The JavaScript connection engine, introduced in 1.0.14 and tried in the 1.1.0 betas, is now a regular choice next to Python: it ran five air conditioners and a washer on real hardware. You pick the engine at the top of the settings page and can switch at any time. There are no more beta releases; this version replaces them.

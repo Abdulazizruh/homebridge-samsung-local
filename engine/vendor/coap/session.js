@@ -84,6 +84,9 @@ class CoapSession {
         const options = [
             ...(0, message_1.pathOptions)(path),
             { number: message_1.Opt.CONTENT_FORMAT, value: CF_CBOR },
+            // Sent as the Python engine sends it: some firmwares answer 4.00
+            // to a command that does not say which reply format it accepts.
+            { number: message_1.Opt.ACCEPT, value: CBOR_ACCEPT },
         ];
         const msg = { type: message_1.CoapType.CON, code: message_1.Code.POST, messageId: this.nextMid(), token, options, payload };
         const datagram = (0, message_1.encode)(msg);
