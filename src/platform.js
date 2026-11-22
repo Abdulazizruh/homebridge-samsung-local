@@ -158,6 +158,7 @@ export class SamsungLocalPlatform {
       return helper;
     }
     const spawn = await helperSpawn(this.paths, this.config, (m) => this.log.info(m));
+    this.engineInUse = spawn.engine;
     this.log.info(`Engine: ${spawn.engine === 'javascript' ? 'JavaScript (beta, no Python)' : 'Python'}.`);
     const helper = new HelperClient({ command: spawn.command, args: spawn.args, env: spawn.env, log: this.log });
     await helper.start();
@@ -270,6 +271,9 @@ export class SamsungLocalPlatform {
       identity: source?.identity ?? null,
       resources: source?.resources ?? null,
       online,
+      // Measured the same way for both engines, so they can be compared.
+      commandMs: this.devices.get(deviceId)?.link.commandMs ?? null,
+      engine: this.engineInUse ?? null,
       updatedAt: Date.now(),
     };
   }

@@ -150,6 +150,13 @@ export class DeviceLink extends EventEmitter {
    * appliance acknowledged every write; rejects with CommandError otherwise.
    * Queue depth is capped so a stuck appliance is never flooded.
    */
+  /** How long the appliance takes to acknowledge a command: the last twenty, averaged. */
+  #timed(ms) {
+    this.commandTimes = [...(this.commandTimes ?? []), ms].slice(-20);
+    this.commandMs = Math.round(this.commandTimes.reduce((a, b) => a + b, 0) / this.commandTimes.length);
+    this.emit('timing', this.commandMs);
+  }
+
   send(writes) {
     if (!writes?.length) {
       return Promise.resolve();
@@ -164,8 +171,10 @@ export class DeviceLink extends EventEmitter {
     const job = this.queue.then(async () => {
       for (const write of writes) {
         let result;
+        const started = Date.now();
         try {
           result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
+          this.#timed(Date.now() - started);
         } catch (err) {
           throw new CommandError(err.code ?? 'error', err.message);
         }

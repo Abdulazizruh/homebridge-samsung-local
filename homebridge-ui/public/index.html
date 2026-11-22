@@ -101,7 +101,8 @@
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
       engine: 'Connection engine', engineChoose: 'Choose…', enginePython: 'Python (stable, tested on real appliances)', engineJs: 'JavaScript (beta, no Python needed)',
       engineNeed: 'Choose the connection engine first. The next steps open after that.',
-      engineNote: 'Both engines give the same features. Python downloads its runtime once. JavaScript needs no download and is new. You can switch here at any time; restart the bridge after changing it.',
+      engineNote: 'Same features with either engine. Python: one download of its runtime, in use the longest. JavaScript: no download, newer. After a command, each appliance below shows its measured response time with the engine in use, so you can compare the two on your own appliances. Restart the bridge after changing the engine.',
+      commandMs: 'Command response (average)',
       engineJsReady: 'JavaScript engine: nothing to prepare',
       pyLeft: 'The Python runtime of this plugin is still on disk:', pyLeftNote: 'It is not used now and is included in every Homebridge backup. Remove it once you are sure the JavaScript engine works for you; switching back to Python later downloads it again.',
       pyRemove: 'Remove the Python runtime', pyRemoved: 'Removed. Space freed:',
@@ -197,7 +198,8 @@
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
       engine: 'محرك الاتصال', engineChoose: 'اختر…', enginePython: 'Python (مستقر، مجرَّب على أجهزة حقيقية)', engineJs: 'JavaScript (تجريبي، دون Python)',
       engineNeed: 'اختر محرك الاتصال أولًا. تُفتح الخطوات التالية بعد ذلك.',
-      engineNote: 'المحركان يقدمان المزايا نفسها. Python ينزّل بيئته مرة واحدة. JavaScript لا يحتاج تنزيلًا وهو جديد. يمكنك التبديل من هنا في أي وقت، وأعد تشغيل الجسر بعد التغيير.',
+      engineNote: 'المزايا نفسها مع المحركين. Python: ينزّل بيئته مرة واحدة، وهو الأقدم استخدامًا. JavaScript: دون تنزيل، وهو الأحدث. بعد أي أمر يظهر تحت كل جهاز زمن استجابته المقاس مع المحرك المستخدم، فتقارن بينهما على أجهزتك أنت. أعد تشغيل الجسر بعد تغيير المحرك.',
+      commandMs: 'زمن استجابة الأمر (متوسط)',
       engineJsReady: 'محرك JavaScript: لا يحتاج تجهيزًا',
       pyLeft: 'بيئة Python الخاصة بالإضافة ما زالت على القرص:', pyLeftNote: 'هي غير مستخدمة الآن وتدخل في كل نسخة احتياطية من Homebridge. احذفها بعد تأكدك من أن محرك JavaScript يعمل عندك، والرجوع إلى Python لاحقًا ينزّلها من جديد.',
       pyRemove: 'احذف بيئة Python', pyRemoved: 'تم الحذف. المساحة المحررة:',
@@ -508,7 +510,7 @@
       const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;
       const address = `${esc(moved ? snap.host : dev.host)}${snap?.mac || dev.mac ? ` · ${esc(snap?.mac || dev.mac)}` : ''}`;
       return `<tr><td><strong>${esc(dev.name || snap?.described?.model || '—')}</strong><div class="sl-muted" dir="ltr">${address}</div>
-        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div></td>
+        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}</td>
         <td>${state}</td>
         <td><label class="mb-0"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}></label></td>
         <td><button class="btn btn-sm btn-primary" data-cfg="${i}">${t('configure')}</button>

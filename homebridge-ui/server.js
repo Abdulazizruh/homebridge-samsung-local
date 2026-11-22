@@ -74,6 +74,8 @@ class UiServer extends HomebridgePluginUiServer {
       deviceId: snap.deviceId ?? (snap.identity ? stableDeviceId(snap.identity) : null),
       online: Boolean(snap.online),
       error: snap.error ?? null,
+      commandMs: snap.commandMs ?? null,
+      engine: snap.engine ?? null,
       updatedAt: snap.updatedAt ?? null,
       source,
       described,
