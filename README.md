@@ -131,7 +131,7 @@ Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + 
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** (one installation) |
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units in one home, across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
-| Control from Apple Home | **Reported working by the owner**; not yet checked function by function on every model |
+| Control from Apple Home (power, temperature, fan, modes) | **Confirmed by the owner on all five units**; not audited function by function |
 | Reconnect on real hardware | **Seen working**: short drops recover within seconds. Their trigger is not identified yet |
 | A washer (`DA_WM_TP1_21_COMMON`) | Answers locally; **diagnostics only**, no HomeKit accessory yet |
 | Following an appliance to a new IP address | **Simulation only** |
