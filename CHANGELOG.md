@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.1.7
+
+TV tile and TV switches:
+
+- The tile follows the TV more closely: the TV is asked every 4 seconds instead of 10, and after a switch from Apple Home the wait ends as soon as the TV agrees.
+- The power key is a toggle. The TV is now asked for its real state just before the key is sent, so a tile that was out of date can no longer switch the TV the wrong way.
+- Remote keys are sent whenever the TV answers, also while the tile still shows it as off.
+- The log states what the TV itself reports about its power whenever that changes.
+
+**بالعربية**
+
+بطاقة التلفزيون ومفاتيحه:
+
+- البطاقة تتابع التلفزيون عن قرب: يُسأل التلفزيون كل 4 ثوانٍ بدل 10، وبعد التبديل من Apple Home ينتهي الانتظار حالما يوافق التلفزيون.
+- زر التشغيل زر تبديل. يُسأل التلفزيون الآن عن حالته الفعلية قبل إرسال الزر مباشرة، فلا تبدّله بطاقة قديمة الحالة في الاتجاه الخطأ.
+- أزرار الريموت تُرسل ما دام التلفزيون يجيب، حتى والبطاقة ما زالت تعرضه مطفأً.
+- السجل يكتب ما يقوله التلفزيون نفسه عن حالته كلما تغيّرت.
+
 ## 1.1.6
 
 - TV tile: the code for the Home app is shown on the plugin settings page, beside the TV, as a picture to scan with the digits under it. No more searching the log. It also says whether the TV has been added to Apple Home.

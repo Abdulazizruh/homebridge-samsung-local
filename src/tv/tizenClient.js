@@ -33,6 +33,8 @@ export async function tvInfo(host, { httpPort = 8001, timeoutMs = INFO_TIMEOUT_M
       tokenAuth: String(d.TokenAuthSupport ?? '').toLowerCase() === 'true',
       // Recent models answer while in standby and say so; older ones simply stop answering.
       power: d.PowerState ? (String(d.PowerState).toLowerCase() === 'on') : true,
+      // As the TV wrote it, for the log: null when the model does not report it.
+      powerState: d.PowerState ? String(d.PowerState) : null,
     };
   } catch {
     return null;

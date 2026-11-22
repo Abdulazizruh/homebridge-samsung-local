@@ -107,3 +107,38 @@ test('TV as switches: inside the bridge, named after the TV, standby shown as of
   await handler.services.get('power').getCharacteristic(C.On).handleSetRequest(true);
   await waitFor(() => tv.keys.includes('KEY_POWER'));
 });
+
+test('TV tile follows the TV: switched with its own remote, the tile changes; the power toggle is never sent the wrong way', async (t) => {
+  const tv = await fakeTv();
+  const { api, platform } = await bootTv(tv, 'tile');
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const C = api.hap.Characteristic;
+  const active = handler.services.get('tv').getCharacteristic(C.Active);
+  await waitFor(() => active.value === 1);
+  // Someone switches the TV off with its own remote.
+  tv.power = 'standby';
+  await handler.poll();
+  assert.equal(active.value, 0);
+  // The tile is stale (still "off") while the TV was switched on again at the set:
+  // asking for "on" must not send the toggle, which would switch it off.
+  tv.power = 'on';
+  await active.handleSetRequest(1);
+  assert.deepEqual(tv.keys, []);
+  assert.equal(active.value, 1);
+  // Switched off from Apple Home: one key press, and a TV that has not followed yet is not believed...
+  await active.handleSetRequest(0);
+  assert.equal(active.value, 0);
+  await handler.poll(); // the key is still on its way: the TV says "on" and is not believed yet
+  assert.equal(active.value, 0);
+  await waitFor(() => tv.keys.length === 1);
+  assert.deepEqual(tv.keys, ['KEY_POWER']);
+  await handler.poll();
+  assert.equal(active.value, 0);
+  // ...but once it agrees the wait is over, and a later change by its remote shows at the next look.
+  tv.power = 'standby';
+  await handler.poll();
+  tv.power = 'on';
+  await handler.poll();
+  assert.equal(active.value, 1);
+});

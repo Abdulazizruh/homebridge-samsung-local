@@ -1,6 +1,6 @@
 import { TizenRemote, tvInfo, wake } from '../tv/tizenClient.js';
 
-const POLL_MS = 10_000;
+const POLL_MS = 4000;
 const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
 const INPUTS = [
   { id: 1, name: 'TV', key: 'KEY_TV' },
@@ -68,10 +68,22 @@ export class TvAccessory {
       this.log.debug(`[${this.displayName}] ${reachable ? 'answers' : 'stopped answering'} on the network.`);
     }
     this.reachable = reachable;
-    if (Date.now() < this.holdUntil) {
-      return;
+    // What the TV itself says is written to the log whenever it changes, so
+    // a tile that disagrees with the screen can be explained.
+    const said = !reachable ? 'does not answer' : info.powerState ? `says "${info.powerState}"` : 'answers without a power state';
+    if (said !== this.said) {
+      this.log.info(`[${this.displayName}] the TV ${said}; shown as ${info?.power ? 'on' : 'off'}.`);
+      this.said = said;
     }
     const on = Boolean(info?.power);
+    if (Date.now() < this.holdUntil) {
+      // Just switched from Apple Home: the TV needs a while to follow. A
+      // report that agrees ends the wait; one that disagrees is not believed yet.
+      if (on !== this.on) {
+        return;
+      }
+      this.holdUntil = 0;
+    }
     if (on !== this.on) {
       this.on = on;
       if (!on) {
@@ -82,6 +94,10 @@ export class TvAccessory {
   }
 
   async #setPower(want) {
+    // The power key is a toggle, so the TV is asked first: acting on an old
+    // picture of it would switch it the wrong way.
+    this.holdUntil = 0;
+    await this.poll();
     if (want === this.on) {
       return;
     }
@@ -115,7 +131,7 @@ export class TvAccessory {
   }
 
   async #press(code, label) {
-    if (!this.on) {
+    if (!this.on && !this.reachable) {
       return;
     }
     try {
