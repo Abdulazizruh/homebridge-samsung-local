@@ -3,6 +3,7 @@ import { eveCharacteristics } from './eve.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = { cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert' };
+export const CYCLE_STYLES = ['readonly', 'valve', 'sensor'];
 export const WASHER_FEATURES = {
   cycleTile: true, finishedSensor: true, energyEve: true,
   // Extras, off until the owner asks for them.
@@ -17,7 +18,11 @@ export const WASHER_FEATURES = {
  * Nothing is written to the appliance.
  */
 export class WasherAccessory {
-  constructor({ api, log, accessory, link, displayName, features = {}, finishedHoldMs = FINISHED_HOLD_MS }) {
+  constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'readonly', finishedHoldMs = FINISHED_HOLD_MS }) {
+    // 'readonly': a valve tile that cannot be tapped on or off (keeps the countdown)
+    // 'valve':    a plain valve tile; a tap is undone at once
+    // 'sensor':   a running sensor; never accepts a tap, has no countdown
+    this.cycleStyle = CYCLE_STYLES.includes(cycleStyle) ? cycleStyle : 'readonly';
     this.features = { ...WASHER_FEATURES, ...features };
     this.api = api;
     this.hap = api.hap;
@@ -91,19 +96,26 @@ export class WasherAccessory {
         this.accessory.removeService(old);
       }
     };
-    if (this.features.cycleTile) {
+    const { Perms } = this.hap;
+    if (this.features.cycleTile && this.cycleStyle === 'sensor') {
+      drop(Service.Valve, 'cycle');
+      this.#service('cycle', Service.OccupancySensor, 'running');
+    } else if (this.features.cycleTile) {
+      drop(Service.OccupancySensor, 'running');
       const valve = this.#service('cycle', Service.Valve, 'cycle');
+      const readOnly = this.cycleStyle === 'readonly';
+      // Without write permission the Home app has nothing to send when the tile is tapped.
+      const perms = readOnly ? [Perms.PAIRED_READ, Perms.NOTIFY] : [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY];
+      const undo = () => { setTimeout(() => this.#push(), 30).unref?.(); };
       valve.setCharacteristic(Characteristic.ValveType, Characteristic.ValveType.GENERIC_VALVE);
       valve.getCharacteristic(Characteristic.RemainingDuration).setProps({ maxValue: 86400 });
       // The Home app only shows a countdown on a valve that also has a set duration.
-      valve.getCharacteristic(Characteristic.SetDuration).setProps({ maxValue: 86400 })
-        .onSet(() => { setTimeout(() => this.#push(), 300).unref?.(); });
-      valve.getCharacteristic(Characteristic.Active).onSet(() => {
-        // Read-only: the appliance does not accept a remote start. Show the truth again.
-        setTimeout(() => this.#push(), 300).unref?.();
-      });
+      valve.getCharacteristic(Characteristic.SetDuration).setProps({ maxValue: 86400, perms }).onSet(undo);
+      // The appliance does not accept a remote start: a tap that still arrives is undone at once.
+      valve.getCharacteristic(Characteristic.Active).setProps({ perms }).onSet(undo);
     } else {
       drop(Service.Valve, 'cycle');
+      drop(Service.OccupancySensor, 'running');
     }
     if (this.features.finishedSensor) {
       this.#service('finished', Service.OccupancySensor, 'finished');
@@ -185,9 +197,11 @@ export class WasherAccessory {
     }
     this.log.warn(`[${this.displayName}] not reachable${error?.message ? ` (${error.message})` : ''}. Will keep retrying.`);
     const { Characteristic, HapStatusError, HAPStatus } = this.hap;
-    this.services.get('cycle')?.updateCharacteristic(Characteristic.Active,
-      new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
-    if (!this.services.has('cycle')) {
+    if (this.cycleStyle !== 'sensor') {
+      this.services.get('cycle')?.updateCharacteristic(Characteristic.Active,
+        new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+    }
+    if (!this.services.has('cycle') || this.cycleStyle === 'sensor') {
       this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected,
         new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
     }
@@ -196,7 +210,10 @@ export class WasherAccessory {
   #push() {
     const { Characteristic } = this.hap;
     const st = this.model?.state ?? { inCycle: false, running: false, remainingSeconds: 0, powerWatts: null, energyKWh: null, percent: 0, kidsLock: false, alarms: [] };
-    const valve = this.services.get('cycle');
+    const valve = this.cycleStyle === 'sensor' ? null : this.services.get('cycle');
+    if (this.cycleStyle === 'sensor') {
+      this.services.get('cycle')?.updateCharacteristic(Characteristic.OccupancyDetected, st.inCycle ? 1 : 0);
+    }
     if (valve) {
       valve.updateCharacteristic(Characteristic.Active, st.inCycle ? 1 : 0);
       valve.updateCharacteristic(Characteristic.InUse, st.running ? 1 : 0);
