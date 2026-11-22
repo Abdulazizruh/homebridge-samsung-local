@@ -28,5 +28,6 @@ export async function helperSpawn(paths, config = {}, log = () => {}) {
     return { engine: 'javascript', command: process.execPath, args: [JS_HELPER_SCRIPT], env };
   }
   const { python } = await ensureRuntime(paths, { pythonPath: config.pythonPath, log });
-  return { engine: 'python', command: python, args: ['-u', HELPER_SCRIPT], env };
+  // -I: isolated mode, so no PYTHON* variable or user site folder can change what is loaded.
+  return { engine: 'python', command: python, args: ['-I', '-u', HELPER_SCRIPT], env };
 }

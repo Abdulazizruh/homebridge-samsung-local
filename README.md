@@ -2,6 +2,8 @@
 
 # homebridge-samsung-local
 
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+
 Local, cloud-free control of Samsung SmartThings-compatible appliances from Apple Home.
 
 **Apple Home → Homebridge → the appliance, directly over your home network.**
@@ -56,6 +58,8 @@ On first start the plugin creates a private Python environment in `<homebridge s
 |---|---|---|
 | First start, and after a plugin update that changes the pins | `pypi.org`, `files.pythonhosted.org` | Download the pinned Python packages |
 | Normal operation | none | Only the appliances on your LAN are contacted |
+| An appliance stopped answering (optional, on by default) | every address of the home network it was on (its /24), UDP 5683 | One small question to find the appliance at its new address, at most once every five minutes. Nothing leaves your network. Switch it off under General → "Find an appliance again when its address changes" |
+| Samsung TVs | the TV itself, TCP 8001 and 8002; one wake-on-network packet to switch it on | Local remote-control channel of the TV |
 
 The client certificate is generated on your machine. Its private key never leaves it and is stored with `0600` permissions in `samsung-local/credentials`.
 

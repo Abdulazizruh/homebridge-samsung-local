@@ -480,8 +480,8 @@ async function locate(credDir, { di = null, mac = null, hints = [], exclude = []
 // ---------------------------------------------------------------------- worker
 
 class DeviceWorker {
-  constructor({ key, host, port, credDir, expectedDi, pollInterval, push, mac, otherHosts }) {
-    Object.assign(this, { key, host, port: port ?? null, credDir, expectedDi, push, otherHosts });
+  constructor({ key, host, port, credDir, expectedDi, pollInterval, push, mac, otherHosts, follow = true }) {
+    Object.assign(this, { key, host, port: port ?? null, credDir, expectedDi, push, otherHosts, follow });
     this.mac = normalizeMac(mac);
     this.pollMs = Math.max(2, Number(pollInterval) || 15) * 1000;
     this.stopping = false;
@@ -617,7 +617,7 @@ class DeviceWorker {
   }
 
   async #relocate() {
-    if (!this.expectedDi || this.stopping || (this.lastRelocate && Date.now() - this.lastRelocate < RELOCATE_MIN_INTERVAL_MS)) {
+    if (!this.follow || !this.expectedDi || this.stopping || (this.lastRelocate && Date.now() - this.lastRelocate < RELOCATE_MIN_INTERVAL_MS)) {
       return false;
     }
     this.lastRelocate = Date.now();
@@ -702,7 +702,7 @@ class Helper {
         await old?.stop();
         this.workers.set(key, new DeviceWorker({
           key, host: String(req.host), port: req.port, credDir: this.credDir, expectedDi: req.expectedDi,
-          pollInterval: req.pollInterval ?? 15, push: req.push !== false, mac: req.mac,
+          pollInterval: req.pollInterval ?? 15, push: req.push !== false, mac: req.mac, follow: req.follow !== false,
           otherHosts: () => [...this.workers.values()].map((w) => w.host),
         }));
         return { opened: key };

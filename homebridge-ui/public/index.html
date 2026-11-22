@@ -66,6 +66,10 @@
       <label class="mb-0"><input type="checkbox" id="sl-push"> <span data-t="push"></span></label>
     </div>
     <div class="sl-muted mt-1" data-t="pollNote"></div>
+    <div class="sl-row mt-2">
+      <label class="mb-0"><input type="checkbox" id="sl-follow"> <span data-t="follow"></span></label>
+    </div>
+    <div class="sl-muted" data-t="followNote"></div>
 
   </div>
 
@@ -103,6 +107,8 @@
       engineNeed: 'Choose the connection engine first. The next steps open after that.',
       engineNote: 'Same features with either engine. Python: one download of its runtime, in use the longest. JavaScript: no download, newer. After a command, each appliance below shows its measured response time with the engine in use, so you can compare the two on your own appliances. Restart the bridge after changing the engine.',
       commandMs: 'Command response (average)',
+      follow: 'Find an appliance again when its address changes',
+      followNote: 'When an appliance stops answering for a while, the plugin sends one small question to every address of your home network (the /24 it is on) to see where it went, at most once every five minutes. Nothing leaves your network. Switch this off to keep to the address you entered.',
       engineJsReady: 'JavaScript engine: nothing to prepare',
       pyLeft: 'The Python runtime of this plugin is still on disk:', pyLeftNote: 'It is not used now and is included in every Homebridge backup. Remove it once you are sure the JavaScript engine works for you; switching back to Python later downloads it again.',
       pyRemove: 'Remove the Python runtime', pyRemoved: 'Removed. Space freed:',
@@ -200,6 +206,8 @@
       engineNeed: 'اختر محرك الاتصال أولًا. تُفتح الخطوات التالية بعد ذلك.',
       engineNote: 'المزايا نفسها مع المحركين. Python: ينزّل بيئته مرة واحدة، وهو الأقدم استخدامًا. JavaScript: دون تنزيل، وهو الأحدث. بعد أي أمر يظهر تحت كل جهاز زمن استجابته المقاس مع المحرك المستخدم، فتقارن بينهما على أجهزتك أنت. أعد تشغيل الجسر بعد تغيير المحرك.',
       commandMs: 'زمن استجابة الأمر (متوسط)',
+      follow: 'ابحث عن الجهاز من جديد إذا تغيّر عنوانه',
+      followNote: 'عندما يتوقف جهاز عن الاستجابة مدة، ترسل الإضافة سؤالًا صغيرًا واحدًا إلى كل عنوان في شبكة منزلك (نطاق /24 الذي هو فيه) لتعرف أين صار، مرة كل خمس دقائق على الأكثر. لا يخرج شيء من شبكتك. أطفئ هذا الخيار للالتزام بالعنوان الذي أدخلته.',
       engineJsReady: 'محرك JavaScript: لا يحتاج تجهيزًا',
       pyLeft: 'بيئة Python الخاصة بالإضافة ما زالت على القرص:', pyLeftNote: 'هي غير مستخدمة الآن وتدخل في كل نسخة احتياطية من Homebridge. احذفها بعد تأكدك من أن محرك JavaScript يعمل عندك، والرجوع إلى Python لاحقًا ينزّلها من جديد.',
       pyRemove: 'احذف بيئة Python', pyRemoved: 'تم الحذف. المساحة المحررة:',
@@ -322,7 +330,7 @@
       const saved = await homebridge.request('/saved-devices');
       if (Array.isArray(saved?.devices)) {
         config.devices = saved.devices;
-        for (const k of ['pollInterval', 'pushUpdates', 'engine']) { if (saved[k] !== undefined) { config[k] = saved[k]; } }
+        for (const k of ['pollInterval', 'pushUpdates', 'engine', 'followAddress']) { if (saved[k] !== undefined) { config[k] = saved[k]; } }
       }
     } catch { /* keep the copy in memory */ }
     await fn();
@@ -603,6 +611,7 @@
     renderSteps();
     $('sl-poll').value = config.pollInterval ?? 15;
     $('sl-push').checked = config.pushUpdates !== false;
+    $('sl-follow').checked = config.followAddress !== false;
     $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
     renderRuntime(); renderResult(); renderDevices();
   }
@@ -615,6 +624,7 @@
   $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
   $('sl-poll').addEventListener('change', async (e) => { const v = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await change(() => { config.pollInterval = v; }, false); });
   $('sl-engine').addEventListener('change', async (e) => { const v = e.target.value; if (!v) { return; } await change(() => { config.engine = v; }, false); await refreshStatus(); });
+  $('sl-follow').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.followAddress = v; }, false); });
   $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();

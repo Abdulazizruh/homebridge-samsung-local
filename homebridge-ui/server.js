@@ -84,7 +84,7 @@ class UiServer extends HomebridgePluginUiServer {
 
   async prepare() {
     try {
-      const result = await ensureRuntime(this.paths, {});
+      const result = await ensureRuntime(this.paths, { pythonPath: (await this.pluginConfig()).pythonPath });
       return { ok: true, installed: result.installed };
     } catch (err) {
       return this.fail(err);
@@ -241,6 +241,7 @@ class UiServer extends HomebridgePluginUiServer {
         pollInterval: block.pollInterval,
         pushUpdates: block.pushUpdates,
         engine: block.engine,
+        followAddress: block.followAddress,
       };
     } catch {
       return {};
