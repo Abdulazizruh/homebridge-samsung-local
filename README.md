@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.11.** Running on one real air conditioner (`ARTIK051_PRAC_20K`, Homebridge in Docker on a Raspberry Pi). Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.11.** Running on five real air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. What works depends on the appliance: each model reports its own set of features, and the plugin only shows what your unit reports. Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
@@ -27,7 +27,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 | Appliance | Level | Notes |
 |---|---|---|
-| Air conditioners (incl. WindFree, `ARTIK051_PRAC_20K`) | **Experimental** | Full HomeKit accessory, mapped from LocalThings' data |
+| Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
 | Washers, dryers, refrigerators, ovens, … | **Diagnostics only** | Connects, lists what the appliance reports, creates no HomeKit accessory yet |
 | Samsung TVs | **Not supported** | TVs need an OCF credential owners cannot obtain yet. Keep them on your current plugin |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
@@ -126,15 +126,18 @@ Differences from `homebridge-smartthings-oauth`: the layout (thermostat + fan + 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (43 JavaScript, 6 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (49 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** (one installation) |
-| Discovery and live readings on a real `ARTIK051_PRAC_20K` air conditioner | **Pass** (one unit) |
-| Control from Apple Home on that unit | **Reported working by its owner**; not yet checked function by function |
-| Other air-conditioner models, long-running stability, reconnect on real hardware | **Not done** |
+| Discovery, live readings and push updates on real air conditioners | **Pass** on five units in one home, across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
+| Control from Apple Home | **Reported working by the owner**; not yet checked function by function on every model |
+| Reconnect on real hardware | **Seen working**: short drops recover within seconds. Their trigger is not identified yet |
+| A washer (`DA_WM_TP1_21_COMMON`) | Answers locally; **diagnostics only**, no HomeKit accessory yet |
+| Following an appliance to a new IP address | **Simulation only** |
+| Other air-conditioner models, other homes, weeks of uptime | **Not done** |
 
-Air-conditioner support is therefore still **experimental**: it rests on one unit. The resource maps come from LocalThings, which records what was measured on real units, but an advertised mode is not proof that writing it works on your unit.
+**It depends on your appliance.** These results come from one home and two model families. Another model may report different features, and an advertised mode is not proof that writing it works on your unit. Use "Test & discover" in the settings: the table it shows is what your own appliance reports. The resource maps come from LocalThings, which records what was measured on real units, but an advertised mode is not proof that writing it works on your unit.
 
 ## Diagnostics
 
