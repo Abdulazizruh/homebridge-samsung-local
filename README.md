@@ -174,7 +174,7 @@ A name is changed in place with the pencil beside it. **Remove** asks to be pres
   <img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings" width="300">
 </p>
 
-First: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display, humidity, power and energy). Second: a washer (cycle tile with time remaining, cycle finished sensor, how the cycle tile behaves). Third: a TV (its name, and whether it appears as a TV tile with the remote or as switches inside the bridge).
+First: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display, humidity, power and energy). Second: a washer (cycle tile with time remaining, cycle finished sensor, how the cycle tile behaves). Third: a TV. Above its options is its code for the Home app: **scan the picture** with the iPhone or iPad camera from the Home app (+ → Add Accessory), **or type the digits by hand** (More options → pick the TV). Either way works. The code in the picture is an example. Under it: the TV's name, and whether it appears as a TV tile with the remote or as switches inside the bridge.
 
 ## What has been tested
 
