@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.2.0
+
+The number moves to 1.2 because the plugin now does more than it did at 1.1. Nothing changes in the saved settings; the code is the same as 1.1.11.
+
+- **Samsung TVs** are tried on four real TVs, newer and older: pairing on the TV screen, a TV tile with the Control Centre remote, the Home app code shown on the settings page, and a tile that follows the TV's real power state.
+- **Settings page** reworked: options open under each appliance, a discovery result sits right under the address field, names are changed in place, and removing asks first.
+- **Washer** "Finished" notice follows the appliance's own announcement.
+- **Stability**: one line a day per appliance with the number of connection losses and the longest gap; a command answered 4.00 is asked once more.
+- **Both engines** (Python and JavaScript) run all of the above.
+
+**بالعربية**
+
+ينتقل الرقم إلى 1.2 لأن الإضافة صارت تفعل أكثر مما كانت عليه في 1.1. لا يتغير شيء في الإعدادات المحفوظة، والكود هو نفسه كود 1.1.11.
+
+- **تلفزيونات Samsung** جُرّبت على أربعة تلفزيونات حقيقية، حديثة وقديمة: الاقتران من شاشة التلفزيون، بطاقة تلفزيون مع ريموت مركز التحكم، رمز تطبيق Home داخل صفحة الإعدادات، وبطاقة تتبع حالة التلفزيون الفعلية.
+- **صفحة الإعدادات** أُعيد ترتيبها: الخيارات تُفتح تحت كل جهاز، نتيجة البحث تحت حقل العنوان مباشرة، الاسم يُغيَّر في مكانه، والحذف يطلب تأكيدًا.
+- **الغسالة**: إشعار «انتهى» يتبع إعلان الجهاز نفسه.
+- **الاستقرار**: سطر يومي لكل جهاز بعدد مرات فقد الاتصال وأطول انقطاع، والأمر الذي يُجاب بالرمز 4.00 يُعاد مرة واحدة.
+- **المحركان** (Python و JavaScript) يشغّلان كل ما سبق.
+
 ## 1.1.11
 
 - TV remote: the channel to the TV stays open for five minutes after the last press instead of twenty seconds, so presses no longer wait for a new secure connection each time. It is closed as soon as the TV goes off.
