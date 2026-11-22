@@ -118,6 +118,8 @@
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
       whereHome: 'Apple Home', whereEve: 'Eve + this page', whereUi: 'this page', whereNone: '—',
       testNote: 'Tested on real air conditioners. Available features differ from one model to another.',
+      cycleStyle: 'How the cycle tile behaves', cycleStyle_readonly: 'Tile that cannot be tapped on or off (recommended)', cycleStyle_valve: 'Plain tile (a tap is undone at once)', cycleStyle_sensor: 'Running sensor (no countdown)',
+      cycleStyleNote: 'The first two keep the countdown inside the tile. The sensor never reacts to a tap but has no countdown.',
       laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
@@ -212,6 +214,8 @@
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
       whereHome: 'Apple Home', whereEve: 'Eve وهذه الصفحة', whereUi: 'هذه الصفحة', whereNone: '—',
       testNote: 'مجرَّب على مكيفات حقيقية. تختلف المزايا المتاحة من طراز إلى آخر.',
+      cycleStyle: 'سلوك بطاقة الدورة', cycleStyle_readonly: 'بطاقة لا يغيّرها الضغط (موصى به)', cycleStyle_valve: 'بطاقة عادية (يُلغى الضغط فورًا)', cycleStyle_sensor: 'حساس تشغيل (دون عدّاد)',
+      cycleStyleNote: 'الخياران الأولان يحتفظان بالعدّاد داخل البطاقة. الحساس لا يتأثر بالضغط إطلاقًا لكنه دون عدّاد.',
       laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
@@ -442,6 +446,10 @@
           <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
+        <div class="mt-2"><strong>${t('cycleStyle')}</strong>
+          <select class="form-control" id="sl-cycle-style" style="max-width:340px">${['readonly', 'valve', 'sensor'].map((v) =>
+            `<option value="${v}" ${(existing?.cycleStyle ?? 'readonly') === v ? 'selected' : ''}>${t('cycleStyle_' + v)}</option>`).join('')}</select>
+          <div class="sl-muted">${t('cycleStyleNote')}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
     html += `<div class="mt-2"><button class="btn btn-sm btn-outline-secondary" id="sl-result-diag">${t('diagFile')}</button>
@@ -481,6 +489,7 @@
       if (p.mac) { entry.mac = p.mac; }
       const name = $('sl-name').value.trim();
       if (name) { entry.name = name; }
+      if ($('sl-cycle-style')) { entry.cycleStyle = $('sl-cycle-style').value; }
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
         if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }

@@ -138,7 +138,7 @@ Left: an air conditioner (fan tile, mode switches, WindFree, Fast, Light Display
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (68 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (69 JavaScript, 16 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |

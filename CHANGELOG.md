@@ -4,6 +4,8 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 ## 1.0.18
 
+- Laundry: the cycle tile no longer reacts to a tap. The Home app sends an on/off command when a valve tile's icon is tapped; the tile is now read-only, so there is nothing to send, and the countdown inside stays. Under Configuration, "How the cycle tile behaves" also offers a plain tile or a running sensor.
+
 JavaScript engine, after its first run on real appliances (five air conditioners and a washer connected and answered commands):
 
 - Push updates: each registration is now confirmed by the appliance before the next one is sent, and sent once more when no answer comes. Before, some appliances silently dropped registrations that arrived in a burst and then reported changes only at the polling interval.
@@ -11,6 +13,8 @@ JavaScript engine, after its first run on real appliances (five air conditioners
 - First contact: the appliance is asked for its port twice, with a longer wait the second time, for appliances that answer late (seen on a washer).
 
 **بالعربية**
+
+- أجهزة الغسيل: بطاقة الدورة لم تعد تتأثر بالضغط. تطبيق Home يرسل أمر تشغيل أو إيقاف عند الضغط على أيقونة الصمام، وصارت البطاقة للقراءة فقط، فلا يُرسل شيء، ويبقى العدّاد في داخلها. من «Configuration» يوجد خيار «سلوك بطاقة الدورة» وفيه أيضًا بطاقة عادية أو حساس تشغيل.
 
 محرك JavaScript بعد أول تشغيل له على أجهزة حقيقية (اتصلت خمسة مكيفات وغسالة واستجابت للأوامر):
 

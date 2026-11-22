@@ -364,7 +364,7 @@ export class SamsungLocalPlatform {
       log: this.log,
     });
     const handler = laundry
-      ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features })
+      ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features, cycleStyle: entry.cycleStyle })
       : new AcAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features });
     link.on('update', (resources) => {
       this.#saveSnapshot(deviceId, () => this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true), resources);

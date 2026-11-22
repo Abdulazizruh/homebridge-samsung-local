@@ -355,7 +355,7 @@ test('an appliance that moves to a new address is followed, and found there agai
 
 test('washer: read-only tile with time remaining, and a sensor when the cycle ends', async (t) => {
   const W = fixture('washer_topload').identity.di;
-  const { api, platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
+  const { api, platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer', cycleStyle: 'valve' }] } });
   t.after(() => platform.stop());
   await online(platform, W);
   assert.equal(api.registered.length, 1);
@@ -484,4 +484,25 @@ test('washer: extras stay away by default, and the not-used list names only what
   assert.ok(!described.unknownResources.includes('/energy/consumption/vs/0'));
   assert.ok(described.unknownResources.includes('/washer/vs/0'));
   assert.equal(described.features.find((r) => r.id === 'washCount').value, 211);
+});
+
+test('washer tile styles: read-only by default (nothing to tap), or a running sensor', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const devices = [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }];
+  const a = await boot({ devices, config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
+  await online(a.platform, W);
+  const { Characteristic: C, Perms } = a.api.hap;
+  const valve = a.platform.devices.get(W).handler.services.get('cycle');
+  assert.ok(!valve.getCharacteristic(C.Active).props.perms.includes(Perms.PAIRED_WRITE));
+  assert.ok(valve.getCharacteristic(C.Active).props.perms.includes(Perms.NOTIFY));
+  await a.platform.stop();
+
+  const b = await boot({ devices, config: { devices: [{ host: '10.0.0.9', name: 'Washer', cycleStyle: 'sensor' }] } });
+  t.after(() => b.platform.stop());
+  await online(b.platform, W);
+  const running = b.platform.devices.get(W).handler.services.get('cycle');
+  assert.equal(running.UUID, b.api.hap.Service.OccupancySensor.UUID);
+  assert.equal(running.getCharacteristic(C.ConfiguredName).value, 'Washer');
+  await b.platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body: { [`${V}state`]: 'Run' } });
+  await waitFor(() => running.getCharacteristic(C.OccupancyDetected).value === 1);
 });
