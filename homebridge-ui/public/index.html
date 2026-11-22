@@ -505,7 +505,7 @@
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
         <div class="mt-2"><strong>${t('cycleStyle')}</strong>
-          <select class="form-control" id="sl-cycle-style" style="max-width:340px">${['valve', 'sensor'].map((v) =>
+          <select class="form-control" id="sl-cycle-style">${['valve', 'sensor'].map((v) =>
             `<option value="${v}" ${(existing?.cycleStyle === 'sensor' ? 'sensor' : 'valve') === v ? 'selected' : ''}>${t('cycleStyle_' + v)}</option>`).join('')}</select>
           <div class="sl-muted">${t('cycleStyleNote')}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
