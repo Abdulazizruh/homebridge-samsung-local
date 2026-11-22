@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.2.1
+
+Settings page:
+
+- Options open under the appliance for every kind: air conditioner, washer and TV. In 1.2.0 a TV still opened at the top of the page.
+- An appliance that has not been read yet is asked on the spot, and its options show under it as well.
+- Once a TV has been added to Apple Home, its code folds away behind "Show the code" so the list stays short.
+- Saving the options of an appliance that is switched off in the list no longer switches it back on.
+
+**بالعربية**
+
+صفحة الإعدادات:
+
+- الخيارات تُفتح تحت الجهاز أيًّا كان نوعه: مكيف أو غسالة أو تلفزيون. في 1.2.0 كان التلفزيون ما زال يُفتح أعلى الصفحة.
+- الجهاز الذي لم يُقرأ بعد يُسأل في الحال، وتظهر خياراته تحته أيضًا.
+- بعد إضافة التلفزيون إلى Apple Home يُطوى رمزه خلف «عرض الرمز» حتى تبقى القائمة قصيرة.
+- حفظ خيارات جهاز موقوف في القائمة لم يعد يعيد تفعيله.
+
 ## 1.2.0
 
 The number moves to 1.2 because the plugin now does more than it did at 1.1. Nothing changes in the saved settings; the code is the same as 1.1.11.

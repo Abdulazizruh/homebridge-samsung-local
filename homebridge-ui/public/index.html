@@ -148,6 +148,7 @@
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
       support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
+      tvCodeShow: 'Show the code', tvPairAgain: 'Pair with the TV again',
       tvCodeTitle: 'Add to Apple Home', tvCodePaired: 'Added to Apple Home', tvCodeLater: 'The code for Apple Home appears here after the bridge restarts.',
       tvCodeNote: 'Home app → + → Add Accessory, then scan this picture. Or choose More options, pick the TV and type the digits.',
       tvCodePairedNote: 'The same code is used if the TV is ever removed from the Home app and added again.',
@@ -251,6 +252,7 @@
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
       support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
+      tvCodeShow: 'عرض الرمز', tvPairAgain: 'اقتران مع التلفزيون من جديد',
       tvCodeTitle: 'أضفه إلى Apple Home', tvCodePaired: 'مضاف إلى Apple Home', tvCodeLater: 'يظهر رمز Apple Home هنا بعد إعادة تشغيل الجسر.',
       tvCodeNote: 'تطبيق Home ← + ← Add Accessory ثم امسح هذه الصورة. أو اختر More options ثم التلفزيون واكتب الأرقام.',
       tvCodePairedNote: 'يُستخدم الرمز نفسه إذا حُذف التلفزيون من تطبيق Home وأُضيف من جديد.',
@@ -476,10 +478,10 @@
       const mode = existing?.tvMode === 'switches' ? 'switches' : 'tile';
       // Models without token support need one approval on screen and nothing stored.
       const ready = p.tv.paired || tvPaired.has(p.deviceId);
-      html += `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
+      html += `${p.tv.configured ? '' : `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
           <ol class="mb-1">${[1, 2, 3, 4].map((n) => `<li>${t('tvStep' + n)}</li>`).join('')}</ol>
-          ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>
-        <button class="btn btn-primary" id="sl-tv-pair">${t('tvPair')}</button>
+          ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>`}
+        <button class="btn ${p.tv.configured ? 'btn-outline-secondary btn-sm mt-2' : 'btn-primary'}" id="sl-tv-pair">${t(p.tv.configured ? 'tvPairAgain' : 'tvPair')}</button>
         <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>
         <div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>
@@ -539,7 +541,7 @@
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
-        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
+        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false }; } else { config.devices.push(entry); }
       });
     });
     $('sl-add')?.addEventListener('click', async () => {
@@ -553,7 +555,7 @@
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
-        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry }; } else { config.devices.push(entry); }
+        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false }; } else { config.devices.push(entry); }
       });
     });
   }
@@ -563,10 +565,13 @@
     if (dev.type !== 'tv' || dev.tvMode === 'switches') { return ''; }
     const setup = status.tvSetup?.[dev.id];
     if (!setup) { return `<div class="sl-muted">${t('tvCodeLater')}</div>`; }
-    return `<div class="sl-tvcode"><div class="sl-pill ${setup.paired ? 'sl-ok' : 'sl-warn'}">${t(setup.paired ? 'tvCodePaired' : 'tvCodeTitle')}</div>
-      ${setup.svg ? `<div class="sl-qr" dir="ltr">${setup.svg}</div>` : ''}
+    const code = `<div class="sl-tvcode">${setup.svg ? `<div class="sl-qr" dir="ltr">${setup.svg}</div>` : ''}
       <div class="sl-pin" dir="ltr">${esc(setup.pin)}</div>
       <div class="sl-muted">${t(setup.paired ? 'tvCodePairedNote' : 'tvCodeNote')}</div></div>`;
+    // Once the TV is in Apple Home the code is rarely needed: one tap away, out of the way.
+    return setup.paired
+      ? `<details class="mt-1"><summary><span class="sl-pill sl-ok">${t('tvCodePaired')}</span> <span class="sl-muted">${t('tvCodeShow')}</span></summary>${code}</details>`
+      : `<div class="mt-1"><span class="sl-pill sl-warn">${t('tvCodeTitle')}</span>${code}</div>`;
   }
 
   function renderDevices() {
@@ -644,17 +649,37 @@
       const snap = status.devices.find((x) => x.deviceId && x.deviceId === dev.id) || status.devices.find((x) => x.host === dev.host);
       if (openKey === keyOf(dev)) {
         openKey = null; lastProbe = null; render();
-      } else if (snap?.described) {
-        // Known appliance: its options open under its own row, without a new discovery.
-        openKey = keyOf(dev);
+        return;
+      }
+      // Every kind of appliance opens its options under its own row.
+      openKey = keyOf(dev);
+      if (snap?.described) {
+        // Known appliance: no new discovery is needed.
         lastProbe = { ...snap, host: dev.host, deviceId: dev.id ?? snap.deviceId, source: 'snapshot' };
         render();
-        $('sl-inline')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else if (dev.type === 'tv' && dev.id) {
+        // A TV keeps no readings; what is in the settings is enough to show its options.
+        lastProbe = {
+          host: dev.host, deviceId: dev.id, mac: dev.mac ?? null, source: 'snapshot',
+          described: { kind: 'tv', deviceId: dev.id, model: dev.model ?? null, support: 'supported', reason: null, features: [], unknownResources: [] },
+          tv: { name: dev.name ?? null, power: true, paired: true, configured: true },
+        };
+        render();
       } else {
-        $('sl-host').value = dev.host;
-        $('sl-discover').click();
-        $('sl-host').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Never read before: ask the appliance now, and show the answer here.
+        lastProbe = null;
+        render();
+        const here = $('sl-inline');
+        if (here) { here.innerHTML = `<span class="sl-muted">${t('discovering')}</span>`; }
+        homebridge.showSpinner();
+        homebridge.request('/probe', { host: dev.host }).then((found) => {
+          if (openKey !== keyOf(dev)) { return; }
+          lastProbe = found; render();
+        }).catch((err) => {
+          if (openKey === keyOf(dev) && $('sl-inline')) { $('sl-inline').innerHTML = `<div class="alert alert-danger mb-0">${esc(errorText(err))}</div>`; }
+        }).finally(() => homebridge.hideSpinner());
       }
+      $('sl-inline')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }));
     box.querySelectorAll('[data-ip]').forEach((b) => b.addEventListener('click', () => {
       $('sl-host').value = config.devices[Number(b.dataset.ip)].host;
