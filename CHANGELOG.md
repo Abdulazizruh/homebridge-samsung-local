@@ -6,6 +6,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 - Laundry: the cycle tile no longer reacts to a tap. The Home app sends an on/off command when a valve tile's icon is tapped; the tile is now read-only, so there is nothing to send, and the countdown inside stays. Under Configuration, "How the cycle tile behaves" also offers a plain tile or a running sensor.
 
+- Settings page header: a green verified mark on the icon and a row of badges (Homebridge Verified, installed version, engine in use, how many appliances are connected).
 - Settings page: after a command, each appliance shows its measured command response time and the engine in use, measured the same way for both engines, so the two can be compared on your own appliances.
 
 JavaScript engine, after its first run on real appliances (five air conditioners and a washer connected and answered commands):
@@ -19,6 +20,7 @@ JavaScript engine, after its first run on real appliances (five air conditioners
 
 - أجهزة الغسيل: بطاقة الدورة لم تعد تتأثر بالضغط. تطبيق Home يرسل أمر تشغيل أو إيقاف عند الضغط على أيقونة الصمام، وصارت البطاقة للقراءة فقط، فلا يُرسل شيء، ويبقى العدّاد في داخلها. من «Configuration» يوجد خيار «سلوك بطاقة الدورة» وفيه أيضًا بطاقة عادية أو حساس تشغيل.
 
+- رأس صفحة الإعدادات: علامة توثيق خضراء على الأيقونة وصف من الشارات (موثقة من Homebridge، الإصدار المثبّت، المحرك المستخدم، عدد الأجهزة المتصلة).
 - صفحة الإعدادات: بعد أي أمر يظهر تحت كل جهاز زمن استجابة الأمر المقاس والمحرك المستخدم، بطريقة قياس واحدة للمحركين، لتقارن بينهما على أجهزتك.
 
 محرك JavaScript بعد أول تشغيل له على أجهزة حقيقية (اتصلت خمسة مكيفات وغسالة واستجابت للأوامر):
