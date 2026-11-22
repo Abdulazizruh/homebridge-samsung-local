@@ -95,6 +95,8 @@ test('a late acknowledgement does not hold Apple Home: quick reply, value kept, 
   assert.ok(Date.now() - started < 1900, 'HomeKit is answered before the appliance acknowledges');
   assert.equal(handler.services.get('fanTurbo').getCharacteristic(C.On).value, true);
   await waitFor(() => link.resources['/wind/strength/vs/0'][`${V}modes`] === '4', 6000);
+  // The slow acknowledgement is measured and offered to the settings page.
+  assert.ok(link.commandMs >= 2000, `measured ${link.commandMs} ms`);
 });
 
 test('a late refusal puts the tile back to the real state', async (t) => {

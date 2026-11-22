@@ -6,20 +6,26 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 - Laundry: the cycle tile no longer reacts to a tap. The Home app sends an on/off command when a valve tile's icon is tapped; the tile is now read-only, so there is nothing to send, and the countdown inside stays. Under Configuration, "How the cycle tile behaves" also offers a plain tile or a running sensor.
 
+- Settings page: after a command, each appliance shows its measured command response time and the engine in use, measured the same way for both engines, so the two can be compared on your own appliances.
+
 JavaScript engine, after its first run on real appliances (five air conditioners and a washer connected and answered commands):
 
 - Push updates: each registration is now confirmed by the appliance before the next one is sent, and sent once more when no answer comes. Before, some appliances silently dropped registrations that arrived in a burst and then reported changes only at the polling interval.
 - Reconnecting: a known appliance is asked again on its own port instead of walking every usual port, so a short silence no longer shows as "not reachable" for a minute.
+- Speed: the engine sent at most five datagrams a second, so one full reading took about two seconds and a command could wait behind it. It now sends up to twenty-five.
 - First contact: the appliance is asked for its port twice, with a longer wait the second time, for appliances that answer late (seen on a washer).
 
 **بالعربية**
 
 - أجهزة الغسيل: بطاقة الدورة لم تعد تتأثر بالضغط. تطبيق Home يرسل أمر تشغيل أو إيقاف عند الضغط على أيقونة الصمام، وصارت البطاقة للقراءة فقط، فلا يُرسل شيء، ويبقى العدّاد في داخلها. من «Configuration» يوجد خيار «سلوك بطاقة الدورة» وفيه أيضًا بطاقة عادية أو حساس تشغيل.
 
+- صفحة الإعدادات: بعد أي أمر يظهر تحت كل جهاز زمن استجابة الأمر المقاس والمحرك المستخدم، بطريقة قياس واحدة للمحركين، لتقارن بينهما على أجهزتك.
+
 محرك JavaScript بعد أول تشغيل له على أجهزة حقيقية (اتصلت خمسة مكيفات وغسالة واستجابت للأوامر):
 
 - التحديثات الفورية: صار كل تسجيل يُؤكَّد من الجهاز قبل إرسال التالي، ويُعاد مرة إذا لم يصل الرد. كانت بعض الأجهزة تتجاهل التسجيلات المرسلة دفعة واحدة، فتظهر التغييرات عند فاصل القراءة فقط.
 - إعادة الاتصال: الجهاز المعروف يُسأل مجددًا على منفذه نفسه دون المرور على كل المنافذ المعتادة، فلا يظهر صمت قصير على أنه «not reachable» لمدة دقيقة.
+- السرعة: كان المحرك يرسل خمس رسائل في الثانية على الأكثر، فتأخذ القراءة الكاملة نحو ثانيتين وقد ينتظر الأمر خلفها. صار يرسل حتى خمس وعشرين.
 - الاتصال الأول: يُسأل الجهاز عن منفذه مرتين، بانتظار أطول في الثانية، للأجهزة التي تتأخر في الرد (ظهر ذلك مع الغسالة).
 
 ## 1.0.17

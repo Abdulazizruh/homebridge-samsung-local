@@ -28,6 +28,7 @@ const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/ce
 
 export const HELPER_VERSION = 'js-0.1.1';
 const SUBSCRIBE_CONFIRM_MS = 3000;
+const SEND_RATE_PER_S = 25;
 const DISCOVERY_ROUNDS = [2500, 4000];
 const FALLBACK_PORTS = [49152, 49153, 49154, 49155, 49156, 49157, 49158, 49159, 49160];
 const MULTICAST_SECURE_PORT = 5684;
@@ -221,7 +222,10 @@ class Link {
 
   async connect() {
     await this.transport.connect();
-    this.session = new CoapSession(this.transport, { defaultTimeoutMs: READ_TIMEOUT_MS });
+    // The transport's default of five datagrams a second makes one full reading
+    // take about two seconds and holds a command behind it. Registrations are
+    // confirmed one by one, so a faster rate does not flood the appliance.
+    this.session = new CoapSession(this.transport, { defaultTimeoutMs: READ_TIMEOUT_MS, rateLimitRps: SEND_RATE_PER_S });
   }
 
   close() {
@@ -511,9 +515,10 @@ class DeviceWorker {
     if (!link) {
       throw new HelperError('offline', 'The appliance is not connected right now.');
     }
+    const started = Date.now();
     const { code, text } = await link.post(pathSegments, body);
     this.requestRefresh(1500);
-    return { code: codeStr(code), accepted: code >> 5 === 2, detail: text };
+    return { code: codeStr(code), accepted: code >> 5 === 2, detail: text, ms: Date.now() - started };
   }
 
   /** Sleep that ends early on stop or on a refresh request. */
