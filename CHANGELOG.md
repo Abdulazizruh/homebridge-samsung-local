@@ -2,13 +2,17 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## 1.0.20
+## 1.1.0
+
+The JavaScript connection engine, introduced in 1.0.14 and tried in the 1.1.0 betas, is now a regular choice next to Python: it ran five air conditioners and a washer on real hardware. You pick the engine at the top of the settings page and can switch at any time. There are no more beta releases; this version replaces them.
 
 - Faster start: the port each appliance uses is remembered with its address, so the next start connects straight to it instead of searching first. If the appliance changed its port (after a power cut, for example) the search runs as before.
 - The log now says how long each connection took, and with the JavaScript engine where the time went (secure session, identity, first reading).
 - Confirmed on a real washer: tapping the cycle tile flips it and it returns at once, with no error.
 
 **بالعربية**
+
+محرك الاتصال بلغة JavaScript، الذي دخل في 1.0.14 وجُرّب في نسخ 1.1.0 التجريبية، صار خيارًا عاديًا بجانب Python بعد أن شغّل خمسة مكيفات وغسالة على أجهزة حقيقية. تختار المحرك من أعلى صفحة الإعدادات وتبدّل متى شئت. انتهت النسخ التجريبية، وهذا الإصدار يحل محلها.
 
 - تشغيل أسرع: يُحفظ منفذ كل جهاز مع عنوانه، فيتصل التشغيل التالي به مباشرة دون بحث. وإذا غيّر الجهاز منفذه (بعد انقطاع الكهرباء مثلًا) يجري البحث كما كان.
 - صار السجل يذكر مدة كل اتصال، ومع محرك JavaScript أين ذهب الوقت (الجلسة المشفرة، الهوية، القراءة الأولى).

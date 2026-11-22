@@ -263,7 +263,7 @@
       "engine": {
         "title": "Connection engine",
         "type": "string",
-        "description": "Both give the same features. The JavaScript engine (beta) needs no Python. Leave empty for the default of the installed version.",
+        "description": "Both give the same features. The JavaScript engine (newer) needs no Python. Leave empty for the default of the installed version.",
         "oneOf": [
           {
             "title": "Python (stable)",
@@ -272,7 +272,7 @@
             ]
           },
           {
-            "title": "JavaScript (beta, no Python needed)",
+            "title": "JavaScript (newer, no Python needed)",
             "enum": [
               "javascript"
             ]

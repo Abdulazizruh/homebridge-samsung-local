@@ -1,6 +1,6 @@
 /**
  * Which helper talks to the appliances: the Python one (stable) or the
- * JavaScript one (beta, no Python needed). Both speak the same protocol, so
+ * JavaScript one (newer, no Python needed). Both speak the same protocol, so
  * nothing else in the plugin knows the difference.
  */
 import fs from 'node:fs';

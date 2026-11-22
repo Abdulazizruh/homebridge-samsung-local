@@ -168,7 +168,7 @@ export class SamsungLocalPlatform {
     }
     const spawn = await helperSpawn(this.paths, this.config, (m) => this.log.info(m));
     this.engineInUse = spawn.engine;
-    this.log.info(`Engine: ${spawn.engine === 'javascript' ? 'JavaScript (beta, no Python)' : 'Python'}.`);
+    this.log.info(`Engine: ${spawn.engine === 'javascript' ? 'JavaScript (no Python)' : 'Python'}.`);
     const helper = new HelperClient({ command: spawn.command, args: spawn.args, env: spawn.env, log: this.log });
     await helper.start();
     return helper;
