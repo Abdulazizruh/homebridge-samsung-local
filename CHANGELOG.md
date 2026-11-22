@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.0.12
+
+- Apple Home gets its answer within about a second even when an appliance acknowledges a command late. The command keeps going in the background; if it fails, the tile returns to the real state. This removes the Homebridge "slow to respond" warning.
+- The Python runtime repairs itself when its files are incomplete, for example after restoring a Homebridge backup (backups skip files larger than 10 MB).
+- Settings page: the option is now called "Light Display", matching its name in Apple Home, and the note under the options says the plugin is tested on real air conditioners and that features differ by model.
+
+**بالعربية**
+
+- يصل الرد إلى Apple Home خلال ثانية تقريبًا حتى لو تأخر الجهاز في تأكيد الأمر. يستمر الأمر في الخلفية، وإذا فشل تعود البطاقة إلى الحالة الحقيقية. بذلك يختفي تحذير Homebridge عن بطء الاستجابة.
+- تُصلح بيئة Python نفسها إذا كانت ملفاتها ناقصة، كما يحدث بعد استرجاع نسخة احتياطية من Homebridge (النسخ الاحتياطي يتخطى الملفات الأكبر من 10 ميجابايت).
+- صفحة الإعدادات: صار اسم الخيار «Light Display» مطابقًا لاسمه في Apple Home، والملاحظة تحت الخيارات توضّح أن الإضافة مجرَّبة على مكيفات حقيقية وأن المزايا تختلف حسب الطراز.
+
 ## 1.0.11 — 2026-11-22
 
 ### Added

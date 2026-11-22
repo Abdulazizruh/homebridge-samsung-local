@@ -92,11 +92,15 @@ function handle(req) {
     case 'write': {
       const dev = devices.get(open.get(req.key)?.host);
       if (!dev || !dev.reachable) { throw Object.assign(new Error('offline'), { code: 'offline' }); }
-      record({ path: req.path, body: req.body });
-      if (dev.refuse) { return { code: '4.05', accepted: false, detail: 'Control fail' }; }
-      if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
-      setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
-      return { code: '2.04', accepted: true, detail: null };
+      const answer = () => {
+        record({ path: req.path, body: req.body });
+        if (dev.refuse) { return { code: '4.05', accepted: false, detail: 'Control fail' }; }
+        if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
+        setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
+        return { code: '2.04', accepted: true, detail: null };
+      };
+      // A slow appliance: the acknowledgement arrives late.
+      return dev.delay ? new Promise((resolve) => { setTimeout(() => resolve(answer()), dev.delay); }) : answer();
     }
     case 'sim': {
       const host = req.host ?? open.get(req.key)?.host;
@@ -105,6 +109,7 @@ function handle(req) {
       if (req.action === 'online') { dev.reachable = true; }
       if (req.action === 'refuse') { dev.refuse = Boolean(req.value); }
       if (req.action === 'ignore') { dev.ignore = Boolean(req.value); }
+      if (req.action === 'delay') { dev.delay = Number(req.value) || 0; }
       if (req.action === 'remote') { applyWrite(dev, req.path, req.body); }
       if (req.action === 'move') { devices.set(req.to, dev); devices.delete(host); }
       for (const [key, session] of open) {
@@ -126,9 +131,10 @@ readline.createInterface({ input: process.stdin }).on('line', (line) => {
   let req;
   try { req = JSON.parse(line); } catch { return; }
   if (req.op === 'shutdown') { process.exit(0); }
+  const fail = (err) => out({ id: req.id, ok: false, error: { code: err.code ?? 'error', message: err.message } });
   try {
-    out({ id: req.id, ok: true, result: handle(req) });
+    Promise.resolve(handle(req)).then((result) => out({ id: req.id, ok: true, result }), fail);
   } catch (err) {
-    out({ id: req.id, ok: false, error: { code: err.code ?? 'error', message: err.message } });
+    fail(err);
   }
 }).on('close', () => process.exit(0));

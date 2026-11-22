@@ -82,6 +82,35 @@ test('external change and refusal through the real helper protocol', async (t) =
   assert.equal(handler.services.get('quiet').getCharacteristic(C.On).value, true);
 });
 
+test('a late acknowledgement does not hold Apple Home: quick reply, value kept, write still lands', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler, link } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  await platform.helper.request('sim', { key: DI, action: 'delay', value: 2200 });
+  const started = Date.now();
+  await handler.services.get('fanTurbo').getCharacteristic(C.On).handleSetRequest(true);
+  assert.ok(Date.now() - started < 1900, 'HomeKit is answered before the appliance acknowledges');
+  assert.equal(handler.services.get('fanTurbo').getCharacteristic(C.On).value, true);
+  await waitFor(() => link.resources['/wind/strength/vs/0'][`${V}modes`] === '4', 6000);
+});
+
+test('a late refusal puts the tile back to the real state', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  const windFree = handler.services.get('windFree').getCharacteristic(C.On);
+  const before = windFree.value;
+  await platform.helper.request('sim', { key: DI, action: 'delay', value: 1800 });
+  await platform.helper.request('sim', { key: DI, action: 'refuse', value: true });
+  await windFree.handleSetRequest(!before);
+  await new Promise((r) => { setTimeout(r, 1200); });
+  await waitFor(() => windFree.value === before, 4000);
+});
+
 test('connection loss and recovery: accessory stays, state resumes', async (t) => {
   const { api, platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
   t.after(() => platform.stop());

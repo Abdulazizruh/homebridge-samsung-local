@@ -9,7 +9,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.0.11.** Running on five real air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. What works depends on the appliance: each model reports its own set of features, and the plugin only shows what your unit reports. Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
+> **Status: 1.0.12.** Running on five real air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), with Homebridge in Docker on a Raspberry Pi. What works depends on the appliance: each model reports its own set of features, and the plugin only shows what your unit reports. Other models and appliance types are unconfirmed. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung. Not a Homebridge Verified plugin.
 
 ## What it does
@@ -102,7 +102,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Fan **Turbo** | Dedicated switch (and the top slider step) | Apple Home | |
 | Swing | Fan oscillation | Apple Home | On/off only; HomeKit has no vertical/horizontal choice |
 | WindFree, Fast, Quiet (optional: Sleep, Smart, Comfort, 2-Step, wind follows / avoids people) | Switches | Apple Home | One comfort mode at a time, as on the appliance |
-| Display light | Light | Apple Home | On/off only. Brightness is not available locally |
+| Light Display | Light | Apple Home | On/off only. Brightness is not available locally |
 | Humidity | Humidity sensor | Apple Home | Hidden while the appliance reports 0 |
 | Filter | Filter maintenance | Apple Home | Change indication and remaining life |
 | Beep, Auto Clean | Switches (off by default) | Apple Home | |

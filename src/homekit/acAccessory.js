@@ -42,6 +42,9 @@ const LEGACY_LABELS = { ...LABELS, light: 'Display Light' };
 
 const SETTLE_MS = 4500; // how long a just-written value is shielded from stale reads
 const CONFIRM_MS = 12000; // after this an unconfirmed write is reported and dropped
+// HomeKit must be answered quickly. If the appliance has not acknowledged a
+// write by then, HomeKit gets its answer and the write carries on behind it.
+const QUICK_REPLY_MS = 1200;
 const PRESET_FEATURES = ['windFree', 'fast', 'quiet', 'sleep', 'smart', 'comfort', 'twoStep', 'motionDirect', 'motionIndirect'];
 
 /**
@@ -134,17 +137,45 @@ export class AcAccessory {
     if (writes.length === 0) {
       return;
     }
-    try {
-      await this.link.send(writes);
-    } catch (err) {
+    const key = kind === 'preset' ? `preset:${value.name}` : kind;
+    const hold = () => {
+      const now = Date.now();
+      this.pending.set(key, {
+        check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label,
+      });
+    };
+    let late = false;
+    let timer;
+    const sent = this.link.send(writes).then(() => {
+      hold();
+      this.log.debug(`[${this.displayName}] ${label} accepted by the appliance; waiting for it to report the change.`);
+    }, (err) => {
       this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}`);
+      if (late) {
+        // HomeKit was already told "done": put the real state back on screen.
+        this.pending.delete(key);
+        this.#showRealState();
+        return;
+      }
       throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    }
-    const now = Date.now();
-    this.pending.set(kind === 'preset' ? `preset:${value.name}` : kind, {
-      check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label,
     });
-    this.log.debug(`[${this.displayName}] ${label} accepted by the appliance; waiting for it to report the change.`);
+    const quick = new Promise((resolve) => { timer = setTimeout(() => resolve('late'), QUICK_REPLY_MS); });
+    let outcome;
+    try {
+      outcome = await Promise.race([sent, quick]);
+    } finally {
+      clearTimeout(timer);
+    }
+    if (outcome === 'late') {
+      late = true;
+      hold(); // keep the requested value on screen while the appliance catches up
+    }
+  }
+
+  #showRealState() {
+    if (this.link.resources) {
+      this.#onUpdate(this.link.resources);
+    }
   }
 
   /** Kinds whose characteristics must not be overwritten by a stale read yet. */

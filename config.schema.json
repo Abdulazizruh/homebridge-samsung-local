@@ -130,7 +130,7 @@
                   "default": false
                 },
                 "light": {
-                  "title": "Display light",
+                  "title": "Light Display",
                   "type": "boolean",
                   "default": true
                 },

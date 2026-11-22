@@ -113,9 +113,23 @@ async function withLock(paths, fn) {
  * The only network access is pip downloading the pinned wheels from PyPI,
  * and only when the environment is missing or the pins changed.
  */
+/**
+ * A prepared environment can still be incomplete: a Homebridge backup skips
+ * files over 10 MB, so one restored from a backup lacks a compiled library.
+ * Importing the packages is the only real proof that it works.
+ */
+async function runtimeWorks(paths) {
+  const check = await run(venvPython(paths.venv), ['-c', 'import smartthings_local, OpenSSL, cbor2, cryptography'], { timeout: 60_000 });
+  return check.ok;
+}
+
 export async function ensureRuntime(paths, { pythonPath, log = () => {} } = {}) {
   if (runtimeStatus(paths).ready) {
-    return { python: venvPython(paths.venv), installed: false };
+    if (await runtimeWorks(paths)) {
+      return { python: venvPython(paths.venv), installed: false };
+    }
+    log('The Python runtime is incomplete (for example after restoring a backup). Rebuilding it…');
+    fs.rmSync(paths.runtimeMarker, { force: true });
   }
   return withLock(paths, async () => {
     if (runtimeStatus(paths).ready) {
