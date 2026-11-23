@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.3.1
+
+Automatic scan, after the first try on real appliances found nothing:
+
+- The question is now asked in the same form both engines already use with these appliances (reply format stated), besides the bare form, and up to three times, since a Wi-Fi appliance often misses the first one. It is also sent once to the OCF group address of the network.
+- Networks made by container software on the same machine (Docker and the like) are no longer scanned.
+- Under the result, one line says how many addresses are alive on the network, how many answered as appliances and how many are TVs, so an empty result can be judged.
+
+Not yet confirmed on real appliances.
+
+**بالعربية**
+
+المسح التلقائي، بعد أن عادت أول تجربة على أجهزة حقيقية بلا نتائج:
+
+- صار السؤال يُرسل بالصيغة نفسها التي يستخدمها المحركان مع هذه الأجهزة (مع تحديد صيغة الرد)، إضافة إلى الصيغة المختصرة، وحتى ثلاث مرات، لأن جهاز Wi-Fi كثيرًا ما يفوّت السؤال الأول. ويُرسل كذلك مرة إلى عنوان مجموعة OCF في الشبكة.
+- الشبكات التي تنشئها برامج الحاويات على الجهاز نفسه (مثل Docker) خرجت من المسح.
+- تحت النتيجة سطر يبيّن عدد العناوين العاملة على الشبكة، وكم منها أجاب كجهاز، وعدد التلفزيونات، ليسهل الحكم على نتيجة فارغة.
+
+لم تتأكد بعد على أجهزة حقيقية.
+
 ## 1.3.0
 
 New: automatic scan, in the settings page, for both engines.

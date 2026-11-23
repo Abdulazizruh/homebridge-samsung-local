@@ -83,6 +83,8 @@ class UiServer extends HomebridgePluginUiServer {
       const found = await scanNetwork({ hints });
       return {
         networks: found.networks,
+        asked: found.asked,
+        alive: found.alive,
         appliances: found.appliances,
         tvs: found.tvs.map((tv) => this.presentTv(tv.host, { ...tv, name: tidyName(tv.name) })),
       };

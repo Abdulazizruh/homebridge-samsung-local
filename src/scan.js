@@ -1,17 +1,34 @@
 /**
  * One look around the home network for appliances this plugin can work with.
  * It runs only when the owner asks for it on the settings page, never by
- * itself. It sends one small question to each address of the home network:
+ * itself. It sends a few small questions to each address of the home network:
  * the public OCF question on UDP 5683 (air conditioners, washers, ...) and
  * the TV's own info page on TCP 8001. Nothing is opened, changed or stored;
  * reading an appliance's identity is a separate, later step.
  */
 import dgram from 'node:dgram';
+import fs from 'node:fs';
 import os from 'node:os';
+import { createRequire } from 'node:module';
 import { tvInfo } from './tv/tizenClient.js';
 
-// CoAP NON GET /oic/res: any OCF device answers it.
-const OIC_RES_GET = Buffer.concat([Buffer.from([0x50, 0x01, 0x53, 0x4c, 0xb3]), Buffer.from('oic'), Buffer.from([0x03]), Buffer.from('res')]);
+const require = createRequire(import.meta.url);
+const { encode, pathOptions, queryOptions, Opt, CoapType, Code, ContentFormat } = require('../engine/vendor/coap/message.js');
+
+// The public OCF question, written the three ways appliances are known to
+// accept: the form both engines use to find the secure port (reply format
+// stated, with and without the filter), and the bare form.
+const ACCEPT = { number: Opt.ACCEPT, value: Buffer.from([ContentFormat.CBOR]) };
+const question = (query, accept, tag) => encode({
+  type: CoapType.NON, code: Code.GET, messageId: 0x5300 + tag, token: Buffer.from([0x53, 0x4c, tag]),
+  options: [...pathOptions(['oic', 'res']), ...queryOptions(query), ...(accept ? [ACCEPT] : [])],
+});
+const QUESTIONS = [question([], true, 1), question(['rt=oic.r.doxm'], true, 2), question([], false, 3)];
+const OCF_GROUP = '224.0.1.187'; // "all OCF nodes": appliances answer it straight back to the asker
+const ROUNDS = 3;
+const ROUND_MS = 900;
+// Networks made by container software on the same machine hold no appliances.
+const VIRTUAL = /^(docker|br-|veth|cni|flannel|virbr|podman|lo)/;
 const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 
 function isPrivate(ip) {
@@ -25,7 +42,8 @@ function isPrivate(ip) {
 
 /** The /24 networks worth looking at: around this machine and around known appliances. */
 export function scanNetworks(hints = [], interfaces = os.networkInterfaces()) {
-  const own = Object.values(interfaces).flat().filter((i) => i && i.family === 'IPv4' && !i.internal).map((i) => i.address);
+  const own = Object.entries(interfaces).filter(([name]) => !VIRTUAL.test(name)).flatMap(([, list]) => list ?? [])
+    .filter((i) => i && i.family === 'IPv4' && !i.internal).map((i) => i.address);
   const bases = [];
   for (const ip of [...own, ...hints]) {
     if (isPrivate(ip)) {
@@ -51,40 +69,84 @@ function hostsOf(bases, own) {
   return hosts;
 }
 
-/** Addresses that answer the OCF question. */
-function sweepOcf(hosts, { port, waitMs }) {
+/**
+ * Addresses that answer the OCF question. Asked up to three times, because a
+ * Wi-Fi appliance often misses the first datagram, and once more to the OCF
+ * group address of each network.
+ */
+function sweepOcf(hosts, { port, waitMs, own = [] }) {
   return new Promise((resolve) => {
     const answered = new Set();
     let socket;
+    let done = false;
     try {
-      socket = dgram.createSocket('udp4');
+      socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
     } catch {
       resolve([]);
       return;
     }
     const finish = () => {
+      if (done) {
+        return;
+      }
+      done = true;
       try { socket.close(); } catch { /* already closed */ }
       resolve([...answered]);
     };
+    const send = (packet, host) => {
+      if (!done) {
+        try { socket.send(packet, port, host, () => {}); } catch { /* socket closing */ }
+      }
+    };
     socket.on('error', finish);
-    socket.on('message', (_msg, rinfo) => answered.add(rinfo.address));
+    socket.on('message', (_msg, rinfo) => {
+      if (!own.includes(rinfo.address)) {
+        answered.add(rinfo.address);
+      }
+    });
     socket.bind(0, () => {
-      // Sent in small groups, so the network is never flooded.
-      let i = 0;
-      const group = () => {
-        for (const host of hosts.slice(i, i + 32)) {
-          socket.send(OIC_RES_GET, port, host, () => {});
+      let round = 0;
+      const startRound = () => {
+        round += 1;
+        for (const address of own) {
+          try { socket.setMulticastInterface(address); send(QUESTIONS[0], OCF_GROUP); } catch { /* no group traffic on this interface */ }
         }
-        i += 32;
-        if (i < hosts.length) {
-          setTimeout(group, 25);
-        } else {
-          setTimeout(finish, waitMs);
-        }
+        const left = hosts.filter((host) => !answered.has(host));
+        // Sent in small groups, so the network is never flooded.
+        let i = 0;
+        const group = () => {
+          if (done) {
+            return;
+          }
+          for (const host of left.slice(i, i + 32)) {
+            for (const packet of QUESTIONS) {
+              send(packet, host);
+            }
+          }
+          i += 32;
+          if (i < left.length) {
+            setTimeout(group, 25);
+          } else if (round < ROUNDS) {
+            setTimeout(startRound, ROUND_MS);
+          } else {
+            setTimeout(finish, waitMs);
+          }
+        };
+        group();
       };
-      group();
+      startRound();
     });
   });
+}
+
+/** How many addresses of these networks the machine has just seen alive (its neighbour table). */
+function aliveCount(bases, file = '/proc/net/arp') {
+  try {
+    return fs.readFileSync(file, 'utf8').split('\n').slice(1).map((line) => line.trim().split(/\s+/))
+      .filter((f) => f.length >= 4 && f[2] !== '0x0' && f[3] !== '00:00:00:00:00:00' && bases.includes(f[0].split('.').slice(0, 3).join('.'))).length;
+  } catch {
+    return null; // not Linux, or not readable
+  }
 }
 
 /** TVs that answer on their info page, a few addresses at a time. */
@@ -109,17 +171,20 @@ async function sweepTvs(hosts, { port, timeoutMs, concurrency }) {
  * Look around once. Resolves { networks, appliances: [ip], tvs: [{host, ...}] }.
  * `hosts` replaces the address list (tests).
  */
-export async function scanNetwork({ hints = [], hosts = null, ocfPort = 5683, tvPort = 8001, waitMs = 2500, tvTimeoutMs = 1200, concurrency = 32 } = {}) {
+export async function scanNetwork({ hints = [], hosts = null, ocfPort = 5683, tvPort = 8001, waitMs = 1500, tvTimeoutMs = 1500, concurrency = 32 } = {}) {
   const { bases, own } = scanNetworks(hints);
   const list = hosts ?? hostsOf(bases, own);
   const [ocf, tvs] = await Promise.all([
-    sweepOcf(list, { port: ocfPort, waitMs }),
+    sweepOcf(list, { port: ocfPort, waitMs, own }),
     sweepTvs(list, { port: tvPort, timeoutMs: tvTimeoutMs, concurrency }),
   ]);
   const tvHosts = new Set(tvs.map((tv) => tv.host));
   const byAddress = (a, b) => a.split('.').map((x) => x.padStart(3, '0')).join('').localeCompare(b.split('.').map((x) => x.padStart(3, '0')).join(''));
   return {
     networks: bases.map((base) => `${base}.0/24`),
+    // For the owner to judge an empty result: addresses asked, and how many of them are alive at all.
+    asked: list.length,
+    alive: aliveCount(bases),
     // A TV also answers the OCF question; it is listed once, as a TV.
     appliances: ocf.filter((ip) => !tvHosts.has(ip)).sort(byAddress),
     tvs: tvs.sort((a, b) => byAddress(a.host, b.host)),

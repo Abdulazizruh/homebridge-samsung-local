@@ -132,12 +132,13 @@
       addIntro: 'Two ways to add: an automatic scan that looks for your appliances, or one address typed by hand.',
       scanTitle: '1 · Automatic scan', manualTitle: '2 · By hand, with an address',
       scanNote: 'Looks once across your home network for Samsung appliances and TVs, only when you press the button. Nothing is added before you confirm. The IP and MAC address of each appliance are kept, so a changed IP address is followed as before.',
-      scanBtn: 'Scan the network', scanAgain: 'Scan again', scanSweep: 'Looking across the network… a few seconds.',
+      scanBtn: 'Scan the network', scanAgain: 'Scan again', scanSweep: 'Looking across the network… about 15 seconds.',
       scanReading: 'Reading appliance', scanOf: 'of', scanStop: 'Stop', scanStopped: 'Stopped. Read the rest with "Read" on each row.',
       scanNone: 'No new appliance answered. Check that it is switched on and on the same network, or add it by address below.',
       scanReady: 'Ready to add', scanAdded: 'Already added', scanMoved: 'Already added · address updated', scanJust: 'Added',
       scanWait: 'Waiting', scanBusy: 'Reading…', scanFailed: 'Not read', scanRetry: 'Read', scanUnsupported: 'Not supported yet',
       scanPair: 'Needs approval on the TV screen', scanAdd: 'Add selected', scanClose: 'Close', scanNet: 'Network',
+      scanSeen: 'Addresses alive', scanAnswered: 'answered as appliances', scanTvs: 'TVs',
       scanDone: 'Added. Name and options of each appliance are under its row in the list below.',
       addHint: 'Enter the appliance IP address or its MAC address, whichever you know. If the address changes later, the plugin finds the appliance again by itself. Success means the appliance answered an authenticated read of its identity and resources.',
       discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
@@ -246,12 +247,13 @@
       addIntro: 'طريقتان للإضافة: مسح تلقائي يبحث عن أجهزتك، أو عنوان جهاز واحد تكتبه يدويًا.',
       scanTitle: '1 · مسح تلقائي', manualTitle: '2 · يدويًا بالعنوان',
       scanNote: 'يبحث مرة واحدة في شبكة المنزل عن أجهزة وتلفزيونات Samsung عند ضغط الزر فقط. لا يُضاف أي جهاز قبل تأكيدك. يُحفظ عنوان IP وعنوان MAC لكل جهاز، فإذا تغيّر عنوان IP تتبّعه الإضافة كما هو معمول حاليًا.',
-      scanBtn: 'مسح الشبكة', scanAgain: 'مسح من جديد', scanSweep: 'جارٍ البحث في الشبكة… ثوانٍ قليلة.',
+      scanBtn: 'مسح الشبكة', scanAgain: 'مسح من جديد', scanSweep: 'جارٍ البحث في الشبكة… نحو 15 ثانية.',
       scanReading: 'قراءة الجهاز', scanOf: 'من', scanStop: 'إيقاف', scanStopped: 'توقّف المسح. اقرأ الباقي بزر «قراءة» في كل صف.',
       scanNone: 'لم يُجب أي جهاز جديد. تأكد أن الجهاز يعمل وعلى الشبكة نفسها، أو أضفه بالعنوان في الأسفل.',
       scanReady: 'جاهز للإضافة', scanAdded: 'مضاف مسبقًا', scanMoved: 'مضاف مسبقًا · تم تحديث عنوانه', scanJust: 'تمت الإضافة',
       scanWait: 'في الانتظار', scanBusy: 'جارٍ القراءة…', scanFailed: 'لم يُقرأ', scanRetry: 'قراءة', scanUnsupported: 'غير مدعوم حاليًا',
       scanPair: 'يحتاج موافقة على شاشة التلفزيون', scanAdd: 'إضافة المحدد', scanClose: 'إغلاق', scanNet: 'الشبكة',
+      scanSeen: 'عناوين تعمل على الشبكة', scanAnswered: 'أجابت كأجهزة', scanTvs: 'تلفزيونات',
       scanDone: 'تمت الإضافة. اسم كل جهاز وخياراته تحت صفه في القائمة بالأسفل.',
       addHint: 'أدخل عنوان IP للجهاز أو عنوان MAC، أيهما تعرف. إن تغيّر العنوان لاحقًا تجد الإضافة الجهاز من جديد تلقائيًا. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
       discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
@@ -638,6 +640,7 @@
       const found = await homebridge.request('/scan');
       if (scan !== run) { return; }
       run.networks = found.networks ?? [];
+      run.counts = { alive: found.alive, ocf: (found.appliances ?? []).length, tvs: (found.tvs ?? []).length };
       for (const tv of found.tvs ?? []) {
         const item = { host: tv.host, state: 'wait', checked: false };
         await settleFound(item, tv);
@@ -718,6 +721,7 @@
           <button class="btn btn-sm btn-outline-secondary" id="sl-scan-stop">${t('scanStop')}</button></div>` : '';
     const fresh = run.items.some((i) => !['added', 'moved'].includes(i.state));
     box.innerHTML = `${run.networks.length ? `<div class="sl-muted">${t('scanNet')}: <span dir="ltr">${run.networks.map(esc).join(' , ')}</span></div>` : ''}
+      ${run.counts ? `<div class="sl-muted">${run.counts.alive === null || run.counts.alive === undefined ? '' : `${t('scanSeen')}: <span dir="ltr">${run.counts.alive}</span> · `}${t('scanAnswered')}: <span dir="ltr">${run.counts.ocf}</span> · ${t('scanTvs')}: <span dir="ltr">${run.counts.tvs}</span></div>` : ''}
       ${progress}${run.stop && run.phase === 'done' ? `<div class="sl-muted">${t('scanStopped')}</div>` : ''}${rows}
       ${run.phase === 'done' && !fresh ? `<div class="alert alert-info mt-2 mb-2">${t('scanNone')}</div>` : ''}
       ${run.note ? `<div class="alert alert-success mt-2 mb-2">${t(run.note)}</div>` : ''}

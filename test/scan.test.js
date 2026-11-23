@@ -24,7 +24,29 @@ test('network scan: finds an appliance by the OCF question and a TV by its info 
   assert.equal(found.tvs[0].model, 'QA55TEST');
 
   const onlyAppliance = await scanNetwork({ hosts: ['127.0.0.1'], ocfPort: appliance.address().port, tvPort: 1, waitMs: 300, tvTimeoutMs: 300 });
-  assert.deepEqual(onlyAppliance, { networks: onlyAppliance.networks, appliances: ['127.0.0.1'], tvs: [] });
+  assert.deepEqual(onlyAppliance.appliances, ['127.0.0.1']);
+  assert.deepEqual(onlyAppliance.tvs, []);
+  assert.equal(onlyAppliance.asked, 1);
+});
+
+test('network scan: an appliance that wants the reply format stated, and misses the first question, is still found', async (t) => {
+  const appliance = dgram.createSocket('udp4');
+  let heard = 0;
+  appliance.on('message', (msg, rinfo) => {
+    // Accept option (number 17) present: the last option of the stated form is a one-byte value 60 (CBOR).
+    const stated = msg[msg.length - 1] === 60;
+    if (!stated) {
+      return; // silent to the bare question, as some firmwares are
+    }
+    heard += 1;
+    if (heard > 2) { // the first round (two stated forms) is lost
+      appliance.send(Buffer.from([0x50, 0x45, 0x53, 0x4c]), rinfo.port, rinfo.address);
+    }
+  });
+  await new Promise((r) => appliance.bind(0, '127.0.0.1', r));
+  t.after(() => appliance.close());
+  const found = await scanNetwork({ hosts: ['127.0.0.1'], ocfPort: appliance.address().port, tvPort: 1, waitMs: 300, tvTimeoutMs: 300 });
+  assert.deepEqual(found.appliances, ['127.0.0.1']);
 });
 
 test('network scan: only private home networks, around this machine and known appliances', () => {
@@ -32,6 +54,7 @@ test('network scan: only private home networks, around this machine and known ap
     eth0: [{ family: 'IPv4', internal: false, address: '192.168.0.10' }],
     lo: [{ family: 'IPv4', internal: true, address: '127.0.0.1' }],
     wan: [{ family: 'IPv4', internal: false, address: '81.2.3.4' }],
+    docker0: [{ family: 'IPv4', internal: false, address: '172.17.0.1' }],
   });
   assert.deepEqual(nets.bases, ['192.168.0', '192.168.5']);
 });
