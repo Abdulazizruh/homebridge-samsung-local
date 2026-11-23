@@ -10,7 +10,7 @@ Automatic scan, after the first try on real appliances found nothing:
 - Networks made by container software on the same machine (Docker and the like) are no longer scanned.
 - Under the result, one line says how many addresses are alive on the network, how many answered as appliances and how many are TVs, so an empty result can be judged.
 
-Not yet confirmed on real appliances.
+Confirmed on a real network: five air conditioners, a washer and a TV answered in one scan. Adding a new appliance from the list is not yet tried on real hardware.
 
 **بالعربية**
 
@@ -20,7 +20,7 @@ Not yet confirmed on real appliances.
 - الشبكات التي تنشئها برامج الحاويات على الجهاز نفسه (مثل Docker) خرجت من المسح.
 - تحت النتيجة سطر يبيّن عدد العناوين العاملة على الشبكة، وكم منها أجاب كجهاز، وعدد التلفزيونات، ليسهل الحكم على نتيجة فارغة.
 
-لم تتأكد بعد على أجهزة حقيقية.
+تأكدت على شبكة حقيقية: أجابت خمسة مكيفات وغسالة وتلفزيون في مسح واحد. إضافة جهاز جديد من القائمة لم تُجرَّب بعد على أجهزة حقيقية.
 
 ## 1.3.0
 

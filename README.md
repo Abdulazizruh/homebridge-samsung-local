@@ -98,6 +98,22 @@ The settings page shows these steps with a tick beside each one that is done, th
 
 <p><img src="assets/screenshots/setup-page.png" alt="The plugin settings page: the setup steps with what is done, the connection engine, and the field to add an appliance" width="360"></p>
 
+### Automatic scan
+
+Tested on a real home network: five air conditioners, a washer and a TV answered in one scan.
+
+**Start.** The "Add an appliance" card offers both ways. **Scan the network** looks once, for about 15 seconds.
+
+<p><img src="assets/screenshots/scan-start.png" alt="The Add an appliance card: automatic scan with its button, and adding by hand with an address" width="360"></p>
+
+**Result.** Each appliance that answered is listed with its address. The ones already in your list are marked "Already added" and left alone. The line above the list says how many addresses are alive on the network and how many answered as appliances and TVs.
+
+<p><img src="assets/screenshots/scan-result.png" alt="Scan result: one TV, five air conditioners and a washer, all marked Already added" width="360"></p>
+
+**A new appliance.** A new one is read, shown with its kind and model, and ticked as "Ready to add". Press **Add selected**; its name and options are then under its row in the list. (Example row added to the picture above.)
+
+<p><img src="assets/screenshots/scan-found.png" alt="Scan result with one new air conditioner ticked as Ready to add and the Add selected button" width="360"></p>
+
 Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
 
 A static DHCP lease for each appliance is recommended. An air conditioner or washer whose address changes is found again by the plugin. To set an address yourself, press **Change IP** beside the appliance, enter the new one and press **Test & discover**: the existing entry is updated.
