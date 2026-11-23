@@ -26,6 +26,10 @@
   .sl-inline { border: 2px solid rgba(128,90,213,.55); border-radius: 8px; padding: 10px; margin-top: 8px; }
   .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
   .sl-danger { border-color: rgba(220,53,69,.5); }
+  .sl-group { border: 1px solid rgba(128,90,213,.45); border-radius: 8px; padding: 0 10px 10px; overflow: hidden; }
+  .sl-group-title { margin: 0 -10px 8px; padding: 6px 10px; font-weight: 700; color: #6f42c1; background: rgba(128,90,213,.14); border-bottom: 1px solid rgba(128,90,213,.3); }
+  .sl-choice { display: block; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 8px; margin-bottom: 8px; cursor: pointer; }
+  .sl-choice:has(input:checked) { border-color: rgba(128,90,213,.8); background: rgba(128,90,213,.08); }
   .sl-way { border-top: 1px solid rgba(128,128,128,.2); padding-top: 10px; margin-top: 10px; }
   .sl-found { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
   .sl-found .sl-grow { flex: 1; min-width: 150px; } .sl-found input[type=checkbox] { width: 20px; height: 20px; flex: none; }
@@ -553,7 +557,7 @@
         <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>
         <div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>
-        <div class="mt-2"><strong>${t('tvMode')}</strong>
+        <div class="sl-group mt-2"><div class="sl-group-title">${t('tvMode')}</div>
           <div><label class="mb-0"><input type="radio" name="sl-tv-mode" value="tile" ${mode === 'tile' ? 'checked' : ''}> ${t('tvModeTile')}</label>
             <div class="sl-muted">${t('tvModeTileNote')}</div></div>
           <div class="mt-1"><label class="mb-0"><input type="radio" name="sl-tv-mode" value="switches" ${mode === 'switches' ? 'checked' : ''}> ${t('tvModeSwitches')}</label>
@@ -562,10 +566,10 @@
         ${p.tv.configured ? (() => {
           const ph = status.appleRemote?.[p.deviceId];
           const which = existing?.appleRemote === true ? (mode === 'switches' ? 'apple' : 'both') : 'home';
-          const choice = (value, title, note) => `<label class="d-block border rounded p-2 mb-2" style="cursor:pointer">
+          const choice = (value, title, note) => `<label class="sl-choice">
               <input type="radio" name="sl-tv-remote" value="${value}" ${which === value ? 'checked' : ''}> <strong>${t(title)}</strong>
               <div class="sl-muted">${t(note)}</div></label>`;
-          return `<div class="mt-3"><strong>${t('phTitle')}</strong>
+          return `<div class="sl-group mt-3"><div class="sl-group-title">${t('phTitle')}</div>
             <div class="mb-1">${t('phWhich')}</div>
             ${choice('home', 'phWhichHome', 'phWhichHomeNote')}
             ${choice('both', 'phWhichBoth', 'phWhichBothNote')}
