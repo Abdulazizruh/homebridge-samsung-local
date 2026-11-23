@@ -3,7 +3,7 @@ import { DropLog } from './dropLog.js';
 import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
 import { WasherAccessory } from './homekit/washerAccessory.js';
 import { LAUNDRY_KINDS } from './capabilities/washer.js';
-import { TvAccessory } from './homekit/tvAccessory.js';
+import { TvAccessory, switchesOf } from './homekit/tvAccessory.js';
 import { pruneAppleRemote } from './appleRemote/bridge.js';
 import { keepPort } from './homekit/tvPort.js';
 import { describeDevice, stableDeviceId } from './capabilities/index.js';
@@ -138,7 +138,7 @@ export class SamsungLocalPlatform {
     try {
       pruneSetup(this.paths.tvSetup, tvs.filter((e) => e.id && e.tvMode !== 'switches').map((e) => e.id));
     } catch { /* best effort */ }
-    this.#pruneAccessories(all.filter((e) => !(e.type === 'tv' && e.tvMode !== 'switches')));
+    this.#pruneAccessories(all.filter((e) => !(e.type === 'tv' && switchesOf(e).length === 0))); // a TV without switches keeps nothing in the bridge
 
     if (!entries.length && tvs.length) {
       return; // TVs need no Python runtime
@@ -339,22 +339,35 @@ export class SamsungLocalPlatform {
     }
     const mode = entry.tvMode === 'switches' ? 'switches' : 'tile';
     const name = String(entry.name || '').trim() || 'Samsung TV';
-    const uuid = this.api.hap.uuid.generate(UUID_NAMESPACE + entry.id + (mode === 'tile' ? ':tv' : ''));
-    let accessory = mode === 'switches' ? this.cached.get(uuid) : null;
-    const fresh = !accessory;
-    if (fresh) {
-      accessory = new this.api.platformAccessory(name, uuid,
-        mode === 'tile' ? this.api.hap.Categories.TELEVISION : this.api.hap.Categories.SWITCH);
-    } else if (accessory.displayName !== name) {
-      accessory.updateDisplayName?.(name);
-      accessory.displayName = name;
+    const switches = switchesOf(entry);
+    const mark = (acc) => {
+      acc.context.deviceId = entry.id;
+      acc.context.kind = 'tv';
+      acc.context.model = entry.model ?? acc.context.model ?? null;
+      return acc;
+    };
+    // The TV tile: its own accessory, made anew at every start (Apple requires it to be added on its own).
+    const accessory = mode === 'tile'
+      ? mark(new this.api.platformAccessory(name, this.api.hap.uuid.generate(UUID_NAMESPACE + entry.id + ':tv'), this.api.hap.Categories.TELEVISION))
+      : null;
+    // The switches chosen for automations: one accessory inside the bridge, kept by Homebridge between starts.
+    let switchAccessory = null;
+    let fresh = false;
+    if (switches.length) {
+      const uuid = this.api.hap.uuid.generate(UUID_NAMESPACE + entry.id);
+      switchAccessory = this.cached.get(uuid);
+      fresh = !switchAccessory;
+      if (fresh) {
+        switchAccessory = new this.api.platformAccessory(name, uuid, this.api.hap.Categories.SWITCH);
+      } else if (switchAccessory.displayName !== name) {
+        switchAccessory.updateDisplayName?.(name);
+        switchAccessory.displayName = name;
+      }
+      mark(switchAccessory);
     }
-    accessory.context.deviceId = entry.id;
-    accessory.context.kind = 'tv';
-    accessory.context.model = entry.model ?? accessory.context.model ?? null;
     const tokens = readJson(this.paths.tvTokens) ?? {};
     const handler = new TvAccessory({
-      api: this.api, log: this.log, accessory, entry, mode, token: tokens[entry.id] ?? null,
+      api: this.api, log: this.log, accessory, switchAccessory, switches, name, entry, token: tokens[entry.id] ?? null,
       saveToken: (token) => {
         try {
           writeJson(this.paths.tvTokens, { ...(readJson(this.paths.tvTokens) ?? {}), [entry.id]: token });
@@ -382,17 +395,17 @@ export class SamsungLocalPlatform {
       handler.enableAppleRemote({ file: this.paths.appleRemote, name: mode === 'tile' ? `${name} +` : name, pin: entry.appleRemotePin, ...(this.overrides.appleRemote ?? {}) })
         .catch((err) => this.log.warn(`[${name}] the iPhone remote option could not start: ${err.message}`));
     }
-    if (mode === 'tile') {
-      // Apple requires a TV tile to be its own accessory, added to the Home app separately.
+    if (accessory) {
       keepPort({ accessory, deviceId: entry.id, file: this.paths.tvFacts, log: this.log }); // the same port after every restart
       this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
       this.log.info(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options. Its code is on the plugin settings page, beside the TV.`);
       trackSetup({ accessory, deviceId: entry.id, name, file: this.paths.tvSetup, timers: this.retryTimers, log: this.log });
-    } else if (fresh) {
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-      this.log.info(`Added "${name}" (TV switches).`);
-    } else {
-      this.api.updatePlatformAccessories([accessory]);
+    }
+    if (switchAccessory && fresh) {
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [switchAccessory]);
+      this.log.info(`Added "${name}" (TV switches: ${switches.join(', ')}).`);
+    } else if (switchAccessory) {
+      this.api.updatePlatformAccessories([switchAccessory]);
     }
     this.tvs ??= [];
     this.tvs.push(handler);

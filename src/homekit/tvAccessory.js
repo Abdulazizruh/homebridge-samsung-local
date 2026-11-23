@@ -23,6 +23,27 @@ function remoteKeys(Characteristic) {
   ]);
 }
 
+/** The switches a TV can show in Apple Home, for automations. `key` is kept in the settings; `code` is what a momentary one sends. */
+export const TV_SWITCHES = [
+  { key: 'power', suffix: '' },
+  { key: 'mute', suffix: 'Mute' },
+  { key: 'volumeUp', suffix: 'Volume Up', code: 'KEY_VOLUP', label: 'volume' },
+  { key: 'volumeDown', suffix: 'Volume Down', code: 'KEY_VOLDOWN', label: 'volume' },
+  { key: 'channelUp', suffix: 'Channel Up', code: 'KEY_CHUP', label: 'channel' },
+  { key: 'channelDown', suffix: 'Channel Down', code: 'KEY_CHDOWN', label: 'channel' },
+  { key: 'playPause', suffix: 'Play Pause', code: 'KEY_PLAY_BACK', label: 'play/pause' },
+  { key: 'home', suffix: 'Home', code: 'KEY_HOME', label: 'home' },
+];
+const OLD_SWITCHES = ['power', 'mute', 'volumeUp', 'volumeDown']; // what "switches" meant before they could be chosen
+
+/** The switches one TV entry asks for. An entry from before the choice existed keeps what it had. */
+export function switchesOf(entry) {
+  if (Array.isArray(entry?.tvSwitches)) {
+    return TV_SWITCHES.map((d) => d.key).filter((key) => entry.tvSwitches.includes(key));
+  }
+  return entry?.tvMode === 'switches' ? [...OLD_SWITCHES] : [];
+}
+
 /**
  * A Samsung TV in HomeKit, in one of two shapes chosen in the settings:
  *  - 'tile'     a real TV tile with the Control Centre remote (Apple requires
@@ -30,16 +51,23 @@ function remoteKeys(Characteristic) {
  *  - 'switches' plain switches inside the bridge: power, mute, volume up/down
  */
 export class TvAccessory {
-  constructor({ api, log, accessory, entry, mode, token, saveToken, ports = {}, pollMs = POLL_MS, reportsPower = false, onReportsPower = null,
-    screenPortSeen = false, onScreenPortSeen = null }) {
+  /**
+   * `accessory` is the TV tile (or null), `switchAccessory` the accessory that carries the
+   * chosen switches (or null). A TV can have either, both, or neither: with the iPhone
+   * remote alone it has nothing in Apple Home.
+   */
+  constructor({ api, log, accessory = null, switchAccessory = null, switches = [], name = null, entry, token, saveToken, ports = {}, pollMs = POLL_MS,
+    reportsPower = false, onReportsPower = null, screenPortSeen = false, onScreenPortSeen = null }) {
     this.api = api;
     this.hap = api.hap;
     this.log = log;
     this.accessory = accessory;
+    this.switchAccessory = switchAccessory;
+    this.switches = switches;
     this.entry = entry;
-    this.mode = mode;
-    this.displayName = accessory.displayName;
-    this.context = accessory.context;
+    this.mode = accessory ? 'tile' : 'switches';
+    this.displayName = name ?? (accessory ?? switchAccessory)?.displayName ?? 'Samsung TV';
+    this.context = (switchAccessory ?? accessory)?.context ?? { model: entry?.model ?? null };
     this.ports = ports;
     this.on = false;
     this.muted = false;
@@ -58,9 +86,10 @@ export class TvAccessory {
     });
     this.keyboardOpen = false;
     this.phone = null; // the iPhone-remote stand-in, when the option is on
-    if (mode === 'tile') {
+    if (accessory) {
       this.#buildTile();
-    } else {
+    }
+    if (switchAccessory) {
       this.#buildSwitches();
     }
     this.timer = setInterval(() => this.poll(), pollMs);
@@ -327,49 +356,59 @@ export class TvAccessory {
   #switch(key, suffix) {
     const { Service } = this.hap;
     const name = suffix ? `${this.displayName} ${suffix}` : this.displayName;
-    const service = this.accessory.getServiceById(Service.Switch, key) ?? this.accessory.addService(Service.Switch, name, key);
+    const service = this.switchAccessory.getServiceById(Service.Switch, key) ?? this.switchAccessory.addService(Service.Switch, name, key);
     this.#applyName(key, service, name);
     this.services.set(key, service);
     return service.getCharacteristic(this.hap.Characteristic.On);
   }
 
   #buildSwitches() {
-    this.#info();
-    this.#switch('power', '').onGet(() => this.on).onSet((v) => this.#setPower(Boolean(v)));
-    this.#switch('mute', 'Mute').onGet(() => this.muted).onSet(async (v) => {
-      if (Boolean(v) !== this.muted && this.on) {
-        await this.#press('KEY_MUTE', 'mute');
-        this.muted = Boolean(v);
-      } else if (!this.on) {
-        setTimeout(() => this.#push(), 300).unref?.();
+    this.#info(this.switchAccessory);
+    const { Service, Characteristic } = this.hap;
+    // A switch that was chosen before and is no longer leaves Apple Home.
+    for (const service of [...this.switchAccessory.services]) {
+      if (service.UUID === Service.Switch.UUID && !this.switches.includes(service.subtype)) {
+        this.switchAccessory.removeService(service);
       }
-    });
-    // Momentary: each press is one volume step.
-    for (const [key, suffix, code] of [['volumeUp', 'Volume Up', 'KEY_VOLUP'], ['volumeDown', 'Volume Down', 'KEY_VOLDOWN']]) {
-      this.#switch(key, suffix).onGet(() => false).onSet(async (v) => {
-        if (v) {
-          setTimeout(() => this.services.get(key).updateCharacteristic(this.hap.Characteristic.On, false), 400).unref?.();
-          await this.#press(code, 'volume');
-        }
-      });
+    }
+    for (const { key, suffix, code, label } of TV_SWITCHES.filter((d) => this.switches.includes(d.key))) {
+      if (key === 'power') {
+        this.#switch(key, suffix).onGet(() => this.on).onSet((v) => this.#setPower(Boolean(v)));
+      } else if (key === 'mute') {
+        this.#switch(key, suffix).onGet(() => this.muted).onSet(async (v) => {
+          if (Boolean(v) !== this.muted && this.on) {
+            await this.#press('KEY_MUTE', 'mute');
+            this.muted = Boolean(v);
+            this.#push();
+          } else if (!this.on) {
+            setTimeout(() => this.#push(), 300).unref?.();
+          }
+        });
+      } else {
+        // Momentary: each press is one step, then the switch is off again, so an automation can press it again.
+        this.#switch(key, suffix).onGet(() => false).onSet(async (v) => {
+          if (v) {
+            setTimeout(() => this.services.get(key).updateCharacteristic(Characteristic.On, false), 400).unref?.();
+            await this.#press(code, label);
+          }
+        });
+      }
     }
   }
 
-  #info() {
+  #info(accessory = this.accessory) {
     const { Service, Characteristic } = this.hap;
-    this.accessory.getService(Service.AccessoryInformation)
+    accessory?.getService(Service.AccessoryInformation)
       ?.setCharacteristic(Characteristic.Manufacturer, 'Samsung')
       .setCharacteristic(Characteristic.Model, String(this.context.model ?? 'TV').slice(0, 64));
   }
 
   #push() {
     const { Characteristic } = this.hap;
-    if (this.mode === 'tile') {
-      this.services.get('tv').updateCharacteristic(Characteristic.Active, this.on ? 1 : 0);
-      this.services.get('speaker').updateCharacteristic(Characteristic.Mute, this.muted);
-    } else {
-      this.services.get('power').updateCharacteristic(Characteristic.On, this.on);
-      this.services.get('mute').updateCharacteristic(Characteristic.On, this.muted);
-    }
+    // Whatever this TV shows in Apple Home says the same thing.
+    this.services.get('tv')?.updateCharacteristic(Characteristic.Active, this.on ? 1 : 0);
+    this.services.get('speaker')?.updateCharacteristic(Characteristic.Mute, this.muted);
+    this.services.get('power')?.updateCharacteristic(Characteristic.On, this.on);
+    this.services.get('mute')?.updateCharacteristic(Characteristic.On, this.muted);
   }
 }

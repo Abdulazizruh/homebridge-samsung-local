@@ -64,6 +64,9 @@ class Connection {
     clearTimeout(this.deadline);
     // A phone that proved itself and left without ever opening the remote: said once a minute at most, to explain a remote that hangs.
     const s = this.server;
+    if (this.opened) {
+      s.log.info(`[${s.name}] iPhone remote connection ended after ${((Date.now() - this.born) / 1000).toFixed(0)}s${this.remote ? ', without the phone closing its remote first' : ''}.`);
+    }
     if (this.verified && !this.opened && Date.now() - (s.lastLeft ?? 0) > 60_000) {
       s.lastLeft = Date.now();
       s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}.`);
@@ -254,6 +257,13 @@ class Connection {
     this.keys = { out: pv.out, in: pv.in };
     this.verified = id.toString('utf8');
     this.verifiedMs = Date.now() - this.born;
+    // A phone has one remote. When it comes back on a new connection, the one it left behind is closed:
+    // a real phone that found its old connection still open sat on "Connecting" for half a minute.
+    let closed = 0;
+    for (const other of [...s.connections]) {
+      if (other !== this && other.verified === this.verified) { other.close(); closed += 1; }
+    }
+    if (closed) { s.log.info(`[${s.name}] the same iPhone or iPad came back; its earlier connection was closed.`); }
     this.pv = null;
     clearTimeout(this.deadline);
   }

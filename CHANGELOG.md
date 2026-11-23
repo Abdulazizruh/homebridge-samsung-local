@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.19
+
+Trial version on the "beta" channel. Same as beta.18, plus:
+
+- **The remote and the switches are two separate choices.** Card 1 is the remote on the iPhone: like Apple TV (recommended), the TV tile with the Home remote, both together (not recommended), or none. Card 2 is "Switches for automations": tick the ones you want, none to begin with. They work with any remote, so a TV tile can now have switches too.
+- **More switches to choose from**: power, mute, volume up and down, channel up and down, play or pause, and the TV's home screen. They show in Apple Home as one group for the TV. The momentary ones go off again by themselves, so an automation can press one several times. A switch that is no longer ticked leaves Apple Home.
+- Settings from before keep what they had: "switches" still means power, mute and volume.
+- **iPhone remote stuck on "Connecting" when opened again.** The log of a real phone showed it: the phone came back on a new connection, asked one thing, and waited half a minute. When the same phone comes back, its earlier connection is now closed. Not yet confirmed as the cure; the log now also says when a remote connection ends.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.18، ومعها:
+
+- **الريموت والمفاتيح اختياران منفصلان.** البطاقة 1 هي الريموت على الآيفون: مثل Apple TV (موصى به)، أو بطاقة تلفزيون مع ريموت تطبيق المنزل، أو الاثنان معًا (لا نوصي به)، أو دون ريموت. والبطاقة 2 «مفاتيح للأتمتة»: تعلّم ما تريده منها، والأصل أنها غير معلّمة. تعمل مع أي ريموت، فصارت بطاقة التلفزيون تقبل المفاتيح أيضًا.
+- **مفاتيح أكثر للاختيار**: التشغيل، الكتم، رفع الصوت وخفضه، القناة التالية والسابقة، تشغيل أو إيقاف مؤقت، والشاشة الرئيسية للتلفزيون. تظهر في Apple Home مجموعة واحدة للتلفزيون. ومفاتيح الضغطة الواحدة تعود مطفأة وحدها، فتستطيع الأتمتة ضغطها عدة مرات. والمفتاح الذي تُزال علامته يخرج من Apple Home.
+- الإعدادات السابقة تحتفظ بما كان لها: «مفاتيح» ما زالت تعني التشغيل والكتم والصوت.
+- **ريموت الآيفون يعلق على «Connecting» عند فتحه مرة ثانية.** أظهره سجل جوال حقيقي: عاد الجوال باتصال جديد، وطلب شيئًا واحدًا، وانتظر نصف دقيقة. الآن حين يعود الجوال نفسه يُغلق اتصاله السابق. لم يتأكد بعد أنه العلاج؛ والسجل يذكر الآن أيضًا متى ينتهي اتصال الريموت.
+
 ## 1.4.0-beta.18
 
 Trial version on the "beta" channel. Same as beta.17, plus:

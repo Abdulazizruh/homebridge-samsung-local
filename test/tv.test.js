@@ -312,3 +312,46 @@ test('iPhone remote as the only remote: with switches instead of a tile it carri
   await waitFor(() => platform.tvs[0].phone);
   assert.equal(platform.tvs[0].phone.name, 'Majlis TV');
 });
+
+test('TV in Apple Home: the tile, the chosen switches, both or neither, and a switch no longer chosen leaves', async (t) => {
+  const tv = await fakeTv();
+  const storage = tmpDir();
+  // The tile and two switches together.
+  let { api, platform } = await bootTv(tv, 'tile', storage, { tvSwitches: ['mute', 'volumeUp', 'nonsense'] });
+  t.after(() => tv.close());
+  const S = api.hap.Service; const C = api.hap.Characteristic;
+  let handler = platform.tvs[0];
+  await waitFor(() => handler.on);
+  assert.ok(handler.services.get('tv'), 'the tile is there');
+  assert.deepEqual([...handler.services.keys()].filter((k) => !['tv', 'speaker'].includes(k) && !k.startsWith('input')).sort(), ['mute', 'volumeUp']);
+  assert.equal(api.external.length, 1);
+  assert.equal(api.registered.length, 1, 'the switches are one accessory inside the bridge');
+  const group = api.registered[0].accessory;
+  assert.deepEqual(group.services.filter((x) => x.UUID === S.Switch.UUID).map((x) => x.subtype).sort(), ['mute', 'volumeUp']);
+  await handler.services.get('volumeUp').getCharacteristic(C.On).setValue(true); // one press, usable again by an automation
+  await waitFor(() => tv.keys.includes('KEY_VOLUP'));
+  await waitFor(() => handler.services.get('volumeUp').getCharacteristic(C.On).value === false);
+  await platform.stop();
+
+  // Only the remote like Apple TV, no switch: nothing of this TV is in Apple Home.
+  ({ api, platform } = await bootTv(tv, 'switches', tmpDir(), { tvSwitches: [], appleRemote: true }));
+  handler = platform.tvs[0];
+  await waitFor(() => handler.phone && handler.on);
+  assert.equal(api.external.length + api.registered.length, 0);
+  handler.phone.emit('key', 'KEY_HOME');
+  await waitFor(() => tv.keys.includes('KEY_HOME'));
+  await platform.stop();
+
+  // Settings from before the choice existed keep their four switches.
+  ({ api, platform } = await bootTv(tv, 'switches', tmpDir()));
+  assert.deepEqual([...platform.tvs[0].services.keys()].sort(), ['mute', 'power', 'volumeDown', 'volumeUp']);
+  await platform.stop();
+});
+
+test('switchesOf: what a TV entry asks for', async () => {
+  const { switchesOf } = await import('../src/homekit/tvAccessory.js');
+  assert.deepEqual(switchesOf({ tvMode: 'tile' }), []);
+  assert.deepEqual(switchesOf({ tvMode: 'switches' }), ['power', 'mute', 'volumeUp', 'volumeDown']);
+  assert.deepEqual(switchesOf({ tvMode: 'switches', tvSwitches: [] }), []);
+  assert.deepEqual(switchesOf({ tvMode: 'tile', tvSwitches: ['home', 'power', 'x'] }), ['power', 'home']);
+});

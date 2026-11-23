@@ -215,6 +215,16 @@
                 }
               ]
             },
+            "tvSwitches": {
+              "title": "Switches for automations",
+              "type": "array",
+              "uniqueItems": true,
+              "description": "Switches of this TV shown in Apple Home as one group, for automations and scenes. Independent of the remote.",
+              "items": {
+                "type": "string",
+                "enum": ["power", "mute", "volumeUp", "volumeDown", "channelUp", "channelDown", "playPause", "home"]
+              }
+            },
             "appleRemote": {
               "title": "iPhone remote with keyboard (trial)",
               "type": "boolean",
