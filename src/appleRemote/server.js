@@ -48,7 +48,7 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
-    this.echoes = new Echoes();
+    this.echoes = new Echoes(Date.now, (server.echoMemory ??= {}));
     this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
     this.lastSelect = 0;
@@ -66,7 +66,7 @@ class Connection {
     const s = this.server;
     if (this.verified && !this.opened && Date.now() - (s.lastLeft ?? 0) > 60_000) {
       s.lastLeft = Date.now();
-      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote.`);
+      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}.`);
     }
     this.server.forget(this);
   }
@@ -119,6 +119,7 @@ class Connection {
     const [message] = unpack(plain);
     if (!message || typeof message !== 'object') { return; }
     if (typeof message._i !== 'string') { return; } // a reply to one of our events
+    if ((this.asked ??= []).length < 25) { this.asked.push(message._i.slice(0, 40).replace(/[^\w.-]/g, '?')); } // Apple's request names, for the log
     const handler = HANDLERS[message._i.toLowerCase()];
     if (handler) { handler.call(this, message, message._c ?? {}); return; }
     this.error(message, 'No request handler', 58822);

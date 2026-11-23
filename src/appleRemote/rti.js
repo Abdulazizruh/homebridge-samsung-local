@@ -70,13 +70,20 @@ export function applyEdit(text, edit, max = 1024) {
 const ECHO_MS = 200; // the word follows its keystroke at once; two real taps on one key are slower
 
 export class Echoes {
-  constructor(now = Date.now) { this.now = now; this.awaiting = false; this.at = 0; }
+  /** `memory` is shared by all connections of one TV: once a phone is known to repeat words, a late repeat is still one. */
+  constructor(now = Date.now, memory = {}) { this.now = now; this.memory = memory; this.awaiting = true; this.at = 0; }
 
   /** True when this edit only repeats what the keystroke before it already did. */
   isEcho(field, edit) {
     const now = this.now();
     const plain = Boolean(edit.insert) && !edit.remove && edit.assert === null;
-    const echo = plain && this.awaiting && now - this.at <= ECHO_MS && String(field ?? '').endsWith(edit.insert);
+    const long = plain && Array.from(edit.insert).length >= 2;
+    // A word of two letters or more that the field already ends with is the repeat, however late it comes
+    // (also the first thing a phone says after it reconnects). One letter alone could be a real second tap,
+    // so it counts only at once after its keystroke, or from a phone already known to repeat.
+    const echo = plain && this.awaiting && String(field ?? '').endsWith(edit.insert)
+      && (long || this.memory.repeats || now - this.at <= ECHO_MS);
+    if (echo && long) { this.memory.repeats = true; }
     this.awaiting = !echo && (Boolean(edit.insert) || edit.remove > 0) && edit.assert === null; // one word per keystroke
     this.at = now;
     return echo;

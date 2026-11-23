@@ -64,3 +64,14 @@ test('a TV name is made safe for HomeKit', () => {
   assert.equal(tidyName('  Living Room TV  '), 'Living Room TV');
   assert.equal(tidyName('[TV]'), 'Samsung TV');
 });
+
+test('announcing the iPhone remote: only real network interfaces count, never a container network or loopback', async () => {
+  const { homeInterfaces } = await import('../src/scan.js');
+  assert.deepEqual(homeInterfaces({
+    lo: [{ family: 'IPv4', address: '127.0.0.1', internal: true }],
+    docker0: [{ family: 'IPv4', address: '172.17.0.1', internal: false }],
+    'br-1a2b': [{ family: 'IPv4', address: '172.18.0.1', internal: false }],
+    eth0: [{ family: 'IPv6', address: 'fe80::1', internal: false }, { family: 'IPv4', address: '192.168.1.20', internal: false }],
+    wlan0: [{ family: 'IPv6', address: 'fe80::2', internal: false }],
+  }), ['eth0']);
+});

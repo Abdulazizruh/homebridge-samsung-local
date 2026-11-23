@@ -10,6 +10,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import ciao from '@homebridge/ciao';
+import { homeInterfaces } from '../scan.js';
 import { CompanionServer } from './server.js';
 
 function load(file) {
@@ -105,7 +106,14 @@ export class AppleRemote {
     }
     if (this.advertise) {
       responder ??= ciao.getResponder();
-      this.service = responder.createService({ name: this.name, type: 'companion-link', port, txt: txt(identity, this.model) });
+      // Only the addresses a phone at home can reach are announced. Inside a container the machine also
+      // has addresses of its own inner networks; a phone that tries one of those first hangs on "Connecting".
+      const reachable = homeInterfaces();
+      this.service = responder.createService({
+        name: this.name, type: 'companion-link', port, txt: txt(identity, this.model),
+        ...(reachable.length ? { restrictedAddresses: reachable, disabledIpv6: true } : {}),
+      });
+      this.log.info(`[${this.name}] announced on ${reachable.length ? reachable.join(', ') : 'every network interface'}.`);
       await this.service.advertise();
     }
     this.log.info(`[${this.name}] shown to the iPhone remote (Control Centre → Apple TV Remote). Pairing code: in the plugin settings, under this TV.`);

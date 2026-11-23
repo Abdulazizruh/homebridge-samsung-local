@@ -41,6 +41,13 @@ function isPrivate(ip) {
 }
 
 /** The /24 networks worth looking at: around this machine and around known appliances. */
+/** The names of the real network interfaces of this machine: the ones a phone at home can reach. */
+export function homeInterfaces(interfaces = os.networkInterfaces()) {
+  return Object.entries(interfaces)
+    .filter(([name, list]) => !VIRTUAL.test(name) && (list ?? []).some((a) => a.family === 'IPv4' && !a.internal))
+    .map(([name]) => name);
+}
+
 export function scanNetworks(hints = [], interfaces = os.networkInterfaces()) {
   const own = Object.entries(interfaces).filter(([name]) => !VIRTUAL.test(name)).flatMap(([, list]) => list ?? [])
     .filter((i) => i && i.family === 'IPv4' && !i.internal).map((i) => i.address);

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.14
+
+Trial version on the "beta" channel. Same as beta.13, plus:
+
+- **iPhone remote stuck on "Connecting".** The remote was announced on every network address of the machine, including the inner networks of a container, which a phone cannot reach. It is now announced only on the real network interfaces. Not yet confirmed as the cause; when a phone connects and leaves without opening the remote, the log now also names what it asked for.
+- **Typing repeated now and then.** A repeated word is still left out when it comes late, and when it is the first thing a phone says after it reconnects in the middle of a field.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.13، ومعها:
+
+- **ريموت الآيفون يعلق على «Connecting».** كان الريموت يُعلَن على كل عناوين الجهاز، ومنها الشبكات الداخلية للحاوية التي لا يصلها الجوال. الآن يُعلَن على واجهات الشبكة الحقيقية فقط. لم يتأكد بعد أنه السبب؛ وحين يتصل جوال ويغادر دون فتح الريموت يذكر السجل الآن ما طلبه.
+- **تكرار الكتابة أحيانًا.** الكلمة المكررة تُترك أيضًا حين تصل متأخرة، وحين تكون أول ما يقوله الجوال بعد إعادة اتصاله وسط الخانة.
+
 ## 1.4.0-beta.13
 
 Trial version on the "beta" channel. Same as beta.12, plus:

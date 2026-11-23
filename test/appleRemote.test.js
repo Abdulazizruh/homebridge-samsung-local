@@ -229,6 +229,15 @@ test('a real iPhone says each keystroke twice (the letter, then the whole word):
   assert.equal(field, 'هل');
   field = ''; key('h', 'h'); key('e', 'he'); key('l', 'hel'); key('l', 'hell'); key('o', 'hello');
   assert.equal(field, 'hello');
-  say({ insert: '1' }, 300); say({ insert: '1' }, 300); // a phone that says nothing twice: two slow taps are two characters
-  assert.equal(field, 'hello11');
+  say({ insert: ' ' }, 300); say({ insert: 'w' }, 300); say({ insert: 'w' }, 900); // a repeat that comes late is still a repeat, from a phone known to repeat
+  assert.equal(field, 'hello w');
+
+  const memory = {};
+  const again = new Echoes(() => clock, memory); // the phone reconnected in the middle of a field
+  assert.equal(again.isEcho('hello w', { assert: null, insert: 'hello w', remove: 0 }), true, 'what it says first is the text it already typed');
+
+  const plain = new Echoes(() => clock); // a phone that says nothing twice: two slow taps are two characters
+  field = '';
+  for (const digit of ['1', '1']) { clock += 300; const e = { assert: null, insert: digit, remove: 0 }; if (!plain.isEcho(field, e)) { field = applyEdit(field, e); } }
+  assert.equal(field, '11');
 });
