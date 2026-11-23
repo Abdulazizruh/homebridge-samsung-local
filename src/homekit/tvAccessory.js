@@ -1,7 +1,8 @@
-import { TizenRemote, tvInfo, wake } from '../tv/tizenClient.js';
+import { TizenRemote, portOpen, tvInfo, wake } from '../tv/tizenClient.js';
 import { AppleRemote } from '../appleRemote/bridge.js';
 
 const POLL_MS = 4000;
+const SCREEN_PORT = 9197;
 // The remote channel stays open this long after the last key, so the next
 // press goes out at once instead of waiting for a new secure connection.
 const REMOTE_IDLE_MS = 5 * 60_000;
@@ -29,7 +30,8 @@ function remoteKeys(Characteristic) {
  *  - 'switches' plain switches inside the bridge: power, mute, volume up/down
  */
 export class TvAccessory {
-  constructor({ api, log, accessory, entry, mode, token, saveToken, ports = {}, pollMs = POLL_MS, reportsPower = false, onReportsPower = null }) {
+  constructor({ api, log, accessory, entry, mode, token, saveToken, ports = {}, pollMs = POLL_MS, reportsPower = false, onReportsPower = null,
+    screenPortSeen = false, onScreenPortSeen = null }) {
     this.api = api;
     this.hap = api.hap;
     this.log = log;
@@ -45,6 +47,8 @@ export class TvAccessory {
     this.holdUntil = 0;
     // Learned from the TV and kept across restarts: it names its power state.
     this.reportsPower = Boolean(reportsPower);
+    this.screenPortSeen = Boolean(screenPortSeen);
+    this.onScreenPortSeen = onScreenPortSeen;
     this.onReportsPower = onReportsPower;
     this.services = new Map();
     this.remote = new TizenRemote({
@@ -153,8 +157,29 @@ export class TvAccessory {
     // A TV that names its power state when on or in standby, and then stops
     // naming it while still answering, has gone into a deeper sleep: it is
     // off. Only a model that never names it is taken as on while it answers.
-    const on = Boolean(info?.power) && (Boolean(info?.powerState) || !this.reportsPower);
-    const said = !reachable ? 'does not answer' : info.powerState ? `says "${info.powerState}"` : 'answers without a power state';
+    // A model that never names its power state still answers for a while
+    // after its screen goes dark, and wakes by itself at night. Such TVs run a
+    // second service (media playback, port 9197) only while the screen is
+    // on. Once that service has been seen on this TV, its absence means off;
+    // a TV that never showed it is judged as before.
+    let dark = false;
+    if (reachable && !info.powerState && !this.reportsPower) {
+      const open = await portOpen(this.entry.host, this.ports.screenPort ?? SCREEN_PORT, 1500);
+      if (open) {
+        this.screenClosed = 0;
+        if (!this.screenPortSeen) {
+          this.screenPortSeen = true;
+          this.onScreenPortSeen?.();
+          this.log.info(`[${this.displayName}] this TV does not name its power state; its screen service will tell on from off.`);
+        }
+      } else {
+        this.screenClosed = (this.screenClosed ?? 0) + 1;
+      }
+      dark = this.screenPortSeen && this.screenClosed >= 2; // twice in a row, so one missed answer changes nothing
+    }
+    const on = Boolean(info?.power) && (Boolean(info?.powerState) || !this.reportsPower) && !dark;
+    const said = !reachable ? 'does not answer' : info.powerState ? `says "${info.powerState}"`
+      : dark ? 'answers, but its screen service is closed' : 'answers without a power state';
     if (said !== this.said) {
       this.log.info(`[${this.displayName}] the TV ${said}; shown as ${on ? 'on' : 'off'}.`);
       this.said = said;

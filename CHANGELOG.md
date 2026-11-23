@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.3
+
+Trial version on the "beta" channel. Same as beta.2, plus the two fixes of 1.3.3: appliances connect one after another at start, and a second on/off signal for TVs that do not name their power state.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.2، ومعها إصلاحا 1.3.3: الاتصال بالأجهزة واحدًا بعد الآخر عند البدء، وإشارة ثانية لحالة التلفزيونات التي لا تذكر حالة تشغيلها.
+
 ## 1.4.0-beta.2
 
 Trial version on the "beta" channel. iPhone remote with keyboard, after a review of beta.1:
@@ -55,6 +63,23 @@ Checked against an independent Apple TV client and a simulated iPhone. Not yet t
 حدود معروفة: Apple لا تنشر هذا البروتوكول، فقد يتعطل مع تحديث iOS. التطبيقات التي لها كيبورد خاص مثل YouTube و Netflix يُذكر أنها لا تقبل النص المكتوب؛ أما بحث التلفزيون نفسه والمتصفح فيقبلانه. يفتح الكيبورد والريموت مفتوح، وليس كتنبيه على شاشة القفل.
 
 جرى الفحص مع عميل Apple TV مستقل ومع آيفون محاكى. لم تُجرَّب بعد مع آيفون حقيقي ولا تلفزيون حقيقي.
+## 1.3.3
+
+Two fixes from a day of logs on real appliances.
+
+- **Start-up:** appliances are now connected one after another, a second apart. Asked all in the same instant, one or two often refused the first attempt and came back ten seconds later.
+- **TVs that do not name their power state:** such a TV keeps answering on the network after its screen goes dark, and wakes by itself at night, so its tile showed "on" for hours. The plugin now also looks at the TV's media service, which these sets run only while the screen is on. Once that service has been seen on a TV, its absence means off. A TV that never shows it is judged as before, so nothing changes for the worse.
+
+The second fix is not yet confirmed on a real TV: the log line "its screen service will tell on from off" shows whether a TV has that service.
+
+**بالعربية**
+
+إصلاحان من سجل يوم كامل على أجهزة حقيقية.
+
+- **بدء التشغيل:** صار الاتصال بالأجهزة واحدًا بعد الآخر بفاصل ثانية. حين كانت تُطلب كلها في اللحظة نفسها، كان جهاز أو اثنان يرفضان المحاولة الأولى ويعودان بعد عشر ثوانٍ.
+- **التلفزيونات التي لا تذكر حالة تشغيلها:** هذا النوع يبقى يجيب على الشبكة بعد انطفاء شاشته، ويستيقظ وحده ليلًا، فكانت بطاقته تظهر «يعمل» لساعات. صارت الإضافة تنظر أيضًا إلى خدمة الوسائط في التلفزيون، وهي تعمل في هذه الأجهزة والشاشة مضاءة فقط. بعد أن تُرى هذه الخدمة مرة على تلفزيون، يعني غيابها أنه مطفأ. والتلفزيون الذي لم تظهر عليه أبدًا يُحكم عليه كما كان، فلا يسوء شيء.
+
+الإصلاح الثاني لم يتأكد بعد على تلفزيون حقيقي: سطر السجل «its screen service will tell on from off» يبيّن هل في التلفزيون هذه الخدمة.
 
 ## 1.3.2
 

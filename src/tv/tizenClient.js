@@ -1,3 +1,4 @@
+import net from 'node:net';
 /**
  * Samsung TVs (Tizen, 2016 and later) over their own local remote-control
  * channel: an HTTP info page on 8001 and a WebSocket on 8002. The owner
@@ -11,6 +12,17 @@ import WebSocket from 'ws';
 
 const APP_NAME = 'Homebridge Samsung Local';
 const INFO_TIMEOUT_MS = 2500;
+
+/** Whether something accepts a TCP connection there. */
+export function portOpen(host, port, timeoutMs = 1500) {
+  return new Promise((resolve) => {
+    const socket = net.connect({ host, port });
+    const done = (open) => { socket.destroy(); resolve(open); };
+    socket.setTimeout(timeoutMs, () => done(false));
+    socket.once('connect', () => done(true));
+    socket.once('error', () => done(false));
+  });
+}
 
 /** Device info from the TV, or null when no TV answers there. */
 export async function tvInfo(host, { httpPort = 8001, timeoutMs = INFO_TIMEOUT_MS } = {}) {

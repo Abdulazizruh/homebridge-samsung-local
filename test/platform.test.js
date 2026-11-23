@@ -22,10 +22,10 @@ function helperFactory(devices, extraEnv = {}) {
   });
 }
 
-async function boot({ storage = tmpDir(), devices, config, cached = [] }) {
+async function boot({ storage = tmpDir(), devices, config, cached = [], overrides = {} }) {
   const api = makeApi(storage);
   const platform = new SamsungLocalPlatform(quietLog, { platform: PLATFORM_NAME, ...config }, api,
-    { createHelper: helperFactory(devices) });
+    { createHelper: helperFactory(devices), startGapMs: 0, ...overrides });
   cached.forEach((a) => platform.configureAccessory(a));
   await platform.start();
   return { api, platform, storage };
@@ -577,4 +577,27 @@ test('washer tile styles: a tile that stays writable (also when 1.0.18 left "rea
   assert.equal(running.getCharacteristic(C.ConfiguredName).value, 'Washer');
   await b.platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body: { [`${V}state`]: 'Run' } });
   await waitFor(() => running.getCharacteristic(C.OccupancyDetected).value === 1);
+});
+
+test('start-up: appliances are asked one after another, a moment apart', async (t) => {
+  const devices = [ac('10.0.0.5'), ac('10.0.0.6'), ac('10.0.0.7')];
+  const asked = [];
+  const factory = helperFactory(devices);
+  const { platform } = await boot({
+    devices,
+    config: { devices: [{ host: '10.0.0.5' }, { host: '10.0.0.6' }, { host: '10.0.0.7' }] },
+    overrides: {
+      startGapMs: 120,
+      createHelper: (paths) => {
+        const helper = factory(paths);
+        const request = helper.request.bind(helper);
+        helper.request = (cmd, args, ...rest) => { if (cmd === 'probe') { asked.push([args.host, Date.now()]); } return request(cmd, args, ...rest); };
+        return helper;
+      },
+    },
+  });
+  t.after(() => platform.stop());
+  await waitFor(() => asked.length === 3);
+  assert.deepEqual(asked.map(([host]) => host), ['10.0.0.5', '10.0.0.6', '10.0.0.7']);
+  assert.ok(asked[1][1] - asked[0][1] >= 90 && asked[2][1] - asked[1][1] >= 90, 'each start waits for its turn');
 });
