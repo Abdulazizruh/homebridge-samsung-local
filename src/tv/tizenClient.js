@@ -84,8 +84,8 @@ export function wake(mac, { address = '255.255.255.255', port = 9, repeat = 3 } 
  * short idle time, so the TV is not kept awake by an open connection.
  */
 export class TizenRemote {
-  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null, onFieldLength = null }) {
-    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard, onFieldLength });
+  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null, onFieldText = null }) {
+    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard, onFieldText });
     this.socket = null;
     this.opening = null;
     this.idleTimer = null;
@@ -128,11 +128,11 @@ export class TizenRemote {
           this.onKeyboard?.(msg.event === 'ms.remote.imeStart');
           return;
         }
-        // Some TVs also say what the field holds (as base64 text). Only its length is
-        // passed on, for the log: what we typed coming back must never be typed again.
+        // The TV says what its field holds when the keyboard opens (as base64 text): a field
+        // reopened with text in it. It is passed on to be the starting text, never to the log.
         if (msg.event === 'ms.remote.imeUpdate') {
           if (typeof msg.data === 'string' && msg.data.length <= 8192 && /^[A-Za-z0-9+/]*={0,2}$/.test(msg.data)) {
-            this.onFieldLength?.(Array.from(Buffer.from(msg.data, 'base64').toString('utf8')).length);
+            this.onFieldText?.(Buffer.from(msg.data, 'base64').toString('utf8'));
           }
           return;
         }

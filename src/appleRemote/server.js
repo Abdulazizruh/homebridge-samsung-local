@@ -69,7 +69,7 @@ class Connection {
     }
     if (this.verified && !this.opened && Date.now() - (s.lastLeft ?? 0) > 60_000) {
       s.lastLeft = Date.now();
-      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}.`);
+      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. Other connections of the same device when it came: ${this.siblings?.kept ?? 0} with the remote open, ${this.siblings?.closed ?? 0} without.`);
     }
     this.server.forget(this);
   }
@@ -259,11 +259,15 @@ class Connection {
     this.verifiedMs = Date.now() - this.born;
     // A phone has one remote. When it comes back on a new connection, the one it left behind is closed:
     // a real phone that found its old connection still open sat on "Connecting" for half a minute.
-    let closed = 0;
+    // Only a connection whose remote is not open is closed: a phone may open a second
+    // connection just to ask something, and that must never cut the remote in use.
+    let closed = 0; let kept = 0;
     for (const other of [...s.connections]) {
-      if (other !== this && other.verified === this.verified) { other.close(); closed += 1; }
+      if (other === this || other.verified !== this.verified) { continue; }
+      if (other.remote) { kept += 1; } else { other.close(); closed += 1; }
     }
-    if (closed) { s.log.info(`[${s.name}] the same iPhone or iPad came back; its earlier connection was closed.`); }
+    this.siblings = { closed, kept };
+    if (closed) { s.log.info(`[${s.name}] the same iPhone or iPad came back; ${closed} earlier connection${closed === 1 ? '' : 's'} without an open remote ${closed === 1 ? 'was' : 'were'} closed.`); }
     this.pv = null;
     clearTimeout(this.deadline);
   }
@@ -453,8 +457,9 @@ export class CompanionServer extends EventEmitter {
   }
 
   /** Called when the TV says its on-screen keyboard opened or closed. */
-  setKeyboard(open_) {
-    if (Boolean(open_) !== this.keyboardOpen) { this.text = ''; } // the TV starts each field empty
+  setKeyboard(open_, text = '') {
+    // A field starts with what the TV says it holds: empty for a new one, its text for one opened again.
+    if (Boolean(open_) !== this.keyboardOpen) { this.text = open_ ? Array.from(String(text ?? '')).slice(0, 1024).join('') : ''; }
     this.keyboardOpen = Boolean(open_);
     let shown = 0;
     for (const c of this.connections) { if (c.keyboard(this.keyboardOpen)) { shown += 1; } }

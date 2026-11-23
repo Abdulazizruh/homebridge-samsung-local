@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.21
+
+Trial version on the "beta" channel. Same as beta.20, with two points from a review:
+
+- **A field opened again.** The plugin started every field empty, so on a field that still held text a backspace on the iPhone removed nothing. The TV says what the field holds right as its keyboard opens; the iPhone keyboard now starts from that text. The text is kept in memory only and never written to the log, which gives its length.
+- **Closing an earlier connection, more carefully.** beta.19 closed every earlier connection of a phone that came back. A phone may also open a second connection only to ask something, and that must never cut the remote in use. Now only an earlier connection without an open remote is closed, and the log says how many of each kind there were.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.20، مع نقطتين من مراجعة:
+
+- **خانة تُفتح من جديد.** كانت الإضافة تبدأ كل خانة فارغة، فإذا بقي في الخانة نص لم يحذف زر الحذف على الآيفون شيئًا. التلفزيون يذكر ما في الخانة لحظة فتح كيبورده؛ والآن يبدأ كيبورد الآيفون من ذلك النص. يبقى النص في الذاكرة فقط ولا يُكتب في السجل، والسجل يذكر طوله.
+- **إغلاق الاتصال السابق بحذر أكبر.** كانت beta.19 تغلق كل اتصال سابق للجوال العائد. وقد يفتح الجوال اتصالًا ثانيًا ليسأل شيئًا فقط، ويجب ألا يقطع ذلك الريموت المستخدم. الآن يُغلق الاتصال السابق الذي ليس فيه ريموت مفتوح فقط، والسجل يذكر عدد كل نوع.
+
 ## 1.4.0-beta.20
 
 Trial version on the "beta" channel. Same as beta.19, plus:

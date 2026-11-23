@@ -46,7 +46,7 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
   });
   await new Promise((r) => { web.listen(0, '127.0.0.1', r); });
   tv.ports = { httpPort: web.address().port, wsPort: wss.address().port, secure: false };
-  tv.say = (event) => { for (const c of wss.clients) { c.send(JSON.stringify({ event })); } };
+  tv.say = (event, data) => { for (const c of wss.clients) { c.send(JSON.stringify(data === undefined ? { event } : { event, data })); } };
   tv.close = () => { web.close(); for (const c of wss.clients) { c.terminate(); } wss.close(); };
   return tv;
 }
@@ -354,4 +354,25 @@ test('switchesOf: what a TV entry asks for', async () => {
   assert.deepEqual(switchesOf({ tvMode: 'switches' }), ['power', 'mute', 'volumeUp', 'volumeDown']);
   assert.deepEqual(switchesOf({ tvMode: 'switches', tvSwitches: [] }), []);
   assert.deepEqual(switchesOf({ tvMode: 'tile', tvSwitches: ['home', 'power', 'x'] }), ['power', 'home']);
+});
+
+test('a field opened again: the iPhone keyboard starts from the text the TV says it holds, so a backspace removes a real letter', async (t) => {
+  const tv = await fakeTv();
+  const { platform } = await bootTv(tv, 'tile', tmpDir(), { appleRemote: true });
+  t.after(async () => { await platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  await waitFor(() => handler.phone && handler.on);
+  handler.phone.emit('sessions', 1);
+  await waitFor(() => tv.tokens.length > 0);
+
+  tv.say('ms.remote.imeStart');
+  tv.say('ms.remote.imeUpdate', Buffer.from('مكة', 'utf8').toString('base64')); // the field already holds a word
+  await waitFor(() => handler.phone.keyboardOpen);
+  assert.equal(handler.phone.text, 'مكة');
+  tv.say('ms.remote.imeEnd');
+  await waitFor(() => !handler.phone.keyboardOpen);
+
+  tv.say('ms.remote.imeStart'); // a new, empty field: the TV says nothing, and the keyboard opens empty after a moment
+  await waitFor(() => handler.phone.keyboardOpen);
+  assert.equal(handler.phone.text, '');
 });

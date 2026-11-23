@@ -6,6 +6,7 @@ const SCREEN_PORT = 9197;
 // The remote channel stays open this long after the last key, so the next
 // press goes out at once instead of waiting for a new secure connection.
 const REMOTE_IDLE_MS = 5 * 60_000;
+const FIELD_TEXT_MS = 250; // how long the TV gets to say what an opened field already holds
 const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
 const INPUTS = [
   { id: 1, name: 'TV', key: 'KEY_TV' },
@@ -82,7 +83,7 @@ export class TvAccessory {
     this.remote = new TizenRemote({
       host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken, idleMs: REMOTE_IDLE_MS,
       onKeyboard: (open) => this.#keyboard(open),
-      onFieldLength: (length) => { this.fieldLength = length; },
+      onFieldText: (text) => this.#fieldText(text),
     });
     this.keyboardOpen = false;
     this.phone = null; // the iPhone-remote stand-in, when the option is on
@@ -103,6 +104,16 @@ export class TvAccessory {
     this.appleRemote?.stop().catch(() => {});
   }
 
+  /** What the TV says its field holds. Only what it says as the keyboard opens counts: that is the text already there. */
+  #fieldText(text) {
+    this.fieldLength = Array.from(text).length;
+    this.reported = { text, at: Date.now() };
+    if (this.opening) { // the keyboard was waiting for exactly this
+      clearTimeout(this.opening.timer);
+      this.opening.go();
+    }
+  }
+
   #keyboard(open) {
     if (open === this.keyboardOpen) {
       return;
@@ -113,15 +124,32 @@ export class TvAccessory {
     const lengths = sent && Number.isInteger(this.fieldLength) ? ` The last text sent had ${this.typedLength} character${this.typedLength === 1 ? '' : 's'}; the TV last reported ${this.fieldLength}.` : '';
     this.typedCount = 0;
     this.typedLength = 0;
-    this.fieldLength = null;
-    const shown = open && this.phone ? this.phone.setKeyboard(true) : 0;
+    if (this.opening) { clearTimeout(this.opening.timer); this.opening = null; }
     if (!open) {
+      this.fieldLength = null;
+      this.reported = null;
       this.phone?.setKeyboard(false);
+      this.log.info(`[${this.displayName}] the TV closed its on-screen keyboard.`
+        + (this.phone ? ` Typed text was sent to the TV ${sent} time${sent === 1 ? '' : 's'}.${lengths}` : ''));
+      return;
     }
-    // Three separate facts, so a trial shows where the path stops: the TV's event, the iPhone keyboard, the text.
-    this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`
-      + (open && this.phone ? ` iPhone keyboard asked to open on ${shown} remote${shown === 1 ? '' : 's'}.` : '')
-      + (!open && this.phone ? ` Typed text was sent to the TV ${sent} time${sent === 1 ? '' : 's'}.${lengths}` : ''));
+    // A field opened again still holds its text, and the TV says so right as the keyboard opens.
+    // The iPhone keyboard is opened with that text, so a backspace there removes a real letter.
+    const go = () => {
+      this.opening = null;
+      if (!this.keyboardOpen) { return; }
+      const fresh = this.reported && Date.now() - this.reported.at <= FIELD_TEXT_MS ? this.reported.text : '';
+      const shown = this.phone ? this.phone.setKeyboard(true, fresh) : 0;
+      const held = Array.from(fresh).length;
+      // Separate facts, so a trial shows where the path stops: the TV's event, the iPhone keyboard, the text.
+      this.log.info(`[${this.displayName}] the TV opened its on-screen keyboard`
+        + (held ? `, on a field that already holds ${held} character${held === 1 ? '' : 's'}.` : '.')
+        + (this.phone ? ` iPhone keyboard asked to open on ${shown} remote${shown === 1 ? '' : 's'}.` : ''));
+    };
+    const timer = setTimeout(go, FIELD_TEXT_MS);
+    timer.unref?.();
+    this.opening = { timer, go };
+    if (this.reported && Date.now() - this.reported.at <= FIELD_TEXT_MS) { clearTimeout(timer); go(); } // the TV said it first
   }
 
   /**
