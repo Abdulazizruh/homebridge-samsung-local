@@ -14,6 +14,7 @@ import { ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './sto
 
 const RETRY_STEPS_MS = [15_000, 30_000, 60_000, 120_000, 300_000];
 const START_GAP_MS = 1000;
+const START_SETTLE_MS = 5000;
 const HELPER_RETRY_MS = [30_000, 60_000, 120_000, 300_000, 600_000];
 const SNAPSHOT_CHANGED_MS = 3_000; // changed readings reach the disk this soon
 const SNAPSHOT_SAME_MS = 60_000; // unchanged readings only refresh the file's time
@@ -178,16 +179,20 @@ export class SamsungLocalPlatform {
     }
     // One after another, a second apart: six appliances asked for a secure
     // session in the same instant often refuse the first attempt.
+    // And not straight away: an appliance whose previous session was closed a
+    // second ago (a restart) may still be letting go of it.
     const gap = this.overrides.startGapMs ?? START_GAP_MS;
+    const settle = this.overrides.startSettleMs ?? START_SETTLE_MS;
     entries.forEach((entry, i) => {
-      if (!gap || i === 0) {
+      const wait = settle + i * gap;
+      if (!wait) {
         this.#bringUp(entry, 0);
         return;
       }
       const timer = setTimeout(() => {
         this.retryTimers.delete(timer);
         this.#bringUp(entry, 0);
-      }, i * gap);
+      }, wait);
       timer.unref?.();
       this.retryTimers.add(timer);
     });

@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.3.4
+
+The one-second gap of 1.3.3 did not stop first attempts from failing after a restart (seen on real appliances). This version measures instead of guessing.
+
+- **The log says where a failed connection stopped:** opening the secure session, asking the appliance who it is, the first reading, or normal use, and after how long. Both engines.
+- **A five-second wait after start** before the first appliance is asked, in case an appliance is still letting go of the session that was closed a moment earlier. The one-second gap between appliances stays.
+
+Whether the wait helps is not known yet; a few restarts on real appliances will show.
+
+**بالعربية**
+
+فاصل الثانية في 1.3.3 لم يمنع فشل المحاولة الأولى بعد إعادة التشغيل (ظهر ذلك على أجهزة حقيقية). هذا الإصدار يقيس بدل أن يخمّن.
+
+- **السجل يذكر أين توقف الاتصال الفاشل:** عند فتح الجلسة الآمنة، أو سؤال الجهاز عن هويته، أو القراءة الأولى، أو أثناء العمل، وبعد كم ثانية. في المحركين.
+- **انتظار خمس ثوانٍ بعد بدء التشغيل** قبل طلب أول جهاز، لاحتمال أن الجهاز ما زال يُنهي الجلسة التي أُغلقت قبل لحظة. وفاصل الثانية بين الأجهزة باقٍ.
+
+هل يفيد الانتظار؟ لم يُعرف بعد؛ بضع إعادات تشغيل على أجهزة حقيقية تبيّن ذلك.
+
 ## 1.3.3
 
 Two fixes from a day of logs on real appliances.

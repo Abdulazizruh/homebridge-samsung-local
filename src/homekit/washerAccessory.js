@@ -1,3 +1,4 @@
+import { failureText } from '../deviceLink.js';
 import { buildWasherModel } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 
@@ -209,7 +210,7 @@ export class WasherAccessory {
       this.#push();
       return;
     }
-    this.log.warn(`[${this.displayName}] not reachable${error?.message ? ` (${error.message})` : ''}. Will keep retrying.`);
+    this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
     const { Characteristic, HapStatusError, HAPStatus } = this.hap;
     if (this.cycleStyle !== 'sensor') {
       this.services.get('cycle')?.updateCharacteristic(Characteristic.Active,

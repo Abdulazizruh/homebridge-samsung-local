@@ -214,3 +214,20 @@ export class DeviceLink extends EventEmitter {
     }
   }
 }
+
+const STAGES = {
+  session: 'opening the secure session',
+  identity: 'asking who it is',
+  reading: 'the first reading',
+  use: 'normal use',
+};
+
+/** Where a connection attempt stopped and after how long, for the "not reachable" line. */
+export function failureText(error) {
+  if (!error?.message) {
+    return '';
+  }
+  const where = STAGES[error.stage];
+  const after = Number.isFinite(error.afterMs) ? `, after ${(error.afterMs / 1000).toFixed(1)}s` : '';
+  return ` (${error.message}${where ? `; stopped at: ${where}${after}` : ''})`;
+}
