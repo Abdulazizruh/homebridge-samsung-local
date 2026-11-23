@@ -101,8 +101,8 @@ export class TvAccessory {
    * Trial: show this TV to the iPhone's own remote as an Apple TV, so the
    * iPhone keyboard can type into the TV's text fields.
    */
-  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, touch = 'arrows' }) {
-    this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise });
+  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, touch = 'arrows', pin }) {
+    this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise, pin });
     const phone = await this.appleRemote.start();
     this.phone = phone;
     phone.touch = touch === 'pointer' ? 'pointer' : 'arrows';

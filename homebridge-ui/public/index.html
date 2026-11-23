@@ -188,7 +188,7 @@
       phOn: 'Show this TV in the iPhone remote as an Apple TV',
       phNote: 'The remote in Control Centre then opens the iPhone keyboard when the TV opens a text field, and what you type appears on the TV. Your TV tile in Apple Home stays as it is; this adds a second name in the remote list. Unofficial: it may stop working after an iOS update. Switching it off removes everything it stored.',
       phStep1: 'Press Update below and restart the bridge.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
-      phStep3: 'Enter this code on the iPhone, once.', phCode: 'Pairing code', phPhones: 'Phones paired',
+      phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinNote: 'Empty means 0000. Each iPhone or iPad enters it once. Devices already paired stay paired. Anyone on your network who knows the code can pair: choose your own digits if others use the network.', phCode: 'Pairing code', phPhones: 'Phones paired',
       phRestart: 'Press Update and restart the bridge. The pairing code then appears here.',
       phTouch: 'Touch area of the remote', phTouchArrows: 'Arrows: a swipe moves one step', phTouchPointer: 'Pointer: your finger moves the pointer on the TV, a tap clicks (trial)',
       phTouchNote: 'Takes effect after Update and a restart of the bridge. The pointer shows only where the TV supports one.',
@@ -316,7 +316,7 @@
       phOn: 'أظهر هذا التلفزيون في ريموت الآيفون كأنه Apple TV',
       phNote: 'عندها يفتح الريموت في مركز التحكم كيبورد الآيفون حين يفتح التلفزيون خانة كتابة، وما تكتبه يظهر على التلفزيون. بطاقة التلفزيون في Apple Home تبقى كما هي؛ ويُضاف اسم ثانٍ في قائمة الريموت. الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. إطفاء الخيار يحذف كل ما حفظه.',
       phStep1: 'اضغط «تحديث» في الأسفل ثم أعد تشغيل الجسر.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
-      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
+      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinNote: 'الخانة الفارغة تعني 0000. كل آيفون أو آيباد يدخله مرة واحدة. الأجهزة المقترنة تبقى مقترنة. من يعرف الرمز على شبكتك يستطيع الاقتران: اختر أرقامك إن كان غيرك يستخدم الشبكة.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
       phRestart: 'اضغط «تحديث» ثم أعد تشغيل الجسر، وبعدها يظهر رمز الاقتران هنا.',
       phTouch: 'منطقة اللمس في الريموت', phTouchArrows: 'أسهم: السحبة تتحرك خطوة واحدة', phTouchPointer: 'مؤشر: إصبعك يحرك المؤشر على التلفزيون، واللمسة تنقر (تجريبي)',
       phTouchNote: 'يسري بعد «تحديث» وإعادة تشغيل الجسر. يظهر المؤشر حيث يدعمه التلفزيون فقط.',
@@ -558,6 +558,9 @@
           return `<div class="mt-3"><strong>${t('phTitle')}</strong>
             <div><label class="mb-0"><input type="checkbox" id="sl-tv-phone" ${existing?.appleRemote === true ? 'checked' : ''}> ${t('phOn')}</label></div>
             <div class="sl-muted">${t('phNote')}</div>
+            <div class="mt-2"><label class="mb-0" for="sl-tv-pin">${t('phPin')}</label>
+              <input id="sl-tv-pin" class="form-control form-control-sm" dir="ltr" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" style="max-width:8em" value="${esc(/^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '')}">
+              <div class="sl-muted">${t('phPinNote')}</div></div>
             <div class="mt-2"><label class="mb-0" for="sl-tv-touch">${t('phTouch')}</label>
               <select id="sl-tv-touch" class="form-control form-control-sm" style="max-width:32em">
                 <option value="arrows" ${existing?.appleRemoteTouch === 'pointer' ? '' : 'selected'}>${t('phTouchArrows')}</option>
@@ -633,6 +636,7 @@
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
       if ($('sl-tv-phone')) { entry.appleRemote = $('sl-tv-phone').checked; }
+      if ($('sl-tv-pin')) { if (/^\d{4}$/.test($('sl-tv-pin').value.trim())) { entry.appleRemotePin = $('sl-tv-pin').value.trim(); } else { delete entry.appleRemotePin; } }
       if ($('sl-tv-touch')) { if ($('sl-tv-touch').value === 'pointer') { entry.appleRemoteTouch = 'pointer'; } else { delete entry.appleRemoteTouch; } }
       done();
       await change(() => {

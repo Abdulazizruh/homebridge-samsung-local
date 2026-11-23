@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.6
+
+Trial version on the "beta" channel. Same as beta.5, plus:
+
+- **Pairing code of the iPhone remote is 0000.** Every new iPhone or iPad enters it once. Under the TV's options you can set four digits of your own; devices already paired stay paired. Anyone on your network who knows the code can pair, so set your own digits if others use the network.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.5، ومعها:
+
+- **رمز اقتران ريموت الآيفون صار 0000.** كل آيفون أو آيباد جديد يدخله مرة واحدة. وفي خيارات التلفزيون تستطيع وضع أربعة أرقام من اختيارك؛ والأجهزة المقترنة تبقى مقترنة. من يعرف الرمز على شبكتك يستطيع الاقتران، فضع أرقامك إن كان غيرك يستخدم الشبكة.
+
 ## 1.4.0-beta.5
 
 Trial version on the "beta" channel. iPhone remote with keyboard, after the first trial on a real TV:

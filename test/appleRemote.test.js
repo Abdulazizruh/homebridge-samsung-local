@@ -111,7 +111,7 @@ test('iPhone remote: pairs with the code once, then buttons, swipes and typed te
   server.on('key', (k) => seen.keys.push(k)); server.on('text', (x) => seen.texts.push(x));
   server.on('power', (p) => seen.power.push(p)); server.on('sessions', (n) => seen.sessions.push(n));
   const { pin, port } = JSON.parse(fs.readFileSync(file, 'utf8'))['tv-1'];
-  assert.match(pin, /^\d{4}$/);
+  assert.equal(pin, '0000', 'the default code');
 
   const stranger = new Phone(port);
   assert.equal(await stranger.pair(pin === '0000' ? '1111' : '0000'), false, 'a wrong code is refused');
@@ -193,4 +193,21 @@ test('touch area as a pointer: movements become steps and a short touch is a cli
   clock += 120;
   assert.equal(p.feed('release', 103, 101), 'CLICK');
   assert.equal(p.feed('click', 0, 0), 'CLICK');
+});
+
+test('pairing code: 0000 unless the owner chose four digits, and changing it keeps the phones already paired', async () => {
+  const { identityOf, pinOf } = await import('../src/appleRemote/bridge.js');
+  assert.equal(pinOf(undefined), '0000');
+  assert.equal(pinOf('12'), '0000');
+  assert.equal(pinOf('4821'), '4821');
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'sl-pin-')), 'apple-remote.json');
+  const first = identityOf(file, 'tv-1');
+  assert.equal(first.pin, '0000');
+  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  data['tv-1'].clients = { phone: 'aa' };
+  fs.writeFileSync(file, JSON.stringify(data));
+  const second = identityOf(file, 'tv-1', '4821');
+  assert.equal(second.pin, '4821');
+  assert.equal(second.seed, first.seed);
+  assert.deepEqual(second.clients, { phone: 'aa' });
 });

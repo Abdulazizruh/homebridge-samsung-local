@@ -221,6 +221,13 @@
               "default": false,
               "description": "Shows this TV to the iPhone's own remote in Control Centre as an Apple TV, so the iPhone keyboard can type into the TV. Unofficial and may stop working after an iOS update."
             },
+            "appleRemotePin": {
+              "title": "Pairing code of the iPhone remote",
+              "type": "string",
+              "pattern": "^[0-9]{4}$",
+              "placeholder": "0000",
+              "description": "Four digits a new iPhone or iPad enters once. Empty means 0000. Anyone on your network who knows it can pair, so choose your own digits if others use the network."
+            },
             "appleRemoteTouch": {
               "title": "Touch area of the iPhone remote (trial)",
               "type": "string",

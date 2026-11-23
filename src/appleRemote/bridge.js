@@ -34,8 +34,16 @@ export function pruneAppleRemote(file, keepIds) {
 }
 
 /** The identity and pairing code of one TV's stand-in, made once and then kept. */
-export function identityOf(file, tvId) {
+export const DEFAULT_PIN = '0000';
+/** The code a new phone or tablet enters once: the owner's own four digits, or the default. */
+export const pinOf = (wanted) => (/^\d{4}$/.test(String(wanted ?? '')) ? String(wanted) : DEFAULT_PIN);
+
+export function identityOf(file, tvId, pin = DEFAULT_PIN) {
   const data = load(file);
+  if (data[tvId]?.seed && data[tvId].pin !== pin) {
+    data[tvId].pin = pin; // phones already paired stay paired; the code is only for new ones
+    save(file, data);
+  }
   if (!data[tvId]?.seed) {
     const mac = crypto.randomBytes(6);
     mac[0] = (mac[0] | 0x02) & 0xfe; // a locally administered address, never a real maker's
@@ -45,7 +53,7 @@ export function identityOf(file, tvId) {
       irk: crypto.randomBytes(16).toString('hex'),
       mac: mac.toString('hex'),
       account: crypto.randomUUID().toUpperCase(),
-      pin: String(crypto.randomInt(0, 10000)).padStart(4, '0'),
+      pin,
       port: 0,
       clients: {},
     };
@@ -68,15 +76,15 @@ function txt(identity, model) {
 let responder = null;
 
 export class AppleRemote {
-  constructor({ file, tvId, name, log, advertise = true, model = 'AppleTV14,1' }) {
-    Object.assign(this, { file, tvId, name, log, advertise, model });
+  constructor({ file, tvId, name, log, advertise = true, model = 'AppleTV14,1', pin = DEFAULT_PIN }) {
+    Object.assign(this, { file, tvId, name, log, advertise, model, pin: pinOf(pin) });
     this.server = null;
     this.service = null;
   }
 
   /** Start listening and announce the stand-in. Returns the server, to listen for what the remote sends. */
   async start() {
-    const identity = identityOf(this.file, this.tvId);
+    const identity = identityOf(this.file, this.tvId, this.pin);
     this.server = new CompanionServer({ name: this.name, identity, pin: identity.pin, clients: identity.clients, model: this.model, log: this.log });
     this.server.on('paired', (id, key) => {
       const data = load(this.file);
