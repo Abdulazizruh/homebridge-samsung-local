@@ -35,7 +35,17 @@ export function readEdit(archive) {
   const assert = follow(['textOperations', 'textToAssert']);
   const insert = follow(['textOperations', 'keyboardOutput', 'insertionText']);
   const remove = follow(['textOperations', 'keyboardOutput', 'deletionCount']);
+  // The names of the fields the phone filled in, two levels deep, without any of their values:
+  // enough to tell one kind of message from another, and nothing of what was typed.
+  const resolve = (v) => (v && typeof v === 'object' && Object.keys(v).length === 1 && Number.isInteger(v.UID) ? objects[v.UID] : v);
+  const named = (v) => (v && typeof v === 'object' && !Buffer.isBuffer(v) && !Array.isArray(v) ? Object.keys(v).filter((k) => k !== '$class' && resolve(v[k]) !== '$null') : []);
+  const ops = resolve(data.$top?.textOperations);
+  const shape = named(ops).sort().map((k) => {
+    const inner = named(resolve(ops[k])).sort();
+    return inner.length ? `${k}(${inner.join(',')})` : k;
+  }).join(' ').replace(/[^\w(), .-]/g, '?').slice(0, 300);
   return {
+    shape,
     assert: typeof assert === 'string' ? assert : null,
     insert: typeof insert === 'string' ? insert : null,
     remove: Number.isInteger(remove) && remove > 0 ? remove : 0,

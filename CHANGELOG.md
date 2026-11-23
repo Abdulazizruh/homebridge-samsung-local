@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.12
+
+Trial version on the "beta" channel. Same as beta.11, plus:
+
+- **Groundwork for a fix that rests on meaning, after a review.** For each kind of edit a real iPhone sends, the log now gives, once, the names of the fields the phone filled in (Apple's field names only, never their values). With them the repeated word can be told apart by what the message is, rather than by its timing and by the field already ending with it, as beta.11 does.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.11، ومعها:
+
+- **تمهيد لإصلاح مبني على المعنى، بعد مراجعة.** لكل نوع من التعديلات التي يرسلها آيفون حقيقي يذكر السجل الآن، مرة واحدة، أسماء الحقول التي ملأها الجوال (أسماء حقول Apple فقط، ولا تُكتب قيمها أبدًا). بها تُميَّز الكلمة المكررة بنوع الرسالة نفسه، بدل توقيتها وانتهاء الخانة بها كما تفعل beta.11.
+
 ## 1.4.0-beta.11
 
 Trial version on the "beta" channel. Same as beta.10, plus:

@@ -368,6 +368,12 @@ const HANDLERS = {
       const repeats = Boolean(edit.insert) && before.length > 0 && (edit.insert.startsWith(tail) || before.endsWith(edit.insert) || edit.insert.startsWith(before));
       this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', the word said again: left out' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
     }
+    const shapes = (this.server.shapes ??= new Set());
+    const kind = `${echo ? 'the word said again' : edit.insert ? 'letters added' : edit.remove ? 'letters removed' : 'whole text'}: ${edit.shape}`;
+    if (shapes.size < 20 && !shapes.has(kind)) { // each kind once: Apple's field names, never their values
+      shapes.add(kind);
+      this.server.log.info(`[${this.server.name}] iPhone edit fields, ${kind}`);
+    }
     if (text === this.server.text) { return; }
     this.server.text = text; // one field on the TV, whichever phone types into it
     this.server.emit('text', text);
