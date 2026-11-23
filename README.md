@@ -15,7 +15,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.2.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.2.2. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -135,6 +135,7 @@ Behaviour rules:
 - A command is reported as successful only after the appliance acknowledged it. A refused command shows as failed. If the appliance acknowledges but does not apply a change, HomeKit returns to the real state within seconds.
 - Some air conditioners now and then answer a correct command with a refusal (4.00). The plugin asks once more; the log says when this happened and how it ended.
 - Switching off from Apple Home shows on every tile of the air conditioner at once.
+- One command, one beep: only a real change is sent. Switching on in the mode the unit was left in sends the power command alone, the same request arriving through several tiles is sent once, and a value the appliance already has is not sent again.
 - Changes made with the remote or the Samsung app appear in HomeKit.
 - When an appliance is unreachable its accessory shows **No Response** and is kept. Accessories are only removed when you remove the appliance from the plugin settings.
 
@@ -200,7 +201,7 @@ Under it: the TV's name, and whether it appears as a TV tile with the remote or 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (84 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (86 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | Adding an appliance by its MAC address instead of its IP address, on a real home network: the plugin found the address itself | **Pass** |

@@ -63,6 +63,7 @@ export class AcAccessory {
     this.features = { ...DEFAULT_FEATURES, ...features };
     this.model = null;
     this.pending = new Map(); // kind -> {check, settleUntil, confirmUntil, label}
+    this.inflight = new Map(); // kind -> value being sent right now
     this.services = new Map();
     this.eve = eveCharacteristics(this.hap);
     this.context = accessory.context;
@@ -138,10 +139,34 @@ export class AcAccessory {
       return;
     }
     const key = kind === 'preset' ? `preset:${value.name}` : kind;
+    // One command, one beep. Apple Home often sends the same thing through
+    // several tiles at once (thermostat "Cool" and fan "on" both mean power
+    // on), and repeats values the appliance already has. Each write makes
+    // the appliance beep and costs time, so only a real change is sent.
+    const same = JSON.stringify(value);
+    const waiting = this.pending.get(key);
+    const asked = this.inflight.get('power') ?? this.pending.get('power')?.value;
+    const powerOff = asked ? asked === 'false' : !this.model.state.power;
+    if (this.inflight.get(key) === same || (waiting?.value === same && Date.now() < waiting.settleUntil)) {
+      this.log.debug(`[${this.displayName}] ${label}: already on its way; not sent twice.`);
+      return;
+    }
+    if (kind === 'light' && powerOff) {
+      // The display is dark while the unit is off; its setting is left alone
+      // so it lights again with the next switch-on.
+      setTimeout(() => this.#push(), 600);
+      return;
+    }
+    if (!waiting && !this.inflight.has(key) && expectedAfter(kind, value)(this.model.state)) {
+      this.log.debug(`[${this.displayName}] ${label}: the appliance is already there; nothing sent.`);
+      setTimeout(() => this.#push(), 600);
+      return;
+    }
+    this.inflight.set(key, same);
     const hold = () => {
       const now = Date.now();
       this.pending.set(key, {
-        check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label,
+        check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label, value: same,
       });
       if (kind === 'power') {
         this.#showRequestedPower(Boolean(value));
@@ -149,7 +174,9 @@ export class AcAccessory {
     };
     let late = false;
     let timer;
-    const sent = this.link.send(writes).then(() => {
+    const sent = this.link.send(writes).finally(() => {
+      if (this.inflight.get(key) === same) { this.inflight.delete(key); }
+    }).then(() => {
       hold();
       this.log.debug(`[${this.displayName}] ${label} accepted by the appliance; waiting for it to report the change.`);
     }, (err) => {
@@ -540,7 +567,9 @@ export class AcAccessory {
     if (!st.power) {
       await this.#command('power', true, 'power on');
     }
-    if (st.mode !== mode || !st.power) {
+    // The appliance comes back in the mode it was left in: when that is the
+    // mode asked for, switching on is the only command (and the only beep).
+    if (st.mode !== mode) {
       await this.#command('mode', mode, `mode ${mode}`);
     }
   }

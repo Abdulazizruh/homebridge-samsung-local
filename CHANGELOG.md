@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.2.2
+
+Air conditioner, both engines:
+
+- One command, one beep. Switching on from Apple Home used to send two or three commands in a row (power, then the mode again, sometimes power a second time through the fan tile), and the unit beeped for each one. Now only a real change is sent: switching on in the mode the unit was left in sends the power command alone; the same request arriving through several tiles is sent once; a value the appliance already has is not sent again.
+- Switching off no longer sends a command for the display light as well. Its setting is left alone, so the display lights again with the next switch-on.
+- With fewer commands, switching on and off is also quicker.
+
+Settings page: the engine choice and the washer's cycle tile choice are no longer cut off.
+
+**بالعربية**
+
+المكيف، مع المحركين:
+
+- أمر واحد وصوت واحد. كان التشغيل من Apple Home يرسل أمرين أو ثلاثة متتالية (التشغيل، ثم الوضع من جديد، وأحيانًا التشغيل مرة ثانية عبر بطاقة المروحة)، فيصدر المكيف صوتًا لكل أمر. الآن يُرسل التغيير الفعلي فقط: التشغيل على الوضع الذي تُرك عليه المكيف يرسل أمر التشغيل وحده، والطلب الواحد الذي يصل من عدة بطاقات يُرسل مرة واحدة، والقيمة الموجودة أصلًا في الجهاز لا تُرسل من جديد.
+- الإطفاء لم يعد يرسل معه أمرًا لإضاءة الشاشة. يبقى إعدادها كما هو، فتضيء الشاشة مع التشغيل التالي.
+- مع أوامر أقل صار التشغيل والإطفاء أسرع.
+
+صفحة الإعدادات: خانة اختيار المحرك وخانة بطاقة دورة الغسالة لم تعودا تقطعان النص.
+
 ## 1.2.1
 
 Settings page:

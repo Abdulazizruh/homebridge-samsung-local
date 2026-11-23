@@ -108,11 +108,14 @@ test('a 4.00 answer to a correct command is asked once more and then succeeds', 
   const retried = [];
   link.on('retried', (path, accepted) => retried.push([path, accepted]));
   await platform.helper.request('sim', { key: DI, action: 'refuse', value: 'once' });
+  // Whichever way the unit is, ask for the opposite so a power command is really sent.
+  const wasOn = handler.model.state.power;
+  const fan = handler.services.get('fan').getCharacteristic(C.Active);
   const target = handler.services.get('thermostat').getCharacteristic(C.TargetHeatingCoolingState);
-  await target.handleSetRequest(C.TargetHeatingCoolingState.OFF);
+  await (wasOn ? target.handleSetRequest(C.TargetHeatingCoolingState.OFF) : fan.handleSetRequest(1));
   await waitFor(() => retried.length === 1, 4000);
   assert.deepEqual(retried, [['power/vs/0', true]]);
-  await waitFor(() => handler.model.state.power === false, 4000);
+  await waitFor(() => handler.model.state.power === !wasOn, 4000);
 });
 
 test('a late refusal puts the tile back to the real state', async (t) => {

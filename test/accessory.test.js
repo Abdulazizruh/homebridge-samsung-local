@@ -79,6 +79,31 @@ test('thermostat: choosing a mode while off powers on first, then sets the mode'
   assert.deepEqual(link.sent[1].body, { [`${V}modes`]: ['Heat'] });
 });
 
+test('one command, one beep: switching on in the mode it was left in sends power only, even when several tiles ask', async () => {
+  const { link, set, C } = setup({ on: false, features: { light: true } });
+  // Apple Home sends "Cool" to the thermostat, "on" to the fan and the target temperature together.
+  await Promise.all([
+    set('thermostat', C.TargetHeatingCoolingState, C.TargetHeatingCoolingState.COOL),
+    set('fan', C.Active, 1),
+    set('thermostat', C.TargetTemperature, 26),
+  ]);
+  assert.deepEqual(link.sent.map((w) => w.path.join('/')), ['power/vs/0']);
+});
+
+test('one command, one beep: switching off sends power only; the display setting is left alone', async () => {
+  const { link, set, C } = setup({ features: { light: true } });
+  await Promise.all([
+    set('thermostat', C.TargetHeatingCoolingState, C.TargetHeatingCoolingState.OFF),
+    set('light', C.On, false),
+    set('fan', C.Active, 0),
+  ]);
+  assert.deepEqual(link.sent.map((w) => w.path.join('/')), ['power/vs/0']);
+  // A value the appliance already has is not sent again.
+  link.sent.length = 0;
+  await set('thermostat', C.TargetHeatingCoolingState, C.TargetHeatingCoolingState.OFF);
+  assert.equal(link.sent.length, 0);
+});
+
 test('Auto and Turbo are explicit choices, not slider positions', async () => {
   const { link, set, get, svc, C } = setup();
   await set('fanTurbo', C.On, true);
