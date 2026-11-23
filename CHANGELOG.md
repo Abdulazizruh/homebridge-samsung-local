@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.20
+
+Trial version on the "beta" channel. Same as beta.19, plus:
+
+- **Settings: the switch list opens only when wanted.** Card 2 now has one tick, "I want switches for automations". The list of switches shows only when it is ticked; without it the TV has no switches.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.19، ومعها:
+
+- **الإعدادات: قائمة المفاتيح تفتح عند الطلب فقط.** في البطاقة 2 علامة واحدة «أريد مفاتيح للأتمتة». تظهر قائمة المفاتيح حين تُعلَّم فقط؛ ومن دونها لا يكون للتلفزيون مفاتيح.
+
 ## 1.4.0-beta.19
 
 Trial version on the "beta" channel. Same as beta.18, plus:

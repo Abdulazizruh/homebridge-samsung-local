@@ -31,6 +31,7 @@
   .sl-choice { display: block; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 8px; margin-bottom: 8px; cursor: pointer; }
   .sl-choice:has(input:checked) { border-color: rgba(128,90,213,.8); background: rgba(128,90,213,.08); }
   .sl-sw { display: flex; align-items: center; gap: 8px; padding: 6px 2px; margin: 0; border-bottom: 1px solid rgba(128,128,128,.15); cursor: pointer; }
+  .sl-swbox:not(:has(#sl-tv-switches-on:checked)) .sl-swlist { display: none; }
   .sl-way { border-top: 1px solid rgba(128,128,128,.2); padding-top: 10px; margin-top: 10px; }
   .sl-found { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
   .sl-found .sl-grow { flex: 1; min-width: 150px; } .sl-found input[type=checkbox] { width: 20px; height: 20px; flex: none; }
@@ -199,7 +200,8 @@
       su_none: 'No remote',
       su_noneNote: 'Only the switches below, if you choose any.',
       swTitle: '2 · Switches for automations (optional)',
-      swNote: 'Separate from the remote, and they work with any choice above. Tick the ones you want in Apple Home for automations and scenes; none is ticked to begin with.',
+      swOn: 'I want switches for automations', swNote: 'Separate from the remote; they work with any choice above. Leave this off if you do not use automations.',
+      swPick: 'Tick the switches to show in Apple Home:',
       sw_power: 'Power, on and off', sw_mute: 'Mute, on and off', sw_volumeUp: 'Volume up', sw_volumeDown: 'Volume down',
       sw_channelUp: 'Channel up', sw_channelDown: 'Channel down', sw_playPause: 'Play or pause', sw_home: 'Home screen of the TV',
       swOnce: 'one press', swGroup: 'They appear in Apple Home as one group for this TV; there you can show them as separate tiles. A "one press" switch goes off again by itself, so an automation can press it several times.',
@@ -340,7 +342,8 @@
       su_none: 'دون ريموت',
       su_noneNote: 'المفاتيح في الأسفل فقط، إن اخترت منها شيئًا.',
       swTitle: '2 · مفاتيح للأتمتة (اختياري)',
-      swNote: 'مستقلة عن الريموت، وتعمل مع أي اختيار في الأعلى. علّم ما تريده في Apple Home للأتمتة والمشاهد؛ والأصل أنها كلها غير معلّمة.',
+      swOn: 'أريد مفاتيح للأتمتة', swNote: 'مستقلة عن الريموت، وتعمل مع أي اختيار في الأعلى. اتركها دون علامة إن كنت لا تستخدم الأتمتة.',
+      swPick: 'علّم المفاتيح التي تظهر في Apple Home:',
       sw_power: 'التشغيل والإطفاء', sw_mute: 'كتم الصوت وإلغاؤه', sw_volumeUp: 'رفع الصوت', sw_volumeDown: 'خفض الصوت',
       sw_channelUp: 'القناة التالية', sw_channelDown: 'القناة السابقة', sw_playPause: 'تشغيل أو إيقاف مؤقت', sw_home: 'الشاشة الرئيسية للتلفزيون',
       swOnce: 'ضغطة واحدة', swGroup: 'تظهر في Apple Home مجموعة واحدة لهذا التلفزيون، ومن هناك تستطيع عرضها بطاقات منفصلة. مفتاح «ضغطة واحدة» يعود مطفأً وحده، فتستطيع الأتمتة ضغطه عدة مرات.',
@@ -596,10 +599,13 @@
             ${choice('none')}
             <div class="sl-muted">${t('tvWake')}</div>
             </div>
-          <div class="sl-group mt-3"><div class="sl-group-title">${t('swTitle')}</div>
-            <div class="sl-muted mb-1">${t('swNote')}</div>
-            ${sw('power')}${sw('mute')}${sw('volumeUp', true)}${sw('volumeDown', true)}${sw('channelUp', true)}${sw('channelDown', true)}${sw('playPause', true)}${sw('home', true)}
-            <div class="sl-muted mt-2">${t('swGroup')}</div>
+          <div class="sl-group sl-swbox mt-3"><div class="sl-group-title">${t('swTitle')}</div>
+            <label class="sl-choice mb-0"><input type="checkbox" id="sl-tv-switches-on" ${chosen.length ? 'checked' : ''}> <strong>${t('swOn')}</strong>
+              <div class="sl-muted">${t('swNote')}</div></label>
+            <div class="sl-swlist mt-2">
+              <div class="mb-1">${t('swPick')}</div>
+              ${sw('power')}${sw('mute')}${sw('volumeUp', true)}${sw('volumeDown', true)}${sw('channelUp', true)}${sw('channelDown', true)}${sw('playPause', true)}${sw('home', true)}
+              <div class="sl-muted mt-2">${t('swGroup')}</div></div>
             </div>
           <div class="sl-group mt-3"><div class="sl-group-title">${t('phTitle')}</div>
             <ul class="sl-muted mb-2" style="padding-inline-start:1.2em"><li>${t('phNote1')}</li><li>${t('phNote2')}</li><li>${t('phNote3')}</li></ul>
@@ -672,7 +678,7 @@
     $('sl-add-tv')?.addEventListener('click', async () => {
       const entry = { host: p.host, id: p.deviceId, type: 'tv', enabled: true,
         tvMode: ['tile', 'both'].includes(box.querySelector('[name="sl-tv-setup"]:checked')?.value) ? 'tile' : 'switches',
-        tvSwitches: [...box.querySelectorAll('[name="sl-tv-switch"]:checked')].map((x) => x.value) };
+        tvSwitches: $('sl-tv-switches-on')?.checked ? [...box.querySelectorAll('[name="sl-tv-switch"]:checked')].map((x) => x.value) : [] };
       if (p.mac) { entry.mac = p.mac; }
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
