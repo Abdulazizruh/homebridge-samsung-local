@@ -2,6 +2,30 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.1
+
+Trial version, published on the "beta" channel only. Stable installs stay on 1.3.2.
+
+First step towards typing on a Samsung TV from the iPhone remote: finding out what the TVs themselves accept.
+
+- The log says when a TV opens and closes its on-screen keyboard (only the fact, never the text).
+- TV options have a "Keyboard trial" section: open a search field on the TV, send a text from the settings page, and see whether it appears.
+- Nothing new is stored on disk and no pairing changes. Going back to 1.3.2 leaves nothing behind.
+
+Not yet tried on real TVs.
+
+**بالعربية**
+
+نسخة تجريبية تُنشر على قناة «beta» فقط. الإصدار المستقر يبقى 1.3.2.
+
+الخطوة الأولى نحو الكتابة على تلفزيون Samsung من ريموت الآيفون: معرفة ما تقبله التلفزيونات نفسها.
+
+- السجل يذكر متى يفتح التلفزيون كيبورد الشاشة ومتى يغلقه (الحدث فقط، ولا يُكتب النص).
+- في خيارات التلفزيون قسم «تجربة الكيبورد»: افتح خانة بحث على التلفزيون، أرسل نصًا من صفحة الإعدادات، وانظر هل يظهر.
+- لا يُحفظ شيء جديد على القرص ولا يتغيّر أي اقتران. الرجوع إلى 1.3.2 لا يترك أثرًا.
+
+لم تُجرَّب بعد على تلفزيونات حقيقية.
+
 ## 1.3.2
 
 No change in behaviour. The plugin description now mentions the automatic scan, and the README explains it with three pictures.

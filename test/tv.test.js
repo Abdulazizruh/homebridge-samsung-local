@@ -10,7 +10,7 @@ import { makeApi, quietLog, tmpDir, waitFor } from './support.js';
 
 /** A stand-in TV: the info page and the remote-control channel, without TLS. */
 async function fakeTv({ power = 'on', allow = true } = {}) {
-  const tv = { keys: [], tokens: [], power, allow };
+  const tv = { keys: [], texts: [], tokens: [], power, allow, keyboardOpen: false };
   const web = http.createServer((req, res) => {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ device: { id: 'uuid:tv-test-1', name: 'Living Room TV', modelName: 'QA65TEST', wifiMac: 'aa:bb:cc:00:11:22', TokenAuthSupport: 'true', ...(tv.power ? { PowerState: tv.power } : {}) } }));
@@ -24,8 +24,18 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
       return;
     }
     socket.send(JSON.stringify({ event: 'ms.channel.connect', data: token ? {} : { token: '12345678' } }));
+    if (tv.keyboardOpen) { socket.send(JSON.stringify({ event: 'ms.remote.imeStart', data: 'x' })); }
     socket.on('message', (raw) => {
       const msg = JSON.parse(String(raw));
+      if (msg.params.TypeOfRemote === 'SendInputString') {
+        tv.texts.push(Buffer.from(msg.params.Cmd, 'base64').toString('utf8'));
+        return;
+      }
+      if (msg.params.TypeOfRemote === 'SendInputEnd') {
+        tv.texts.push('<end>');
+        socket.send(JSON.stringify({ event: 'ms.remote.imeEnd' }));
+        return;
+      }
       tv.keys.push(msg.params.DataOfCmd);
       if (msg.params.DataOfCmd === 'KEY_POWER') { tv.power = tv.power === 'on' ? 'standby' : 'on'; }
     });
@@ -194,4 +204,20 @@ test('TV remote: the channel stays open between presses and is closed when the T
   tv.power = 'standby';
   await handler.poll();
   assert.equal(handler.remote.socket, null);
+});
+
+test('TV keyboard: the TV says when its keyboard opens and closes, and a whole Arabic text reaches it', async (t) => {
+  const tv = await fakeTv();
+  tv.keyboardOpen = true;
+  t.after(tv.close);
+  const seen = [];
+  const remote = new TizenRemote({ host: '127.0.0.1', ...tv.ports, token: 'abc', onKeyboard: (open) => seen.push(open) });
+  t.after(() => remote.close());
+  await remote.text('مكة 2026');
+  await remote.text('مكة 2026', { done: true });
+  const until = Date.now() + 2000;
+  while (seen.length < 2 && Date.now() < until) { await new Promise((r) => setTimeout(r, 20)); }
+  assert.deepEqual(tv.texts, ['مكة 2026', 'مكة 2026', '<end>']);
+  assert.deepEqual(seen, [true, false]);
+  assert.deepEqual(tv.keys, []);
 });

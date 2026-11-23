@@ -25,6 +25,7 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/wipe', (payload) => this.wipe(payload));
     this.onRequest('/saved-devices', () => this.savedDevices());
     this.onRequest('/tv-pair', (payload) => this.tvPair(payload));
+    this.onRequest('/tv-text', (payload) => this.tvText(payload));
     this.onRequest('/remove-runtime', () => this.removeRuntime());
     this.onRequest('/scan', () => this.scan());
     this.ready();
@@ -212,6 +213,35 @@ class UiServer extends HomebridgePluginUiServer {
   }
 
   /** Ask the TV for permission; the owner answers "Allow" on its screen. */
+  /**
+   * Trial: send a text to the field a TV's on-screen keyboard is open on, over
+   * the pairing the TV already granted. Nothing is stored and the text is not logged.
+   */
+  async tvText({ host, id, text, done } = {}) {
+    if (typeof host !== 'string' || !/^\d{1,3}(\.\d{1,3}){3}$/.test(host.trim())) {
+      throw new RequestError('Enter a valid IP address.', { code: 'bad_host' });
+    }
+    if (typeof text !== 'string' || !text.length || text.length > 200) {
+      throw new RequestError('Enter a text of up to 200 characters.', { code: 'bad_text' });
+    }
+    const token = (readJson(this.paths.tvTokens) ?? {})[id] ?? null;
+    let keyboard = null;
+    const remote = new TizenRemote({ host: host.trim(), token, onKeyboard: (open) => { keyboard = open; } });
+    try {
+      await remote.open();
+      // A moment for the TV to say whether its keyboard is open, then the text.
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      const before = keyboard;
+      await remote.text(text, { done: Boolean(done) });
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      return { sent: true, keyboardBefore: before, keyboardAfter: keyboard };
+    } catch (err) {
+      throw new RequestError(err.message, { code: err.code ?? 'tv_error' });
+    } finally {
+      remote.close();
+    }
+  }
+
   async tvPair({ host } = {}) {
     if (typeof host !== 'string' || !/^\d{1,3}(\.\d{1,3}){3}$/.test(host.trim())) {
       throw new RequestError('Enter a valid IP address.', { code: 'bad_host' });

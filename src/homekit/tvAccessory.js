@@ -48,6 +48,7 @@ export class TvAccessory {
     this.services = new Map();
     this.remote = new TizenRemote({
       host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken, idleMs: REMOTE_IDLE_MS,
+      onKeyboard: (open) => this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`),
     });
     if (mode === 'tile') {
       this.#buildTile();

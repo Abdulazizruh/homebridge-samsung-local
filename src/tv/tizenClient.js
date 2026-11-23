@@ -72,8 +72,8 @@ export function wake(mac, { address = '255.255.255.255', port = 9, repeat = 3 } 
  * short idle time, so the TV is not kept awake by an open connection.
  */
 export class TizenRemote {
-  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null }) {
-    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken });
+  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null }) {
+    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard });
     this.socket = null;
     this.opening = null;
     this.idleTimer = null;
@@ -109,6 +109,12 @@ export class TizenRemote {
       socket.on('message', (raw) => {
         let msg;
         try { msg = JSON.parse(String(raw)); } catch { return; }
+        // The TV says when its on-screen keyboard opens and closes. Only the
+        // fact is passed on, never what is typed.
+        if (msg.event === 'ms.remote.imeStart' || msg.event === 'ms.remote.imeEnd') {
+          this.onKeyboard?.(msg.event === 'ms.remote.imeStart');
+          return;
+        }
         if (msg.event === 'ms.channel.connect') {
           clearTimeout(timer);
           const token = msg.data?.token;
@@ -137,8 +143,23 @@ export class TizenRemote {
     clearTimeout(this.idleTimer);
     this.idleTimer = setTimeout(() => this.close(), this.idleMs);
     this.idleTimer.unref?.();
-    const payload = { method: 'ms.remote.control', params: { Cmd: 'Click', DataOfCmd: code, Option: 'false', TypeOfRemote: 'SendRemoteKey' } };
-    await new Promise((resolve, reject) => this.socket.send(JSON.stringify(payload), (err) => (err ? reject(err) : resolve())));
+    await this.#send({ Cmd: 'Click', DataOfCmd: code, Option: 'false', TypeOfRemote: 'SendRemoteKey' });
+  }
+
+  #send(params) {
+    return new Promise((resolve, reject) => this.socket.send(JSON.stringify({ method: 'ms.remote.control', params }), (err) => (err ? reject(err) : resolve())));
+  }
+
+  /**
+   * Put text into the field the TV's on-screen keyboard is open on. The whole
+   * text is sent each time; `done` then closes the keyboard.
+   */
+  async text(value, { done = false } = {}) {
+    await this.open();
+    await this.#send({ Cmd: Buffer.from(String(value), 'utf8').toString('base64'), DataOfCmd: 'base64', TypeOfRemote: 'SendInputString' });
+    if (done) {
+      await this.#send({ TypeOfRemote: 'SendInputEnd' });
+    }
   }
 
   close() {

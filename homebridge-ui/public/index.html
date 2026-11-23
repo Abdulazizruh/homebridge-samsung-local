@@ -184,6 +184,11 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
+      kbTitle: 'Keyboard trial (beta)',
+      kbNote: 'Open a search field on the TV so its on-screen keyboard shows, then send a text from here. This trial tells us which apps accept typing from outside. Nothing is stored, and the text is not written to the log.',
+      kbPlaceholder: 'Text to send', kbSend: 'Send to the TV', kbDone: 'Close the TV keyboard after sending', kbEmpty: 'Enter a text first',
+      kbSending: 'Sending…', kbSent: 'Sent', kbSaidOpen: 'The TV said its keyboard is open. Check the text on its screen.',
+      kbSaidNothing: 'The TV did not say whether its keyboard is open. Check its screen.',
       tvMode: 'How it appears in Apple Home',
       tvModeTile: 'TV tile with remote', tvModeSwitches: 'Switches inside the bridge',
       tvModeTileNote: 'A real TV tile, the remote in Control Centre and input buttons. Apple requires each TV tile to be added on its own: after you press Add, its code (a picture to scan and the digits) appears beside the TV in the list below.',
@@ -299,6 +304,11 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
+      kbTitle: 'تجربة الكيبورد (نسخة تجريبية)',
+      kbNote: 'افتح خانة بحث على التلفزيون حتى يظهر كيبورد الشاشة، ثم أرسل نصًا من هنا. هذه التجربة تبيّن أي التطبيقات تقبل الكتابة من الخارج. لا يُحفظ شيء، ولا يُكتب النص في السجل.',
+      kbPlaceholder: 'النص المراد إرساله', kbSend: 'إرسال إلى التلفزيون', kbDone: 'أغلق كيبورد التلفزيون بعد الإرسال', kbEmpty: 'اكتب نصًا أولًا',
+      kbSending: 'جارٍ الإرسال…', kbSent: 'أُرسل', kbSaidOpen: 'أبلغ التلفزيون أن الكيبورد مفتوح. تحقق من النص على شاشته.',
+      kbSaidNothing: 'لم يُبلغ التلفزيون عن حالة الكيبورد. تحقق من شاشته.',
       tvMode: 'شكل الظهور في Apple Home',
       tvModeTile: 'بطاقة تلفزيون مع ريموت', tvModeSwitches: 'مفاتيح داخل الجسر',
       tvModeTileNote: 'بطاقة تلفزيون حقيقية، وريموت في مركز التحكم، وأزرار للمداخل. تشترط Apple إضافة كل بطاقة تلفزيون بمفردها: بعد الضغط على «إضافة» يظهر رمزه (صورة للمسح والأرقام تحتها) بجانب التلفزيون في القائمة بالأسفل.',
@@ -527,7 +537,13 @@
           <div class="mt-1"><label class="mb-0"><input type="radio" name="sl-tv-mode" value="switches" ${mode === 'switches' ? 'checked' : ''}> ${t('tvModeSwitches')}</label>
             <div class="sl-muted">${t('tvModeSwitchesNote')}</div></div></div>
         <div class="sl-muted mt-1">${t('tvWake')}</div>
-        <button class="btn btn-success mt-2" id="sl-add-tv" ${ready ? '' : 'disabled'}>${existing ? t('update') : t('add')}</button>`;
+        <button class="btn btn-success mt-2" id="sl-add-tv" ${ready ? '' : 'disabled'}>${existing ? t('update') : t('add')}</button>
+        ${p.tv.configured ? `<details class="mt-3"><summary>${t('kbTitle')}</summary>
+          <div class="sl-muted mt-1">${t('kbNote')}</div>
+          <div class="sl-row mt-2"><input type="text" class="form-control" id="sl-kb-text" maxlength="200" placeholder="${t('kbPlaceholder')}">
+            <button class="btn btn-primary" id="sl-kb-send">${t('kbSend')}</button></div>
+          <label class="mb-0 mt-1"><input type="checkbox" id="sl-kb-done"> ${t('kbDone')}</label>
+          <div id="sl-kb-result" class="mt-1"></div></details>` : ''}`;
     }
     if (d.kind !== 'airConditioner' && d.kind !== 'tv' && d.support === 'experimental') {
       const feats = { ...LAUNDRY_DEFAULTS, ...(existing?.features || {}) };
@@ -556,6 +572,16 @@
     html += `<details class="mt-2" ${inline ? '' : 'open'}><summary>${t('reportsTitle')}</summary>${more}</details>`;
     box.innerHTML = html;
     $('sl-result-diag')?.addEventListener('click', () => downloadDiagnostics({ deviceId: p.deviceId, host: p.host }));
+    $('sl-kb-send')?.addEventListener('click', async () => {
+      const out = $('sl-kb-result'); const text = $('sl-kb-text').value;
+      if (!text) { out.innerHTML = `<span class="sl-pill sl-warn">${t('kbEmpty')}</span>`; return; }
+      out.innerHTML = `<span class="sl-muted">${t('kbSending')}</span>`;
+      try {
+        const r = await homebridge.request('/tv-text', { host: p.host, id: p.deviceId, text, done: $('sl-kb-done').checked });
+        const said = r.keyboardBefore === true || r.keyboardAfter === true ? t('kbSaidOpen') : t('kbSaidNothing');
+        out.innerHTML = `<span class="sl-pill sl-ok">${t('kbSent')}</span> <span class="sl-muted">${said}</span>`;
+      } catch (err) { out.innerHTML = `<span class="sl-pill sl-bad">${esc(errorText(err))}</span>`; }
+    });
     $('sl-tv-pair')?.addEventListener('click', async () => {
       const state = $('sl-tv-state'); const button = $('sl-tv-pair');
       button.disabled = true; state.className = 'sl-pill sl-warn'; state.textContent = t('tvPairing');
