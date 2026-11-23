@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.23
+
+Trial version on the "beta" channel. Same as beta.22, plus what its log showed:
+
+- **iPhone remote stuck on "Connecting": the idle connection is closed.** Naming itself (beta.22) changed nothing. The log shows that some seconds after a remote is closed, the phone connects again by itself, says who it is, and then says nothing for half a minute; an opened remote asks for its session within a moment. Such a silent connection is now closed after three seconds, unless that makes the phone come straight back again and again. Not yet confirmed as the cure.
+- **The log tells the devices apart**: "device 1", "device 2", in the order they were paired, never a name. It also notes a device that connected and left without proving itself, and where it stopped.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.22، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون يعلق على «Connecting»: إغلاق الاتصال الخامل.** تعريف البديل بنفسه (beta.22) لم يغيّر شيئًا. السجل يُظهر أن الجوال يتصل من نفسه بعد ثوانٍ من إغلاق الريموت، يعرّف بنفسه، ثم يسكت نصف دقيقة؛ أما الريموت المفتوح فيطلب جلسته في لحظة. الآن يُغلق هذا الاتصال الساكت بعد ثلاث ثوانٍ، إلا إذا جعل ذلك الجوال يعود مرة بعد مرة. لم يتأكد بعد أنه العلاج.
+- **السجل يميّز بين الأجهزة**: «device 1» و«device 2» بترتيب اقترانها، دون أي اسم. ويذكر أيضًا الجهاز الذي اتصل وغادر دون أن يثبت هويته، وأين توقف.
+
 ## 1.4.0-beta.22
 
 Trial version on the "beta" channel. Same as beta.21, plus what its log showed:

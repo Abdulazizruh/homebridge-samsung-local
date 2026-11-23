@@ -22,6 +22,9 @@ const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPA
 const AUTH_FRAMES = new Set([FRAME.PS_Start, FRAME.PS_Next, FRAME.PV_Start, FRAME.PV_Next]);
 const MAX_FRAME = 256 * 1024;
 const AUTH_DEADLINE_MS = 60_000;
+const IDLE_CLOSE_MS = 3000; // a connection that only said who it is and then nothing
+const IDLE_LOOP_MS = 120_000;
+const IDLE_LOOP_MAX = 4; // closed this often in two minutes, it is left alone
 const MAX_CONNECTIONS = 8;
 const MAX_WRONG_CODES = 10;
 const VOLUME_FLAG = 0x0100;
@@ -60,16 +63,24 @@ class Connection {
 
   close() { this.socket.destroy(); }
 
+  /** "device 1", "device 2": the paired phones and tablets in the order they were paired. Never a name or an identifier. */
+  who() {
+    const n = [...this.server.clients.keys()].indexOf(this.verified);
+    return n >= 0 ? `device ${n + 1}` : 'a device not paired';
+  }
+
   #gone() {
     clearTimeout(this.deadline);
-    // A phone that proved itself and left without ever opening the remote: said once a minute at most, to explain a remote that hangs.
+    clearTimeout(this.idle);
     const s = this.server;
+    const lasted = ((Date.now() - this.born) / 1000).toFixed(1);
     if (this.opened) {
-      s.log.info(`[${s.name}] iPhone remote connection ended after ${((Date.now() - this.born) / 1000).toFixed(0)}s${this.remote ? ', without the phone closing its remote first' : ''}.`);
-    }
-    if (this.verified && !this.opened && Date.now() - (s.lastLeft ?? 0) > 60_000) {
-      s.lastLeft = Date.now();
-      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. Other connections of the same device when it came: ${this.siblings?.kept ?? 0} with the remote open, ${this.siblings?.closed ?? 0} without. About itself it sent: ${this.infoShape ?? 'nothing'}.`);
+      s.log.info(`[${s.name}] iPhone remote of ${this.who()} ended after ${lasted}s${this.remote ? ', without the phone closing its remote first' : ''}.`);
+    } else if (this.verified) {
+      s.log.info(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}.`);
+    } else if (this.stage) {
+      // It reached us but never proved itself: where it stopped explains a remote that hangs before it opens.
+      s.log.info(`[${s.name}] a device connected and left ${lasted}s later without proving itself; it got as far as: ${this.stage}.`);
     }
     this.server.forget(this);
   }
@@ -101,9 +112,9 @@ class Connection {
       const tlv = readTlv(message?._pd ?? Buffer.alloc(0));
       const step = tlv.get(Tlv.SeqNo)?.[0];
       const verifyFlow = type === FRAME.PV_Start || type === FRAME.PV_Next;
-      if (verifyFlow && step === 1) { this.#verify1(tlv); }
-      else if (verifyFlow && step === 3) { this.#verify3(tlv); }
-      else if (!verifyFlow && step === 1) { this.#setup1(); }
+      if (verifyFlow && step === 1) { this.stage = 'the first step of proving itself'; this.#verify1(tlv); }
+      else if (verifyFlow && step === 3) { this.stage = 'the last step of proving itself'; this.#verify3(tlv); }
+      else if (!verifyFlow && step === 1) { this.stage = 'asking to pair'; this.#setup1(); }
       else if (!verifyFlow && step === 3) { this.#setup3(tlv); }
       else if (!verifyFlow && step === 5) { this.#setup5(tlv); }
       else { this.close(); }
@@ -313,6 +324,21 @@ const HANDLERS = {
     });
     const shape = Object.keys(c ?? {}).sort().join(',').replace(/[^\w,.-]/g, '?').slice(0, 300);
     this.infoShape = shape; // the names of what the phone sent about itself, never the values
+    // A phone also connects by itself, says who it is, and then says nothing for half a minute. While such
+    // a connection sat there, the remote on that phone showed "Connecting". It is closed after a short wait,
+    // unless that makes the phone come straight back again and again.
+    clearTimeout(this.idle);
+    this.idle = setTimeout(() => {
+      if (this.opened || (this.asked ?? []).length > 1 || this.socket.destroyed) { return; }
+      const now = Date.now();
+      const closes = (s.idleCloses ??= new Map());
+      const mine = (closes.get(this.verified) ?? []).filter((at) => now - at < IDLE_LOOP_MS);
+      if (mine.length >= IDLE_LOOP_MAX) { return; } // it keeps coming back: left alone
+      closes.set(this.verified, [...mine, now]);
+      this.closedIdle = true;
+      this.close();
+    }, IDLE_CLOSE_MS);
+    this.idle.unref?.();
   },
   _sessionstart(message, c) {
     this.sid = c._sid;
@@ -324,7 +350,7 @@ const HANDLERS = {
   tvrcsessionstart(message, c) {
     this.remote = true;
     this.opened = true;
-    this.server.log.info(`[${this.server.name}] iPhone remote opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. About itself it sent: ${this.infoShape ?? 'nothing'}.`);
+    this.server.log.info(`[${this.server.name}] iPhone remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}..`);
     this.server.sessionsChanged();
     this.reply(message, c);
     this.flags(message._x); // within a moment, or the iPhone keeps the volume buttons for itself
