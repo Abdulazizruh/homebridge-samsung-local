@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import net from 'node:net';
 import test from 'node:test';
 import { WebSocketServer } from 'ws';
 import { SamsungLocalPlatform } from '../src/platform.js';
@@ -67,7 +68,7 @@ async function bootTv(tv, tvMode, storage = tmpDir()) {
   const api = makeApi(storage);
   const platform = new SamsungLocalPlatform(quietLog,
     { platform: PLATFORM_NAME, devices: [{ host: '127.0.0.1', id: 'tv-tv-test-1', type: 'tv', tvMode, name: 'Majlis TV' }] }, api,
-    { tv: { ports: tv.ports, pollMs: 60 }, createHelper: () => { throw new Error('a TV must not need the Python helper'); } });
+    { tv: { ports: { ...tv.ports, screenPort: tv.screenPort ?? 1 }, pollMs: 60 }, createHelper: () => { throw new Error('a TV must not need the Python helper'); } });
   await platform.start();
   return { api, platform, storage };
 }
@@ -194,4 +195,19 @@ test('TV remote: the channel stays open between presses and is closed when the T
   tv.power = 'standby';
   await handler.poll();
   assert.equal(handler.remote.socket, null);
+});
+
+test('a TV that does not name its power state: once its screen service was seen, a closed one means off', async (t) => {
+  const tv = await fakeTv({ power: null });
+  const screen = net.createServer((socket) => socket.destroy());
+  await new Promise((r) => screen.listen(0, '127.0.0.1', r));
+  tv.screenPort = screen.address().port;
+  const { api, platform, storage } = await bootTv(tv, 'tile');
+  t.after(() => { platform.stop(); tv.close(); });
+  const C = api.hap.Characteristic;
+  const tile = platform.tvs[0].services.get('tv');
+  await waitFor(() => tile.getCharacteristic(C.Active).value === 1 && readJson(pluginPaths(storage).tvFacts)?.['tv-tv-test-1']?.screenPortSeen);
+  await new Promise((r) => screen.close(r)); // the screen goes dark; the TV still answers on the network
+  await waitFor(() => tile.getCharacteristic(C.Active).value === 0);
+  assert.equal(platform.tvs[0].reachable, true);
 });

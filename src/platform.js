@@ -13,6 +13,7 @@ import { PLATFORM_NAME, PLUGIN_NAME, UUID_NAMESPACE } from './settings.js';
 import { ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './storage.js';
 
 const RETRY_STEPS_MS = [15_000, 30_000, 60_000, 120_000, 300_000];
+const START_GAP_MS = 1000;
 const HELPER_RETRY_MS = [30_000, 60_000, 120_000, 300_000, 600_000];
 const SNAPSHOT_CHANGED_MS = 3_000; // changed readings reach the disk this soon
 const SNAPSHOT_SAME_MS = 60_000; // unchanged readings only refresh the file's time
@@ -175,9 +176,21 @@ export class SamsungLocalPlatform {
     for (const device of this.devices.values()) {
       device.link.attachHelper(this.helper);
     }
-    for (const entry of entries) {
-      this.#bringUp(entry, 0);
-    }
+    // One after another, a second apart: six appliances asked for a secure
+    // session in the same instant often refuse the first attempt.
+    const gap = this.overrides.startGapMs ?? START_GAP_MS;
+    entries.forEach((entry, i) => {
+      if (!gap || i === 0) {
+        this.#bringUp(entry, 0);
+        return;
+      }
+      const timer = setTimeout(() => {
+        this.retryTimers.delete(timer);
+        this.#bringUp(entry, 0);
+      }, i * gap);
+      timer.unref?.();
+      this.retryTimers.add(timer);
+    });
   }
 
   async #startHelper() {
@@ -339,6 +352,13 @@ export class SamsungLocalPlatform {
         }
       },
       reportsPower: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.reportsPower),
+      screenPortSeen: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.screenPortSeen),
+      onScreenPortSeen: () => {
+        try {
+          const facts = readJson(this.paths.tvFacts) ?? {};
+          writeJson(this.paths.tvFacts, { ...facts, [entry.id]: { ...facts[entry.id], screenPortSeen: true } });
+        } catch { /* learned again after the next start */ }
+      },
       onReportsPower: () => {
         try {
           const facts = readJson(this.paths.tvFacts) ?? {};

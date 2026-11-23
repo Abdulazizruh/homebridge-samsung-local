@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.3.3
+
+Two fixes from a day of logs on real appliances.
+
+- **Start-up:** appliances are now connected one after another, a second apart. Asked all in the same instant, one or two often refused the first attempt and came back ten seconds later.
+- **TVs that do not name their power state:** such a TV keeps answering on the network after its screen goes dark, and wakes by itself at night, so its tile showed "on" for hours. The plugin now also looks at the TV's media service, which these sets run only while the screen is on. Once that service has been seen on a TV, its absence means off. A TV that never shows it is judged as before, so nothing changes for the worse.
+
+The second fix is not yet confirmed on a real TV: the log line "its screen service will tell on from off" shows whether a TV has that service.
+
+**بالعربية**
+
+إصلاحان من سجل يوم كامل على أجهزة حقيقية.
+
+- **بدء التشغيل:** صار الاتصال بالأجهزة واحدًا بعد الآخر بفاصل ثانية. حين كانت تُطلب كلها في اللحظة نفسها، كان جهاز أو اثنان يرفضان المحاولة الأولى ويعودان بعد عشر ثوانٍ.
+- **التلفزيونات التي لا تذكر حالة تشغيلها:** هذا النوع يبقى يجيب على الشبكة بعد انطفاء شاشته، ويستيقظ وحده ليلًا، فكانت بطاقته تظهر «يعمل» لساعات. صارت الإضافة تنظر أيضًا إلى خدمة الوسائط في التلفزيون، وهي تعمل في هذه الأجهزة والشاشة مضاءة فقط. بعد أن تُرى هذه الخدمة مرة على تلفزيون، يعني غيابها أنه مطفأ. والتلفزيون الذي لم تظهر عليه أبدًا يُحكم عليه كما كان، فلا يسوء شيء.
+
+الإصلاح الثاني لم يتأكد بعد على تلفزيون حقيقي: سطر السجل «its screen service will tell on from off» يبيّن هل في التلفزيون هذه الخدمة.
+
 ## 1.3.2
 
 No change in behaviour. The plugin description now mentions the automatic scan, and the README explains it with three pictures.
