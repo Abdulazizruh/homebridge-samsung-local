@@ -27,3 +27,30 @@ test('TV tile code: kept for the settings page once Homebridge has published the
   assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), {});
   for (const timer of timers) { clearTimeout(timer); }
 });
+
+test('TV tile port: the tile keeps one Apple Home port across restarts, moves when it is taken, and a port chosen by Homebridge wins', async () => {
+  const { freePort, keepPort } = await import('../src/homekit/tvPort.js');
+  const net = await import('node:net');
+  const file = path.join(tmpDir(), 'tv-facts.json');
+  fs.writeFileSync(file, JSON.stringify({ 'tv-1': { reportsPower: true } }));
+  const start = async (given) => {
+    const used = [];
+    const accessory = { displayName: 'Bed TV', _associatedHAPAccessory: { publish: async (info) => { used.push(info.port); } } };
+    assert.equal(keepPort({ accessory, deviceId: 'tv-1', file }), true);
+    await accessory._associatedHAPAccessory.publish({ username: 'AA', ...(given ? { port: given } : {}) }, false);
+    return used[0];
+  };
+  const first = await start();
+  assert.ok(first > 0);
+  assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), { 'tv-1': { reportsPower: true, homePort: first } }, 'other facts stay');
+  assert.equal(await start(), first, 'the same port after a restart');
+  assert.equal(await start(51999), 51999, 'a port range set in Homebridge wins');
+
+  const squatter = net.createServer();
+  await new Promise((r) => squatter.listen(first, r));
+  const moved = await start();
+  squatter.close();
+  assert.notEqual(moved, first);
+  assert.equal(JSON.parse(fs.readFileSync(file, 'utf8'))['tv-1'].homePort, moved);
+  assert.ok(await freePort(0) > 0);
+});

@@ -5,6 +5,7 @@ import { WasherAccessory } from './homekit/washerAccessory.js';
 import { LAUNDRY_KINDS } from './capabilities/washer.js';
 import { TvAccessory } from './homekit/tvAccessory.js';
 import { pruneAppleRemote } from './appleRemote/bridge.js';
+import { keepPort } from './homekit/tvPort.js';
 import { describeDevice, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
 import { shortId } from './redact.js';
@@ -383,6 +384,7 @@ export class SamsungLocalPlatform {
     }
     if (mode === 'tile') {
       // Apple requires a TV tile to be its own accessory, added to the Home app separately.
+      keepPort({ accessory, deviceId: entry.id, file: this.paths.tvFacts, log: this.log }); // the same port after every restart
       this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
       this.log.info(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options. Its code is on the plugin settings page, beside the TV.`);
       trackSetup({ accessory, deviceId: entry.id, name, file: this.paths.tvSetup, timers: this.retryTimers, log: this.log });

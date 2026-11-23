@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.13
+
+Trial version on the "beta" channel. Same as beta.12, plus:
+
+- **The Home remote of a TV tile that answers only sometimes.** Homebridge gave each TV tile a new network port at every start, so a phone had to find the tile again after each restart. The tile now keeps one port, remembered by the plugin, with nothing to set by hand. A port range set in Homebridge still wins. Whether this was the cause on a real home is not yet confirmed.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.12، ومعها:
+
+- **ريموت تطبيق المنزل لبطاقة التلفزيون الذي يستجيب أحيانًا فقط.** كان Homebridge يعطي كل بطاقة تلفزيون منفذ شبكة جديدًا عند كل تشغيل، فيبحث الجوال عن البطاقة من جديد بعد كل إعادة تشغيل. الآن تحتفظ البطاقة بمنفذ واحد تحفظه الإضافة، دون أي إعداد يدوي. وإن حُدد مدى منافذ في Homebridge فهو المعتمد. لم يتأكد بعد أن هذا هو السبب في منزل حقيقي.
+
 ## 1.4.0-beta.12
 
 Trial version on the "beta" channel. Same as beta.11, plus:
