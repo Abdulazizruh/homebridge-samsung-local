@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.7
+
+Trial version on the "beta" channel. Same as beta.6, plus:
+
+- **Choose your remote.** Under the TV's options, "Which remote do you want on the iPhone?" now has three choices: the Home remote of the TV tile; a remote like Apple TV only (keyboard and touch pad, one name, the TV shown in Apple Home as switches); or both. With no tile the remote carries the plain TV name, without "+".
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.6، ومعها:
+
+- **اختر ريموتك.** في خيارات التلفزيون، سؤال «أي ريموت تريده على الآيفون؟» له الآن ثلاثة خيارات: ريموت تطبيق المنزل لبطاقة التلفزيون؛ أو ريموت مثل Apple TV فقط (كيبورد ولوحة لمس، باسم واحد، والتلفزيون يظهر في Apple Home كمفاتيح)؛ أو الاثنان. ومن دون البطاقة يحمل الريموت اسم التلفزيون كما هو، دون «+».
+
 ## 1.4.0-beta.6
 
 Trial version on the "beta" channel. Same as beta.5, plus:

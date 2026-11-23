@@ -247,6 +247,7 @@ test('iPhone remote in pointer mode: finger movement moves the TV pointer, a tap
   const handler = platform.tvs[0];
   await waitFor(() => handler.phone && handler.on);
   assert.equal(handler.phone.touch, 'pointer');
+  assert.equal(handler.phone.name, 'Majlis TV +', 'beside a TV tile the second name is marked');
   handler.phone.emit('sessions', 1);
   await waitFor(() => tv.tokens.length > 0);
 
@@ -317,4 +318,12 @@ test('a TV that does not name its power state: once its screen service was seen,
   await new Promise((r) => screen.close(r)); // the screen goes dark; the TV still answers on the network
   await waitFor(() => tile.getCharacteristic(C.Active).value === 0);
   assert.equal(platform.tvs[0].reachable, true);
+});
+
+test('iPhone remote as the only remote: with switches instead of a tile it carries the plain TV name', async (t) => {
+  const tv = await fakeTv();
+  const { platform } = await bootTv(tv, 'switches', tmpDir(), { appleRemote: true });
+  t.after(async () => { await platform.stop(); tv.close(); });
+  await waitFor(() => platform.tvs[0].phone);
+  assert.equal(platform.tvs[0].phone.name, 'Majlis TV');
 });
