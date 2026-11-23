@@ -62,24 +62,26 @@ export function applyEdit(text, edit, max = 1024) {
 }
 
 /**
- * A real iPhone (iOS 26) follows a keystroke with a second message that is not
- * typing. Read from the logs of a real phone, by field names and lengths only:
- *  - a keystroke carries the keyboard's own state (`inputSourceState`) and the one letter;
- *  - the message after it carries no keyboard state, and as its text everything
- *    inserted since the keyboard opened, deletions not taken out. It grows by one
- *    with each letter and never shrinks, so it is no picture of the field either.
- * So it is told apart by what it is: an insertion without keyboard state, right
- * after a keystroke, ending with what that keystroke added. Never by comparing
- * it with the field, and never by timing. pyatv's remote sends no such message.
+ * How a real iPhone (iOS 26) words its typing, read from the logs of a real
+ * phone by field names and lengths only:
+ *  - a key press carries the keyboard's own state (`inputSourceState`) and the
+ *    one change: a letter added, letters removed, or a suggestion accepted;
+ *  - whenever its text changed, the phone then says the whole text as it now
+ *    stands, in a message without keyboard state. After a letter it is one longer,
+ *    after a deletion one shorter, after an accepted suggestion it holds the
+ *    suggested word, and it is right wherever the cursor was.
+ * So that second message is a picture of the text and replaces the field; it
+ * was once added to it, which doubled everything. A phone that never sends
+ * keyboard state (older systems, pyatv's remote) has no such pictures: its
+ * insertions are plain typing and are added as before.
  */
-export class Echoes {
-  constructor() { this.last = null; }
+export class Typing {
+  constructor() { this.keyboard = false; }
 
-  /** True when this edit is the message that follows a keystroke and adds nothing. */
-  isEcho(edit) {
-    const plain = Boolean(edit.insert) && !edit.remove && edit.assert === null;
-    const echo = plain && !edit.keyboard && this.last !== null && edit.insert.endsWith(this.last);
-    this.last = plain && edit.keyboard ? edit.insert : null; // one such message per keystroke
-    return echo;
+  /** The field after this edit, and whether the edit was a picture of the whole text. */
+  apply(field, edit, max = 1024) {
+    if (edit.keyboard) { this.keyboard = true; }
+    const picture = this.keyboard && !edit.keyboard && edit.insert !== null && !edit.remove && edit.assert === null;
+    return { picture, text: picture ? Array.from(edit.insert).slice(0, max).join('') : applyEdit(field, edit, max) };
   }
 }

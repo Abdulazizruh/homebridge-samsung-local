@@ -14,7 +14,7 @@ import srp from 'fast-srp-hap';
 import { pack, unpack } from './opack.js';
 import { Tlv, TlvError, readTlv, writeTlv } from './tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer, verify } from './crypto.js';
-import { Echoes, applyEdit, documentState, readEdit } from './rti.js';
+import { Typing, documentState, readEdit } from './rti.js';
 import { PHASE, Swipes } from './gestures.js';
 
 const { SRP, SrpServer } = srp;
@@ -48,7 +48,7 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
-    this.echoes = new Echoes();
+    this.typing = new Typing();
     this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
     this.lastSelect = 0;
@@ -364,18 +364,17 @@ const HANDLERS = {
     if (!this.rti.registered || !this.rti.open || !this.server.keyboardOpen) { return; } // no field is open
     const edit = readEdit(c._tiD);
     const before = this.server.text;
-    const echo = this.echoes.isEcho(edit); // the message that follows a keystroke: not typing
-    const text = echo ? before : applyEdit(before, edit);
+    const { picture: echo, text } = this.typing.apply(before, edit); // a picture of the whole text replaces the field
     // Trial: the shape of each edit, in lengths only and never the text, to see how a real iPhone words its typing.
     this.edits = (this.edits ?? 0) + 1;
     if (this.edits <= 60) {
       const n = (v) => (v === null ? '-' : Array.from(v).length);
       const tail = edit.insert && before ? Array.from(before).slice(-Array.from(edit.insert).length).join('') : '';
       const repeats = Boolean(edit.insert) && before.length > 0 && (edit.insert.startsWith(tail) || before.endsWith(edit.insert) || edit.insert.startsWith(before));
-      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}${edit.keyboard ? ', keyboard' : ''}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', follows a keystroke without keyboard state: left out' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
+      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}${edit.keyboard ? ', keyboard' : ''}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', the whole text as the phone has it' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
     }
     const shapes = (this.server.shapes ??= new Set());
-    const kind = `${echo ? 'the message after a keystroke' : edit.insert && !edit.keyboard ? 'letters added without keyboard state' : edit.insert ? 'letters added' : edit.remove ? 'letters removed' : 'whole text'}: ${edit.shape}`;
+    const kind = `${echo ? 'the whole text after a change' : edit.insert && !edit.keyboard ? 'letters added without keyboard state' : edit.insert ? 'letters added' : edit.remove ? 'letters removed' : 'whole text'}: ${edit.shape}`;
     if (shapes.size < 20 && !shapes.has(kind)) { // each kind once: Apple's field names, never their values
       shapes.add(kind);
       this.server.log.info(`[${this.server.name}] iPhone edit fields, ${kind}`);

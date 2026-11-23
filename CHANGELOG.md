@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.16
+
+Trial version on the "beta" channel. Same as beta.15, with the typing corrected by a further log of a real iPhone:
+
+- **The message after a key press is a picture of the whole text.** After a letter it is one longer, after a deletion one shorter, and after an accepted suggestion it holds the suggested word. The field now follows it: the picture replaces the field. beta.15 left it out, which kept plain typing right but lost an accepted suggestion and text typed with the cursor moved. A phone that never sends keyboard state is handled as before.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.15، مع تصحيح الكتابة بسجل آخر من آيفون حقيقي:
+
+- **الرسالة التي تلي الضغطة صورة للنص كله.** بعد حرف تزيد واحدًا، وبعد حذف تنقص واحدًا، وبعد قبول اقتراح تحمل الكلمة المقترحة. الآن تتبعها الخانة: الصورة تحل محل الخانة. كانت beta.15 تتركها، فتصح الكتابة العادية ويضيع الاقتراح المقبول والنص المكتوب والمؤشر في غير آخره. والجوال الذي لا يرسل حالة الكيبورد أبدًا يُعامل كما كان.
+
 ## 1.4.0-beta.15
 
 Trial version on the "beta" channel. Same as beta.14, plus what the log of a real iPhone showed:

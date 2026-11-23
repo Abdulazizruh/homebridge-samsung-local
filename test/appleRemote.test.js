@@ -212,33 +212,47 @@ test('pairing code: 0000 unless the owner chose four digits, and changing it kee
   assert.deepEqual(second.clients, { phone: 'aa' });
 });
 
-test('a real iPhone follows each keystroke with a message that is not typing: it is left out by what it is, in the sequences its log showed', async () => {
-  const { Echoes } = await import('../src/appleRemote/rti.js');
-  const echoes = new Echoes();
-  let field = ''; let said = ''; // `said`: everything inserted since the keyboard opened, as the phone repeats it
-  const edit = (e) => { const full = { assert: null, insert: null, remove: 0, keyboard: false, ...e }; if (!echoes.isEcho(full)) { field = applyEdit(field, full); } };
-  const key = (letter) => { said += letter; edit({ insert: letter, keyboard: true }); edit({ insert: said }); };
-  const back = () => edit({ remove: 1, keyboard: true });
-  for (const letter of 'هلا') { key(letter); }
-  assert.equal(field, 'هلا');
-  key(' '); for (const letter of 'book') { key(letter); } // a real double letter stays
+test('a real iPhone says the whole text after every change: the field follows it, in the sequences its log showed', async () => {
+  const { Typing } = await import('../src/appleRemote/rti.js');
+  const typing = new Typing();
+  let field = ''; let phone = ''; // `phone`: the text as the phone itself has it
+  const edit = (e) => { field = typing.apply(field, { assert: null, insert: null, remove: 0, keyboard: false, ...e }).text; };
+  const key = (letter) => { phone += letter; edit({ insert: letter, keyboard: true }); edit({ insert: phone }); };
+  const back = () => { phone = phone.slice(0, -1); edit({ remove: 1, keyboard: true }); edit({ insert: phone }); };
+  for (const letter of 'هلا book') { key(letter); } // letters, a space, a real double letter
   assert.equal(field, 'هلا book');
-  for (let i = 0; i < 8; i += 1) { back(); }
-  assert.equal(field, '');
-  key('H'); key('i'); // after deleting, the phone still repeats all it ever inserted: 9 and 10 letters, never typed again
-  assert.equal(field, 'Hi');
-  back(); edit({ insert: 'i', keyboard: true }); // a keystroke with no message after it
-  edit({ insert: 'pasted', keyboard: false }); // then text from elsewhere: it does not end with that keystroke, so it is typing
-  assert.equal(field, 'Hipasted');
-  edit({ insert: '1', keyboard: true }); edit({ insert: '1', keyboard: true }); // two real taps on one key
-  assert.equal(field, 'Hipasted11');
-  edit({ assert: 'Hello' });
+  back(); back();
+  assert.equal(field, 'هلا bo');
+  edit({ keyboard: true }); phone = 'هلا book '; edit({ insert: phone }); // a suggestion was accepted: only the picture says what changed
+  assert.equal(field, 'هلا book ');
+  phone = `X${phone}`; edit({ insert: 'X', keyboard: true }); edit({ insert: phone }); // typed with the cursor at the start
+  assert.equal(field, 'Xهلا book ');
+  edit({ remove: 1, keyboard: true }); // a deletion the phone says nothing after: applied as it is
+  assert.equal(field, 'Xهلا book');
+  edit({ assert: 'Hello', keyboard: true });
   assert.equal(field, 'Hello');
 
-  const old = new Echoes(); // a phone whose messages carry no keyboard state at all: nothing is ever left out
+  const old = new Typing(); // a phone that never sends keyboard state: every insertion is typing
   field = '';
-  for (const part of ['a', 'a', 'ab']) { const e = { assert: null, insert: part, remove: 0, keyboard: false }; if (!old.isEcho(e)) { field = applyEdit(field, e); } }
+  for (const part of ['a', 'a', 'ab']) { field = old.apply(field, { assert: null, insert: part, remove: 0, keyboard: false }).text; }
   assert.equal(field, 'aaab');
+});
+
+test('pairing code: 0000 unless the owner chose four digits, and changing it keeps the phones already paired', async () => {
+  const { identityOf, pinOf } = await import('../src/appleRemote/bridge.js');
+  assert.equal(pinOf(undefined), '0000');
+  assert.equal(pinOf('12'), '0000');
+  assert.equal(pinOf('4821'), '4821');
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'sl-pin-')), 'apple-remote.json');
+  const first = identityOf(file, 'tv-1');
+  assert.equal(first.pin, '0000');
+  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  data['tv-1'].clients = { phone: 'aa' };
+  fs.writeFileSync(file, JSON.stringify(data));
+  const second = identityOf(file, 'tv-1', '4821');
+  assert.equal(second.pin, '4821');
+  assert.equal(second.seed, first.seed);
+  assert.deepEqual(second.clients, { phone: 'aa' });
 });
 
 test('pairing code: 0000 unless the owner chose four digits, and changing it keeps the phones already paired', async () => {
