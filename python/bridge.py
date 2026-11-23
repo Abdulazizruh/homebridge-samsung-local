@@ -673,11 +673,13 @@ class DeviceWorker(threading.Thread):
                 grace_until = time.monotonic() + OFFLINE_GRACE_S
             was_online = False
             started = time.monotonic()
+            stage = "session"  # how far this attempt got, for the log
             try:
                 cert, key = ensure_credentials(self.cred_dir)
                 link, _ = open_link(self.host, self.port, cert, key,
                                     self._on_notification if self.push else None)
                 self.port = link.port
+                stage = "identity"
                 identity = link.read_identity()
                 if self.expected_di and identity["di"] and identity["di"] != self.expected_di:
                     raise HelperError(
@@ -685,7 +687,9 @@ class DeviceWorker(threading.Thread):
                         "A different appliance answered at this address. Update the IP address in the plugin settings.",
                         fatal=True,
                     )
+                stage = "reading"
                 resources, _mode = link.read_resources()
+                stage = "use"
                 with self._link_lock:
                     self._link = link
                 self._linked.set()
@@ -709,6 +713,8 @@ class DeviceWorker(threading.Thread):
                 self._loop(link)
             except Exception as exc:  # noqa: BLE001
                 info = classify(exc)
+                info["stage"] = stage
+                info["afterMs"] = int((time.monotonic() - started) * 1000)
                 if was_online:
                     grace_until = time.monotonic() + OFFLINE_GRACE_S
                     was_online = False

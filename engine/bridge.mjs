@@ -546,21 +546,25 @@ class DeviceWorker {
         graceUntil = Date.now() + OFFLINE_GRACE_MS;
       }
       wasOnline = false;
+      const started = Date.now();
+      let stage = 'session'; // how far this attempt got, for the log
       try {
-        const started = Date.now();
         const cred = await ensureCredentials(this.credDir);
         let details;
         ({ link, details } = await openLink(this.host, this.port, cred, this.push ? () => { this.notifications += 1; this.requestRefresh(300); } : null));
         this.port = link.port;
         link.onDead = () => this.wake?.();
         const sessionAt = Date.now();
+        stage = 'identity';
         const identity = await link.readIdentity();
         const identityAt = Date.now();
         if (this.expectedDi && identity.di && identity.di !== this.expectedDi) {
           throw new HelperError('identity_mismatch',
             'A different appliance answered at this address. Update the IP address in the plugin settings.', { fatal: true });
         }
+        stage = 'reading';
         const { resources } = await link.readResources();
+        stage = 'use';
         this.link = link;
         this.reconnecting = false;
         this.linkedWaiters.splice(0).forEach((r) => r());
@@ -589,7 +593,7 @@ class DeviceWorker {
         }
         await this.#loop(link);
       } catch (err) {
-        const info = classify(err);
+        const info = { ...classify(err), stage, afterMs: Date.now() - started };
         if (wasOnline) {
           graceUntil = Date.now() + OFFLINE_GRACE_MS;
           wasOnline = false;

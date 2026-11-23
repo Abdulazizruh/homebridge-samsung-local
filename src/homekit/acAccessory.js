@@ -1,3 +1,4 @@
+import { failureText } from '../deviceLink.js';
 import { acCommand, buildAcModel, expectedAfter } from '../capabilities/ac.js';
 import { eveCharacteristics } from './eve.js';
 
@@ -110,7 +111,7 @@ export class AcAccessory {
       this.#push();
       return;
     }
-    this.log.warn(`[${this.displayName}] not reachable${error?.message ? ` (${error.message})` : ''}. Will keep retrying.`);
+    this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
     const { Characteristic, HapStatusError, HAPStatus } = this.hap;
     const thermostat = this.services.get('thermostat');
     // Shows "No Response" in the Home app instead of a stale state.

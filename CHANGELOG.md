@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.4
+
+Trial version on the "beta" channel. Same as beta.3, plus what is new in 1.3.4: the log says where a failed connection stopped, and the plugin waits five seconds after start before asking the first appliance.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.3، ومعها جديد 1.3.4: السجل يذكر أين توقف الاتصال الفاشل، والإضافة تنتظر خمس ثوانٍ بعد البدء قبل طلب أول جهاز.
+
 ## 1.4.0-beta.3
 
 Trial version on the "beta" channel. Same as beta.2, plus the two fixes of 1.3.3: appliances connect one after another at start, and a second on/off signal for TVs that do not name their power state.
@@ -63,6 +71,24 @@ Checked against an independent Apple TV client and a simulated iPhone. Not yet t
 حدود معروفة: Apple لا تنشر هذا البروتوكول، فقد يتعطل مع تحديث iOS. التطبيقات التي لها كيبورد خاص مثل YouTube و Netflix يُذكر أنها لا تقبل النص المكتوب؛ أما بحث التلفزيون نفسه والمتصفح فيقبلانه. يفتح الكيبورد والريموت مفتوح، وليس كتنبيه على شاشة القفل.
 
 جرى الفحص مع عميل Apple TV مستقل ومع آيفون محاكى. لم تُجرَّب بعد مع آيفون حقيقي ولا تلفزيون حقيقي.
+## 1.3.4
+
+The one-second gap of 1.3.3 did not stop first attempts from failing after a restart (seen on real appliances). This version measures instead of guessing.
+
+- **The log says where a failed connection stopped:** opening the secure session, asking the appliance who it is, the first reading, or normal use, and after how long. Both engines.
+- **A five-second wait after start** before the first appliance is asked, in case an appliance is still letting go of the session that was closed a moment earlier. The one-second gap between appliances stays.
+
+Whether the wait helps is not known yet; a few restarts on real appliances will show.
+
+**بالعربية**
+
+فاصل الثانية في 1.3.3 لم يمنع فشل المحاولة الأولى بعد إعادة التشغيل (ظهر ذلك على أجهزة حقيقية). هذا الإصدار يقيس بدل أن يخمّن.
+
+- **السجل يذكر أين توقف الاتصال الفاشل:** عند فتح الجلسة الآمنة، أو سؤال الجهاز عن هويته، أو القراءة الأولى، أو أثناء العمل، وبعد كم ثانية. في المحركين.
+- **انتظار خمس ثوانٍ بعد بدء التشغيل** قبل طلب أول جهاز، لاحتمال أن الجهاز ما زال يُنهي الجلسة التي أُغلقت قبل لحظة. وفاصل الثانية بين الأجهزة باقٍ.
+
+هل يفيد الانتظار؟ لم يُعرف بعد؛ بضع إعادات تشغيل على أجهزة حقيقية تبيّن ذلك.
+
 ## 1.3.3
 
 Two fixes from a day of logs on real appliances.

@@ -7,6 +7,7 @@ import { SamsungLocalPlatform } from '../src/platform.js';
 import { HelperClient } from '../src/runtime/helperClient.js';
 import { PLATFORM_NAME, PLUGIN_NAME, STORAGE_DIR_NAME, UUID_NAMESPACE } from '../src/settings.js';
 import { listSnapshots, pluginPaths, wipePluginData } from '../src/storage.js';
+import { failureText } from '../src/deviceLink.js';
 import { fixture, fixturePath, here, makeApi, pidAlive, quietLog, tmpDir, waitFor } from './support.js';
 
 const V = 'x.com.samsung.da.';
@@ -25,7 +26,7 @@ function helperFactory(devices, extraEnv = {}) {
 async function boot({ storage = tmpDir(), devices, config, cached = [], overrides = {} }) {
   const api = makeApi(storage);
   const platform = new SamsungLocalPlatform(quietLog, { platform: PLATFORM_NAME, ...config }, api,
-    { createHelper: helperFactory(devices), startGapMs: 0, ...overrides });
+    { createHelper: helperFactory(devices), startGapMs: 0, startSettleMs: 0, ...overrides });
   cached.forEach((a) => platform.configureAccessory(a));
   await platform.start();
   return { api, platform, storage };
@@ -466,6 +467,8 @@ test('a failed helper start is retried on its own; appliances connect once it wo
   let starts = 0;
   const good = helperFactory([ac('10.0.0.5')]);
   const platform = new SamsungLocalPlatform(quietLog, { platform: PLATFORM_NAME, devices: [{ host: '10.0.0.5' }] }, api, {
+    startGapMs: 0,
+    startSettleMs: 0,
     helperRetryMs: [80],
     createHelper: (paths) => {
       starts += 1;
@@ -600,4 +603,34 @@ test('start-up: appliances are asked one after another, a moment apart', async (
   await waitFor(() => asked.length === 3);
   assert.deepEqual(asked.map(([host]) => host), ['10.0.0.5', '10.0.0.6', '10.0.0.7']);
   assert.ok(asked[1][1] - asked[0][1] >= 90 && asked[2][1] - asked[1][1] >= 90, 'each start waits for its turn');
+});
+
+test('a failed connection says where it stopped and after how long', () => {
+  assert.equal(failureText({ message: 'session operation timed out', stage: 'session', afterMs: 12040 }),
+    ' (session operation timed out; stopped at: opening the secure session, after 12.0s)');
+  assert.equal(failureText({ message: 'helper stopped' }), ' (helper stopped)');
+  assert.equal(failureText(null), '');
+});
+
+test('start-up: nothing is asked before the settle time has passed', async (t) => {
+  const devices = [ac('10.0.0.5')];
+  let first = 0;
+  const factory = helperFactory(devices);
+  const began = Date.now();
+  const { platform } = await boot({
+    devices,
+    config: { devices: [{ host: '10.0.0.5' }] },
+    overrides: {
+      startSettleMs: 200,
+      createHelper: (paths) => {
+        const helper = factory(paths);
+        const request = helper.request.bind(helper);
+        helper.request = (cmd, ...rest) => { if (cmd === 'probe' && !first) { first = Date.now(); } return request(cmd, ...rest); };
+        return helper;
+      },
+    },
+  });
+  t.after(() => platform.stop());
+  await waitFor(() => first > 0);
+  assert.ok(first - began >= 190, 'the first appliance waits for the settle time');
 });
