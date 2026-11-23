@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.17
+
+Trial version on the "beta" channel. Same as beta.16, plus:
+
+- **Settings: the two TV choices can no longer disagree.** The second question is now only "Do you want the remote with keyboard?", yes or no, and what each answer means follows the first choice: beside a TV tile it is a second remote, with switches it is the only one. Before, "switches" above could be combined with "Home remote" below, which does not exist without a tile.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.16، ومعها:
+
+- **الإعدادات: خيارا التلفزيون لا يتعارضان بعد الآن.** السؤال الثاني صار «هل تريد الريموت الذي فيه كيبورد؟» بنعم أو لا، ومعنى كل جواب يتبع الخيار الأول: مع بطاقة التلفزيون هو ريموت ثانٍ، ومع المفاتيح هو الريموت الوحيد. قبل ذلك كان يمكن الجمع بين «مفاتيح» في الأعلى و«ريموت تطبيق المنزل» في الأسفل، وهو غير موجود دون بطاقة.
+
 ## 1.4.0-beta.16
 
 Trial version on the "beta" channel. Same as beta.15, with the typing corrected by a further log of a real iPhone:

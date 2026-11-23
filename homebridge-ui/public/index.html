@@ -30,6 +30,8 @@
   .sl-group-title { margin: 0 -10px 8px; padding: 6px 10px; font-weight: 700; color: #6f42c1; background: rgba(128,90,213,.14); border-bottom: 1px solid rgba(128,90,213,.3); }
   .sl-choice { display: block; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 8px; margin-bottom: 8px; cursor: pointer; }
   .sl-choice:has(input:checked) { border-color: rgba(128,90,213,.8); background: rgba(128,90,213,.08); }
+  .sl-inline:has(input[name="sl-tv-mode"][value="switches"]:checked) .sl-if-tile { display: none; }
+  .sl-inline:not(:has(input[name="sl-tv-mode"][value="switches"]:checked)) .sl-if-switches { display: none; }
   .sl-way { border-top: 1px solid rgba(128,128,128,.2); padding-top: 10px; margin-top: 10px; }
   .sl-found { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
   .sl-found .sl-grow { flex: 1; min-width: 150px; } .sl-found input[type=checkbox] { width: 20px; height: 20px; flex: none; }
@@ -189,13 +191,15 @@
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
       phTitle: 'iPhone remote with keyboard (trial)',
-      phWhich: 'Which remote do you want on the iPhone?',
-      phWhichHome: 'Home remote', phWhichHomeNote: 'The remote of the TV tile. Arrows, no keyboard.',
-      phWhichBoth: 'Both (trial)', phWhichBothNote: 'The TV tile stays. A second name ending in "+" has the keyboard and touch pad.',
-      phWhichApple: 'Like Apple TV only (trial)', phWhichAppleNote: 'One name with keyboard and touch pad. The TV tile leaves Apple Home and becomes switches (power, mute, volume).',
+      phWhich: 'Do you want the remote with keyboard?',
+      phOffTile: 'No: the Home remote only', phOffSwitches: 'No: no remote',
+      phOffNoteTile: 'The remote of the TV tile. Arrows, no keyboard.', phOffNoteSwitches: 'Only the switches in Apple Home.',
+      phOnTile: 'Yes: add a second remote like Apple TV (trial)', phOnSwitches: 'Yes: a remote like Apple TV (trial)',
+      phOnNoteTile: 'The TV tile and its remote stay. A second name ending in "+" has the keyboard and touch pad.',
+      phOnNoteSwitches: 'One name in the remote list, with keyboard and touch pad.',
       phNote1: 'The iPhone keyboard opens when the TV opens one of its own text fields (TV search, settings, browser).',
       phNote2: 'Apps with their own keyboard, such as YouTube and Netflix, do not accept it.',
-      phNote3: 'Unofficial: it may stop working after an iOS update. Choosing "Home remote" removes everything it stored.',
+      phNote3: 'Unofficial: it may stop working after an iOS update. Choosing "No" removes everything it stored.',
       phStep1: 'Press Update below and restart the bridge.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
       phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinNote: 'Empty means 0000. Each device enters it once. Choose your own digits if others use your network.', phCode: 'Pairing code', phPhones: 'Phones paired',
       phRestart: 'Press Update and restart the bridge. The pairing code then appears here.',
@@ -320,13 +324,15 @@
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
       phTitle: 'ريموت الآيفون مع الكيبورد (تجريبي)',
-      phWhich: 'أي ريموت تريده على الآيفون؟',
-      phWhichHome: 'ريموت تطبيق المنزل', phWhichHomeNote: 'ريموت بطاقة التلفزيون. أسهم، دون كيبورد.',
-      phWhichBoth: 'الاثنان (تجريبي)', phWhichBothNote: 'بطاقة التلفزيون تبقى. واسم ثانٍ ينتهي بعلامة «+» فيه الكيبورد ولوحة اللمس.',
-      phWhichApple: 'مثل Apple TV فقط (تجريبي)', phWhichAppleNote: 'اسم واحد بالكيبورد ولوحة اللمس. بطاقة التلفزيون تخرج من Apple Home وتصير مفاتيح (تشغيل، كتم، صوت).',
+      phWhich: 'هل تريد الريموت الذي فيه كيبورد؟',
+      phOffTile: 'لا: ريموت تطبيق المنزل فقط', phOffSwitches: 'لا: دون ريموت',
+      phOffNoteTile: 'ريموت بطاقة التلفزيون. أسهم، دون كيبورد.', phOffNoteSwitches: 'المفاتيح في Apple Home فقط.',
+      phOnTile: 'نعم: أضف ريموتًا ثانيًا مثل Apple TV (تجريبي)', phOnSwitches: 'نعم: ريموت مثل Apple TV (تجريبي)',
+      phOnNoteTile: 'بطاقة التلفزيون وريموتها يبقيان. واسم ثانٍ ينتهي بعلامة «+» فيه الكيبورد ولوحة اللمس.',
+      phOnNoteSwitches: 'اسم واحد في قائمة الريموت، بالكيبورد ولوحة اللمس.',
       phNote1: 'يفتح كيبورد الآيفون حين يفتح التلفزيون إحدى خاناته (بحث التلفزيون، الإعدادات، المتصفح).',
       phNote2: 'التطبيقات التي لها كيبورد خاص، مثل YouTube و Netflix، لا تقبله.',
-      phNote3: 'الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. اختيار «ريموت تطبيق المنزل» يحذف كل ما حفظته.',
+      phNote3: 'الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. اختيار «لا» يحذف كل ما حفظته.',
       phStep1: 'اضغط «تحديث» في الأسفل ثم أعد تشغيل الجسر.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
       phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinNote: 'الخانة الفارغة تعني 0000. كل جهاز يدخله مرة واحدة. اختر أرقامك إن كان غيرك يستخدم شبكتك.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
       phRestart: 'اضغط «تحديث» ثم أعد تشغيل الجسر، وبعدها يظهر رمز الاقتران هنا.',
@@ -565,15 +571,16 @@
         <div class="sl-muted mt-1">${t('tvWake')}</div>
         ${p.tv.configured ? (() => {
           const ph = status.appleRemote?.[p.deviceId];
-          const which = existing?.appleRemote === true ? (mode === 'switches' ? 'apple' : 'both') : 'home';
-          const choice = (value, title, note) => `<label class="sl-choice">
-              <input type="radio" name="sl-tv-remote" value="${value}" ${which === value ? 'checked' : ''}> <strong>${t(title)}</strong>
-              <div class="sl-muted">${t(note)}</div></label>`;
+          const on = existing?.appleRemote === true;
+          // The answer above decides what each choice here means, so the two can never disagree.
+          const both = (key) => `<span class="sl-if-tile">${t(key + 'Tile')}</span><span class="sl-if-switches">${t(key + 'Switches')}</span>`;
+          const choice = (value, key) => `<label class="sl-choice">
+              <input type="radio" name="sl-tv-remote" value="${value}" ${on === (value === 'on') ? 'checked' : ''}> <strong>${both(key)}</strong>
+              <div class="sl-muted">${both(key + 'Note')}</div></label>`;
           return `<div class="sl-group mt-3"><div class="sl-group-title">${t('phTitle')}</div>
             <div class="mb-1">${t('phWhich')}</div>
-            ${choice('home', 'phWhichHome', 'phWhichHomeNote')}
-            ${choice('both', 'phWhichBoth', 'phWhichBothNote')}
-            ${choice('apple', 'phWhichApple', 'phWhichAppleNote')}
+            ${choice('off', 'phOff')}
+            ${choice('on', 'phOn')}
             <ul class="sl-muted mb-2" style="padding-inline-start:1.2em"><li>${t('phNote1')}</li><li>${t('phNote2')}</li><li>${t('phNote3')}</li></ul>
             <div class="mt-2"><label class="mb-0" for="sl-tv-pin">${t('phPin')}</label>
               <input id="sl-tv-pin" class="form-control form-control-sm" dir="ltr" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" style="max-width:8em" value="${esc(/^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '')}">
@@ -648,10 +655,7 @@
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
       const remoteChoice = box.querySelector('[name="sl-tv-remote"]:checked')?.value;
-      if (remoteChoice) {
-        entry.appleRemote = remoteChoice !== 'home';
-        if (remoteChoice === 'apple') { entry.tvMode = 'switches'; } // one remote: no TV tile, so no second name
-      }
+      if (remoteChoice) { entry.appleRemote = remoteChoice === 'on'; }
       if ($('sl-tv-pin')) { if (/^\d{4}$/.test($('sl-tv-pin').value.trim())) { entry.appleRemotePin = $('sl-tv-pin').value.trim(); } else { delete entry.appleRemotePin; } }
       done();
       await change(() => {
