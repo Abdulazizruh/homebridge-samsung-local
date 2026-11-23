@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.10
+
+Trial version on the "beta" channel. Same as beta.9, plus:
+
+- **Doubled letters, second attempt.** A trial showed that the TV replaces its field correctly, so the doubling comes from how the iPhone words its typing: it appears to send the whole word with every letter, and once more when the word is settled. Once the plugin sees that, the word replaces its own beginning instead of being added again. Not yet confirmed on a real iPhone; the log lines of beta.9 stay to show it.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.9، ومعها:
+
+- **تكرار الحروف، المحاولة الثانية.** أظهرت تجربة أن التلفزيون يستبدل خانته صحيحًا، فالتكرار يأتي من طريقة الآيفون في إرسال الكتابة: يبدو أنه يرسل الكلمة كلها مع كل حرف، ومرة أخرى حين تستقر الكلمة. حين ترى الإضافة ذلك تضع الكلمة مكان بدايتها بدل أن تضيفها من جديد. لم يتأكد بعد على آيفون حقيقي؛ وأسطر السجل من beta.9 باقية لتبيّنه.
+
 ## 1.4.0-beta.9
 
 Trial version on the "beta" channel. Same as beta.8, plus:

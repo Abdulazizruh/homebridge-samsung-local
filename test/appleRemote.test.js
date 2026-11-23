@@ -211,3 +211,14 @@ test('pairing code: 0000 unless the owner chose four digits, and changing it kee
   assert.equal(second.seed, first.seed);
   assert.deepEqual(second.clients, { phone: 'aa' });
 });
+
+test('an iPhone keyboard that sends the whole word with every letter: nothing is doubled, real double letters stay', async () => {
+  const { applyWholeWord, overlap } = await import('../src/appleRemote/rti.js');
+  assert.equal(overlap('ه', 'هل'), 1);
+  assert.equal(overlap('ha ', 'ha'), 0);
+  let text = '';
+  for (const word of ['ه', 'هل', 'هلا', 'هلا']) { text = applyWholeWord(text, word); } // the last one settles the word
+  assert.equal(text, 'هلا');
+  for (const part of [' ', 'h', 'he', 'hel', 'hell', 'hello', 'hello']) { text = applyWholeWord(text, part); }
+  assert.equal(text, 'هلا hello');
+});

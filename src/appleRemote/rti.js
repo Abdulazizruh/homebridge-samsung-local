@@ -49,3 +49,23 @@ export function applyEdit(text, edit, max = 1024) {
   if (edit.insert) { chars = chars.concat(Array.from(edit.insert)); }
   return chars.slice(0, max).join('');
 }
+
+/** How many characters at the end of `text` are also the start of `insert` (the longest such run). */
+export function overlap(text, insert) {
+  const t = Array.from(text ?? ''); const i = Array.from(insert ?? '');
+  for (let k = Math.min(t.length, i.length); k > 0; k -= 1) {
+    if (t.slice(t.length - k).join('') === i.slice(0, k).join('')) { return k; }
+  }
+  return 0;
+}
+
+/**
+ * Some iPhone keyboards send, with every letter, the whole word typed so far
+ * (and once more when the word is settled) instead of the one new letter.
+ * Read that way, the word replaces its own beginning at the end of the field.
+ */
+export function applyWholeWord(text, insert, max = 1024) {
+  const chars = Array.from(text ?? '');
+  const k = overlap(text, insert);
+  return chars.slice(0, chars.length - k).concat(Array.from(insert)).slice(0, max).join('');
+}

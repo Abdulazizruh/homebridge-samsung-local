@@ -14,7 +14,7 @@ import srp from 'fast-srp-hap';
 import { pack, unpack } from './opack.js';
 import { Tlv, TlvError, readTlv, writeTlv } from './tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer, verify } from './crypto.js';
-import { applyEdit, documentState, readEdit } from './rti.js';
+import { applyEdit, applyWholeWord, documentState, overlap, readEdit } from './rti.js';
 import { PHASE, Swipes } from './gestures.js';
 
 const { SRP, SrpServer } = srp;
@@ -357,7 +357,17 @@ const HANDLERS = {
     if (!this.rti.registered || !this.rti.open || !this.server.keyboardOpen) { return; } // no field is open
     const edit = readEdit(c._tiD);
     const before = this.server.text;
-    const text = applyEdit(before, edit);
+    let text = applyEdit(before, edit);
+    const plain = edit.insert && !edit.remove && edit.assert === null; // only letters added
+    if (plain && !this.server.wholeWords) {
+      // Seen once, it is how this phone types: the added part is the word so far plus one letter.
+      const length = Array.from(edit.insert).length;
+      if (length >= 2 && overlap(before, edit.insert) === length - 1) {
+        this.server.wholeWords = true;
+        this.server.log.info(`[${this.server.name}] this iPhone keyboard sends the whole word with every letter; typing is now read that way.`);
+      }
+    }
+    if (plain && this.server.wholeWords) { text = applyWholeWord(before, edit.insert); }
     // Trial: the shape of each edit, in lengths only and never the text, to see how a real iPhone words its typing.
     this.edits = (this.edits ?? 0) + 1;
     if (this.edits <= 60) {
