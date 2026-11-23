@@ -148,8 +148,7 @@ test('iPhone remote: pairs with the code once, then buttons, swipes and typed te
   await new Promise((r) => setTimeout(r, 80));
   server.setKeyboard(true);
   await again.event('_tiStarted');
-  server.setFieldText('مكة'); // the TV says the new field already holds a word
-  again.typed({ insert: ' 2026' });
+  again.typed({ insert: 'مكة 2026' }); // a new field starts empty
   await until(() => seen.texts.length === 5);
 
 
@@ -179,4 +178,19 @@ test('iPhone remote: edits count whole characters; a short touch is Select and a
   s.feed('press', 500, 500); assert.equal(s.feed('release', 510, 505), 'SELECT');
   s.feed('press', 500, 800); assert.equal(s.feed('release', 520, 300), 'UP');
   s.feed('press', 500, 500); assert.equal(s.feed('release', 650, 640), null, 'a diagonal is no clear direction');
+});
+
+test('touch area as a pointer: movements become steps and a short touch is a click', async () => {
+  const { Pointer } = await import('../src/appleRemote/gestures.js');
+  let clock = 0;
+  const p = new Pointer(() => clock);
+  assert.equal(p.feed('press', 500, 500), null);
+  clock = 900; // a slow, small movement
+  assert.deepEqual(p.feed('hold', 510, 495), { dx: 16, dy: -8 });
+  assert.deepEqual(p.feed('release', 520, 495), { dx: 16, dy: 0 });
+  assert.equal(p.feed('hold', 600, 600), null, 'nothing without a finger down');
+  p.feed('press', 100, 100);
+  clock += 120;
+  assert.equal(p.feed('release', 103, 101), 'CLICK');
+  assert.equal(p.feed('click', 0, 0), 'CLICK');
 });

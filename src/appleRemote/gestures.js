@@ -25,3 +25,27 @@ export class Swipes {
     return ay < ax * DOMINANT ? null : dy > 0 ? 'DOWN' : 'UP';
   }
 }
+
+/**
+ * The other way to read the touch area: as a trackpad. Every finger movement
+ * becomes a small step of the TV's pointer and a tap becomes a click.
+ */
+const GAIN = 1.6; // touch area units to TV pointer units
+
+const TAP_MS = 300; // a slow small movement is a movement, never a click
+
+export class Pointer {
+  constructor(now = Date.now) { this.last = null; this.travel = 0; this.now = now; }
+
+  /** Returns { dx, dy } | 'CLICK' | null. */
+  feed(phase, x, y) {
+    if (phase === 'click') { this.last = null; return 'CLICK'; }
+    if (phase === 'press') { this.last = { x, y }; this.travel = 0; this.since = this.now(); return null; }
+    if (!this.last) { return null; }
+    const dx = x - this.last.x; const dy = y - this.last.y;
+    this.last = phase === 'release' ? null : { x, y };
+    this.travel += Math.abs(dx) + Math.abs(dy);
+    if (phase === 'release' && this.travel <= TAP_MAX && this.now() - this.since <= TAP_MS) { return 'CLICK'; }
+    return dx || dy ? { dx: dx * GAIN, dy: dy * GAIN } : null;
+  }
+}

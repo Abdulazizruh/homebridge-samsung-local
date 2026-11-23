@@ -6,6 +6,8 @@ const SCREEN_PORT = 9197;
 // The remote channel stays open this long after the last key, so the next
 // press goes out at once instead of waiting for a new secure connection.
 const REMOTE_IDLE_MS = 5 * 60_000;
+const POINTER_STEP_MS = 40; // pointer steps are sent at most this often
+const POINTER_SHOWN_MS = 4000; // a tap is a click only while the pointer was moved this recently
 const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
 const INPUTS = [
   { id: 1, name: 'TV', key: 'KEY_TV' },
@@ -54,7 +56,7 @@ export class TvAccessory {
     this.remote = new TizenRemote({
       host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken, idleMs: REMOTE_IDLE_MS,
       onKeyboard: (open) => this.#keyboard(open),
-      onFieldText: (text) => this.phone?.setFieldText(text),
+      onFieldLength: (length) => { this.fieldLength = length; },
     });
     this.keyboardOpen = false;
     this.phone = null; // the iPhone-remote stand-in, when the option is on
@@ -81,7 +83,10 @@ export class TvAccessory {
     this.keyboardOpen = open;
     this.typing = null; // typing meant for the field that just closed never reaches the next one
     const sent = this.typedCount ?? 0;
+    const lengths = sent && Number.isInteger(this.fieldLength) ? ` The last text sent had ${this.typedLength} character${this.typedLength === 1 ? '' : 's'}; the TV last reported ${this.fieldLength}.` : '';
     this.typedCount = 0;
+    this.typedLength = 0;
+    this.fieldLength = null;
     const shown = open && this.phone ? this.phone.setKeyboard(true) : 0;
     if (!open) {
       this.phone?.setKeyboard(false);
@@ -89,17 +94,20 @@ export class TvAccessory {
     // Three separate facts, so a trial shows where the path stops: the TV's event, the iPhone keyboard, the text.
     this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`
       + (open && this.phone ? ` iPhone keyboard asked to open on ${shown} remote${shown === 1 ? '' : 's'}.` : '')
-      + (!open && this.phone ? ` Typed text was sent to the TV ${sent} time${sent === 1 ? '' : 's'}.` : ''));
+      + (!open && this.phone ? ` Typed text was sent to the TV ${sent} time${sent === 1 ? '' : 's'}.${lengths}` : ''));
   }
 
   /**
    * Trial: show this TV to the iPhone's own remote as an Apple TV, so the
    * iPhone keyboard can type into the TV's text fields.
    */
-  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true }) {
+  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, touch = 'arrows' }) {
     this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise });
     const phone = await this.appleRemote.start();
     this.phone = phone;
+    phone.touch = touch === 'pointer' ? 'pointer' : 'arrows';
+    phone.on('move', (dx, dy) => this.#move(dx, dy));
+    phone.on('click', () => this.#click());
     phone.awake = this.on;
     phone.on('key', (code) => this.#press(code, 'iPhone remote key').catch(() => {}));
     phone.on('power', (want) => this.#setPower(want === 'toggle' ? !this.on : want).catch(() => {}));
@@ -112,6 +120,33 @@ export class TvAccessory {
       }
     });
     return phone;
+  }
+
+  /** Finger movements arrive many times a second; they are added up and sent as one step at a time. */
+  #move(dx, dy) {
+    this.step = { dx: (this.step?.dx ?? 0) + dx, dy: (this.step?.dy ?? 0) + dy };
+    this.pointerAt = Date.now();
+    if (this.stepTimer || !this.on) {
+      return;
+    }
+    this.stepTimer = setTimeout(() => {
+      this.stepTimer = null;
+      const { dx: x, dy: y } = this.step;
+      this.step = null;
+      if (Math.round(x) || Math.round(y)) {
+        this.remote.move(x, y).catch(() => {});
+      }
+    }, POINTER_STEP_MS);
+    this.stepTimer.unref?.();
+  }
+
+  /** A tap clicks where the pointer is. With no pointer on screen (it was not moved lately), it is the OK key. */
+  #click() {
+    if (Date.now() - (this.pointerAt ?? 0) < POINTER_SHOWN_MS) {
+      this.remote.click().catch(() => {});
+    } else {
+      this.#press('KEY_ENTER', 'iPhone remote key').catch(() => {});
+    }
   }
 
   /** The newest text wins: what is on the iPhone is what the field should hold. */
@@ -130,6 +165,7 @@ export class TvAccessory {
         }
         await this.remote.text(next);
         this.typedCount = (this.typedCount ?? 0) + 1;
+        this.typedLength = Array.from(next).length;
       }
     } catch (err) {
       this.log.warn(`[${this.displayName}] typing from the iPhone did not reach the TV: ${err.message}`);

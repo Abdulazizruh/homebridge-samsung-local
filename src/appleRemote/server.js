@@ -15,7 +15,7 @@ import { pack, unpack } from './opack.js';
 import { Tlv, TlvError, readTlv, writeTlv } from './tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer, verify } from './crypto.js';
 import { applyEdit, documentState, readEdit } from './rti.js';
-import { PHASE, Swipes } from './gestures.js';
+import { PHASE, Pointer, Swipes } from './gestures.js';
 
 const { SRP, SrpServer } = srp;
 const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPACK: 8 };
@@ -48,6 +48,8 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
+    this.pointer = new Pointer();
+    this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
     this.lastSelect = 0;
     this.deadline = setTimeout(() => { if (!this.keys) { this.close(); } }, AUTH_DEADLINE_MS);
@@ -60,6 +62,12 @@ class Connection {
 
   #gone() {
     clearTimeout(this.deadline);
+    // A phone that proved itself and left without ever opening the remote: said once a minute at most, to explain a remote that hangs.
+    const s = this.server;
+    if (this.verified && !this.opened && Date.now() - (s.lastLeft ?? 0) > 60_000) {
+      s.lastLeft = Date.now();
+      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote.`);
+    }
     this.server.forget(this);
   }
 
@@ -112,7 +120,14 @@ class Connection {
     if (!message || typeof message !== 'object') { return; }
     if (typeof message._i !== 'string') { return; } // a reply to one of our events
     const handler = HANDLERS[message._i.toLowerCase()];
-    if (handler) { handler.call(this, message, message._c ?? {}); } else { this.error(message, 'No request handler', 58822); }
+    if (handler) { handler.call(this, message, message._c ?? {}); return; }
+    this.error(message, 'No request handler', 58822);
+    const asked = (this.server.unanswered ??= new Set());
+    const name = message._i.slice(0, 60).replace(/[^\w.-]/g, '?');
+    if (asked.size < 30 && !asked.has(name)) { // each name once: these are Apple's request names, never content
+      asked.add(name);
+      this.server.log.info(`[${this.server.name}] iPhone remote asked for something this plugin does not answer: ${name}.`);
+    }
   }
 
   send(type, data) {
@@ -237,12 +252,22 @@ class Connection {
     this.send(FRAME.PV_Next, { _pd: writeTlv([[Tlv.SeqNo, [4]]]) });
     this.keys = { out: pv.out, in: pv.in };
     this.verified = id.toString('utf8');
+    this.verifiedMs = Date.now() - this.born;
     this.pv = null;
     clearTimeout(this.deadline);
   }
 
   // ---- what the remote does
+  click() {
+    // A tap arrives both as a touch and as a button; one click on the TV is meant.
+    const now = Date.now();
+    if (now - this.lastSelect < SELECT_REPEAT_MS) { return; }
+    this.lastSelect = now;
+    this.server.emit('click');
+  }
+
   key(name) {
+    if (name === 'KEY_ENTER' && this.server.touch === 'pointer') { this.click(); return; }
     if (name === 'KEY_ENTER') {
       // A tap arrives both as a touch and as a button; one press on the TV is meant.
       const now = Date.now();
@@ -277,6 +302,8 @@ const HANDLERS = {
   _sessionstop: ok,
   tvrcsessionstart(message, c) {
     this.remote = true;
+    this.opened = true;
+    this.server.log.info(`[${this.server.name}] iPhone remote opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms.`);
     this.server.sessionsChanged();
     this.reply(message, c);
     this.flags(message._x); // within a moment, or the iPhone keeps the volume buttons for itself
@@ -302,7 +329,14 @@ const HANDLERS = {
   },
   _touchstop: ok,
   _hidt(message, c) {
-    const direction = this.swipes.feed(PHASE[Number(c._tPh)], Number(c._cx ?? 0), Number(c._cy ?? 0));
+    const phase = PHASE[Number(c._tPh)]; const x = Number(c._cx ?? 0); const y = Number(c._cy ?? 0);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) { return; }
+    if (this.server.touch === 'pointer') {
+      const step = this.pointer.feed(phase, x, y);
+      if (step === 'CLICK') { this.click(); } else if (step) { this.server.emit('move', step.dx, step.dy); }
+      return;
+    }
+    const direction = this.swipes.feed(phase, x, y);
     if (direction) { this.key(SWIPE_KEYS[direction]); }
   },
   _mcc(message, c) {
@@ -350,6 +384,7 @@ const HANDLERS = {
  * One stand-in per TV.
  * Events: 'key' (a Samsung key name), 'power' (true, false or 'toggle'),
  * 'text' (the whole text of the field), 'sessions' (how many remotes are open),
+ * 'move' (pointer step dx, dy) and 'click' when `touch` is 'pointer',
  * 'paired' (the phone's identifier).
  */
 export class CompanionServer extends EventEmitter {
@@ -365,6 +400,7 @@ export class CompanionServer extends EventEmitter {
     this.connections = new Set();
     this.wrongCodes = 0;
     this.keyboardOpen = false;
+    this.touch = 'arrows'; // or 'pointer'
     this.text = '';
     this.awake = true;
     this.tcp = net.createServer((socket) => {
@@ -409,10 +445,4 @@ export class CompanionServer extends EventEmitter {
     return shown; // how many remotes were asked to show the iPhone keyboard
   }
 
-  /** The TV said what its open field holds; typing continues from there. Our own typing coming back changes nothing. */
-  setFieldText(text) {
-    if (this.keyboardOpen && typeof text === 'string' && text !== this.text) {
-      this.text = Array.from(text).slice(0, 1024).join('');
-    }
-  }
 }

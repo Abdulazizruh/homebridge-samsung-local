@@ -84,8 +84,8 @@ export function wake(mac, { address = '255.255.255.255', port = 9, repeat = 3 } 
  * short idle time, so the TV is not kept awake by an open connection.
  */
 export class TizenRemote {
-  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null, onFieldText = null }) {
-    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard, onFieldText });
+  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null, onFieldLength = null }) {
+    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard, onFieldLength });
     this.socket = null;
     this.opening = null;
     this.idleTimer = null;
@@ -124,13 +124,15 @@ export class TizenRemote {
         // The TV says when its on-screen keyboard opens and closes. Only the
         // fact is passed on, never what is typed.
         if (msg.event === 'ms.remote.imeStart' || msg.event === 'ms.remote.imeEnd') {
+          this.textAnnounced = false; // every keyboard session starts with the announcement again
           this.onKeyboard?.(msg.event === 'ms.remote.imeStart');
           return;
         }
-        // Some TVs also say what the field already holds (as base64 text).
+        // Some TVs also say what the field holds (as base64 text). Only its length is
+        // passed on, for the log: what we typed coming back must never be typed again.
         if (msg.event === 'ms.remote.imeUpdate') {
           if (typeof msg.data === 'string' && msg.data.length <= 8192 && /^[A-Za-z0-9+/]*={0,2}$/.test(msg.data)) {
-            this.onFieldText?.(Buffer.from(msg.data, 'base64').toString('utf8'));
+            this.onFieldLength?.(Array.from(Buffer.from(msg.data, 'base64').toString('utf8')).length);
           }
           return;
         }
@@ -146,6 +148,7 @@ export class TizenRemote {
           socket.on('error', () => {});
           socket.on('close', () => { if (this.socket === socket) { this.socket = null; this.onKeyboard?.(false); } });
           this.socket = socket;
+          this.textAnnounced = false;
           resolve();
         } else if (msg.event === 'ms.channel.unauthorized') {
           fail('tv_denied', 'The TV refused the connection. Allow it on the TV screen, or remove the old entry under Settings → General → External Device Manager → Device Connection Manager.');
@@ -180,17 +183,38 @@ export class TizenRemote {
     }
   }
 
-  #send(params) {
-    return new Promise((resolve, reject) => this.socket.send(JSON.stringify({ method: 'ms.remote.control', params }), (err) => (err ? reject(err) : resolve())));
+  #send(params, method = 'ms.remote.control') {
+    return new Promise((resolve, reject) => this.socket.send(JSON.stringify({ method, params }), (err) => (err ? reject(err) : resolve())));
+  }
+
+  /** Move the TV's on-screen pointer by a small step. */
+  async move(dx, dy) {
+    await this.open();
+    this.#touch();
+    await this.#send({ Cmd: 'Move', Position: { x: Math.round(dx), y: Math.round(dy), Time: '0' }, TypeOfRemote: 'ProcessMouseDevice' });
+  }
+
+  /** Click where the pointer is. */
+  async click() {
+    await this.open();
+    this.#touch();
+    await this.#send({ Cmd: 'LeftClick', TypeOfRemote: 'ProcessMouseDevice' });
   }
 
   /**
    * Put text into the field the TV's on-screen keyboard is open on. The whole
-   * text is sent each time; `done` then closes the keyboard.
+   * text is sent each time and replaces what the field holds; `done` then
+   * closes the keyboard. Before the first text of a keyboard session the TV is
+   * told that text is coming, as samsungtvws and atvr4samsung (both MIT) do:
+   * without it some TVs add each text to the field instead of replacing it.
    */
   async text(value, { done = false } = {}) {
     await this.open();
     this.#touch();
+    if (!this.textAnnounced) {
+      await this.#send({ event: 'custom.remote.textReceived', to: 'broadcast' }, 'ms.channel.emit');
+      this.textAnnounced = true;
+    }
     await this.#send({ Cmd: Buffer.from(String(value), 'utf8').toString('base64'), DataOfCmd: 'base64', TypeOfRemote: 'SendInputString' });
     if (done) {
       await this.#send({ TypeOfRemote: 'SendInputEnd' });

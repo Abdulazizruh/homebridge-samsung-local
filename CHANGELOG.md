@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.5
+
+Trial version on the "beta" channel. iPhone remote with keyboard, after the first trial on a real TV:
+
+- **Doubled letters.** Before the first text of each keyboard session the TV is now told that text is coming, as the reference libraries do. And what the TV says back about its field is never fed into the typing again; only its length goes to the log. Not yet confirmed on a real TV.
+- **Pointer instead of arrows (option).** Under the TV's options, "Touch area of the remote" can be set to "Pointer": the finger moves the TV's pointer and a tap clicks. A tap with no pointer on screen is still the OK key. Not yet tried on a real TV.
+- **Slow or failed opening of the remote.** The log now says how long the phone took to prove itself and how long until the remote was ready, when a phone left without opening the remote, and the name of any request the plugin does not answer. Never any content.
+- When a field closes, the log also gives the length of the last text sent and the length the TV last reported.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». ريموت الآيفون مع الكيبورد، بعد أول تجربة على تلفزيون حقيقي:
+
+- **تكرار الحروف.** قبل أول نص في كل جلسة كيبورد تُبلَّغ الشاشة أن نصًا قادم، كما تفعل المكتبات المرجعية. وما تردّه الشاشة عن خانتها لا يعود إلى الكتابة أبدًا؛ طوله فقط يُكتب في السجل. لم يتأكد بعد على تلفزيون حقيقي.
+- **مؤشر بدل الأسهم (خيار).** في خيارات التلفزيون، «منطقة اللمس في الريموت» تقبل «مؤشر»: الإصبع يحرك مؤشر التلفزيون واللمسة تنقر. واللمسة حين لا يظهر مؤشر تبقى زر «موافق». لم يُجرَّب بعد على تلفزيون حقيقي.
+- **بطء فتح الريموت أو فشله.** السجل يذكر الآن كم استغرق الجوال ليثبت هويته وكم مضى حتى جهز الريموت، ومتى غادر جوال دون فتح الريموت، واسم أي طلب لا تجيب عنه الإضافة. ولا يُكتب أي محتوى.
+- عند إغلاق الخانة يذكر السجل طول آخر نص أُرسل والطول الذي ذكرته الشاشة آخر مرة.
+
 ## 1.4.0-beta.4
 
 Trial version on the "beta" channel. Same as beta.3, plus what is new in 1.3.4: the log says where a failed connection stopped, and the plugin waits five seconds after start before asking the first appliance.
