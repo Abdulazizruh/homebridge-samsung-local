@@ -215,6 +215,12 @@
                 }
               ]
             },
+            "appleRemote": {
+              "title": "iPhone remote with keyboard (trial)",
+              "type": "boolean",
+              "default": false,
+              "description": "Shows this TV to the iPhone's own remote in Control Centre as an Apple TV, so the iPhone keyboard can type into the TV. Unofficial and may stop working after an iOS update."
+            },
             "model": {
               "title": "Model",
               "type": "string"

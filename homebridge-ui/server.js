@@ -67,6 +67,9 @@ class UiServer extends HomebridgePluginUiServer {
       arch: process.arch,
       devices: listSnapshots(this.paths).map((snap) => this.present(snap)),
       tvSetup: this.tvSetup(),
+      // Pairing code of each TV shown to the iPhone remote, and how many phones are paired.
+      appleRemote: Object.fromEntries(Object.entries(readJson(this.paths.appleRemote) ?? {})
+        .map(([id, v]) => [id, { pin: String(v?.pin ?? ''), phones: Object.keys(v?.clients ?? {}).length }])),
     };
   }
 

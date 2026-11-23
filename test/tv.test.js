@@ -42,6 +42,7 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
   });
   await new Promise((r) => { web.listen(0, '127.0.0.1', r); });
   tv.ports = { httpPort: web.address().port, wsPort: wss.address().port, secure: false };
+  tv.say = (event) => { for (const c of wss.clients) { c.send(JSON.stringify({ event })); } };
   tv.close = () => { web.close(); for (const c of wss.clients) { c.terminate(); } wss.close(); };
   return tv;
 }
@@ -73,11 +74,11 @@ test('TV: a refusal on the TV screen is reported as such', async (t) => {
   await assert.rejects(() => remote.key('KEY_MUTE'), { code: 'tv_denied' });
 });
 
-async function bootTv(tv, tvMode, storage = tmpDir()) {
+async function bootTv(tv, tvMode, storage = tmpDir(), extra = {}) {
   const api = makeApi(storage);
   const platform = new SamsungLocalPlatform(quietLog,
-    { platform: PLATFORM_NAME, devices: [{ host: '127.0.0.1', id: 'tv-tv-test-1', type: 'tv', tvMode, name: 'Majlis TV' }] }, api,
-    { tv: { ports: tv.ports, pollMs: 60 }, createHelper: () => { throw new Error('a TV must not need the Python helper'); } });
+    { platform: PLATFORM_NAME, devices: [{ host: '127.0.0.1', id: 'tv-tv-test-1', type: 'tv', tvMode, name: 'Majlis TV', ...extra }] }, api,
+    { tv: { ports: tv.ports, pollMs: 60 }, appleRemote: { advertise: false }, createHelper: () => { throw new Error('a TV must not need the Python helper'); } });
   await platform.start();
   return { api, platform, storage };
 }
@@ -220,4 +221,33 @@ test('TV keyboard: the TV says when its keyboard opens and closes, and a whole A
   assert.deepEqual(tv.texts, ['مكة 2026', 'مكة 2026', '<end>']);
   assert.deepEqual(seen, [true, false]);
   assert.deepEqual(tv.keys, []);
+});
+
+test('iPhone remote option: its keys and typed text reach the TV, the TV keyboard reaches the phone, and switching it off leaves no file', async (t) => {
+  const tv = await fakeTv();
+  const storage = tmpDir();
+  const { platform } = await bootTv(tv, 'tile', storage, { appleRemote: true });
+  t.after(() => tv.close());
+  const handler = platform.tvs[0];
+  await waitFor(() => handler.phone && handler.on);
+  const file = pluginPaths(storage).appleRemote;
+  assert.match(readJson(file)['tv-tv-test-1'].pin, /^\d{4}$/);
+
+  handler.phone.emit('sessions', 1); // a remote was opened on an iPhone
+  await waitFor(() => tv.tokens.length > 0);
+  tv.say('ms.remote.imeStart');
+  await waitFor(() => handler.phone.keyboardOpen);
+  handler.phone.emit('key', 'KEY_DOWN');
+  handler.phone.emit('text', 'مك');
+  handler.phone.emit('text', 'مكة');
+  await waitFor(() => tv.texts.includes('مكة') && tv.keys.length === 1);
+  assert.deepEqual(tv.keys, ['KEY_DOWN']);
+  assert.equal(tv.texts.at(-1), 'مكة');
+  tv.say('ms.remote.imeEnd');
+  await waitFor(() => !handler.phone.keyboardOpen);
+  await platform.stop();
+
+  const second = await bootTv(tv, 'tile', storage); // option off
+  await second.platform.stop();
+  assert.equal(readJson(file), null);
 });

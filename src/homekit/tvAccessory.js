@@ -1,4 +1,5 @@
 import { TizenRemote, tvInfo, wake } from '../tv/tizenClient.js';
+import { AppleRemote } from '../appleRemote/bridge.js';
 
 const POLL_MS = 4000;
 // The remote channel stays open this long after the last key, so the next
@@ -48,8 +49,10 @@ export class TvAccessory {
     this.services = new Map();
     this.remote = new TizenRemote({
       host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken, idleMs: REMOTE_IDLE_MS,
-      onKeyboard: (open) => this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`),
+      onKeyboard: (open) => this.#keyboard(open),
     });
+    this.keyboardOpen = false;
+    this.phone = null; // the iPhone-remote stand-in, when the option is on
     if (mode === 'tile') {
       this.#buildTile();
     } else {
@@ -63,6 +66,58 @@ export class TvAccessory {
   stop() {
     clearInterval(this.timer);
     this.remote.close();
+    this.appleRemote?.stop().catch(() => {});
+  }
+
+  #keyboard(open) {
+    if (open === this.keyboardOpen) {
+      return;
+    }
+    this.keyboardOpen = open;
+    this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`);
+    this.phone?.setKeyboard(open);
+  }
+
+  /**
+   * Trial: show this TV to the iPhone's own remote as an Apple TV, so the
+   * iPhone keyboard can type into the TV's text fields.
+   */
+  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true }) {
+    this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise });
+    const phone = await this.appleRemote.start();
+    this.phone = phone;
+    phone.awake = this.on;
+    phone.on('key', (code) => this.#press(code, 'iPhone remote key').catch(() => {}));
+    phone.on('power', (want) => this.#setPower(want === 'toggle' ? !this.on : want).catch(() => {}));
+    phone.on('text', (text) => this.#type(text));
+    phone.on('sessions', (count) => {
+      // The TV tells only a listener that its keyboard opened, so the channel is kept while a remote is open.
+      this.remote.hold(count > 0);
+      if (count > 0 && this.on) {
+        this.remote.open().catch(() => {});
+      }
+    });
+    return phone;
+  }
+
+  /** The newest text wins: what is on the iPhone is what the field should hold. */
+  async #type(text) {
+    this.typing = text;
+    if (this.typingNow) {
+      return;
+    }
+    this.typingNow = true;
+    try {
+      while (this.typing !== null && this.typing !== undefined) {
+        const next = this.typing;
+        this.typing = null;
+        await this.remote.text(next);
+      }
+    } catch (err) {
+      this.log.warn(`[${this.displayName}] typing from the iPhone did not reach the TV: ${err.message}`);
+    } finally {
+      this.typingNow = false;
+    }
   }
 
   async poll() {
@@ -97,6 +152,12 @@ export class TvAccessory {
         return;
       }
       this.holdUntil = 0;
+    }
+    if (this.phone) {
+      this.phone.awake = on;
+      if (on && this.phone.sessions > 0) {
+        this.remote.open().catch(() => {}); // keep listening for the keyboard while a remote is open
+      }
     }
     if (on !== this.on) {
       this.on = on;

@@ -184,6 +184,12 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
+      phTitle: 'iPhone remote with keyboard (trial)',
+      phOn: 'Show this TV in the iPhone remote as an Apple TV',
+      phNote: 'The remote in Control Centre then opens the iPhone keyboard when the TV opens a text field, and what you type appears on the TV. Your TV tile in Apple Home stays as it is; this adds a second name in the remote list. Unofficial: it may stop working after an iOS update. Switching it off removes everything it stored.',
+      phStep1: 'Press Update below and restart the bridge.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
+      phStep3: 'Enter this code on the iPhone, once.', phCode: 'Pairing code', phPhones: 'Phones paired',
+      phRestart: 'Press Update and restart the bridge. The pairing code then appears here.',
       kbTitle: 'Keyboard trial (beta)',
       kbNote: 'Open a search field on the TV so its on-screen keyboard shows, then send a text from here. This trial tells us which apps accept typing from outside. Nothing is stored, and the text is not written to the log.',
       kbPlaceholder: 'Text to send', kbSend: 'Send to the TV', kbDone: 'Close the TV keyboard after sending', kbEmpty: 'Enter a text first',
@@ -304,6 +310,12 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
+      phTitle: 'ريموت الآيفون مع الكيبورد (تجريبي)',
+      phOn: 'أظهر هذا التلفزيون في ريموت الآيفون كأنه Apple TV',
+      phNote: 'عندها يفتح الريموت في مركز التحكم كيبورد الآيفون حين يفتح التلفزيون خانة كتابة، وما تكتبه يظهر على التلفزيون. بطاقة التلفزيون في Apple Home تبقى كما هي؛ ويُضاف اسم ثانٍ في قائمة الريموت. الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. إطفاء الخيار يحذف كل ما حفظه.',
+      phStep1: 'اضغط «تحديث» في الأسفل ثم أعد تشغيل الجسر.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
+      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
+      phRestart: 'اضغط «تحديث» ثم أعد تشغيل الجسر، وبعدها يظهر رمز الاقتران هنا.',
       kbTitle: 'تجربة الكيبورد (نسخة تجريبية)',
       kbNote: 'افتح خانة بحث على التلفزيون حتى يظهر كيبورد الشاشة، ثم أرسل نصًا من هنا. هذه التجربة تبيّن أي التطبيقات تقبل الكتابة من الخارج. لا يُحفظ شيء، ولا يُكتب النص في السجل.',
       kbPlaceholder: 'النص المراد إرساله', kbSend: 'إرسال إلى التلفزيون', kbDone: 'أغلق كيبورد التلفزيون بعد الإرسال', kbEmpty: 'اكتب نصًا أولًا',
@@ -537,6 +549,17 @@
           <div class="mt-1"><label class="mb-0"><input type="radio" name="sl-tv-mode" value="switches" ${mode === 'switches' ? 'checked' : ''}> ${t('tvModeSwitches')}</label>
             <div class="sl-muted">${t('tvModeSwitchesNote')}</div></div></div>
         <div class="sl-muted mt-1">${t('tvWake')}</div>
+        ${p.tv.configured ? (() => {
+          const ph = status.appleRemote?.[p.deviceId];
+          return `<div class="mt-3"><strong>${t('phTitle')}</strong>
+            <div><label class="mb-0"><input type="checkbox" id="sl-tv-phone" ${existing?.appleRemote === true ? 'checked' : ''}> ${t('phOn')}</label></div>
+            <div class="sl-muted">${t('phNote')}</div>
+            ${existing?.appleRemote === true ? (ph?.pin ? `<div class="alert alert-info mt-2 mb-0">
+                <ol class="mb-1">${[1, 2, 3].map((n) => `<li>${t('phStep' + n).replace('{name}', `<strong>${esc((existing.name || 'Samsung TV') + ' +')}</strong>`)}</li>`).join('')}</ol>
+                <div>${t('phCode')}: <strong dir="ltr" style="font-size:1.4em;letter-spacing:.15em">${esc(ph.pin)}</strong></div>
+                <div class="sl-muted">${t('phPhones')}: <span dir="ltr">${ph.phones}</span></div></div>`
+              : `<div class="sl-pill sl-warn mt-1">${t('phRestart')}</div>`) : ''}</div>`;
+        })() : ''}
         <button class="btn btn-success mt-2" id="sl-add-tv" ${ready ? '' : 'disabled'}>${existing ? t('update') : t('add')}</button>
         ${p.tv.configured ? `<details class="mt-3"><summary>${t('kbTitle')}</summary>
           <div class="sl-muted mt-1">${t('kbNote')}</div>
@@ -600,6 +623,7 @@
       if (p.mac) { entry.mac = p.mac; }
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
+      if ($('sl-tv-phone')) { entry.appleRemote = $('sl-tv-phone').checked; }
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));

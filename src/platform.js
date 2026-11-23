@@ -4,6 +4,7 @@ import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
 import { WasherAccessory } from './homekit/washerAccessory.js';
 import { LAUNDRY_KINDS } from './capabilities/washer.js';
 import { TvAccessory } from './homekit/tvAccessory.js';
+import { pruneAppleRemote } from './appleRemote/bridge.js';
 import { describeDevice, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
 import { shortId } from './redact.js';
@@ -127,6 +128,10 @@ export class SamsungLocalPlatform {
     for (const entry of tvs) {
       this.#attachTv(entry);
     }
+    try {
+      // Switched off means gone: nothing of the iPhone-remote option is left behind.
+      pruneAppleRemote(this.paths.appleRemote, tvs.filter((e) => e.id && e.appleRemote === true).map((e) => e.id));
+    } catch { /* best effort */ }
     try {
       pruneSetup(this.paths.tvSetup, tvs.filter((e) => e.id && e.tvMode !== 'switches').map((e) => e.id));
     } catch { /* best effort */ }
@@ -347,6 +352,10 @@ export class SamsungLocalPlatform {
       },
       ...(this.overrides.tv ?? {}),
     });
+    if (entry.appleRemote === true) {
+      handler.enableAppleRemote({ file: this.paths.appleRemote, ...(this.overrides.appleRemote ?? {}) })
+        .catch((err) => this.log.warn(`[${name}] the iPhone remote option could not start: ${err.message}`));
+    }
     if (mode === 'tile') {
       // Apple requires a TV tile to be its own accessory, added to the Home app separately.
       this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);

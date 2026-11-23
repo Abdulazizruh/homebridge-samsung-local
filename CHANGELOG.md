@@ -6,25 +6,35 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 Trial version, published on the "beta" channel only. Stable installs stay on 1.3.2.
 
-First step towards typing on a Samsung TV from the iPhone remote: finding out what the TVs themselves accept.
+Typing on a Samsung TV from the iPhone's own remote.
 
+- **New option per TV: "iPhone remote with keyboard (trial)".** The TV is shown to the remote in Control Centre as an Apple TV, under its name followed by "+". Pair it once with the four-digit code shown in the TV's options. Its buttons, swipes, volume and power then reach the TV, and when the TV opens a text field the iPhone keyboard opens and what is typed appears on the TV.
+- Your TV tile in Apple Home, its pairing and the TV's own approval stay untouched. The option adds a second name in the remote list.
+- It works inside this plugin, with nothing else to install, and stays on your home network.
+- Everything it keeps is one file in the plugin folder (`apple-remote.json`). Switching the option off removes it; going back to 1.3.2 leaves nothing in the system.
 - The log says when a TV opens and closes its on-screen keyboard (only the fact, never the text).
-- TV options have a "Keyboard trial" section: open a search field on the TV, send a text from the settings page, and see whether it appears.
-- Nothing new is stored on disk and no pairing changes. Going back to 1.3.2 leaves nothing behind.
+- TV options also have a "Keyboard trial" section to send a text to the TV from the settings page.
 
-Not yet tried on real TVs.
+Known limits: Apple does not publish this protocol, so an iOS update may break it. Apps with their own keyboard, such as YouTube and Netflix, are reported not to accept typed text; the TV's own search and browser fields do. The keyboard opens while the remote is open, not as a lock-screen notice.
+
+Checked against an independent Apple TV client and a simulated iPhone. Not yet tried with a real iPhone or a real TV.
 
 **بالعربية**
 
 نسخة تجريبية تُنشر على قناة «beta» فقط. الإصدار المستقر يبقى 1.3.2.
 
-الخطوة الأولى نحو الكتابة على تلفزيون Samsung من ريموت الآيفون: معرفة ما تقبله التلفزيونات نفسها.
+الكتابة على تلفزيون Samsung من ريموت الآيفون الأصلي.
 
+- **خيار جديد لكل تلفزيون: «ريموت الآيفون مع الكيبورد (تجريبي)».** يظهر التلفزيون في ريموت مركز التحكم كأنه Apple TV، باسمه متبوعًا بعلامة «+». يُقترن مرة واحدة برمز من أربع خانات يظهر في خيارات التلفزيون. بعدها تصل الأزرار والسحب والصوت والتشغيل إلى التلفزيون، وحين يفتح التلفزيون خانة كتابة يفتح كيبورد الآيفون وما تكتبه يظهر على التلفزيون.
+- بطاقة التلفزيون في Apple Home واقترانها وموافقة التلفزيون تبقى كما هي. الخيار يضيف اسمًا ثانيًا في قائمة الريموت.
+- يعمل داخل هذه الإضافة نفسها دون تثبيت شيء آخر، ويبقى داخل شبكة المنزل.
+- كل ما يحفظه ملف واحد في مجلد الإضافة (`apple-remote.json`). إطفاء الخيار يحذفه، والرجوع إلى 1.3.2 لا يترك شيئًا في النظام.
 - السجل يذكر متى يفتح التلفزيون كيبورد الشاشة ومتى يغلقه (الحدث فقط، ولا يُكتب النص).
-- في خيارات التلفزيون قسم «تجربة الكيبورد»: افتح خانة بحث على التلفزيون، أرسل نصًا من صفحة الإعدادات، وانظر هل يظهر.
-- لا يُحفظ شيء جديد على القرص ولا يتغيّر أي اقتران. الرجوع إلى 1.3.2 لا يترك أثرًا.
+- في خيارات التلفزيون أيضًا قسم «تجربة الكيبورد» لإرسال نص إلى التلفزيون من صفحة الإعدادات.
 
-لم تُجرَّب بعد على تلفزيونات حقيقية.
+حدود معروفة: Apple لا تنشر هذا البروتوكول، فقد يتعطل مع تحديث iOS. التطبيقات التي لها كيبورد خاص مثل YouTube و Netflix يُذكر أنها لا تقبل النص المكتوب؛ أما بحث التلفزيون نفسه والمتصفح فيقبلانه. يفتح الكيبورد والريموت مفتوح، وليس كتنبيه على شاشة القفل.
+
+جرى الفحص مع عميل Apple TV مستقل ومع آيفون محاكى. لم تُجرَّب بعد مع آيفون حقيقي ولا تلفزيون حقيقي.
 
 ## 1.3.2
 

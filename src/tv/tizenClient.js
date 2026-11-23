@@ -125,7 +125,7 @@ export class TizenRemote {
           socket.removeAllListeners('close');
           socket.removeAllListeners('error');
           socket.on('error', () => {});
-          socket.on('close', () => { if (this.socket === socket) { this.socket = null; } });
+          socket.on('close', () => { if (this.socket === socket) { this.socket = null; this.onKeyboard?.(false); } });
           this.socket = socket;
           resolve();
         } else if (msg.event === 'ms.channel.unauthorized') {
@@ -140,10 +140,25 @@ export class TizenRemote {
 
   async key(code) {
     await this.open();
+    this.#touch();
+    await this.#send({ Cmd: 'Click', DataOfCmd: code, Option: 'false', TypeOfRemote: 'SendRemoteKey' });
+  }
+
+  /** While `held`, the channel stays open: the TV can only say "keyboard opened" to a listener. */
+  #touch() {
     clearTimeout(this.idleTimer);
+    if (this.held) {
+      return;
+    }
     this.idleTimer = setTimeout(() => this.close(), this.idleMs);
     this.idleTimer.unref?.();
-    await this.#send({ Cmd: 'Click', DataOfCmd: code, Option: 'false', TypeOfRemote: 'SendRemoteKey' });
+  }
+
+  hold(on) {
+    this.held = Boolean(on);
+    if (this.socket) {
+      this.#touch();
+    }
   }
 
   #send(params) {
@@ -156,6 +171,7 @@ export class TizenRemote {
    */
   async text(value, { done = false } = {}) {
     await this.open();
+    this.#touch();
     await this.#send({ Cmd: Buffer.from(String(value), 'utf8').toString('base64'), DataOfCmd: 'base64', TypeOfRemote: 'SendInputString' });
     if (done) {
       await this.#send({ TypeOfRemote: 'SendInputEnd' });

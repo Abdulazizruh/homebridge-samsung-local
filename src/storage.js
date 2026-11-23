@@ -19,6 +19,8 @@ export function pluginPaths(homebridgeStoragePath) {
     tvFacts: path.join(root, 'tv-facts.json'),
     // Setup code of each TV tile, shown on the settings page.
     tvSetup: path.join(root, 'tv-setup.json'),
+    // The iPhone-remote stand-in of each TV that has the option on: identity, code and paired phones.
+    appleRemote: path.join(root, 'apple-remote.json'),
     // Connection losses counted for the daily line in the log.
     stability: path.join(root, 'stability.json'),
   };
