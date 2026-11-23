@@ -375,4 +375,12 @@ test('a field opened again: the iPhone keyboard starts from the text the TV says
   tv.say('ms.remote.imeStart'); // a new, empty field: the TV says nothing, and the keyboard opens empty after a moment
   await waitFor(() => handler.phone.keyboardOpen);
   assert.equal(handler.phone.text, '');
+  tv.say('ms.remote.imeUpdate', Buffer.from('جدة', 'utf8').toString('base64')); // the TV says it late, before anything was typed
+  await waitFor(() => handler.phone.text === 'جدة');
+  handler.phone.emit('text', 'جد'); // typing has begun
+  await waitFor(() => tv.texts.includes('جد'));
+  handler.phone.edited = true;
+  tv.say('ms.remote.imeUpdate', Buffer.from('xyz', 'utf8').toString('base64')); // what the TV says after that changes nothing
+  await new Promise((r) => setTimeout(r, 80));
+  assert.equal(handler.phone.text, 'جدة');
 });

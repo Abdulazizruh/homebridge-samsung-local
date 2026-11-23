@@ -69,7 +69,7 @@ class Connection {
     }
     if (this.verified && !this.opened && Date.now() - (s.lastLeft ?? 0) > 60_000) {
       s.lastLeft = Date.now();
-      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. Other connections of the same device when it came: ${this.siblings?.kept ?? 0} with the remote open, ${this.siblings?.closed ?? 0} without.`);
+      s.log.info(`[${s.name}] an iPhone or iPad connected and left ${((Date.now() - this.born) / 1000).toFixed(1)}s later without opening the remote. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. Other connections of the same device when it came: ${this.siblings?.kept ?? 0} with the remote open, ${this.siblings?.closed ?? 0} without. About itself it sent: ${this.infoShape ?? 'nothing'}.`);
     }
     this.server.forget(this);
   }
@@ -303,7 +303,17 @@ class Connection {
 
 const ok = function ok(message) { this.reply(message, {}); };
 const HANDLERS = {
-  _systeminfo: ok,
+  _systeminfo(message, c) {
+    // The phone says who it is and expects the same back. An empty answer left a real phone waiting
+    // half a minute on some connections, so the stand-in now names itself, as it does when pairing.
+    const s = this.server;
+    this.reply(message, {
+      name: s.name, model: s.model, _sv: '715.2', _bf: 0,
+      _idsID: s.identity.id, _pubID: [...s.identity.mac].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
+    });
+    const shape = Object.keys(c ?? {}).sort().join(',').replace(/[^\w,.-]/g, '?').slice(0, 300);
+    this.infoShape = shape; // the names of what the phone sent about itself, never the values
+  },
   _sessionstart(message, c) {
     this.sid = c._sid;
     // A number of its own for every session: a phone that comes back while its earlier session is
@@ -314,7 +324,7 @@ const HANDLERS = {
   tvrcsessionstart(message, c) {
     this.remote = true;
     this.opened = true;
-    this.server.log.info(`[${this.server.name}] iPhone remote opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms.`);
+    this.server.log.info(`[${this.server.name}] iPhone remote opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. About itself it sent: ${this.infoShape ?? 'nothing'}.`);
     this.server.sessionsChanged();
     this.reply(message, c);
     this.flags(message._x); // within a moment, or the iPhone keeps the volume buttons for itself
@@ -395,6 +405,7 @@ const HANDLERS = {
     }
     if (text === this.server.text) { return; }
     this.server.text = text; // one field on the TV, whichever phone types into it
+    this.server.edited = true;
     this.server.emit('text', text);
   },
   fetchsupportedactionsevent: ok, publishpresenceevent: ok, switchactiveuseraccountevent: ok, fetchupnextinfoevent: ok,
@@ -457,9 +468,24 @@ export class CompanionServer extends EventEmitter {
   }
 
   /** Called when the TV says its on-screen keyboard opened or closed. */
+  /**
+   * The TV said what its open field holds only after the keyboard was up. Taken as the
+   * starting text as long as nothing was typed yet; the phones are told the text again.
+   */
+  setFieldText(text) {
+    if (!this.keyboardOpen || this.edited || typeof text !== 'string') { return false; }
+    const next = Array.from(text).slice(0, 1024).join('');
+    if (next === this.text) { return false; }
+    this.text = next;
+    for (const c of this.connections) {
+      if (c.rti.registered && c.rti.open) { c.event('_tiStarted', { _tiD: documentState(c.rti.uuid, next) }); }
+    }
+    return true;
+  }
+
   setKeyboard(open_, text = '') {
     // A field starts with what the TV says it holds: empty for a new one, its text for one opened again.
-    if (Boolean(open_) !== this.keyboardOpen) { this.text = open_ ? Array.from(String(text ?? '')).slice(0, 1024).join('') : ''; }
+    if (Boolean(open_) !== this.keyboardOpen) { this.edited = false; this.text = open_ ? Array.from(String(text ?? '')).slice(0, 1024).join('') : ''; }
     this.keyboardOpen = Boolean(open_);
     let shown = 0;
     for (const c of this.connections) { if (c.keyboard(this.keyboardOpen)) { shown += 1; } }

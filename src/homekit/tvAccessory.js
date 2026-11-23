@@ -111,6 +111,10 @@ export class TvAccessory {
     if (this.opening) { // the keyboard was waiting for exactly this
       clearTimeout(this.opening.timer);
       this.opening.go();
+    } else if (this.keyboardOpen && this.phone && !(this.typedCount > 0)) {
+      // It came after the wait: still the text already there, as long as nothing was typed.
+      const taken = this.phone.setFieldText(text);
+      this.log.info(`[${this.displayName}] the TV said ${Date.now() - (this.openedAt ?? Date.now())} ms after opening its keyboard that the field holds ${this.fieldLength} character${this.fieldLength === 1 ? '' : 's'}${taken ? '; the iPhone keyboard now starts from them.' : '.'}`);
     }
   }
 
@@ -135,6 +139,7 @@ export class TvAccessory {
     }
     // A field opened again still holds its text, and the TV says so right as the keyboard opens.
     // The iPhone keyboard is opened with that text, so a backspace there removes a real letter.
+    this.openedAt = Date.now();
     const go = () => {
       this.opening = null;
       if (!this.keyboardOpen) { return; }

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.22
+
+Trial version on the "beta" channel. Same as beta.21, plus what its log showed:
+
+- **iPhone remote stuck on "Connecting": another attempt.** The log ruled out the earlier idea: no older connection was open when the phone got stuck. What it showed is a phone that connects, proves itself, tells the stand-in who it is, and then waits half a minute. The stand-in used to answer that with nothing; it now names itself in return, as it does when pairing. Not yet confirmed as the cure. The log now also says what a phone asked before the remote opened, and the names (never the values) of what it sent about itself, to compare a connection that works with one that waits.
+- **A field opened again.** On a real TV its report of the text already there did not arrive within the short wait. It is now also taken when it comes later, as long as nothing was typed yet, and the log says after how many milliseconds it came.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.21، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون يعلق على «Connecting»: محاولة أخرى.** السجل نفى الفكرة السابقة: لم يكن هناك اتصال أقدم مفتوح حين علق الجوال. وما أظهره هو جوال يتصل، ويثبت هويته، ويعرّف بنفسه، ثم ينتظر نصف دقيقة. كان البديل يرد على ذلك برد فارغ؛ والآن يعرّف بنفسه في المقابل، كما يفعل عند الاقتران. لم يتأكد بعد أنه العلاج. والسجل يذكر الآن أيضًا ما طلبه الجوال قبل فتح الريموت، وأسماء ما أرسله عن نفسه (دون قيمها)، لمقارنة اتصال يعمل باتصال ينتظر.
+- **خانة تُفتح من جديد.** على تلفزيون حقيقي لم يصل بلاغه عن النص الموجود خلال الانتظار القصير. الآن يؤخذ أيضًا إذا وصل متأخرًا ما دام لم يُكتب شيء بعد، والسجل يذكر بعد كم جزء من الثانية وصل.
+
 ## 1.4.0-beta.21
 
 Trial version on the "beta" channel. Same as beta.20, with two points from a review:
