@@ -26,6 +26,10 @@
   .sl-inline { border: 2px solid rgba(128,90,213,.55); border-radius: 8px; padding: 10px; margin-top: 8px; }
   .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
   .sl-danger { border-color: rgba(220,53,69,.5); }
+  .sl-way { border-top: 1px solid rgba(128,128,128,.2); padding-top: 10px; margin-top: 10px; }
+  .sl-found { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
+  .sl-found .sl-grow { flex: 1; min-width: 150px; } .sl-found input[type=checkbox] { width: 20px; height: 20px; flex: none; }
+  .sl-found:last-of-type { border-bottom: 0; }
   .sl-lang { margin-inline-start: auto; }
   .sl-scroll { overflow-x: auto; }
   .sl-step { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
@@ -60,12 +64,22 @@
 
   <div class="sl-card">
     <h6 data-t="addTitle"></h6>
-    <div class="sl-row">
-      <input type="text" class="form-control" id="sl-host" placeholder="192.168.1.50 / AA:BB:CC:DD:EE:FF" dir="ltr">
-      <button class="btn btn-primary" id="sl-discover" data-t="discover"></button>
+    <div class="sl-muted" data-t="addIntro"></div>
+    <div class="sl-way">
+      <strong data-t="scanTitle"></strong>
+      <div class="sl-muted" data-t="scanNote"></div>
+      <button class="btn btn-primary mt-2" id="sl-scan-btn"></button>
+      <div id="sl-scan" class="mt-2"></div>
     </div>
-    <div id="sl-result" class="mt-2"></div>
-    <div class="sl-muted mt-1" data-t="addHint"></div>
+    <div class="sl-way">
+      <strong data-t="manualTitle"></strong>
+      <div class="sl-row mt-1">
+        <input type="text" class="form-control" id="sl-host" placeholder="192.168.1.50 / AA:BB:CC:DD:EE:FF" dir="ltr">
+        <button class="btn btn-primary" id="sl-discover" data-t="discover"></button>
+      </div>
+      <div id="sl-result" class="mt-2"></div>
+      <div class="sl-muted mt-1" data-t="addHint"></div>
+    </div>
   </div>
 
   <div class="sl-card">
@@ -110,11 +124,21 @@
       pythonFound: 'Python found', pythonProblem: 'Python problem',
       stepsTitle: 'Getting started', stepsDone: 'Setup complete', stepDone: 'done', stepNow: 'do this now', stepsOrder: 'Steps 2 and 3 work in either order.',
       step1: 'Choose the engine and prepare it', step1Text: 'Choose the connection engine in the box below. Python then asks you to press "Prepare now" once (it can take a few minutes); JavaScript needs nothing more.',
-      step2: 'Add your appliance', step2Text: 'Find the appliance IP address in your router\'s device list, type it under "Add an appliance", press "Test & discover", then "Add to configuration".',
+      step2: 'Add your appliance', step2Text: 'Under "Add an appliance" press "Scan the network", tick what you want and press "Add selected". Or type the IP or MAC address of one appliance, press "Test & discover", then "Add to configuration".',
       step3: 'Turn on the child bridge', step3Text: 'Press SAVE at the bottom. On the plugin card open ⋮ → Bridge Settings, switch the bridge on, save, and restart Homebridge.',
       step4: 'Add it to the Home app', step4Text: 'In ⋮ → Bridge Settings a QR code appears. In the Home app choose + → Add Accessory and scan it. Later changes here only need a restart of the child bridge.',
       bridgeWarn: 'Run this plugin as a child bridge: use the bridge button (⋮ → Bridge Settings) on the plugin card after saving. It keeps this plugin separate from your other plugins.',
       addTitle: 'Add an appliance', discover: 'Test & discover',
+      addIntro: 'Two ways to add: an automatic scan that looks for your appliances, or one address typed by hand.',
+      scanTitle: '1 · Automatic scan', manualTitle: '2 · By hand, with an address',
+      scanNote: 'Looks once across your home network for Samsung appliances and TVs, only when you press the button. Nothing is added before you confirm. The IP and MAC address of each appliance are kept, so a changed IP address is followed as before.',
+      scanBtn: 'Scan the network', scanAgain: 'Scan again', scanSweep: 'Looking across the network… a few seconds.',
+      scanReading: 'Reading appliance', scanOf: 'of', scanStop: 'Stop', scanStopped: 'Stopped. Read the rest with "Read" on each row.',
+      scanNone: 'No new appliance answered. Check that it is switched on and on the same network, or add it by address below.',
+      scanReady: 'Ready to add', scanAdded: 'Already added', scanMoved: 'Already added · address updated', scanJust: 'Added',
+      scanWait: 'Waiting', scanBusy: 'Reading…', scanFailed: 'Not read', scanRetry: 'Read', scanUnsupported: 'Not supported yet',
+      scanPair: 'Needs approval on the TV screen', scanAdd: 'Add selected', scanClose: 'Close', scanNet: 'Network',
+      scanDone: 'Added. Name and options of each appliance are under its row in the list below.',
       addHint: 'Enter the appliance IP address or its MAC address, whichever you know. If the address changes later, the plugin finds the appliance again by itself. Success means the appliance answered an authenticated read of its identity and resources.',
       discovering: 'Connecting to the appliance… this can take up to two minutes.', techDetails: 'Technical details (safe to share)',
       devicesTitle: 'Configured appliances', none: 'No appliances yet.',
@@ -214,11 +238,21 @@
       pythonFound: 'Python الموجود', pythonProblem: 'مشكلة في Python',
       stepsTitle: 'خطوات البدء', stepsDone: 'اكتمل الإعداد', stepDone: 'تم', stepNow: 'نفّذ هذه الآن', stepsOrder: 'الخطوتان 2 و3 تصحّان بأي ترتيب.',
       step1: 'اختر المحرك وجهّزه', step1Text: 'اختر محرك الاتصال في المربع أدناه. مع Python اضغط بعدها «جهّزها الآن» مرة واحدة (قد يأخذ دقائق)، ومع JavaScript لا تحتاج شيئًا آخر.',
-      step2: 'أضف جهازك', step2Text: 'خذ عنوان الجهاز من قائمة الأجهزة في الراوتر، اكتبه تحت «إضافة جهاز»، اضغط «اختبار واكتشاف»، ثم «أضف إلى الإعدادات».',
+      step2: 'أضف جهازك', step2Text: 'تحت «إضافة جهاز» اضغط «مسح الشبكة»، حدّد ما تريد ثم اضغط «إضافة المحدد». أو اكتب عنوان IP أو MAC لجهاز واحد، اضغط «اختبار واكتشاف»، ثم «أضف إلى الإعدادات».',
       step3: 'فعّل الجسر الفرعي', step3Text: 'اضغط SAVE في الأسفل. من بطاقة الإضافة افتح ⋮ ← Bridge Settings، فعّل الجسر، احفظ، ثم أعد تشغيل Homebridge.',
       step4: 'أضفه إلى تطبيق Home', step4Text: 'في ⋮ ← Bridge Settings يظهر رمز QR. في تطبيق Home اختر + ← Add Accessory وامسحه. أي تعديل لاحق هنا يكفيه إعادة تشغيل الجسر الفرعي.',
       bridgeWarn: 'شغّل هذه الإضافة كجسر فرعي مستقل: بعد الحفظ استخدم زر الجسر في بطاقة الإضافة (⋮ ← إعدادات الجسر). بذلك تبقى منفصلة عن بقية الإضافات.',
       addTitle: 'إضافة جهاز', discover: 'اختبار واكتشاف',
+      addIntro: 'طريقتان للإضافة: مسح تلقائي يبحث عن أجهزتك، أو عنوان جهاز واحد تكتبه يدويًا.',
+      scanTitle: '1 · مسح تلقائي', manualTitle: '2 · يدويًا بالعنوان',
+      scanNote: 'يبحث مرة واحدة في شبكة المنزل عن أجهزة وتلفزيونات Samsung عند ضغط الزر فقط. لا يُضاف أي جهاز قبل تأكيدك. يُحفظ عنوان IP وعنوان MAC لكل جهاز، فإذا تغيّر عنوان IP تتبّعه الإضافة كما هو معمول حاليًا.',
+      scanBtn: 'مسح الشبكة', scanAgain: 'مسح من جديد', scanSweep: 'جارٍ البحث في الشبكة… ثوانٍ قليلة.',
+      scanReading: 'قراءة الجهاز', scanOf: 'من', scanStop: 'إيقاف', scanStopped: 'توقّف المسح. اقرأ الباقي بزر «قراءة» في كل صف.',
+      scanNone: 'لم يُجب أي جهاز جديد. تأكد أن الجهاز يعمل وعلى الشبكة نفسها، أو أضفه بالعنوان في الأسفل.',
+      scanReady: 'جاهز للإضافة', scanAdded: 'مضاف مسبقًا', scanMoved: 'مضاف مسبقًا · تم تحديث عنوانه', scanJust: 'تمت الإضافة',
+      scanWait: 'في الانتظار', scanBusy: 'جارٍ القراءة…', scanFailed: 'لم يُقرأ', scanRetry: 'قراءة', scanUnsupported: 'غير مدعوم حاليًا',
+      scanPair: 'يحتاج موافقة على شاشة التلفزيون', scanAdd: 'إضافة المحدد', scanClose: 'إغلاق', scanNet: 'الشبكة',
+      scanDone: 'تمت الإضافة. اسم كل جهاز وخياراته تحت صفه في القائمة بالأسفل.',
       addHint: 'أدخل عنوان IP للجهاز أو عنوان MAC، أيهما تعرف. إن تغيّر العنوان لاحقًا تجد الإضافة الجهاز من جديد تلقائيًا. يُعدّ الاتصال ناجحًا عند قراءة هوية الجهاز وموارده فعليًا بعد المصادقة.',
       discovering: 'جارٍ الاتصال بالجهاز… قد يستغرق حتى دقيقتين.', techDetails: 'تفاصيل تقنية (آمنة للمشاركة)',
       devicesTitle: 'الأجهزة المضافة', none: 'لا توجد أجهزة بعد.',
@@ -401,7 +435,7 @@
       box = document.createElement('div');
       box.id = 'sl-diag-panel';
       box.className = 'sl-card';
-      $('sl-result').parentElement.after(box);
+      $('sl-result').closest('.sl-card').after(box);
     }
     const canShare = typeof navigator.share === 'function' && typeof File === 'function';
     box.innerHTML = `<h6>${t('diagTitle')}</h6><div class="sl-muted mb-2">${t('diagHelp')}</div>
@@ -557,6 +591,168 @@
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
         if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false }; } else { config.devices.push(entry); }
       });
+    });
+  }
+
+  // ---- Automatic scan: runs only when its button is pressed, adds only what is ticked.
+  let scan = null;
+  const scanBusy = () => Boolean(scan) && (scan.phase === 'sweep' || scan.phase === 'reading');
+
+  /** Decide what a read appliance is to this list: already here, ready, or not usable. */
+  async function settleFound(item, p) {
+    item.probe = p; item.host = p.host;
+    const d = p.described;
+    const known = config.devices.find((x) => x.id && x.id === p.deviceId);
+    if (known) {
+      // Same appliance on a new address: keep one entry and follow it, as the manual path does.
+      if (known.host !== p.host) {
+        await change(() => { const dev = config.devices.find((x) => x.id === p.deviceId); if (dev) { dev.host = p.host; } }, false);
+        item.state = 'moved';
+      } else { item.state = 'added'; }
+    } else if (d.kind === 'tv') {
+      const ready = p.tv?.paired || tvPaired.has(p.deviceId);
+      item.state = ready ? 'ready' : 'pair'; item.checked = Boolean(ready);
+    } else if (d.kind === 'airConditioner' || d.support === 'experimental' || d.support === 'supported') {
+      item.state = 'ready'; item.checked = true;
+    } else { item.state = 'unsupported'; }
+  }
+
+  async function readFound(item, run) {
+    item.state = 'busy'; item.error = null; renderScan();
+    try {
+      const p = await homebridge.request('/probe', { host: item.host });
+      if (scan !== run) { return; }
+      await settleFound(item, p);
+    } catch (err) {
+      if (scan !== run) { return; }
+      item.state = 'failed'; item.error = errorText(err);
+    }
+    renderScan();
+  }
+
+  async function startScan() {
+    if (scanBusy()) { return; }
+    const run = { phase: 'sweep', items: [], networks: [], at: 0, stop: false };
+    scan = run; renderScan();
+    try {
+      const found = await homebridge.request('/scan');
+      if (scan !== run) { return; }
+      run.networks = found.networks ?? [];
+      for (const tv of found.tvs ?? []) {
+        const item = { host: tv.host, state: 'wait', checked: false };
+        await settleFound(item, tv);
+        run.items.push(item);
+      }
+      const mine = new Set(config.devices.filter((x) => x.type !== 'tv').map((x) => x.host));
+      for (const host of found.appliances ?? []) {
+        // An appliance already in the list is never read again here: it stays connected to the plugin.
+        const dev = mine.has(host) ? config.devices.find((x) => x.type !== 'tv' && x.host === host) : null;
+        run.items.push(dev ? { host, state: 'added', dev } : { host, state: 'wait', checked: false });
+      }
+      run.phase = 'reading';
+      // One appliance at a time: a session is opened for each, and they are slow to answer two at once.
+      const queue = run.items.filter((i) => i.state === 'wait');
+      run.total = queue.length;
+      for (const item of queue) {
+        if (scan !== run || run.stop) { break; }
+        run.at += 1;
+        await readFound(item, run);
+      }
+      if (scan === run) { run.phase = 'done'; }
+    } catch (err) {
+      if (scan !== run) { return; }
+      run.phase = 'done'; run.error = errorText(err);
+    }
+    renderScan();
+  }
+
+  function entryOf(p) {
+    const d = p.described;
+    if (d.kind === 'tv') {
+      const entry = { host: p.host, id: p.deviceId, type: 'tv', enabled: true, tvMode: 'tile', name: p.tv?.name || 'Samsung TV' };
+      if (p.mac) { entry.mac = p.mac; }
+      if (d.model) { entry.model = d.model; }
+      return entry;
+    }
+    const has = new Set((d.features || []).filter((r) => r.device === true).map((r) => r.id));
+    const features = {};
+    if (d.kind === 'airConditioner') {
+      for (const k of Object.keys(DEFAULTS)) { if (NEEDS[k].some((id) => has.has(id))) { features[k] = DEFAULTS[k]; } }
+    } else {
+      const needs = { progressTile: 'progress', kidsLockSensor: 'kidsLock', alertSensor: 'alarms', energyEve: 'energyKWh' };
+      for (const k of Object.keys(LAUNDRY_DEFAULTS)) { if (!needs[k] || has.has(needs[k])) { features[k] = LAUNDRY_DEFAULTS[k]; } }
+    }
+    const entry = { host: p.host, id: p.deviceId, enabled: true, features };
+    if (p.mac) { entry.mac = p.mac; }
+    return entry;
+  }
+
+  function renderScan() {
+    const btn = $('sl-scan-btn'); const box = $('sl-scan');
+    btn.disabled = !engineChosen() || scanBusy();
+    btn.textContent = t(scan?.phase === 'done' ? 'scanAgain' : 'scanBtn');
+    if (!scan) { box.innerHTML = ''; return; }
+    if (scan.phase === 'sweep') { box.innerHTML = `<span class="sl-muted">${t('scanSweep')}</span>`; return; }
+    if (scan.error) { box.innerHTML = `<div class="alert alert-danger mb-0">${esc(scan.error)}</div>`; return; }
+    const run = scan;
+    const pill = { ready: 'sl-ok', added: '', moved: 'sl-ok', just: 'sl-ok', wait: '', busy: 'sl-warn', failed: 'sl-bad', unsupported: 'sl-warn', pair: 'sl-warn' };
+    const word = { ready: 'scanReady', added: 'scanAdded', moved: 'scanMoved', just: 'scanJust', wait: 'scanWait', busy: 'scanBusy', failed: 'scanFailed', unsupported: 'scanUnsupported', pair: 'scanPair' };
+    const rows = run.items.map((item, i) => {
+      const d = item.probe?.described;
+      const kind = d ? (KINDS[lang][d.kind] ?? d.kind) : item.dev ? esc(item.dev.name || t('scanAdded')) : 'Samsung';
+      const title = item.probe?.tv?.name ? `${esc(item.probe.tv.name)}` : '';
+      const tick = item.state === 'ready' ? `<input type="checkbox" data-pick="${i}" ${item.checked ? 'checked' : ''} aria-label="${t('scanAdd')}">` : '';
+      const act = item.state === 'pair' ? `<button class="btn btn-sm btn-primary" data-pair="${i}">${t('tvPair')}</button>`
+        : (item.state === 'failed' || (item.state === 'wait' && run.phase === 'done')) ? `<button class="btn btn-sm btn-outline-secondary" data-read="${i}">${t('scanRetry')}</button>`
+        : item.state === 'unsupported' ? `<button class="btn btn-sm btn-outline-secondary" data-diag="${i}">${t('diagFile')}</button>` : '';
+      const off = item.state === 'pair' && item.probe?.tv && !item.probe.tv.power ? `<div class="sl-muted">${t('tvOff')}</div>` : '';
+      return `<div class="sl-found">${tick}
+        <div class="sl-grow"><strong>${kind}</strong> ${title ? `<span>${title}</span>` : ''}
+          <div class="sl-muted" dir="ltr" style="text-align:start">${esc(d?.model ?? '')}${d?.model ? ' · ' : ''}${esc(item.host)}</div>
+          ${item.error ? `<div class="sl-muted">${esc(item.error)}</div>` : ''}${off}</div>
+        <span class="sl-pill ${pill[item.state]}">${t(word[item.state])}</span>${act}</div>`;
+    }).join('');
+    const picked = run.items.filter((i) => i.state === 'ready' && i.checked).length;
+    const progress = run.phase === 'reading'
+      ? `<div class="sl-row"><span class="sl-pill sl-warn">${t('scanReading')} <span dir="ltr">${run.at}</span> ${t('scanOf')} <span dir="ltr">${run.total}</span></span>
+          <button class="btn btn-sm btn-outline-secondary" id="sl-scan-stop">${t('scanStop')}</button></div>` : '';
+    const fresh = run.items.some((i) => !['added', 'moved'].includes(i.state));
+    box.innerHTML = `${run.networks.length ? `<div class="sl-muted">${t('scanNet')}: <span dir="ltr">${run.networks.map(esc).join(' , ')}</span></div>` : ''}
+      ${progress}${run.stop && run.phase === 'done' ? `<div class="sl-muted">${t('scanStopped')}</div>` : ''}${rows}
+      ${run.phase === 'done' && !fresh ? `<div class="alert alert-info mt-2 mb-2">${t('scanNone')}</div>` : ''}
+      ${run.note ? `<div class="alert alert-success mt-2 mb-2">${t(run.note)}</div>` : ''}
+      <div class="sl-row mt-2">
+        <button class="btn btn-success" id="sl-scan-add" ${picked && !scanBusy() ? '' : 'disabled'}>${t('scanAdd')} (<span dir="ltr">${picked}</span>)</button>
+        ${run.phase === 'done' ? `<button class="btn btn-outline-secondary" id="sl-scan-close">${t('scanClose')}</button>` : ''}
+      </div>`;
+    box.querySelectorAll('[data-pick]').forEach((el) => el.addEventListener('change', () => { run.items[Number(el.dataset.pick)].checked = el.checked; renderScan(); }));
+    box.querySelectorAll('[data-read]').forEach((el) => el.addEventListener('click', () => readFound(run.items[Number(el.dataset.read)], run)));
+    box.querySelectorAll('[data-diag]').forEach((el) => el.addEventListener('click', () => { const it = run.items[Number(el.dataset.diag)]; downloadDiagnostics({ deviceId: it.probe.deviceId, host: it.host }); }));
+    box.querySelectorAll('[data-pair]').forEach((el) => el.addEventListener('click', async () => {
+      const item = run.items[Number(el.dataset.pair)];
+      el.disabled = true; el.textContent = t('tvPairing');
+      try {
+        await homebridge.request('/tv-pair', { host: item.host });
+        tvPaired.add(item.probe.deviceId);
+        item.state = 'ready'; item.checked = true; item.error = null;
+      } catch (err) { item.error = errorText(err); }
+      renderScan();
+    }));
+    $('sl-scan-stop')?.addEventListener('click', () => { run.stop = true; });
+    $('sl-scan-close')?.addEventListener('click', () => { scan = null; renderScan(); });
+    $('sl-scan-add')?.addEventListener('click', async () => {
+      const picks = run.items.filter((i) => i.state === 'ready' && i.checked);
+      if (!picks.length) { return; }
+      await change(() => {
+        for (const item of picks) {
+          const p = item.probe;
+          if (!config.devices.some((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host))) { config.devices.push(entryOf(p)); }
+        }
+      }, false);
+      for (const item of picks) { item.state = 'just'; item.checked = false; }
+      run.note = 'scanDone';
+      homebridge.toast.success(t('saved'));
+      await refreshStatus();
     });
   }
 
@@ -760,7 +956,7 @@
     $('sl-push').checked = config.pushUpdates !== false;
     $('sl-follow').checked = config.followAddress !== false;
     $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
-    renderRuntime(); renderDevices(); renderResult();
+    renderRuntime(); renderDevices(); renderResult(); renderScan();
   }
 
   async function refreshStatus() {
@@ -773,6 +969,7 @@
   $('sl-engine').addEventListener('change', async (e) => { const v = e.target.value; if (!v) { return; } await change(() => { config.engine = v; }, false); await refreshStatus(); });
   $('sl-follow').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.followAddress = v; }, false); });
   $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });
+  $('sl-scan-btn').addEventListener('click', startScan);
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();
     if (!host) { return; }

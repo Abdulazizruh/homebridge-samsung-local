@@ -15,7 +15,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.2.2. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.3.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -24,7 +24,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 |---|---|
 | Connection | Air conditioners and washers: CoAP over DTLS on the LAN. TVs: the TV's own local remote-control channel |
 | Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
-| Setup | Enter an IP address or a MAC address in the plugin settings, press **Test & discover** |
+| Setup | Press **Scan the network** in the plugin settings and tick what to add, or enter one IP or MAC address and press **Test & discover** |
 | Identity | Each appliance is keyed on its own stable device ID, so a new IP address never creates a duplicate. An air conditioner or washer whose address changes is found again by itself |
 | Updates | Push (CoAP Observe) where the appliance supports it, polling every 15 s as fallback |
 | Works offline | Yes, after the one-time setup below |
@@ -64,6 +64,7 @@ On first start the plugin creates a private Python environment in `<homebridge s
 |---|---|---|
 | Python engine only: first start, and after a plugin update that changes the pins | `pypi.org`, `files.pythonhosted.org` | Download the pinned Python packages. The JavaScript engine downloads nothing |
 | Normal operation | none | Only the appliances on your LAN are contacted |
+| You press **Scan the network** in the settings | every address of your home network (its /24): UDP 5683 for appliances, TCP 8001 for TVs; then one read of each new appliance found | Only when you press the button, never in the background. Nothing is added or stored before you confirm, and nothing leaves your network. |
 | An appliance stopped answering (optional, on by default) | every address of the home network it was on (its /24), UDP 5683 | One small question to find the appliance at its new address, at most once every five minutes. Nothing leaves your network. Switch it off under General → "Find an appliance again when its address changes" |
 | Samsung TVs | the TV itself, TCP 8001 and 8002; one wake-on-network packet to switch it on | Local remote-control channel of the TV |
 
@@ -85,8 +86,10 @@ Then restart Homebridge.
 ## Set up
 
 1. Open the plugin settings and choose the connection engine. JavaScript works straight away. With Python, press **Prepare now** if its runtime is not ready yet.
-2. Enter the appliance IP address, or its MAC address, and press **Test & discover**.
-3. Right under the address field: give it a name (optional) and tick what should appear in HomeKit. The table of functions the appliance reports is under that.
+2. Add your appliances, in either of two ways:
+   - **Automatic scan:** press **Scan the network**. The plugin looks once across your home network, reads what each appliance it finds is, and lists them. Tick the ones you want and press **Add selected**. A TV asks for one approval on its screen first. Appliances already in your list are shown as added and left alone.
+   - **By hand:** enter the appliance IP address, or its MAC address, and press **Test & discover**.
+3. Added by hand: right under the address field, give it a name (optional) and tick what should appear in HomeKit. The table of functions the appliance reports is under that.
 4. Press **Add to configuration**.
    A TV asks for one more step before that: press **Pair with the TV** and choose "Allow" on the TV screen.
 5. On the plugin card open **⋮ → Bridge Settings** and enable the **child bridge**. Restart, then scan the child bridge's own QR code in the Home app.
@@ -201,7 +204,7 @@ Under it: the TV's name, and whether it appears as a TV tile with the remote or 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (86 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (89 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | Adding an appliance by its MAC address instead of its IP address, on a real home network: the plugin found the address itself | **Pass** |

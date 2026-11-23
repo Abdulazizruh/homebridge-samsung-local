@@ -2,6 +2,32 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.3.0
+
+New: automatic scan, in the settings page, for both engines.
+
+- **Scan the network** looks once across your home network for Samsung appliances and TVs, reads what each new one is, and lists them. Tick the ones you want and press **Add selected**; name and options are then changed under each row, as before.
+- It runs only when the button is pressed, never in the background. Nothing is added or stored before you confirm.
+- Appliances already in your list are shown as added and are not read again. One that answers from a new address has its address updated instead of being added twice.
+- A TV asks for one approval on its screen before it can be ticked. An appliance that could not be read gets a **Read** button to try again.
+- Adding by hand with an IP or MAC address stays as it was, now as the second way under the same card. IP and MAC address are kept for every appliance either way, so a changed address is followed as before.
+- A TV found by either way gets a default name Apple Home accepts.
+
+Not yet tried on real appliances.
+
+**بالعربية**
+
+جديد: مسح تلقائي في صفحة الإعدادات، للمحركين معًا.
+
+- زر **مسح الشبكة** يبحث مرة واحدة في شبكة المنزل عن أجهزة وتلفزيونات Samsung، ويتعرّف على كل جهاز جديد، ثم يعرضها في قائمة. حدّد ما تريد واضغط **إضافة المحدد**؛ ثم يُعدَّل الاسم والخيارات تحت كل صف كما هو معمول.
+- يعمل عند ضغط الزر فقط، ولا يعمل في الخلفية. لا يُضاف ولا يُحفظ شيء قبل تأكيدك.
+- الأجهزة المضافة مسبقًا تظهر بوصفها مضافة ولا تُقرأ من جديد. والجهاز الذي يجيب من عنوان جديد يُحدَّث عنوانه ولا يُضاف مرتين.
+- التلفزيون يطلب موافقة واحدة على شاشته قبل تحديده. والجهاز الذي تعذّرت قراءته يظهر بجانبه زر **قراءة** للمحاولة من جديد.
+- الإضافة اليدوية بعنوان IP أو MAC باقية كما هي، وصارت الطريقة الثانية في البطاقة نفسها. يُحفظ عنوان IP وعنوان MAC لكل جهاز في الطريقتين، فيُتتبَّع العنوان إذا تغيّر كما هو معمول.
+- التلفزيون المكتشف بأي من الطريقتين يأخذ اسمًا افتراضيًا يقبله Apple Home.
+
+لم تُجرَّب بعد على أجهزة حقيقية.
+
 ## 1.2.2
 
 Air conditioner, both engines:

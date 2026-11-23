@@ -8,6 +8,7 @@ import { ensureRuntime, findPython, runtimeStatus } from '../src/runtime/pythonR
 import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePythonRuntime, wipePluginData, writeJson } from '../src/storage.js';
 import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
 import QRCode from 'qrcode-svg';
+import { scanNetwork, tidyName } from '../src/scan.js';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
 
@@ -25,6 +26,7 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/saved-devices', () => this.savedDevices());
     this.onRequest('/tv-pair', (payload) => this.tvPair(payload));
     this.onRequest('/remove-runtime', () => this.removeRuntime());
+    this.onRequest('/scan', () => this.scan());
     this.ready();
   }
 
@@ -65,6 +67,28 @@ class UiServer extends HomebridgePluginUiServer {
       devices: listSnapshots(this.paths).map((snap) => this.present(snap)),
       tvSetup: this.tvSetup(),
     };
+  }
+
+  /**
+   * Look around the home network once, because the owner pressed the button.
+   * TVs come back identified (their info page says what they are). Other
+   * appliances come back as addresses only: reading what each one is opens a
+   * session, which the page then does one appliance at a time through /probe.
+   */
+  async scan() {
+    try {
+      const config = await this.pluginConfig();
+      const hints = [...listSnapshots(this.paths).map((s) => s.host), ...(config.devices ?? []).map((d) => d.host)]
+        .filter((h) => typeof h === 'string');
+      const found = await scanNetwork({ hints });
+      return {
+        networks: found.networks,
+        appliances: found.appliances,
+        tvs: found.tvs.map((tv) => this.presentTv(tv.host, { ...tv, name: tidyName(tv.name) })),
+      };
+    } catch (err) {
+      return this.fail(err);
+    }
   }
 
   /** Setup code of each TV tile, with the same code as a picture to scan. */
@@ -152,7 +176,7 @@ class UiServer extends HomebridgePluginUiServer {
     if (tv) {
       // A MAC address typed by the owner is the interface the TV is really
       // connected with (it may be the cable, not Wi-Fi): waking uses that one.
-      return this.presentTv(host, typedMac ? { ...tv, mac: typedMac } : tv);
+      return this.presentTv(host, { ...tv, name: tidyName(tv.name), ...(typedMac ? { mac: typedMac } : {}) });
     }
     let helper;
     try {
