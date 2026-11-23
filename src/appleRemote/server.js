@@ -91,7 +91,8 @@ class Connection {
     const last = this.lastHeard ? `${((Date.now() - this.lastHeard) / 1000).toFixed(1)}s before it left` : 'never';
     const notes = [];
     if (this.bad) { notes.push(`${this.bad} not understood (${[...(this.badWhy ?? [])].join('; ')})`); }
-    if (this.answers) { notes.push(`${this.answers} without a request name`); }
+    if (this.answers) { notes.push(`${this.answers} without a request name (${this.answerShape})`); }
+    if (this.infoShape !== undefined) { notes.push(`about itself it sent: ${this.infoShape || 'nothing'}`); }
     if (this.buffer.length) { notes.push(`${this.buffer.length} bytes of an unfinished message`); }
     return `Messages after proving itself: ${kinds}; the last one ${last}${notes.length ? `; ${notes.join(', ')}` : ''}.`;
   }
@@ -154,7 +155,13 @@ class Connection {
     this.counters.in += 1;
     const [message] = unpack(plain);
     if (!message || typeof message !== 'object') { return; }
-    if (typeof message._i !== 'string') { this.answers = (this.answers ?? 0) + 1; return; } // a reply to one of our events
+    if (typeof message._i !== 'string') { // a reply to one of our events, or something not understood
+      this.answers = (this.answers ?? 0) + 1;
+      // Apple's field names only, never a value: what kind of message came without a request name.
+      const names = (o) => Object.keys(o ?? {}).sort().join(',').replace(/[^\w,.-]/g, '?').slice(0, 200);
+      this.answerShape = `fields ${names(message)}; kind ${Number(message._t) || '-'}; name is ${message._i === undefined ? 'missing' : typeof message._i}; inside: ${typeof message._c === 'object' ? names(message._c) : '-'}`;
+      return;
+    }
     if ((this.asked ??= []).length < 25) { this.asked.push(message._i.slice(0, 40).replace(/[^\w.-]/g, '?')); } // Apple's request names, for the log
     const handler = HANDLERS[message._i.toLowerCase()];
     if (handler) { handler.call(this, message, message._c ?? {}); return; }
@@ -321,6 +328,13 @@ class Connection {
     this.event('_iMC', { _mcF: VOLUME_FLAG }, xid);
   }
 
+  /** Whether the TV is awake, as an Apple TV tells every phone that connects. */
+  status(xid) {
+    const state = this.server.awake ? 3 : 1;
+    this.event('SystemStatus', { state }, xid);
+    this.event('TVSystemStatus', { state }, xid);
+  }
+
   /** The TV opened or closed a text field: show or hide the iPhone keyboard. */
   keyboard(open_) {
     if (!this.rti.registered || this.rti.open === open_) { return false; }
@@ -344,6 +358,7 @@ const HANDLERS = {
       name: s.name, model: s.model, _sv: '715.2', _bf: 0,
       _idsID: s.identity.id, _pubID: [...s.identity.mac].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
     });
+    this.status(message._x);
     const shape = Object.keys(c ?? {}).sort().join(',').replace(/[^\w,.-]/g, '?').slice(0, 300);
     this.infoShape = shape; // the names of what the phone sent about itself, never the values
     // A phone also connects by itself, says who it is, and then says nothing for half a minute. While such
@@ -383,6 +398,7 @@ const HANDLERS = {
       if (name === '_iMC') { this.event('_iMC', { _mcF: VOLUME_FLAG }, message._x); }
       if (name === 'MediaControlStatus') { this.event('MediaControlStatus', { MediaControlFlags: VOLUME_FLAG }, message._x); }
       if (name === 'NowPlayingInfo') { this.event('NowPlayingInfo', {}, message._x); }
+      if (name === 'SystemStatus' || name === 'TVSystemStatus') { this.event(name, { state: this.server.awake ? 3 : 1 }, message._x); }
     }
   },
   _hidc(message, c) {

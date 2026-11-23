@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.25
+
+Trial version on the "beta" channel. Same as beta.24, plus what its log showed:
+
+- **iPhone remote stuck on "Connecting": the stand-in now says whether the TV is awake.** The log of beta.24 shows that a stuck connection sends one message only, its introduction, and then waits half a minute; nothing was dropped unread. So the phone is waiting to hear something. An Apple TV tells a phone that introduced itself whether it is awake; the stand-in said so only when asked. It now says it straight after the introduction. A trial: not yet confirmed as the cure.
+- **The log names the fields** (Apple's field names, never their values) of a first message that came without a request name, seen from one device in beta.24.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.24، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون يعلق على «Connecting»: البديل يخبر الآن هل التلفزيون مستيقظ.** سجل beta.24 يُظهر أن الاتصال العالق يرسل رسالة واحدة فقط، هي تعريفه بنفسه، ثم ينتظر نصف دقيقة؛ ولم تُهمل أي رسالة دون قراءة. إذن الجوال ينتظر أن يسمع شيئًا. تلفزيون Apple يخبر الجوال الذي عرّف بنفسه هل هو مستيقظ؛ والبديل كان يخبر بذلك عند السؤال فقط. الآن يخبر به مباشرة بعد التعريف. تجربة: لم يتأكد بعد أنها العلاج.
+- **السجل يذكر أسماء الحقول** (أسماء Apple، دون قيمها) لرسالة أولى وصلت دون اسم طلب، ظهرت من جهاز واحد في beta.24.
+
 ## 1.4.0-beta.24
 
 Trial version on the "beta" channel. Same as beta.23, plus what its log showed:
