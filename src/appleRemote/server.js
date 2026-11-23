@@ -14,7 +14,7 @@ import srp from 'fast-srp-hap';
 import { pack, unpack } from './opack.js';
 import { Tlv, TlvError, readTlv, writeTlv } from './tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer, verify } from './crypto.js';
-import { applyEdit, applyWholeWord, documentState, overlap, readEdit } from './rti.js';
+import { Echoes, applyEdit, documentState, readEdit } from './rti.js';
 import { PHASE, Swipes } from './gestures.js';
 
 const { SRP, SrpServer } = srp;
@@ -48,6 +48,7 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
+    this.echoes = new Echoes();
     this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
     this.lastSelect = 0;
@@ -357,24 +358,15 @@ const HANDLERS = {
     if (!this.rti.registered || !this.rti.open || !this.server.keyboardOpen) { return; } // no field is open
     const edit = readEdit(c._tiD);
     const before = this.server.text;
-    let text = applyEdit(before, edit);
-    const plain = edit.insert && !edit.remove && edit.assert === null; // only letters added
-    if (plain && !this.server.wholeWords) {
-      // Seen once, it is how this phone types: the added part is the word so far plus one letter.
-      const length = Array.from(edit.insert).length;
-      if (length >= 2 && overlap(before, edit.insert) === length - 1) {
-        this.server.wholeWords = true;
-        this.server.log.info(`[${this.server.name}] this iPhone keyboard sends the whole word with every letter; typing is now read that way.`);
-      }
-    }
-    if (plain && this.server.wholeWords) { text = applyWholeWord(before, edit.insert); }
+    const echo = this.echoes.isEcho(before, edit); // the word said again after its keystroke: not typing
+    const text = echo ? before : applyEdit(before, edit);
     // Trial: the shape of each edit, in lengths only and never the text, to see how a real iPhone words its typing.
     this.edits = (this.edits ?? 0) + 1;
     if (this.edits <= 60) {
       const n = (v) => (v === null ? '-' : Array.from(v).length);
       const tail = edit.insert && before ? Array.from(before).slice(-Array.from(edit.insert).length).join('') : '';
       const repeats = Boolean(edit.insert) && before.length > 0 && (edit.insert.startsWith(tail) || before.endsWith(edit.insert) || edit.insert.startsWith(before));
-      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${repeats ? ', the added part repeats what the field already holds' : ''}.`);
+      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', the word said again: left out' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
     }
     if (text === this.server.text) { return; }
     this.server.text = text; // one field on the TV, whichever phone types into it

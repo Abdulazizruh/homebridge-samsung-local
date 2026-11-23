@@ -212,13 +212,23 @@ test('pairing code: 0000 unless the owner chose four digits, and changing it kee
   assert.deepEqual(second.clients, { phone: 'aa' });
 });
 
-test('an iPhone keyboard that sends the whole word with every letter: nothing is doubled, real double letters stay', async () => {
-  const { applyWholeWord, overlap } = await import('../src/appleRemote/rti.js');
-  assert.equal(overlap('ه', 'هل'), 1);
-  assert.equal(overlap('ha ', 'ha'), 0);
-  let text = '';
-  for (const word of ['ه', 'هل', 'هلا', 'هلا']) { text = applyWholeWord(text, word); } // the last one settles the word
-  assert.equal(text, 'هلا');
-  for (const part of [' ', 'h', 'he', 'hel', 'hell', 'hello', 'hello']) { text = applyWholeWord(text, part); }
-  assert.equal(text, 'هلا hello');
+test('a real iPhone says each keystroke twice (the letter, then the whole word): the word is left out, real double letters stay', async () => {
+  const { Echoes } = await import('../src/appleRemote/rti.js');
+  let clock = 0;
+  const echoes = new Echoes(() => clock);
+  let field = '';
+  const say = (edit, gap = 2) => {
+    clock += gap;
+    const e = { assert: null, insert: null, remove: 0, ...edit };
+    if (!echoes.isEcho(field, e)) { field = applyEdit(field, e); }
+  };
+  const key = (letter, word) => { say({ insert: letter }, 300); say({ insert: word }); };
+  key('ه', 'ه'); key('ل', 'هل'); key('ا', 'هلا'); // exactly what the log of a real phone showed
+  assert.equal(field, 'هلا');
+  say({ remove: 1 }, 300); say({ insert: 'هل' }); // a backspace is followed by the word too
+  assert.equal(field, 'هل');
+  field = ''; key('h', 'h'); key('e', 'he'); key('l', 'hel'); key('l', 'hell'); key('o', 'hello');
+  assert.equal(field, 'hello');
+  say({ insert: '1' }, 300); say({ insert: '1' }, 300); // a phone that says nothing twice: two slow taps are two characters
+  assert.equal(field, 'hello11');
 });

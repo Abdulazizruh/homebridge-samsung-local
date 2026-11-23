@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.11
+
+Trial version on the "beta" channel. Same as beta.10, plus:
+
+- **Doubled letters: the cause, read from the log of a real iPhone.** The iPhone says every keystroke twice: first the one letter (or the one removal), then at once the whole word as it now stands. The plugin added both. The second message is now left out, since the field already ends with it. The guess of beta.10 was wrong and is removed. Not yet confirmed on a real TV.
+- **Settings.** "How it appears in Apple Home" and "iPhone remote with keyboard" are each in a frame with a coloured title, and the chosen card is marked.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.10، ومعها:
+
+- **تكرار الحروف: السبب، مقروءًا من سجل آيفون حقيقي.** الآيفون يقول كل ضغطة مرتين: الحرف الواحد أولًا (أو الحذف الواحد)، ثم في الحال الكلمة كلها كما صارت. وكانت الإضافة تضيف الاثنين. الآن تُترك الرسالة الثانية، لأن الخانة تنتهي بها أصلًا. تخمين beta.10 كان خاطئًا وحُذف. لم يتأكد بعد على تلفزيون حقيقي.
+- **الإعدادات.** قسم «كيف يظهر في Apple Home» وقسم «ريموت الآيفون مع الكيبورد» صار كل منهما في إطار له عنوان ملوّن، والبطاقة المختارة مميّزة.
+
 ## 1.4.0-beta.10
 
 Trial version on the "beta" channel. Same as beta.9, plus:

@@ -50,22 +50,25 @@ export function applyEdit(text, edit, max = 1024) {
   return chars.slice(0, max).join('');
 }
 
-/** How many characters at the end of `text` are also the start of `insert` (the longest such run). */
-export function overlap(text, insert) {
-  const t = Array.from(text ?? ''); const i = Array.from(insert ?? '');
-  for (let k = Math.min(t.length, i.length); k > 0; k -= 1) {
-    if (t.slice(t.length - k).join('') === i.slice(0, k).join('')) { return k; }
-  }
-  return 0;
-}
-
 /**
- * Some iPhone keyboards send, with every letter, the whole word typed so far
- * (and once more when the word is settled) instead of the one new letter.
- * Read that way, the word replaces its own beginning at the end of the field.
+ * A real iPhone keyboard says every keystroke twice: first the one edit (a
+ * letter added, or a letter removed), and in the same breath the whole word as
+ * it now stands. The second is not typing: the field already ends with it.
+ * Seen on iOS 26 with Arabic and English keyboards; pyatv's own remote sends
+ * no such second message, which is why a simulated phone never showed it.
  */
-export function applyWholeWord(text, insert, max = 1024) {
-  const chars = Array.from(text ?? '');
-  const k = overlap(text, insert);
-  return chars.slice(0, chars.length - k).concat(Array.from(insert)).slice(0, max).join('');
+const ECHO_MS = 200; // the word follows its keystroke at once; two real taps on one key are slower
+
+export class Echoes {
+  constructor(now = Date.now) { this.now = now; this.awaiting = false; this.at = 0; }
+
+  /** True when this edit only repeats what the keystroke before it already did. */
+  isEcho(field, edit) {
+    const now = this.now();
+    const plain = Boolean(edit.insert) && !edit.remove && edit.assert === null;
+    const echo = plain && this.awaiting && now - this.at <= ECHO_MS && String(field ?? '').endsWith(edit.insert);
+    this.awaiting = !echo && (Boolean(edit.insert) || edit.remove > 0) && edit.assert === null; // one word per keystroke
+    this.at = now;
+    return echo;
+  }
 }
