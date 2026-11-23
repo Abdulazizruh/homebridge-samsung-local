@@ -15,7 +15,7 @@ import { pack, unpack } from './opack.js';
 import { Tlv, TlvError, readTlv, writeTlv } from './tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer, verify } from './crypto.js';
 import { applyEdit, documentState, readEdit } from './rti.js';
-import { PHASE, Pointer, Swipes } from './gestures.js';
+import { PHASE, Swipes } from './gestures.js';
 
 const { SRP, SrpServer } = srp;
 const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPACK: 8 };
@@ -48,7 +48,6 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
-    this.pointer = new Pointer();
     this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
     this.lastSelect = 0;
@@ -258,16 +257,7 @@ class Connection {
   }
 
   // ---- what the remote does
-  click() {
-    // A tap arrives both as a touch and as a button; one click on the TV is meant.
-    const now = Date.now();
-    if (now - this.lastSelect < SELECT_REPEAT_MS) { return; }
-    this.lastSelect = now;
-    this.server.emit('click');
-  }
-
   key(name) {
-    if (name === 'KEY_ENTER' && this.server.touch === 'pointer') { this.click(); return; }
     if (name === 'KEY_ENTER') {
       // A tap arrives both as a touch and as a button; one press on the TV is meant.
       const now = Date.now();
@@ -331,11 +321,6 @@ const HANDLERS = {
   _hidt(message, c) {
     const phase = PHASE[Number(c._tPh)]; const x = Number(c._cx ?? 0); const y = Number(c._cy ?? 0);
     if (!Number.isFinite(x) || !Number.isFinite(y)) { return; }
-    if (this.server.touch === 'pointer') {
-      const step = this.pointer.feed(phase, x, y);
-      if (step === 'CLICK') { this.click(); } else if (step) { this.server.emit('move', step.dx, step.dy); }
-      return;
-    }
     const direction = this.swipes.feed(phase, x, y);
     if (direction) { this.key(SWIPE_KEYS[direction]); }
   },
@@ -384,7 +369,6 @@ const HANDLERS = {
  * One stand-in per TV.
  * Events: 'key' (a Samsung key name), 'power' (true, false or 'toggle'),
  * 'text' (the whole text of the field), 'sessions' (how many remotes are open),
- * 'move' (pointer step dx, dy) and 'click' when `touch` is 'pointer',
  * 'paired' (the phone's identifier).
  */
 export class CompanionServer extends EventEmitter {
@@ -400,7 +384,6 @@ export class CompanionServer extends EventEmitter {
     this.connections = new Set();
     this.wrongCodes = 0;
     this.keyboardOpen = false;
-    this.touch = 'arrows'; // or 'pointer'
     this.text = '';
     this.awake = true;
     this.tcp = net.createServer((socket) => {

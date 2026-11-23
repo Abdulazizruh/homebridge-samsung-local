@@ -228,15 +228,6 @@
               "placeholder": "0000",
               "description": "Four digits a new iPhone or iPad enters once. Empty means 0000. Anyone on your network who knows it can pair, so choose your own digits if others use the network."
             },
-            "appleRemoteTouch": {
-              "title": "Touch area of the iPhone remote (trial)",
-              "type": "string",
-              "default": "arrows",
-              "oneOf": [
-                { "title": "Arrows: a swipe is one step", "enum": ["arrows"] },
-                { "title": "Pointer: the finger moves the TV's pointer, a tap clicks", "enum": ["pointer"] }
-              ]
-            },
             "model": {
               "title": "Model",
               "type": "string"

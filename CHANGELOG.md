@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.8
+
+Trial version on the "beta" channel. Same as beta.7, with one way to use the touch area, as on an Apple TV:
+
+- **Sliding like Apple TV.** While the finger slides on the touch area, the selection on the TV moves one step for every stretch of the way; a short flick is one step and a tap selects. Before, a whole swipe was only one step.
+- **The pointer option of beta.5 is removed**, so the remote behaves one way for everyone.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.7، مع طريقة واحدة للوحة اللمس كما في Apple TV:
+
+- **سحب مثل Apple TV.** ما دام الإصبع يسحب على لوحة اللمس ينتقل التحديد على التلفزيون خطوة لكل مسافة يقطعها؛ والسحبة القصيرة خطوة واحدة واللمسة تختار. قبل ذلك كانت السحبة كلها خطوة واحدة.
+- **حُذف خيار المؤشر الذي أضيف في beta.5**، ليعمل الريموت بطريقة واحدة للجميع.
+
 ## 1.4.0-beta.7
 
 Trial version on the "beta" channel. Same as beta.6, plus:

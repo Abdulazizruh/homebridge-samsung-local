@@ -6,8 +6,6 @@ const SCREEN_PORT = 9197;
 // The remote channel stays open this long after the last key, so the next
 // press goes out at once instead of waiting for a new secure connection.
 const REMOTE_IDLE_MS = 5 * 60_000;
-const POINTER_STEP_MS = 40; // pointer steps are sent at most this often
-const POINTER_SHOWN_MS = 4000; // a tap is a click only while the pointer was moved this recently
 const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
 const INPUTS = [
   { id: 1, name: 'TV', key: 'KEY_TV' },
@@ -101,13 +99,10 @@ export class TvAccessory {
    * Trial: show this TV to the iPhone's own remote as an Apple TV, so the
    * iPhone keyboard can type into the TV's text fields.
    */
-  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, touch = 'arrows', pin }) {
+  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, pin }) {
     this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise, pin });
     const phone = await this.appleRemote.start();
     this.phone = phone;
-    phone.touch = touch === 'pointer' ? 'pointer' : 'arrows';
-    phone.on('move', (dx, dy) => this.#move(dx, dy));
-    phone.on('click', () => this.#click());
     phone.awake = this.on;
     phone.on('key', (code) => this.#press(code, 'iPhone remote key').catch(() => {}));
     phone.on('power', (want) => this.#setPower(want === 'toggle' ? !this.on : want).catch(() => {}));
@@ -120,33 +115,6 @@ export class TvAccessory {
       }
     });
     return phone;
-  }
-
-  /** Finger movements arrive many times a second; they are added up and sent as one step at a time. */
-  #move(dx, dy) {
-    this.step = { dx: (this.step?.dx ?? 0) + dx, dy: (this.step?.dy ?? 0) + dy };
-    this.pointerAt = Date.now();
-    if (this.stepTimer || !this.on) {
-      return;
-    }
-    this.stepTimer = setTimeout(() => {
-      this.stepTimer = null;
-      const { dx: x, dy: y } = this.step;
-      this.step = null;
-      if (Math.round(x) || Math.round(y)) {
-        this.remote.move(x, y).catch(() => {});
-      }
-    }, POINTER_STEP_MS);
-    this.stepTimer.unref?.();
-  }
-
-  /** A tap clicks where the pointer is. With no pointer on screen (it was not moved lately), it is the OK key. */
-  #click() {
-    if (Date.now() - (this.pointerAt ?? 0) < POINTER_SHOWN_MS) {
-      this.remote.click().catch(() => {});
-    } else {
-      this.#press('KEY_ENTER', 'iPhone remote key').catch(() => {});
-    }
   }
 
   /** The newest text wins: what is on the iPhone is what the field should hold. */

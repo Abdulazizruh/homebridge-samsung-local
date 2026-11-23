@@ -187,20 +187,6 @@ export class TizenRemote {
     return new Promise((resolve, reject) => this.socket.send(JSON.stringify({ method, params }), (err) => (err ? reject(err) : resolve())));
   }
 
-  /** Move the TV's on-screen pointer by a small step. */
-  async move(dx, dy) {
-    await this.open();
-    this.#touch();
-    await this.#send({ Cmd: 'Move', Position: { x: Math.round(dx), y: Math.round(dy), Time: '0' }, TypeOfRemote: 'ProcessMouseDevice' });
-  }
-
-  /** Click where the pointer is. */
-  async click() {
-    await this.open();
-    this.#touch();
-    await this.#send({ Cmd: 'LeftClick', TypeOfRemote: 'ProcessMouseDevice' });
-  }
-
   /**
    * Put text into the field the TV's on-screen keyboard is open on. The whole
    * text is sent each time and replaces what the field holds; `done` then

@@ -11,7 +11,7 @@ import { makeApi, quietLog, tmpDir, waitFor } from './support.js';
 
 /** A stand-in TV: the info page and the remote-control channel, without TLS. */
 async function fakeTv({ power = 'on', allow = true } = {}) {
-  const tv = { keys: [], texts: [], tokens: [], emits: [], moves: [], clicks: 0, power, allow, keyboardOpen: false };
+  const tv = { keys: [], texts: [], tokens: [], emits: [], power, allow, keyboardOpen: false };
   const web = http.createServer((req, res) => {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ device: { id: 'uuid:tv-test-1', name: 'Living Room TV', modelName: 'QA65TEST', wifiMac: 'aa:bb:cc:00:11:22', TokenAuthSupport: 'true', ...(tv.power ? { PowerState: tv.power } : {}) } }));
@@ -29,10 +29,6 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
     socket.on('message', (raw) => {
       const msg = JSON.parse(String(raw));
       if (msg.method === 'ms.channel.emit') { tv.emits.push(msg.params.event); tv.texts.push('<announce>'); return; }
-      if (msg.params.TypeOfRemote === 'ProcessMouseDevice') {
-        if (msg.params.Cmd === 'Move') { tv.moves.push([msg.params.Position.x, msg.params.Position.y]); } else { tv.clicks += 1; }
-        return;
-      }
       if (msg.params.TypeOfRemote === 'SendInputString') {
         tv.texts.push(Buffer.from(msg.params.Cmd, 'base64').toString('utf8'));
         // A real TV says back what the field now holds.
@@ -239,27 +235,16 @@ test('TV keyboard: the TV says when its keyboard opens and closes, and a whole A
   assert.deepEqual(tv.texts.slice(4), ['<announce>', 'a', 'ab']);
 });
 
-test('iPhone remote in pointer mode: finger movement moves the TV pointer, a tap clicks, and what the TV says back is never typed again', async (t) => {
+test('iPhone remote typing: what the TV says back about its field is never typed again', async (t) => {
   const tv = await fakeTv();
   const storage = tmpDir();
-  const { platform } = await bootTv(tv, 'tile', storage, { appleRemote: true, appleRemoteTouch: 'pointer' });
+  const { platform } = await bootTv(tv, 'tile', storage, { appleRemote: true });
   t.after(async () => { await platform.stop(); tv.close(); });
   const handler = platform.tvs[0];
   await waitFor(() => handler.phone && handler.on);
-  assert.equal(handler.phone.touch, 'pointer');
   assert.equal(handler.phone.name, 'Majlis TV +', 'beside a TV tile the second name is marked');
   handler.phone.emit('sessions', 1);
   await waitFor(() => tv.tokens.length > 0);
-
-  handler.phone.emit('click'); // no pointer on screen yet: the OK key
-  await waitFor(() => tv.keys.length === 1);
-  assert.deepEqual(tv.keys, ['KEY_ENTER']);
-  handler.phone.emit('move', 10, 4); handler.phone.emit('move', 6, -1); // added up into one step
-  await waitFor(() => tv.moves.length === 1);
-  assert.deepEqual(tv.moves, [[16, 3]]);
-  handler.phone.emit('click');
-  await waitFor(() => tv.clicks === 1);
-  assert.equal(tv.keys.length, 1);
 
   tv.say('ms.remote.imeStart');
   await waitFor(() => handler.phone.keyboardOpen);

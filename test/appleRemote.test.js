@@ -180,19 +180,19 @@ test('iPhone remote: edits count whole characters; a short touch is Select and a
   s.feed('press', 500, 500); assert.equal(s.feed('release', 650, 640), null, 'a diagonal is no clear direction');
 });
 
-test('touch area as a pointer: movements become steps and a short touch is a click', async () => {
-  const { Pointer } = await import('../src/appleRemote/gestures.js');
-  let clock = 0;
-  const p = new Pointer(() => clock);
-  assert.equal(p.feed('press', 500, 500), null);
-  clock = 900; // a slow, small movement
-  assert.deepEqual(p.feed('hold', 510, 495), { dx: 16, dy: -8 });
-  assert.deepEqual(p.feed('release', 520, 495), { dx: 16, dy: 0 });
-  assert.equal(p.feed('hold', 600, 600), null, 'nothing without a finger down');
-  p.feed('press', 100, 100);
-  clock += 120;
-  assert.equal(p.feed('release', 103, 101), 'CLICK');
-  assert.equal(p.feed('click', 0, 0), 'CLICK');
+test('touch area like an Apple TV: a long slide moves several steps, a flick one, a tap selects', () => {
+  const s = new Swipes();
+  const out = [];
+  s.feed('press', 100, 500);
+  for (let x = 120; x <= 700; x += 20) { const d = s.feed('hold', x, 505); if (d) { out.push(d); } }
+  const end = s.feed('release', 700, 505); if (end) { out.push(end); }
+  assert.deepEqual(out, ['RIGHT', 'RIGHT', 'RIGHT'], 'one step for every stretch of the slide');
+  s.feed('press', 500, 500); s.feed('hold', 500, 420);
+  assert.equal(s.feed('release', 500, 370), 'UP', 'a short flick is one step');
+  s.feed('press', 500, 500);
+  assert.equal(s.feed('release', 504, 498), 'SELECT');
+  s.feed('press', 500, 500); s.feed('hold', 560, 500); s.feed('hold', 500, 500);
+  assert.equal(s.feed('release', 500, 500), null, 'a finger that wandered and came back is no tap');
 });
 
 test('pairing code: 0000 unless the owner chose four digits, and changing it keeps the phones already paired', async () => {
