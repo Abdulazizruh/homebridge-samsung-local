@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.26
+
+Trial version on the "beta" channel. Same as beta.25, plus:
+
+- **The pairing code is shown under the chosen remote.** Choosing "Remote like Apple TV" (or both) now shows the code right there, with a note that it can be changed further down. It follows what is typed in the code field.
+- **iPhone remote stuck on "Connecting": the silent connection is closed sooner and every time.** The log of beta.25 shows that saying whether the TV is awake changed nothing, and that every half-minute wait left came from a silent connection the plugin had stopped closing after four closes. A remote that opens asks for its session within a twentieth of a second, so the silent connection is now closed after one second instead of three, and up to thirty times in two minutes instead of four.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.25، ومعها:
+
+- **رمز الاقتران يظهر تحت الريموت المختار.** عند اختيار «ريموت مثل Apple TV» (أو الاثنين معًا) يظهر الرمز في مكانه، مع ملاحظة أن تغييره في الأسفل. ويتبع ما يُكتب في خانة الرمز.
+- **ريموت الآيفون يعلق على «Connecting»: إغلاق الاتصال الساكت أسرع وفي كل مرة.** سجل beta.25 يُظهر أن إخبار الجوال بأن التلفزيون مستيقظ لم يغيّر شيئًا، وأن كل انتظار نصف دقيقة بقي كان من اتصال ساكت توقفت الإضافة عن إغلاقه بعد أربع مرات. الريموت الذي يفتح يطلب جلسته خلال جزء من عشرين من الثانية، فصار الاتصال الساكت يُغلق بعد ثانية واحدة بدل ثلاث، وحتى ثلاثين مرة في دقيقتين بدل أربع.
+
 ## 1.4.0-beta.25
 
 Trial version on the "beta" channel. Same as beta.24, plus what its log showed:
