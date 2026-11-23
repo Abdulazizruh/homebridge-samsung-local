@@ -72,8 +72,8 @@ export function wake(mac, { address = '255.255.255.255', port = 9, repeat = 3 } 
  * short idle time, so the TV is not kept awake by an open connection.
  */
 export class TizenRemote {
-  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null }) {
-    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard });
+  constructor({ host, token = null, wsPort = 8002, secure = true, idleMs = 20_000, connectMs = 8000, onToken = null, onKeyboard = null, onFieldText = null }) {
+    Object.assign(this, { host, token, wsPort, secure, idleMs, connectMs, onToken, onKeyboard, onFieldText });
     this.socket = null;
     this.opening = null;
     this.idleTimer = null;
@@ -113,6 +113,13 @@ export class TizenRemote {
         // fact is passed on, never what is typed.
         if (msg.event === 'ms.remote.imeStart' || msg.event === 'ms.remote.imeEnd') {
           this.onKeyboard?.(msg.event === 'ms.remote.imeStart');
+          return;
+        }
+        // Some TVs also say what the field already holds (as base64 text).
+        if (msg.event === 'ms.remote.imeUpdate') {
+          if (typeof msg.data === 'string' && msg.data.length <= 8192 && /^[A-Za-z0-9+/]*={0,2}$/.test(msg.data)) {
+            this.onFieldText?.(Buffer.from(msg.data, 'base64').toString('utf8'));
+          }
           return;
         }
         if (msg.event === 'ms.channel.connect') {

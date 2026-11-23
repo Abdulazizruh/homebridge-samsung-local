@@ -50,6 +50,7 @@ export class TvAccessory {
     this.remote = new TizenRemote({
       host: entry.host, token, wsPort: ports.wsPort, secure: ports.secure ?? true, onToken: saveToken, idleMs: REMOTE_IDLE_MS,
       onKeyboard: (open) => this.#keyboard(open),
+      onFieldText: (text) => this.phone?.setFieldText(text),
     });
     this.keyboardOpen = false;
     this.phone = null; // the iPhone-remote stand-in, when the option is on
@@ -74,8 +75,17 @@ export class TvAccessory {
       return;
     }
     this.keyboardOpen = open;
-    this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`);
-    this.phone?.setKeyboard(open);
+    this.typing = null; // typing meant for the field that just closed never reaches the next one
+    const sent = this.typedCount ?? 0;
+    this.typedCount = 0;
+    const shown = open && this.phone ? this.phone.setKeyboard(true) : 0;
+    if (!open) {
+      this.phone?.setKeyboard(false);
+    }
+    // Three separate facts, so a trial shows where the path stops: the TV's event, the iPhone keyboard, the text.
+    this.log.info(`[${this.displayName}] the TV ${open ? 'opened' : 'closed'} its on-screen keyboard.`
+      + (open && this.phone ? ` iPhone keyboard asked to open on ${shown} remote${shown === 1 ? '' : 's'}.` : '')
+      + (!open && this.phone ? ` Typed text was sent to the TV ${sent} time${sent === 1 ? '' : 's'}.` : ''));
   }
 
   /**
@@ -111,7 +121,11 @@ export class TvAccessory {
       while (this.typing !== null && this.typing !== undefined) {
         const next = this.typing;
         this.typing = null;
+        if (!this.keyboardOpen) {
+          break; // the field closed while this was waiting
+        }
         await this.remote.text(next);
+        this.typedCount = (this.typedCount ?? 0) + 1;
       }
     } catch (err) {
       this.log.warn(`[${this.displayName}] typing from the iPhone did not reach the TV: ${err.message}`);

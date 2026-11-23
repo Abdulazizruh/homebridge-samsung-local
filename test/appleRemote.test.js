@@ -144,10 +144,18 @@ test('iPhone remote: pairs with the code once, then buttons, swipes and typed te
   await until(() => seen.texts.length === 4);
   server.setKeyboard(false);
   await again.event('_tiStopped');
+  again.typed({ insert: 'late' }); // typed after the field closed: dropped
+  await new Promise((r) => setTimeout(r, 80));
+  server.setKeyboard(true);
+  await again.event('_tiStarted');
+  server.setFieldText('مكة'); // the TV says the new field already holds a word
+  again.typed({ insert: ' 2026' });
+  await until(() => seen.texts.length === 5);
+
 
   assert.deepEqual(seen.keys, ['KEY_UP', 'KEY_MUTE', 'KEY_RIGHT']);
   assert.deepEqual(seen.power, ['toggle']);
-  assert.deepEqual(seen.texts, ['مكه', 'مك', 'مكة 2026', 'المدينة']);
+  assert.deepEqual(seen.texts, ['مكه', 'مك', 'مكة 2026', 'المدينة', 'مكة 2026']);
   assert.deepEqual(seen.sessions, [1]);
 
   const unknown = new Phone(port); // never paired: refused without the code

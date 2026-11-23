@@ -259,13 +259,14 @@ class Connection {
 
   /** The TV opened or closed a text field: show or hide the iPhone keyboard. */
   keyboard(open_) {
-    if (!this.rti.registered || this.rti.open === open_) { return; }
+    if (!this.rti.registered || this.rti.open === open_) { return false; }
     this.rti.open = open_;
     if (open_) {
       this.event('_tiStarted', { _tiD: documentState(this.rti.uuid, this.server.text) });
     } else {
       this.event('_tiStopped', {});
     }
+    return open_;
   }
 }
 
@@ -334,7 +335,7 @@ const HANDLERS = {
   },
   _tic(message, c) {
     if (!c._tiD) { return; }
-    if (!this.rti.registered) { return; }
+    if (!this.rti.registered || !this.rti.open || !this.server.keyboardOpen) { return; } // no field is open
     const text = applyEdit(this.server.text, readEdit(c._tiD));
     if (text === this.server.text) { return; }
     this.server.text = text; // one field on the TV, whichever phone types into it
@@ -403,6 +404,15 @@ export class CompanionServer extends EventEmitter {
   setKeyboard(open_) {
     if (Boolean(open_) !== this.keyboardOpen) { this.text = ''; } // the TV starts each field empty
     this.keyboardOpen = Boolean(open_);
-    for (const c of this.connections) { c.keyboard(this.keyboardOpen); }
+    let shown = 0;
+    for (const c of this.connections) { if (c.keyboard(this.keyboardOpen)) { shown += 1; } }
+    return shown; // how many remotes were asked to show the iPhone keyboard
+  }
+
+  /** The TV said what its open field holds; typing continues from there. Our own typing coming back changes nothing. */
+  setFieldText(text) {
+    if (this.keyboardOpen && typeof text === 'string' && text !== this.text) {
+      this.text = Array.from(text).slice(0, 1024).join('');
+    }
   }
 }

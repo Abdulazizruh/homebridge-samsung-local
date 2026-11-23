@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.2
+
+Trial version on the "beta" channel. iPhone remote with keyboard, after a review of beta.1:
+
+- Typing that was still on its way when a field closed is dropped, and never reaches the next field.
+- When a TV says what an opened field already holds, typing continues from that text.
+- The log now gives three separate facts for each field: the TV opened its keyboard, how many remotes were asked to show the iPhone keyboard, and how many times typed text was sent to the TV (never the text itself). A trial then shows where the path stops.
+
+Still not tried with a real iPhone or a real TV. Whether a TV replaces or appends sent text can only be seen on its screen.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». ريموت الآيفون مع الكيبورد، بعد مراجعة beta.1:
+
+- الكتابة التي كانت في طريقها حين أُغلقت الخانة تُسقط، ولا تصل إلى الخانة التالية.
+- حين يُبلغ التلفزيون بما تحتويه الخانة المفتوحة، تُستكمل الكتابة من ذلك النص.
+- السجل يعطي ثلاث حقائق منفصلة لكل خانة: فتح التلفزيون للكيبورد، وعدد الريموتات التي طُلب منها إظهار كيبورد الآيفون، وعدد مرات إرسال النص إلى التلفزيون (دون النص نفسه). فتُظهر التجربة أين يتوقف المسار.
+
+لم تُجرَّب بعد مع آيفون حقيقي ولا تلفزيون حقيقي. وهل يستبدل التلفزيون النص المرسل أم يُلحقه، هذا يُرى على شاشته فقط.
+
 ## 1.4.0-beta.1
 
 Trial version, published on the "beta" channel only. Stable installs stay on 1.3.2.

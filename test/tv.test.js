@@ -245,6 +245,10 @@ test('iPhone remote option: its keys and typed text reach the TV, the TV keyboar
   assert.equal(tv.texts.at(-1), 'مكة');
   tv.say('ms.remote.imeEnd');
   await waitFor(() => !handler.phone.keyboardOpen);
+  const before = tv.texts.length;
+  handler.phone.emit('text', 'late'); // the field is closed: nothing goes to the TV
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(tv.texts.length, before);
   await platform.stop();
 
   const second = await bootTv(tv, 'tile', storage); // option off
