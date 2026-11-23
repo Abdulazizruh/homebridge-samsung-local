@@ -2,6 +2,14 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.3.2
+
+No change in behaviour. The plugin description now mentions the automatic scan, and the README explains it with three pictures.
+
+**بالعربية**
+
+لم يتغيّر السلوك. وصف الإضافة صار يذكر المسح التلقائي، وصفحة الشرح تعرضه بثلاث صور.
+
 ## 1.3.1
 
 Automatic scan, after the first try on real appliances found nothing:
