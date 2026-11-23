@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.24
+
+Trial version on the "beta" channel. Same as beta.23, plus what its log showed:
+
+- **iPhone remote stuck on "Connecting": looking at what the silent connection sends.** Closing the silent connection (beta.23) made the phone try again, and it then connected only after several tries. The half-minute wait looks like the phone waiting for an answer to something this plugin did not answer. Until now a message the plugin could not read was dropped without a word. Now it is written in the log (its kind, size and reason, never its content), and a connection that left without opening the remote says how many messages of each kind arrived and when the last one came.
+- **One value Apple uses (minus one) was refused** by the reader of the phone's messages, which dropped the whole message. It is now read.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.23، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون يعلق على «Connecting»: فحص ما يرسله الاتصال الساكت.** إغلاق الاتصال الساكت (beta.23) جعل الجوال يحاول من جديد، لكنه لم يتصل إلا بعد عدة محاولات. انتظار نصف الدقيقة يشبه انتظار الجوال ردًّا على شيء لم تردّ عليه الإضافة. حتى الآن كانت الرسالة التي لم تستطع الإضافة قراءتها تُهمل بصمت. الآن تُكتب في السجل (نوعها وحجمها والسبب، دون محتواها)، والاتصال الذي غادر دون فتح الريموت يذكر عدد الرسائل الواردة من كل نوع ومتى وصلت آخرها.
+- **قيمة تستخدمها Apple (سالب واحد) كان قارئ رسائل الجوال يرفضها** فيُهمل الرسالة كلها. الآن تُقرأ.
+
 ## 1.4.0-beta.23
 
 Trial version on the "beta" channel. Same as beta.22, plus what its log showed:

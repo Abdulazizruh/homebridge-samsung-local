@@ -77,12 +77,23 @@ class Connection {
     if (this.opened) {
       s.log.info(`[${s.name}] iPhone remote of ${this.who()} ended after ${lasted}s${this.remote ? ', without the phone closing its remote first' : ''}.`);
     } else if (this.verified) {
-      s.log.info(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}.`);
+      s.log.info(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. ${this.#heard()}`);
     } else if (this.stage) {
       // It reached us but never proved itself: where it stopped explains a remote that hangs before it opens.
       s.log.info(`[${s.name}] a device connected and left ${lasted}s later without proving itself; it got as far as: ${this.stage}.`);
     }
     this.server.forget(this);
+  }
+
+  /** What arrived on this connection, as kinds and counts only: for a connection that stayed silent. */
+  #heard() {
+    const kinds = [...(this.frames ?? new Map())].map(([type, n]) => `${n} of kind ${type}`).join(', ') || 'none';
+    const last = this.lastHeard ? `${((Date.now() - this.lastHeard) / 1000).toFixed(1)}s before it left` : 'never';
+    const notes = [];
+    if (this.bad) { notes.push(`${this.bad} not understood (${[...(this.badWhy ?? [])].join('; ')})`); }
+    if (this.answers) { notes.push(`${this.answers} without a request name`); }
+    if (this.buffer.length) { notes.push(`${this.buffer.length} bytes of an unfinished message`); }
+    return `Messages after proving itself: ${kinds}; the last one ${last}${notes.length ? `; ${notes.join(', ')}` : ''}.`;
   }
 
   #data(chunk) {
@@ -97,7 +108,14 @@ class Connection {
       try {
         this.#frame(header, payload);
       } catch (err) {
-        this.server.log.debug?.(`[${this.server.name}] iPhone remote: a message was not understood (${err.message}).`);
+        // Said aloud, once per reason: a request that is not understood gets no answer, and the phone waits for one.
+        const why = `kind ${header[0]}: ${String(err.message).replace(/[^\w .:-]/g, '?').slice(0, 60)}`;
+        (this.badWhy ??= new Set()).add(why);
+        const told = (this.server.notUnderstood ??= new Set());
+        if (told.size < 20 && !told.has(why)) {
+          told.add(why);
+          this.server.log.info(`[${this.server.name}] iPhone remote: a message of ${payload.length} bytes was not understood (${why}).`);
+        }
         this.bad = (this.bad ?? 0) + 1;
         if (this.bad > 8) { this.close(); return; }
       }
@@ -121,18 +139,22 @@ class Connection {
       return;
     }
     if (!this.keys) { this.close(); return; }
+    (this.frames ??= new Map()).set(type, (this.frames.get(type) ?? 0) + 1);
+    this.lastHeard = Date.now();
     if (type === FRAME.NoOp && payload.length === 0) { return; }
     let plain;
     try {
       plain = open(this.keys.in, counterNonce(this.counters.in), payload, header);
     } catch {
+      this.bad = (this.bad ?? 0) + 1;
+      (this.badWhy ??= new Set()).add(`kind ${type}: could not be opened with this connection's key`);
       this.close();
       return;
     }
     this.counters.in += 1;
     const [message] = unpack(plain);
     if (!message || typeof message !== 'object') { return; }
-    if (typeof message._i !== 'string') { return; } // a reply to one of our events
+    if (typeof message._i !== 'string') { this.answers = (this.answers ?? 0) + 1; return; } // a reply to one of our events
     if ((this.asked ??= []).length < 25) { this.asked.push(message._i.slice(0, 40).replace(/[^\w.-]/g, '?')); } // Apple's request names, for the log
     const handler = HANDLERS[message._i.toLowerCase()];
     if (handler) { handler.call(this, message, message._c ?? {}); return; }

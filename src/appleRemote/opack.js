@@ -89,6 +89,7 @@ export function unpack(data) {
     else if (tag === 0x02) { value = false; next = at + 1; remember = false; }
     else if (tag === 0x04) { value = null; next = at + 1; remember = false; }
     else if (tag === 0x05) { need(at + 1, 16); value = new Uuid(data.subarray(at + 1, at + 17)); next = at + 17; }
+    else if (tag === 0x07) { value = -1; next = at + 1; remember = false; }
     else if (tag === 0x06) { value = int(at + 1, 8); next = at + 9; }
     else if (tag >= 0x08 && tag <= 0x2f) { value = tag - 8; next = at + 1; remember = false; }
     else if (tag === 0x35) { need(at + 1, 4); value = data.readFloatLE(at + 1); next = at + 5; }

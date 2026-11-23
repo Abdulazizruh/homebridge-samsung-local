@@ -272,3 +272,8 @@ test('pairing code: 0000 unless the owner chose four digits, and changing it kee
   assert.deepEqual(second.clients, { phone: 'aa' });
 });
 
+
+test('OPACK: minus one, as Apple writes it, is read rather than refused', async () => {
+  const { unpack } = await import('../src/appleRemote/opack.js');
+  assert.deepEqual(unpack(Buffer.from([0xe1, 0x41, 0x61, 0x07]))[0], { a: -1 });
+});
