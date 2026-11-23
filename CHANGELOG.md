@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.18
+
+Trial version on the "beta" channel. Same as beta.17, plus:
+
+- **Settings: one question for the TV.** "How do you want this TV on the iPhone?" has four whole set-ups, so no two choices can disagree: a remote like Apple TV (marked recommended), the TV tile with the Home remote, both together (marked not recommended: two names for one TV, and inputs can be reached with the remote like Apple TV as well), or switches only.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.17، ومعها:
+
+- **الإعدادات: سؤال واحد للتلفزيون.** «كيف تريد هذا التلفزيون على الآيفون؟» له أربعة إعدادات كاملة، فلا يتعارض خياران: ريموت مثل Apple TV (موصى به)، أو بطاقة تلفزيون مع ريموت تطبيق المنزل، أو الاثنان معًا (لا نوصي به: اسمان لتلفزيون واحد، والمداخل تصلها بالريموت الذي مثل Apple TV أيضًا)، أو مفاتيح فقط.
+
 ## 1.4.0-beta.17
 
 Trial version on the "beta" channel. Same as beta.16, plus:
