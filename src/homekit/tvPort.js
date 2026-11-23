@@ -35,10 +35,12 @@ export function keepPort({ accessory, deviceId, file, log }) {
     }
     let port = 0;
     try {
-      const facts = readJson(file) ?? {};
-      const kept = Number(facts[deviceId]?.homePort) || 0;
+      const kept = Number((readJson(file) ?? {})[deviceId]?.homePort) || 0;
       port = await freePort(kept);
       if (port && port !== kept) {
+        // Several TVs start at the same moment: the file is read again here and written in one go,
+        // or each TV would write back the list it read before the others had added their port.
+        const facts = readJson(file) ?? {};
         writeJson(file, { ...facts, [deviceId]: { ...facts[deviceId], homePort: port } });
         if (kept) { log?.info?.(`[${accessory.displayName}] its usual port for Apple Home was taken; it now keeps ${port}.`); }
       }

@@ -46,6 +46,7 @@ export function readEdit(archive) {
   }).join(' ').replace(/[^\w(), .-]/g, '?').slice(0, 300);
   return {
     shape,
+    keyboard: named(ops).includes('inputSourceState'), // said by the keyboard itself: a key was pressed
     assert: typeof assert === 'string' ? assert : null,
     insert: typeof insert === 'string' ? insert : null,
     remove: Number.isInteger(remove) && remove > 0 ? remove : 0,
@@ -61,31 +62,24 @@ export function applyEdit(text, edit, max = 1024) {
 }
 
 /**
- * A real iPhone keyboard says every keystroke twice: first the one edit (a
- * letter added, or a letter removed), and in the same breath the whole word as
- * it now stands. The second is not typing: the field already ends with it.
- * Seen on iOS 26 with Arabic and English keyboards; pyatv's own remote sends
- * no such second message, which is why a simulated phone never showed it.
+ * A real iPhone (iOS 26) follows a keystroke with a second message that is not
+ * typing. Read from the logs of a real phone, by field names and lengths only:
+ *  - a keystroke carries the keyboard's own state (`inputSourceState`) and the one letter;
+ *  - the message after it carries no keyboard state, and as its text everything
+ *    inserted since the keyboard opened, deletions not taken out. It grows by one
+ *    with each letter and never shrinks, so it is no picture of the field either.
+ * So it is told apart by what it is: an insertion without keyboard state, right
+ * after a keystroke, ending with what that keystroke added. Never by comparing
+ * it with the field, and never by timing. pyatv's remote sends no such message.
  */
-const ECHO_MS = 200; // the word follows its keystroke at once; two real taps on one key are slower
-
 export class Echoes {
-  /** `memory` is shared by all connections of one TV: once a phone is known to repeat words, a late repeat is still one. */
-  constructor(now = Date.now, memory = {}) { this.now = now; this.memory = memory; this.awaiting = true; this.at = 0; }
+  constructor() { this.last = null; }
 
-  /** True when this edit only repeats what the keystroke before it already did. */
-  isEcho(field, edit) {
-    const now = this.now();
+  /** True when this edit is the message that follows a keystroke and adds nothing. */
+  isEcho(edit) {
     const plain = Boolean(edit.insert) && !edit.remove && edit.assert === null;
-    const long = plain && Array.from(edit.insert).length >= 2;
-    // A word of two letters or more that the field already ends with is the repeat, however late it comes
-    // (also the first thing a phone says after it reconnects). One letter alone could be a real second tap,
-    // so it counts only at once after its keystroke, or from a phone already known to repeat.
-    const echo = plain && this.awaiting && String(field ?? '').endsWith(edit.insert)
-      && (long || this.memory.repeats || now - this.at <= ECHO_MS);
-    if (echo && long) { this.memory.repeats = true; }
-    this.awaiting = !echo && (Boolean(edit.insert) || edit.remove > 0) && edit.assert === null; // one word per keystroke
-    this.at = now;
+    const echo = plain && !edit.keyboard && this.last !== null && edit.insert.endsWith(this.last);
+    this.last = plain && edit.keyboard ? edit.insert : null; // one such message per keystroke
     return echo;
   }
 }

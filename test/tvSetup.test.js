@@ -53,4 +53,15 @@ test('TV tile port: the tile keeps one Apple Home port across restarts, moves wh
   assert.notEqual(moved, first);
   assert.equal(JSON.parse(fs.readFileSync(file, 'utf8'))['tv-1'].homePort, moved);
   assert.ok(await freePort(0) > 0);
+
+  // Three TVs start in the same moment: each one's port is kept, none overwrites another's.
+  const shared = path.join(tmpDir(), 'tv-facts.json');
+  await Promise.all(['a', 'b', 'c'].map((id) => {
+    const accessory = { displayName: id, _associatedHAPAccessory: { publish: async () => {} } };
+    keepPort({ accessory, deviceId: id, file: shared });
+    return accessory._associatedHAPAccessory.publish({}, false);
+  }));
+  const kept = JSON.parse(fs.readFileSync(shared, 'utf8'));
+  assert.deepEqual(Object.keys(kept).sort(), ['a', 'b', 'c']);
+  assert.equal(new Set(Object.values(kept).map((v) => v.homePort)).size, 3);
 });

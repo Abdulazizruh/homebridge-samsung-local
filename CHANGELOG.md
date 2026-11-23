@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.15
+
+Trial version on the "beta" channel. Same as beta.14, plus what the log of a real iPhone showed:
+
+- **Typing, by what the message is.** A keystroke carries the keyboard's own state and one letter. The message after it carries no keyboard state, and as text everything inserted since the keyboard opened, deletions not taken out. It is now left out for being that kind of message, right after a keystroke, and no longer by timing or by comparing it with the field. This also covers typing again after deleting everything, where beta.13 still multiplied the text.
+- **TV tile port.** In beta.13 only one of several TVs kept its port, because the TVs wrote the list at the same moment. Each one's port is now kept.
+- **iPhone remote that hangs when opened again.** Every session now gets a number of its own. Not yet confirmed as the cause.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.14، ومعها ما أظهره سجل آيفون حقيقي:
+
+- **الكتابة، بحسب نوع الرسالة.** الضغطة تحمل حالة الكيبورد نفسه وحرفًا واحدًا. والرسالة التي تليها لا تحمل حالة الكيبورد، ونصها كل ما أُدخل منذ فتح الكيبورد دون طرح المحذوف. الآن تُترك لأنها من هذا النوع وتأتي بعد ضغطة مباشرة، وليس بالتوقيت أو بمقارنتها بالخانة. وهذا يشمل الكتابة من جديد بعد حذف كل شيء، وهي الحالة التي بقي النص يتضاعف فيها في beta.13.
+- **منفذ بطاقة التلفزيون.** في beta.13 احتفظ تلفزيون واحد فقط بمنفذه، لأن التلفزيونات كتبت القائمة في اللحظة نفسها. الآن يُحفظ منفذ كل واحد.
+- **ريموت الآيفون يعلق عند فتحه مرة ثانية.** كل جلسة تأخذ الآن رقمًا خاصًا بها. لم يتأكد بعد أنه السبب.
+
 ## 1.4.0-beta.14
 
 Trial version on the "beta" channel. Same as beta.13, plus:

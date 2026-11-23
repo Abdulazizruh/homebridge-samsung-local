@@ -48,7 +48,7 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
-    this.echoes = new Echoes(Date.now, (server.echoMemory ??= {}));
+    this.echoes = new Echoes();
     this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
     this.lastSelect = 0;
@@ -290,7 +290,12 @@ class Connection {
 const ok = function ok(message) { this.reply(message, {}); };
 const HANDLERS = {
   _systeminfo: ok,
-  _sessionstart(message, c) { this.sid = c._sid; this.reply(message, { _sid: 5555 }); },
+  _sessionstart(message, c) {
+    this.sid = c._sid;
+    // A number of its own for every session: a phone that comes back while its earlier session is
+    // still winding down must never be handed that session's number again.
+    this.reply(message, { _sid: crypto.randomInt(1, 0x7fffffff) });
+  },
   _sessionstop: ok,
   tvrcsessionstart(message, c) {
     this.remote = true;
@@ -359,7 +364,7 @@ const HANDLERS = {
     if (!this.rti.registered || !this.rti.open || !this.server.keyboardOpen) { return; } // no field is open
     const edit = readEdit(c._tiD);
     const before = this.server.text;
-    const echo = this.echoes.isEcho(before, edit); // the word said again after its keystroke: not typing
+    const echo = this.echoes.isEcho(edit); // the message that follows a keystroke: not typing
     const text = echo ? before : applyEdit(before, edit);
     // Trial: the shape of each edit, in lengths only and never the text, to see how a real iPhone words its typing.
     this.edits = (this.edits ?? 0) + 1;
@@ -367,10 +372,10 @@ const HANDLERS = {
       const n = (v) => (v === null ? '-' : Array.from(v).length);
       const tail = edit.insert && before ? Array.from(before).slice(-Array.from(edit.insert).length).join('') : '';
       const repeats = Boolean(edit.insert) && before.length > 0 && (edit.insert.startsWith(tail) || before.endsWith(edit.insert) || edit.insert.startsWith(before));
-      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', the word said again: left out' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
+      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}${edit.keyboard ? ', keyboard' : ''}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', follows a keystroke without keyboard state: left out' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
     }
     const shapes = (this.server.shapes ??= new Set());
-    const kind = `${echo ? 'the word said again' : edit.insert ? 'letters added' : edit.remove ? 'letters removed' : 'whole text'}: ${edit.shape}`;
+    const kind = `${echo ? 'the message after a keystroke' : edit.insert && !edit.keyboard ? 'letters added without keyboard state' : edit.insert ? 'letters added' : edit.remove ? 'letters removed' : 'whole text'}: ${edit.shape}`;
     if (shapes.size < 20 && !shapes.has(kind)) { // each kind once: Apple's field names, never their values
       shapes.add(kind);
       this.server.log.info(`[${this.server.name}] iPhone edit fields, ${kind}`);
