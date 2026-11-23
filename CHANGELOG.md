@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.9
+
+Trial version on the "beta" channel. Same as beta.8, plus:
+
+- **Clearer choice of remote.** The three choices are now cards with a short line each, and the notes are a short list. The list says that apps with their own keyboard, such as YouTube and Netflix, do not accept typing.
+- **Doubled letters are not fixed yet.** To find the cause, the log now gives the shape of each edit a real iPhone sends, in lengths only and never the text.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.8، ومعها:
+
+- **اختيار الريموت أوضح.** الخيارات الثلاثة صارت بطاقات مع سطر قصير لكل منها، والملاحظات قائمة قصيرة تذكر أن التطبيقات التي لها كيبورد خاص، مثل YouTube و Netflix، لا تقبل الكتابة.
+- **تكرار الحروف لم يُحل بعد.** لمعرفة السبب يذكر السجل الآن شكل كل تعديل يرسله آيفون حقيقي، بالأطوال فقط ولا يُكتب النص أبدًا.
+
 ## 1.4.0-beta.8
 
 Trial version on the "beta" channel. Same as beta.7, with one way to use the touch area, as on an Apple TV:

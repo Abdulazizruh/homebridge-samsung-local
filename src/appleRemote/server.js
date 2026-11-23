@@ -355,7 +355,17 @@ const HANDLERS = {
   _tic(message, c) {
     if (!c._tiD) { return; }
     if (!this.rti.registered || !this.rti.open || !this.server.keyboardOpen) { return; } // no field is open
-    const text = applyEdit(this.server.text, readEdit(c._tiD));
+    const edit = readEdit(c._tiD);
+    const before = this.server.text;
+    const text = applyEdit(before, edit);
+    // Trial: the shape of each edit, in lengths only and never the text, to see how a real iPhone words its typing.
+    this.edits = (this.edits ?? 0) + 1;
+    if (this.edits <= 60) {
+      const n = (v) => (v === null ? '-' : Array.from(v).length);
+      const tail = edit.insert && before ? Array.from(before).slice(-Array.from(edit.insert).length).join('') : '';
+      const repeats = Boolean(edit.insert) && before.length > 0 && (edit.insert.startsWith(tail) || before.endsWith(edit.insert) || edit.insert.startsWith(before));
+      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${repeats ? ', the added part repeats what the field already holds' : ''}.`);
+    }
     if (text === this.server.text) { return; }
     this.server.text = text; // one field on the TV, whichever phone types into it
     this.server.emit('text', text);
