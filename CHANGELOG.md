@@ -7,6 +7,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 Trial version on the "beta" channel. Everything in 1.6.0-beta.5, plus:
 
 - **Settings: each trial control keeps its name, its "trial" tag and its "Not working?" button on one line,** where a long name used to push the button onto a line of its own.
+- **Easier to find in the Homebridge plugin search.** Searching for SmartThings, Samsung, TV, AC, air conditioner, washer or air purifier, or in Arabic (سامسونج، مكيف، تلفزيون، سمارت ثينقز), now matches this plugin's keywords exactly. The search reads what npm holds for the full release, so this shows once 1.6.0 is out.
 - **The project page has pictures of the new settings:** the list grouped by kind, an opened appliance card with the bar for changes not saved yet, the touch-area choice of the remote like Apple TV, and the options of an air purifier. The Arabic page shows them in Arabic.
 
 **بالعربية**
@@ -14,6 +15,7 @@ Trial version on the "beta" channel. Everything in 1.6.0-beta.5, plus:
 نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.5، ومعه:
 
 - **الإعدادات: كل وظيفة تجريبية يبقى اسمها ووسم «تجريبي» وزر «لا تعمل؟» في سطر واحد،** وكان الاسم الطويل يدفع الزر إلى سطر وحده.
+- **أسهل في الظهور ضمن بحث الإضافات في Homebridge.** البحث بكلمة SmartThings أو Samsung أو TV أو AC أو air conditioner أو washer أو air purifier، أو بالعربية (سامسونج، مكيف، تلفزيون، سمارت ثينقز)، صار يطابق كلمات هذه الإضافة تمامًا. يقرأ البحث بيانات النسخة الرسمية من npm، فيظهر الأثر بعد نشر 1.6.0.
 - **صفحة المشروع فيها صور الإعدادات الجديدة:** القائمة المصنّفة حسب النوع، وبطاقة جهاز مفتوحة مع شريط التغييرات غير المحفوظة، واختيار مساحة اللمس في الريموت الذي مثل Apple TV، وخيارات منقي الهواء. والصفحة العربية تعرضها بالعربية.
 
 ## 1.6.0-beta.5
