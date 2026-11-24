@@ -92,6 +92,7 @@ class Connection {
     const notes = [];
     if (this.bad) { notes.push(`${this.bad} not understood (${[...(this.badWhy ?? [])].join('; ')})`); }
     if (this.answers) { notes.push(`${this.answers} without a request name (${this.answerShape})`); }
+    if (this.renamed) { notes.push(`${this.renamed} recognised by name although worded in another order`); }
     if (this.infoShape !== undefined) { notes.push(`about itself it sent: ${this.infoShape || 'nothing'}`); }
     if (this.buffer.length) { notes.push(`${this.buffer.length} bytes of an unfinished message`); }
     return `Messages after proving itself: ${kinds}; the last one ${last}${notes.length ? `; ${notes.join(', ')}` : ''}.`;
@@ -155,10 +156,23 @@ class Connection {
     this.counters.in += 1;
     const [message] = unpack(plain);
     if (!message || typeof message !== 'object') { return; }
+    if (typeof message._i !== 'string' && Number(message._t) === 2) {
+      // A request whose name landed under the wrong field: some phones word the same request in another
+      // order, and the name is then read one place off. The request is still recognised by its name.
+      for (const [field, value] of Object.entries(message)) {
+        if (typeof value === 'string' && Object.hasOwn(HANDLERS, value.toLowerCase())) {
+          delete message[field];
+          message._i = value;
+          this.renamed = (this.renamed ?? 0) + 1;
+          break;
+        }
+      }
+    }
     if (typeof message._i !== 'string') { // a reply to one of our events, or something not understood
       this.answers = (this.answers ?? 0) + 1;
       // Apple's field names only, never a value: what kind of message came without a request name.
-      const names = (o) => Object.keys(o ?? {}).sort().join(',').replace(/[^\w,.-]/g, '?').slice(0, 200);
+      // Only what looks like one of Apple's field names is written; anything else could be an identifier.
+      const names = (o) => Object.keys(o ?? {}).sort().map((k) => (/^[_A-Za-z][A-Za-z]{0,23}$/.test(k) ? k : '(other)')).join(',').slice(0, 200);
       this.answerShape = `fields ${names(message)}; kind ${Number(message._t) || '-'}; name is ${message._i === undefined ? 'missing' : typeof message._i}; inside: ${typeof message._c === 'object' ? names(message._c) : '-'}`;
       return;
     }
@@ -359,7 +373,7 @@ const HANDLERS = {
       _idsID: s.identity.id, _pubID: [...s.identity.mac].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
     });
     this.status(message._x);
-    const shape = Object.keys(c ?? {}).sort().join(',').replace(/[^\w,.-]/g, '?').slice(0, 300);
+    const shape = Object.keys(c ?? {}).sort().map((k) => (/^[_A-Za-z][A-Za-z]{0,23}$/.test(k) ? k : '(other)')).join(',').slice(0, 300);
     this.infoShape = shape; // the names of what the phone sent about itself, never the values
     // A phone also connects by itself, says who it is, and then says nothing for half a minute. While such
     // a connection sat there, the remote on that phone showed "Connecting". It is closed after a short wait,

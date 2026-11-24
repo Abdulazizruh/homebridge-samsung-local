@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.27
+
+Trial version on the "beta" channel. Same as beta.26, plus what its log showed:
+
+- **iPhone remote stuck on "Connecting": the last half-minute waits.** With beta.26 a silent connection is closed after one second and the remote then opens at once. Every half-minute wait left in the log came from one kind of connection: the phone introduced itself in another wording, the plugin read the request's name one place off, did not recognise it, and so neither answered nor closed it. The request is now recognised by its name wherever it was read, answered, and treated like the others.
+- **Log: only field names.** In that case the log line listing field names could include an identifier of the phone. Anything that does not look like one of Apple's field names is now written as "(other)".
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.26، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون يعلق على «Connecting»: آخر انتظارات نصف الدقيقة.** مع beta.26 يُغلق الاتصال الساكت بعد ثانية ثم يفتح الريموت فورًا. كل انتظار نصف دقيقة بقي في السجل جاء من نوع واحد من الاتصالات: الجوال عرّف بنفسه بصياغة أخرى، فقرأت الإضافة اسم الطلب في غير موضعه ولم تتعرف عليه، فلم تردّ عليه ولم تغلقه. الآن يُعرف الطلب من اسمه أينما قُرئ، ويُردّ عليه، ويُعامل مثل غيره.
+- **السجل: أسماء الحقول فقط.** في تلك الحالة كان سطر أسماء الحقول قد يحمل معرّفًا للجوال. الآن يُكتب «(other)» مكان كل ما لا يشبه أسماء حقول Apple.
+
 ## 1.4.0-beta.26
 
 Trial version on the "beta" channel. Same as beta.25, plus:

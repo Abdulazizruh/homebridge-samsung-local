@@ -127,6 +127,11 @@ test('iPhone remote: pairs with the code once, then buttons, swipes and typed te
   t.after(() => again.socket.destroy());
   assert.equal(await again.verify(), true);
   await again.request('_systemInfo', {});
+  // The same request read one place off, as a real phone's other wording came out: its name under another field.
+  again.send(8, { _btHP: false, _c: { model: 'iPhone' }, _t: 2, _x: 77, 'SOME-IDENTIFIER': '_systemInfo' });
+  const named = await again.event('_systemInfo');
+  assert.equal(named._x, 77, 'answered as the request it is');
+  assert.equal(named._c.model, 'AppleTV14,1');
   await again.request('TVRCSessionStart', {});
   assert.equal((await again.event('MediaControlStatus'))._c.MediaControlFlags, 0x100, 'volume buttons are offered');
   assert.equal((await again.request('_touchStart', { _width: 1000, _height: 1000 }))._c._i, 1);
