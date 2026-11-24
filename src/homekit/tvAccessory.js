@@ -114,7 +114,7 @@ export class TvAccessory {
     } else if (this.keyboardOpen && this.phone && !(this.typedCount > 0)) {
       // It came after the wait: still the text already there, as long as nothing was typed.
       const taken = this.phone.setFieldText(text);
-      this.log.info(`[${this.displayName}] the TV said ${Date.now() - (this.openedAt ?? Date.now())} ms after opening its keyboard that the field holds ${this.fieldLength} character${this.fieldLength === 1 ? '' : 's'}${taken ? '; the iPhone keyboard now starts from them.' : '.'}`);
+      this.log.debug?.(`[${this.displayName}] the TV said ${Date.now() - (this.openedAt ?? Date.now())} ms after opening its keyboard that the field holds ${this.fieldLength} character${this.fieldLength === 1 ? '' : 's'}${taken ? '; the iPhone keyboard now starts from them.' : '.'}`);
     }
   }
 

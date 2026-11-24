@@ -2,6 +2,52 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.5.0
+
+Everything tried in the 1.4.0 beta versions, as one release. Your settings, pairings and accessories are kept as they are.
+
+**New for TVs**
+
+- **A remote like Apple TV (trial).** A TV can appear in the Control Centre remote the way an Apple TV does, with a touch area and with the iPhone keyboard, which opens when the TV opens one of its own text fields (TV search, settings, browser). It is paired once on each iPhone, iPad or Apple Watch with a four-digit code: 0000 unless you choose your own in the TV's options. Typing, deleting, moving the cursor and accepting suggestions follow what the phone shows. It works inside this plugin and stays on your home network.
+- **Switches for automations (optional).** Power, mute, volume up and down, channel up and down, play/pause and home, each as a switch and all grouped under one accessory, for automations and scenes. Off unless you tick it; you choose which ones appear.
+- **TV options in two cards.** First the remote: like Apple TV (recommended, trial), the TV tile with the Home remote, both (not recommended), or none. Then the switches for automations, separate from the remote.
+- **A TV tile keeps its place in Apple Home.** Each tile now keeps the same network port across restarts, with nothing to edit by hand. A tile that answered only some of the time after a restart is steady.
+
+**Known limits of the remote like Apple TV**
+
+- About one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment before it connects. The cause is on the phone's side of an unpublished protocol and is not yet understood.
+- Apps with their own keyboard, such as YouTube and Netflix, do not accept typed text.
+- It is unofficial: an iOS update may break it. Choosing a set-up without it removes everything it stored.
+
+**Log**
+
+- The everyday log is short: one line when an appliance connects or is lost, when a remote or the TV keyboard opens and closes, and for anything unexpected. Timings, the steps of the iPhone remote and typing (lengths only, never the text) are written in Homebridge debug mode. Once an hour, one line counts the phone connections that did not open a remote.
+
+**Going back** to a version before 1.5.0: first choose a TV set-up without the remote like Apple TV and press Update, then install the older version. Nothing is left in the system.
+
+**بالعربية**
+
+كل ما جُرّب في نسخ 1.4.0 التجريبية، في إصدار واحد. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+**جديد التلفزيونات**
+
+- **ريموت مثل Apple TV (تجريبي).** يمكن أن يظهر التلفزيون في ريموت مركز التحكم كما يظهر Apple TV، بمنطقة لمس وبلوحة مفاتيح الآيفون، وتُفتح حين يفتح التلفزيون أحد حقول الكتابة الخاصة به (بحث التلفزيون، الإعدادات، المتصفح). يُقرن مرة واحدة على كل آيفون أو آيباد أو Apple Watch برمز من أربعة أرقام: 0000 ما لم تختر رمزك من خيارات التلفزيون. الكتابة والحذف وتحريك المؤشر وقبول الاقتراحات تتبع ما يعرضه الجوال. يعمل داخل هذه الإضافة ولا يخرج من شبكة بيتك.
+- **مفاتيح للأتمتة (اختياري).** التشغيل، كتم الصوت، رفع الصوت وخفضه، القناة التالية والسابقة، تشغيل/إيقاف مؤقت، والصفحة الرئيسية: كل منها مفتاح، وكلها مجموعة تحت ملحق واحد، للأتمتة والمشاهد. متوقفة ما لم تفعّلها، وأنت تختار ما يظهر منها.
+- **خيارات التلفزيون في بطاقتين.** الأولى للريموت: مثل Apple TV (موصى به، تجريبي)، أو بطاقة التلفزيون مع ريموت Home، أو الاثنان معًا (لا يُنصح به)، أو دون ريموت. والثانية لمفاتيح الأتمتة، منفصلة عن الريموت.
+- **بطاقة التلفزيون تثبت في Apple Home.** كل بطاقة تحتفظ الآن بمنفذ الشبكة نفسه بعد كل إعادة تشغيل، دون أي تعديل يدوي. والبطاقة التي كانت تستجيب أحيانًا فقط بعد إعادة التشغيل صارت ثابتة.
+
+**حدود معروفة للريموت الذي مثل Apple TV**
+
+- نحو فتح واحد من كل ثلاثة يتأخر من ثانية إلى خمس ثوانٍ، وقد يعرض الجوال «Can't Connect» لحظة قبل أن يتصل. السبب في جهة الجوال من بروتوكول غير منشور، ولم يُفهم بعد.
+- التطبيقات التي لها لوحة مفاتيح خاصة، مثل YouTube و Netflix، لا تقبل النص المكتوب.
+- هو غير رسمي: قد يعطّله تحديث iOS. واختيار إعداد دونه يحذف كل ما خزّنه.
+
+**السجل**
+
+- السجل اليومي قصير: سطر واحد حين يتصل جهاز أو ينقطع، وحين يُفتح الريموت أو لوحة مفاتيح التلفزيون ويُغلقان، ولكل ما هو غير متوقع. الأزمنة وخطوات ريموت الآيفون والكتابة (الأطوال فقط دون النص) تُكتب في وضع Debug في Homebridge. ومرة كل ساعة، سطر واحد يعدّ اتصالات الجوال التي لم تفتح ريموتًا.
+
+**للرجوع** إلى نسخة قبل 1.5.0: اختر أولًا إعدادًا للتلفزيون دون الريموت الذي مثل Apple TV واضغط «تحديث»، ثم ثبّت النسخة الأقدم. ولا يبقى شيء في النظام.
+
 ## 1.4.0-beta.34
 
 Trial version on the "beta" channel. Same behaviour as beta.33 (and beta.30) towards silent connections; two changes in how the stand-in talks, aimed at the flicker:

@@ -79,12 +79,13 @@ class Connection {
     const s = this.server;
     const lasted = ((Date.now() - this.born) / 1000).toFixed(1);
     if (this.opened) {
-      s.log.info(`[${s.name}] iPhone remote of ${this.who()} ended after ${lasted}s${this.remote ? ', without the phone closing its remote first' : ''}.`);
+      s.log.info(`[${s.name}] remote of ${this.who()} closed after ${lasted}s${this.remote ? ' (its connection dropped)' : ''}.`);
     } else if (this.verified) {
-      s.log.info(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. ${this.#heard()}`);
+      s.silent = (s.silent ?? 0) + 1; // counted for the hourly line; the detail is for debug mode
+      s.log.debug?.(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. ${this.#heard()}`);
     } else if (this.stage) {
       // It reached us but never proved itself: where it stopped explains a remote that hangs before it opens.
-      s.log.info(`[${s.name}] a device connected and left ${lasted}s later without proving itself; it got as far as: ${this.stage}.`);
+      s.log.debug?.(`[${s.name}] a device connected and left ${lasted}s later without proving itself; it got as far as: ${this.stage}.`);
     }
     this.server.forget(this);
   }
@@ -327,7 +328,7 @@ class Connection {
       if (other.remote) { kept += 1; } else { other.close(); closed += 1; }
     }
     this.siblings = { closed, kept };
-    if (closed) { s.log.info(`[${s.name}] the same iPhone or iPad came back; ${closed} earlier connection${closed === 1 ? '' : 's'} without an open remote ${closed === 1 ? 'was' : 'were'} closed.`); }
+    if (closed) { s.log.debug?.(`[${s.name}] the same iPhone or iPad came back; ${closed} earlier connection${closed === 1 ? '' : 's'} without an open remote ${closed === 1 ? 'was' : 'were'} closed.`); }
     this.pv = null;
     clearTimeout(this.deadline);
   }
@@ -416,7 +417,8 @@ const HANDLERS = {
   tvrcsessionstart(message, c) {
     this.remote = true;
     this.opened = true;
-    this.server.log.info(`[${this.server.name}] iPhone remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. Its switches: ${this.infoFlags ?? '-'}.`);
+    this.server.log.info(`[${this.server.name}] remote of ${this.who()} opened.`);
+    this.server.log.debug?.(`[${this.server.name}] remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. Its switches: ${this.infoFlags ?? '-'}.`);
     this.server.sessionsChanged();
     this.reply(message, c);
     this.flags(message._x); // within a moment, or the iPhone keeps the volume buttons for itself
@@ -488,13 +490,13 @@ const HANDLERS = {
       const n = (v) => (v === null ? '-' : Array.from(v).length);
       const tail = edit.insert && before ? Array.from(before).slice(-Array.from(edit.insert).length).join('') : '';
       const repeats = Boolean(edit.insert) && before.length > 0 && (edit.insert.startsWith(tail) || before.endsWith(edit.insert) || edit.insert.startsWith(before));
-      this.server.log.info(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}${edit.keyboard ? ', keyboard' : ''}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', the whole text as the phone has it' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
+      this.server.log.debug?.(`[${this.server.name}] iPhone edit ${this.edits}: kind ${message._t}${edit.keyboard ? ', keyboard' : ''}, whole text ${n(edit.assert)}, removed ${edit.remove}, added ${n(edit.insert)}, field ${Array.from(before).length} -> ${Array.from(text).length}${echo ? ', the whole text as the phone has it' : repeats ? ', the added part repeats what the field already holds' : ''}.`);
     }
     const shapes = (this.server.shapes ??= new Set());
     const kind = `${echo ? 'the whole text after a change' : edit.insert && !edit.keyboard ? 'letters added without keyboard state' : edit.insert ? 'letters added' : edit.remove ? 'letters removed' : 'whole text'}: ${edit.shape}`;
     if (shapes.size < 20 && !shapes.has(kind)) { // each kind once: Apple's field names, never their values
       shapes.add(kind);
-      this.server.log.info(`[${this.server.name}] iPhone edit fields, ${kind}`);
+      this.server.log.debug?.(`[${this.server.name}] iPhone edit fields, ${kind}`);
     }
     if (text === this.server.text) { return; }
     this.server.text = text; // one field on the TV, whichever phone types into it
@@ -537,6 +539,12 @@ export class CompanionServer extends EventEmitter {
   }
 
   listen(port = 0) {
+    // One line an hour in place of one per connection: how often a phone connected without opening a remote.
+    this.hourly = setInterval(() => {
+      if (this.silent) { this.log.info(`[${this.name}] ${this.silent} connection${this.silent === 1 ? '' : 's'} without an open remote in the last hour (details in debug mode).`); }
+      this.silent = 0;
+    }, 3_600_000);
+    this.hourly.unref?.();
     return new Promise((resolve, reject) => {
       this.tcp.once('error', reject);
       this.tcp.listen(port, () => { this.tcp.off('error', reject); resolve(this.tcp.address().port); });
@@ -544,6 +552,7 @@ export class CompanionServer extends EventEmitter {
   }
 
   close() {
+    clearInterval(this.hourly);
     for (const c of this.connections) { c.close(); }
     return new Promise((resolve) => this.tcp.close(() => resolve()));
   }

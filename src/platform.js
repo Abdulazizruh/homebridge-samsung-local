@@ -398,7 +398,7 @@ export class SamsungLocalPlatform {
     if (accessory) {
       keepPort({ accessory, deviceId: entry.id, file: this.paths.tvFacts, log: this.log }); // the same port after every restart
       this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-      this.log.info(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options. Its code is on the plugin settings page, beside the TV.`);
+      this.log.debug?.(`"${name}" is published as a TV. Add it in the Home app: + → Add Accessory → More options. Its code is on the plugin settings page, beside the TV.`);
       trackSetup({ accessory, deviceId: entry.id, name, file: this.paths.tvSetup, timers: this.retryTimers, log: this.log });
     }
     if (switchAccessory && fresh) {
@@ -477,9 +477,11 @@ export class SamsungLocalPlatform {
     // reaction to the remote can be explained from the log.
     const pushCheck = setTimeout(() => {
       if (link.online && this.config.pushUpdates !== false) {
-        this.log.info(link.pushes > 0
-          ? `[${name}] push updates are arriving from the appliance.`
-          : `[${name}] no push updates received so far; changes made at the appliance show up at the polling interval (${link.pollInterval}s).`);
+        if (link.pushes > 0) { // the usual case: only the exception is worth a line
+          this.log.debug?.(`[${name}] push updates are arriving from the appliance.`);
+        } else {
+          this.log.info(`[${name}] no push updates received so far; changes made at the appliance show up at the polling interval (${link.pollInterval}s).`);
+        }
       }
     }, 120_000);
     pushCheck.unref?.();
@@ -495,7 +497,7 @@ export class SamsungLocalPlatform {
         const tm = link.timing;
         if (tm) {
           const s = (ms) => (ms / 1000).toFixed(1);
-          this.log.info(tm.sessionMs === undefined
+          this.log.debug?.(tm.sessionMs === undefined
             ? `[${name}] connection took ${s(tm.totalMs)}s.`
             : `[${name}] connection took ${s(tm.totalMs)}s (secure session ${s(tm.sessionMs)}s, port ${tm.port}; identity ${s(tm.identityMs)}s; first reading ${s(tm.readingMs)}s).`);
           link.timing = null;
@@ -513,7 +515,7 @@ export class SamsungLocalPlatform {
       this.log.info(`Added "${name}" (${shortId(deviceId)}).`);
     } else {
       this.api.updatePlatformAccessories([accessory]);
-      this.log.info(`Restored "${name}" (${shortId(deviceId)}) from cache.`);
+      this.log.debug?.(`Restored "${name}" (${shortId(deviceId)}) from cache.`);
     }
     const device = { link, handler, accessory, entry };
     this.devices.set(deviceId, device);

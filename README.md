@@ -5,6 +5,7 @@
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![npm](https://badgen.net/npm/v/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
 [![downloads](https://badgen.net/npm/dm/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
+[![total downloads](https://badgen.net/npm/dt/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
 [![tests](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml)
 [![license](https://badgen.net/npm/license/homebridge-samsung-local)](LICENSE)
 
@@ -15,7 +16,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.3.4. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.5.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -186,6 +187,10 @@ The remote is in Control Centre: open the remote and choose the TV at the top. V
 
 <p><img src="assets/screenshots/tv-remote.png" alt="The Control Centre remote for the TV: arrows, back, play and pause, info, mute and power" width="280"></p>
 
+**A remote like Apple TV (trial).** In place of the tile, or beside it, a TV can appear in the same Control Centre remote as an Apple TV: with a touch area and with the iPhone keyboard, which opens when the TV opens one of its own text fields (TV search, settings, browser). It is chosen from the remote list and paired once on each iPhone, iPad or Apple Watch with a code of four digits (0000 unless you choose your own). Limits: apps with their own keyboard, such as YouTube and Netflix, do not accept the keyboard; opening the remote sometimes takes a few seconds, and the phone may show "Can't Connect" for a moment before it connects; it is unofficial and may stop working after an iOS update. It never leaves your network.
+
+**Switches for automations (optional).** Power, mute, volume up and down, channel up and down, play/pause and home can each be shown as a switch, grouped under one accessory in the bridge, for use in automations and scenes. They work with any remote choice.
+
 Apple wants every TV tile added on its own. After you add the TV in the plugin settings, its code appears beside it in the list of configured appliances (see [the TV options](#tv-options) below).
 
 Give each TV a fixed address in your router (a DHCP reservation). An air conditioner or washer whose address changes is found again by the plugin; a TV is not, because a TV that is switched off does not answer at all and cannot be told apart from one that moved. If a TV's address does change, press **Change IP** beside it.
@@ -212,9 +217,14 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 
 Above the options is the TV's code for the Home app. **Scan the picture** with the iPhone or iPad camera from the Home app (+ → Add Accessory), **or type the digits by hand** (More options → pick the TV). Either way works. The code in the picture is an example.
 
-Under it: the TV's name, and whether it appears as a TV tile with the remote or as switches inside the bridge.
+Under it: the TV's name, then two separate choices.
 
-<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings, with the Home app code above them" width="320"></p>
+1. **Remote on the iPhone**: the remote like Apple TV (trial), the TV tile with the Home remote, both together (not recommended: two names for one TV), or no remote.
+2. **Switches for automations**: off unless you tick it; then you choose which switches appear.
+
+The pairing code of the remote like Apple TV is shown under that choice and can be changed in the card below it.
+
+<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: the remote choice, the switches for automations, and the notes on the remote like Apple TV" width="320"></p>
 
 ## What has been tested
 
@@ -223,6 +233,7 @@ Under it: the TV's name, and whether it appears as a TV tile with the remote or 
 | Unit and simulation tests (113 JavaScript, 17 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
+| The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |
 | Adding an appliance by its MAC address instead of its IP address, on a real home network: the plugin found the address itself | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
 | Install from the Homebridge plugin search inside the Docker container on a Raspberry Pi (ARM64, Python 3.12) | **Pass** |
@@ -239,12 +250,14 @@ Under it: the TV's name, and whether it appears as a TV tile with the remote or 
 
 - Plugin settings → **Diagnostics** downloads a redacted dump (no serial numbers, MAC or IP addresses, device IDs, Wi-Fi names or keys). TVs have none.
 - Once every 24 hours the log states, for each appliance, how many times the connection was lost and the longest gap. Restarts of the bridge are not counted.
-- Each connection is logged with the time it took.
-- Enable Homebridge debug mode for detailed logs. Certificates and keys are never logged.
+- The everyday log is short: one line when an appliance connects or is lost, when a remote or the TV keyboard opens and closes, and for anything unexpected.
+- Enable Homebridge debug mode for the detail: connection timings, every step of the iPhone remote, typing (lengths only, never the text). Certificates, keys and typed text are never logged.
 
 ## Update
 
 Use the Homebridge Plugins tab. The settings, the certificate and the accessories are kept.
+
+Going back to a version before 1.5.0: first choose a TV set-up without the remote like Apple TV and press Update, so that what it stored is removed; then install the older version. Switches for automations are not known to older versions and disappear from the Home app until you update again.
 
 ## Remove
 

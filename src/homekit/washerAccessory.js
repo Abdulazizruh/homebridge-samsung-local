@@ -210,7 +210,11 @@ export class WasherAccessory {
       this.#push();
       return;
     }
-    this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
+    if (error?.code === 'helper_down') { // every appliance at once: the platform says it in one line
+      this.log.debug?.(`[${this.displayName}] not reachable${failureText(error)}.`);
+    } else {
+      this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
+    }
     const { Characteristic, HapStatusError, HAPStatus } = this.hap;
     if (this.cycleStyle !== 'sensor') {
       this.services.get('cycle')?.updateCharacteristic(Characteristic.Active,

@@ -111,7 +111,11 @@ export class AcAccessory {
       this.#push();
       return;
     }
-    this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
+    if (error?.code === 'helper_down') { // every appliance at once: the platform says it in one line
+      this.log.debug?.(`[${this.displayName}] not reachable${failureText(error)}.`);
+    } else {
+      this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
+    }
     const { Characteristic, HapStatusError, HAPStatus } = this.hap;
     const thermostat = this.services.get('thermostat');
     // Shows "No Response" in the Home app instead of a stale state.

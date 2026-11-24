@@ -118,7 +118,7 @@ export class AppleRemote {
         name: this.name, type: 'companion-link', port, txt: announced,
         ...(reachable.length ? { restrictedAddresses: reachable, disabledIpv6: true } : {}),
       });
-      this.log.info(`[${this.name}] announced on ${reachable.length ? reachable.join(', ') : 'every network interface'}.`);
+      this.log.debug?.(`[${this.name}] announced on ${reachable.length ? reachable.join(', ') : 'every network interface'}.`);
       await this.service.advertise();
     }
     this.log.info(`[${this.name}] shown to the iPhone remote (Control Centre → Apple TV Remote). Pairing code: in the plugin settings, under this TV.`);

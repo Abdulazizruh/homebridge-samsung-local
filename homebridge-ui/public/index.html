@@ -212,6 +212,7 @@
       phTitle: 'About the remote like Apple TV',
       phNote1: 'Remote like Apple TV: the iPhone keyboard opens when the TV opens one of its own text fields (TV search, settings, browser).',
       phNote2: 'Apps with their own keyboard, such as YouTube and Netflix, do not accept it.',
+      phNote4: 'Trial: opening it sometimes takes a few seconds, and the phone may show "Can\'t Connect" for a moment before it connects.',
       phNote3: 'Unofficial: it may stop working after an iOS update. Choosing a set-up without it removes everything it stored.',
       phStep1: 'Press Update below and restart the bridge.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
       phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinNote: 'Empty means 0000. Each device enters it once. Choose your own digits if others use your network.', phCode: 'Pairing code', phPhones: 'Phones paired',
@@ -355,6 +356,7 @@
       phTitle: 'عن الريموت الذي مثل Apple TV',
       phNote1: 'الريموت الذي مثل Apple TV: يفتح كيبورد الآيفون حين يفتح التلفزيون إحدى خاناته (بحث التلفزيون، الإعدادات، المتصفح).',
       phNote2: 'التطبيقات التي لها كيبورد خاص، مثل YouTube و Netflix، لا تقبله.',
+      phNote4: 'تجريبي: فتحه يأخذ أحيانًا بضع ثوانٍ، وقد يعرض الجوال «Can\'t Connect» لحظة قبل أن يتصل.',
       phNote3: 'الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. اختيار إعداد دونه يحذف كل ما حفظه.',
       phStep1: 'اضغط «تحديث» في الأسفل ثم أعد تشغيل الجسر.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
       phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinNote: 'الخانة الفارغة تعني 0000. كل جهاز يدخله مرة واحدة. اختر أرقامك إن كان غيرك يستخدم شبكتك.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
@@ -615,7 +617,7 @@
               <div class="sl-muted mt-2">${t('swGroup')}</div></div>
             </div>
           <div class="sl-group mt-3"><div class="sl-group-title">${t('phTitle')}</div>
-            <ul class="sl-muted mb-2" style="padding-inline-start:1.2em"><li>${t('phNote1')}</li><li>${t('phNote2')}</li><li>${t('phNote3')}</li></ul>
+            <ul class="sl-muted mb-2" style="padding-inline-start:1.2em"><li>${t('phNote1')}</li><li>${t('phNote2')}</li><li>${t('phNote4')}</li><li>${t('phNote3')}</li></ul>
             <div class="mt-2"><label class="mb-0" for="sl-tv-pin">${t('phPin')}</label>
               <input id="sl-tv-pin" class="form-control form-control-sm" dir="ltr" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" style="max-width:8em" value="${esc(/^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '')}">
               <div class="sl-muted">${t('phPinNote')}</div></div>
