@@ -23,6 +23,16 @@
   .sl-ico { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .7rem; line-height: 1.2; min-width: 68px; padding: 4px 6px; text-transform: none; }
   .sl-ico svg, .sl-mini svg, .sl-main svg { width: 18px; height: 18px; flex: none; } .sl-main svg { vertical-align: -4px; }
   .sl-mini { padding: 2px 6px; line-height: 1; }
+  .sl-exp { width: 44px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .sl-exp svg { width: 20px; height: 20px; } [dir="rtl"] .sl-exp[aria-expanded="false"] svg { transform: scaleX(-1); }
+  .sl-dev.sl-open { background: rgba(0,123,255,.05); margin: 0 -10px; padding: 10px; }
+  .sl-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .sl-acts .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-transform: none; }
+  .sl-acts svg, .sl-rm svg { width: 16px; height: 16px; flex: none; }
+  .sl-rm { display: inline-flex; align-items: center; gap: 6px; text-transform: none; }
+  .sl-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; } .sl-foot label { flex: 1; margin: 0; }
+  .sl-dirty { position: sticky; bottom: 8px; z-index: 5; display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffe08a; }
+  .sl-dirty span { flex: 1; } .sl-dirty svg { width: 18px; height: 18px; flex: none; }
   .sl-inline { border: 2px solid rgba(128,90,213,.55); border-radius: 8px; padding: 10px; margin-top: 8px; }
   .sl-sec { border: 1px solid rgba(128,90,213,.45); border-radius: 8px; overflow: hidden; margin-top: 10px; }
   .sl-sec-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; border: 0; font-weight: 700; color: #6f42c1; background: rgba(128,90,213,.14); text-align: start; }
@@ -192,6 +202,7 @@
       sec: { ac: 'Air conditioners', laundry: 'Laundry', tv: 'TVs', air: 'Air purifiers and dehumidifiers', fridge: 'Refrigerators', vacuum: 'Robot vacuums', cooking: 'Cooking', other: 'Other appliances' }, secCount: (n) => (n === 1 ? '1 device' : `${n} devices`), secAll: 'all connected', secOne: 'connected', secSome: (a, n) => `${a} of ${n} connected`, secFold: 'Show or hide this group',
       phTouch: 'Touch area of this remote', phTouchArrows: 'Arrows: a slide moves the selection step by step', phTouchPointer: 'Pointer (trial): the finger moves a pointer, like a mouse', phTouchNote: 'The pointer shows in the TV\'s browser and in some apps; elsewhere nothing moves. A tap is still Select. Buttons and keyboard are the same in both.',
       phArrows: 'Arrows', phPointer: 'Pointer', phArrowsNote: 'A slide moves the selection step by step', phPointerNote: 'The finger moves a pointer, like a mouse', phTested: 'tested',
+      devMore: 'Show or hide this appliance', devOff: 'Off', dirtyNote: 'Unsaved changes in', dirtyUndo: 'Undo', dirtySave: 'Save',
       apReadings: 'Readings', apControls: 'Controls', apTrial: 'trial', apBroken: 'Not working?', apNote: 'Trial functions have not been tried on this model yet. Untick one to remove it from Apple Home. If one does not work, press "Not working?" next to it.', apReportNote: 'The report opens ready on GitHub; you press Submit there. Attach the diagnostics file from below: identifiers, addresses and keys are removed from it.', apTableNote: 'Read from what your own appliance reports. Controls are trials until confirmed on a real appliance of this type.',
       apPart: { power: 'Power', speed: 'Fan speed and automatic mode', clean: 'Start cleaning, and back to the station', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze', airQuality: 'Air quality', filter: 'Filter', temperature: 'Temperature', setpoint: 'Set the temperature', humidity: 'Humidity', targetHumidity: 'Target humidity', door: 'Door', battery: 'Battery', running: 'Running sensor', kidsLock: 'Child lock status', alert: 'Alert sensor (appliance faults)', energy: 'Power and energy (Eve)' },
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
@@ -341,6 +352,7 @@
       sec: { ac: 'المكيفات', laundry: 'الغسيل', tv: 'التلفزيونات', air: 'منقيات الهواء ومزيلات الرطوبة', fridge: 'الثلاجات', vacuum: 'المكانس الآلية', cooking: 'الطبخ', other: 'أجهزة أخرى' }, secCount: (n) => (n === 1 ? 'جهاز واحد' : n === 2 ? 'جهازان' : n <= 10 ? `${n} أجهزة` : `${n} جهازًا`), secAll: 'كلها متصلة', secOne: 'متصل', secSome: (a, n) => `${a} من ${n} متصلة`, secFold: 'إظهار هذه المجموعة أو إخفاؤها',
       phTouch: 'مساحة اللمس في هذا الريموت', phTouchArrows: 'أسهم: السحب يحرّك التحديد خطوة خطوة', phTouchPointer: 'مؤشر (تجريبي): الإصبع يحرّك مؤشرًا مثل الماوس', phTouchNote: 'المؤشر يظهر في متصفح التلفزيون وبعض التطبيقات، وفي غيرها لن يتحرك شيء. اللمسة تبقى «اختيار». الأزرار والكيبورد كما هي في الحالتين.',
       phArrows: 'أسهم', phPointer: 'مؤشر', phArrowsNote: 'السحب يحرّك التحديد خطوة خطوة', phPointerNote: 'الإصبع يحرّك مؤشرًا مثل الماوس', phTested: 'مجرَّب',
+      devMore: 'إظهار هذا الجهاز أو إخفاؤه', devOff: 'موقوف', dirtyNote: 'تغييرات لم تُحفظ في', dirtyUndo: 'تراجع', dirtySave: 'حفظ',
       apReadings: 'القراءات', apControls: 'التحكم', apTrial: 'تجريبي', apBroken: 'لا تعمل؟', apNote: 'الوظائف التجريبية لم تُجرَّب على هذا الموديل بعد. أزل العلامة عن أي وظيفة لإخفائها من Apple Home. وإن لم تعمل إحداها فاضغط «لا تعمل؟» بجانبها.', apReportNote: 'يُفتح التقرير جاهزًا في GitHub، وأنت تضغط الإرسال هناك. أرفق ملف التشخيص من الأسفل: تُحذف منه المعرّفات والعناوين والمفاتيح.', apTableNote: 'مقروءة مما يعلنه جهازك نفسه. وظائف التحكم تجريبية حتى تُؤكَّد على جهاز حقيقي من هذا النوع.',
       apPart: { power: 'التشغيل والإيقاف', speed: 'سرعة المروحة والوضع التلقائي', clean: 'بدء التنظيف، والعودة إلى المحطة', 'boost.fridge': 'التبريد السريع', 'boost.freezer': 'التجميد السريع', airQuality: 'جودة الهواء', filter: 'الفلتر', temperature: 'الحرارة', setpoint: 'ضبط الحرارة', humidity: 'الرطوبة', targetHumidity: 'الرطوبة المطلوبة', door: 'الباب', battery: 'البطارية', running: 'حساس التشغيل', kidsLock: 'حالة قفل الأطفال', alert: 'حساس التنبيه (أعطال الجهاز)', energy: 'القدرة والطاقة (Eve)' },
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
@@ -463,6 +475,8 @@
   let lastProbe = null;
   let openKey = null; // the configured appliance whose options are open under its own row
   let renaming = null; // the configured appliance whose name is being typed
+  const expanded = new Set(); // appliances whose card is open; a closed card is one line with nothing to press but its arrow
+  let dirty = null; // the appliance whose open options were changed and not saved yet
   const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICON = {
     arrows: svg('<path d="M12 4v16"/><path d="M4 12h16"/><path d="M9.5 6.5L12 4l2.5 2.5"/><path d="M9.5 17.5L12 20l2.5-2.5"/><path d="M6.5 9.5L4 12l2.5 2.5"/><path d="M17.5 9.5L20 12l-2.5 2.5"/>'),
@@ -475,6 +489,8 @@
     close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
     down: svg('<path d="M6 9l6 6 6-6"/>'),
     up: svg('<path d="M6 15l6-6 6 6"/>'),
+    next: svg('<path d="M9 6l6 6-6 6"/>'),
+    gear: svg('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>'),
   };
   const tvPaired = new Set();
   let legacyNames = [];
@@ -985,6 +1001,21 @@
   function foldedSections() {
     try { const v = JSON.parse(localStorage.getItem('sl-folded') || '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; }
   }
+  /** A change inside open options that is not saved yet: say so, with a way back and a way to save. Nothing is redrawn, so what is typed stays. */
+  function markDirty(e) {
+    if (!openKey || dirty === openKey || !e.target.closest?.('#sl-inline')) { return; }
+    dirty = openKey;
+    const name = config.devices.find((x) => keyOf(x) === dirty)?.name || '';
+    const bar = document.createElement('div');
+    bar.className = 'sl-dirty'; bar.setAttribute('role', 'status');
+    bar.innerHTML = `${ICON.edit}<span>${t('dirtyNote')} <strong>${esc(name)}</strong></span>
+      <button type="button" class="btn btn-sm btn-outline-dark" data-dirty="undo">${t('dirtyUndo')}</button>
+      <button type="button" class="btn btn-sm btn-dark" data-dirty="save">${t('dirtySave')}</button>`;
+    bar.querySelector('[data-dirty="undo"]').addEventListener('click', () => render());
+    bar.querySelector('[data-dirty="save"]').addEventListener('click', () => ($('sl-add') || $('sl-add-tv'))?.click());
+    $('sl-devices').appendChild(bar);
+  }
+
   function renderDevices() {
     const box = $('sl-devices');
     if (!config.devices.length) { box.innerHTML = `<span class="sl-muted">${t('none')}</span>`; return; }
@@ -998,23 +1029,28 @@
       const address = `${esc(moved ? snap.host : dev.host)}${snap?.mac || dev.mac ? ` · ${esc(snap?.mac || dev.mac)}` : ''}`;
       const shown = dev.name || snap?.described?.model || '—';
       const open = openKey === key;
+      const shownOpen = open || renaming === key || expanded.has(key);
+      const watts = snap?.described?.features?.find((r) => r.id === 'powerWatts' && r.device === true)?.value;
       const title = renaming === key
         ? `<input type="text" class="form-control sl-grow" id="sl-rename" value="${esc(dev.name ?? '')}" placeholder="${esc(shown)}" aria-label="${t('rename')}">
            <button class="btn btn-sm btn-success sl-mini" data-rn-save="${i}" aria-label="${t('saveName')}" title="${t('saveName')}">${ICON.check}</button>
            <button class="btn btn-sm btn-outline-secondary sl-mini" data-rn-cancel="${i}" aria-label="${t('cancel')}" title="${t('cancel')}">${ICON.close}</button>`
-        : `<strong>${esc(shown)}</strong>
-           <button class="btn btn-sm btn-link sl-mini" data-rn="${i}" aria-label="${t('rename')}" title="${t('rename')}">${ICON.edit}</button>
-           <span class="sl-grow"></span>${state}
-           <label class="mb-0 sl-muted"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}> ${t('enabled')}</label>`;
-      const html = `<div class="sl-dev"><div class="sl-dev-head">${title}</div>
-        <div class="sl-muted" dir="ltr" style="text-align:start">${address}</div>
+        : `<strong class="sl-grow">${esc(shown)}</strong>
+           ${!shownOpen && Number(watts) > 0 ? `<span class="sl-muted" dir="ltr">${esc(watts)} W</span>` : ''}
+           ${dev.enabled === false ? `<span class="sl-pill">${t('devOff')}</span>` : ''}${state}`;
+      // Only the arrow at the row's edge opens or closes it: the rest of the row is safe to scroll over.
+      const arrow = `<button type="button" class="btn btn-sm btn-outline-secondary sl-exp" data-exp="${i}" aria-expanded="${shownOpen}" aria-label="${t('devMore')}" title="${t('devMore')}">${shownOpen ? ICON.down : ICON.next}</button>`;
+      const html = `<div class="sl-dev${shownOpen ? ' sl-open' : ''}"><div class="sl-dev-head">${title}${arrow}</div>
+        ${shownOpen ? `<div class="sl-muted" dir="ltr" style="text-align:start">${address}</div>
         ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}
-        <div class="sl-act">
-          <button class="btn btn-sm ${open ? 'btn-primary' : 'btn-outline-primary'} sl-main" data-cfg="${i}" aria-expanded="${open}">${t('options')} ${open ? ICON.up : ICON.down}</button>
-          <button class="btn btn-sm btn-outline-secondary sl-ico" data-ip="${i}">${ICON.address}<span>${t('changeIp')}</span></button>
-          <button class="btn btn-sm btn-outline-secondary sl-ico" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${ICON.download}<span>${t('diagnostics')}</span></button>
-          <button class="btn btn-sm btn-outline-danger sl-ico" data-rm="${i}">${ICON.trash}<span>${t('remove')}</span></button>
+        <div class="sl-acts">
+          <button class="btn btn-sm ${open ? 'btn-primary' : 'btn-outline-primary'}" data-cfg="${i}" aria-expanded="${open}">${ICON.gear}<span>${t('options')}</span></button>
+          <button class="btn btn-sm btn-outline-secondary" data-rn="${i}">${ICON.edit}<span>${t('rename')}</span></button>
+          <button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${ICON.address}<span>${t('changeIp')}</span></button>
+          <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${ICON.download}<span>${t('diagnostics')}</span></button>
         </div>
+        <div class="sl-foot"><label class="sl-muted"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}> ${t('enabled')}</label>
+          <button class="btn btn-sm btn-outline-danger sl-rm" data-rm="${i}">${ICON.trash}<span>${t('remove')}</span></button></div>` : ''}
         ${open ? '<div class="sl-inline" id="sl-inline"></div>' : ''}</div>`;
       return { html, section: sectionOf(dev, snap), online: dev.type === 'tv' ? null : Boolean(snap?.online), busy: open || renaming === key };
     });
@@ -1032,6 +1068,18 @@
           ${shut ? ICON.down : ICON.up}<span>${esc(T[lang].sec[sec])}</span><small>${esc(T[lang].secCount(mine.length))}${link ? ` · ${esc(link)}` : ''}</small></button>
         ${shut ? '' : `<div class="sl-sec-body">${mine.map((c) => c.html).join('')}</div>`}</div>`;
     }).join('');
+    dirty = null; // drawing the list again draws the options from what is saved
+    box.querySelectorAll('[data-exp]').forEach((b) => b.addEventListener('click', () => {
+      const key = keyOf(config.devices[Number(b.dataset.exp)]);
+      if (b.getAttribute('aria-expanded') === 'true') {
+        expanded.delete(key);
+        if (openKey === key) { openKey = null; lastProbe = null; dirty = null; }
+        if (renaming === key) { renaming = null; }
+      } else {
+        expanded.add(key);
+      }
+      render();
+    }));
     box.querySelectorAll('[data-sec]').forEach((b) => b.addEventListener('click', () => {
       const now = foldedSections();
       if (b.getAttribute('aria-expanded') === 'true') { now[b.dataset.sec] = Number(b.dataset.count); } else { delete now[b.dataset.sec]; }
@@ -1061,11 +1109,11 @@
       // Two presses: the first asks, the second (within a few seconds) removes.
       if (b.dataset.armed !== '1') {
         b.dataset.armed = '1';
-        b.className = 'btn btn-sm btn-danger sl-ico';
+        b.className = 'btn btn-sm btn-danger sl-rm';
         b.querySelector('span').textContent = t('removeConfirm');
         setTimeout(() => {
           if (b.isConnected && b.dataset.armed === '1') {
-            b.dataset.armed = ''; b.className = 'btn btn-sm btn-outline-danger sl-ico'; b.querySelector('span').textContent = t('remove');
+            b.dataset.armed = ''; b.className = 'btn btn-sm btn-outline-danger sl-rm'; b.querySelector('span').textContent = t('remove');
           }
         }, 5000);
         return;
@@ -1086,6 +1134,8 @@
       }
       // Every kind of appliance opens its options under its own row.
       openKey = keyOf(dev);
+      expanded.add(openKey);
+      dirty = null;
       if (snap?.described) {
         // Known appliance: no new discovery is needed.
         lastProbe = { ...snap, host: dev.host, deviceId: dev.id ?? snap.deviceId, source: 'snapshot' };
@@ -1196,6 +1246,9 @@
     $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
     renderRuntime(); renderDevices(); renderResult(); renderScan();
   }
+
+  $('sl-devices').addEventListener('input', markDirty);
+  $('sl-devices').addEventListener('change', markDirty);
 
   async function refreshStatus() {
     try { status = await homebridge.request('/status'); } catch { /* keep the previous status */ }

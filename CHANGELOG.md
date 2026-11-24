@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.5
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.4, plus:
+
+- **Settings: safe to scroll with a finger.** Each appliance is now one line: its name, its state and, for an air conditioner in use, its power. The only thing to press on that line is an arrow at its edge (on the right in English, on the left in Arabic), which opens the appliance's card. Nothing else on the line reacts to a touch, so scrolling over it cannot change anything.
+- **Nothing was removed from a card.** Opened, it holds what it held before: address, energy, the TV's pairing code and QR, response time, Options, Rename, Change IP, Diagnostics, On, Remove (which still asks twice).
+- **Changes not saved yet are shown.** A change inside open options brings up a bar at the bottom: "Unsaved changes in …", with Undo and Save. Nothing is saved before Save or Update is pressed, as before.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.4، ومعه:
+
+- **الإعدادات: التمرير بالإصبع آمن.** كل جهاز صار سطرًا واحدًا: اسمه وحالته، وللمكيف الذي يعمل قدرته. الشيء الوحيد الذي يُضغط في هذا السطر سهم في طرفه (يسارًا في العربية ويمينًا في الإنجليزية) يفتح بطاقة الجهاز. ولا يستجيب باقي السطر للمس، فالتمرير فوقه لن يغيّر شيئًا.
+- **لم يُحذف شيء من البطاقة.** إذا فُتحت ففيها ما كان فيها: العنوان، الطاقة، رمز إضافة التلفزيون والباركود، زمن الاستجابة، الخيارات، تغيير الاسم، تغيير العنوان، التشخيص، التفعيل، والحذف (وما زال يطلب ضغطتين).
+- **التغييرات غير المحفوظة تظهر.** أي تغيير داخل الخيارات المفتوحة يُظهر شريطًا في الأسفل: «تغييرات لم تُحفظ في …» مع «تراجع» و«حفظ». ولا يُحفظ شيء قبل ضغط «حفظ» أو «تحديث»، كما كان.
+
 ## 1.6.0-beta.4
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.3, plus:
