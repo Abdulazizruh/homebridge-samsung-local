@@ -34,7 +34,7 @@ import ipaddress
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.7"
+HELPER_VERSION = "0.1.8"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -857,8 +857,10 @@ class DeviceWorker(threading.Thread):
                 self._wake.wait(due - now)
                 continue
             self._wake_at = None
+            began = time.monotonic()
             resources = self._read(link)
-            emit({"ev": "state", "key": self.key, "resources": resources, "pushes": self.notifications})
+            emit({"ev": "state", "key": self.key, "resources": resources, "pushes": self.notifications,
+                  "readMs": int((time.monotonic() - began) * 1000)})
             next_poll = time.monotonic() + self.poll_interval
 
 

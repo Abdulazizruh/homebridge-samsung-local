@@ -26,7 +26,7 @@ const { CoapSession } = require('./vendor/coap/session.js');
 const { decodeCbor, encodeCbor } = require('./vendor/ocf/cbor.js');
 const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/cert.js');
 
-export const HELPER_VERSION = 'js-0.1.3';
+export const HELPER_VERSION = 'js-0.1.4';
 const SUBSCRIBE_CONFIRM_MS = 3000;
 const SEND_RATE_PER_S = 25;
 const KNOWN_PORT_TIMEOUT_MS = 6000;
@@ -695,9 +695,10 @@ class DeviceWorker {
         continue;
       }
       this.wakeAt = null;
+      const began = Date.now();
       const resources = await this.#read(link);
       // Accepted registrations count too: a quiet appliance pushes nothing for hours.
-      emit({ ev: 'state', key: this.key, resources, pushes: this.notifications + (this.subscriptions ?? 0) });
+      emit({ ev: 'state', key: this.key, resources, pushes: this.notifications + (this.subscriptions ?? 0), readMs: Date.now() - began });
       nextPoll = Date.now() + this.pollMs;
     }
   }

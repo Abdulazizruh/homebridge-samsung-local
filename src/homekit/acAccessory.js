@@ -41,7 +41,7 @@ const LABELS = {
 // in front. Used once, to tell a name the plugin gave from one the user typed.
 const LEGACY_LABELS = { ...LABELS, light: 'Display Light' };
 
-const SETTLE_MS = 4500; // how long a just-written value is shielded from stale reads
+const SETTLE_MS = 10000; // how long a just-written value is shielded from stale reads: an appliance that applies a command but reports it late must not make the tile flip back and forth
 const CONFIRM_MS = 12000; // after this an unconfirmed write is reported and dropped
 // HomeKit must be answered quickly. If the appliance has not acknowledged a
 // write by then, HomeKit gets its answer and the write carries on behind it.

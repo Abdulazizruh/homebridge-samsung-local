@@ -326,6 +326,8 @@ export class SamsungLocalPlatform {
       online,
       // Measured the same way for both engines, so they can be compared.
       commandMs: this.devices.get(deviceId)?.link.commandMs ?? null,
+      readMs: this.devices.get(deviceId)?.link.readMs ?? null,
+      pushes: this.devices.get(deviceId)?.link.pushes ?? null,
       engine: this.engineInUse ?? null,
       updatedAt: Date.now(),
     };

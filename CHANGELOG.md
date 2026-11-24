@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.8
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.7, plus:
+
+- **A temperature set from Apple Home no longer flips back and forth.** An air conditioner that applied a command but reported it a few seconds late made the tile show the old value again, then the new one. The requested value now stays on the tile for up to 10 seconds while the appliance catches up (it was 4.5). An appliance that has still not applied it after 12 seconds is reported, as before.
+- **Settings: how long reading each appliance takes, and whether its push updates arrive.** Under "Command response", each appliance card now shows "State read (average)" and whether a change made elsewhere (the SmartThings app, the appliance's own remote) arrives at once or only at the next read. Measured the same way in both engines, so a slow appliance can be told apart from a slow network.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.7، ومعه:
+
+- **الحرارة التي تُضبط من Apple Home لن ترجع ثم تتقدم.** المكيف الذي يطبّق الأمر ويبلّغ عنه بعد ثوانٍ كان يجعل البطاقة تعرض القيمة القديمة ثم الجديدة. صارت القيمة المطلوبة تبقى على البطاقة حتى 10 ثوانٍ ريثما يلحق المكيف (كانت 4.5). والمكيف الذي لم يطبّقها بعد 12 ثانية يُبلَّغ عنه كما كان.
+- **الإعدادات: زمن قراءة كل جهاز، وهل تصل تحديثاته فورًا.** تحت «زمن استجابة الأمر» صارت بطاقة كل جهاز تعرض «زمن قراءة الحالة (متوسط)»، وهل التغيير من مكان آخر (تطبيق SmartThings أو ريموت المكيف) يصل فورًا أم مع القراءة التالية. يُقاس بالطريقة نفسها في المحركين، فيُعرف المكيف البطيء من الشبكة البطيئة.
+
 ## 1.6.0-beta.7
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.6, plus:

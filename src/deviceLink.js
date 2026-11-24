@@ -47,6 +47,11 @@ export class DeviceLink extends EventEmitter {
       }
       this.resources = msg.resources;
       this.pushes = msg.pushes ?? this.pushes ?? 0;
+      if (Number.isFinite(msg.readMs)) {
+        // How long reading the appliance's state takes, over the last ten reads: the settings show it.
+        this.readTimes = [...(this.readTimes ?? []), msg.readMs].slice(-10);
+        this.readMs = Math.round(this.readTimes.reduce((a, b) => a + b, 0) / this.readTimes.length);
+      }
       this.lastSeen = Date.now();
       this.#setOnline(true);
       this.emit('update', this.resources);

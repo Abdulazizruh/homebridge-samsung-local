@@ -123,6 +123,8 @@ class UiServer extends HomebridgePluginUiServer {
       online: Boolean(snap.online),
       error: snap.error ?? null,
       commandMs: snap.commandMs ?? null,
+      readMs: snap.readMs ?? null,
+      pushes: snap.pushes ?? null,
       engine: snap.engine ?? null,
       updatedAt: snap.updatedAt ?? null,
       source,

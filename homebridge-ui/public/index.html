@@ -176,7 +176,7 @@
       engine: 'Connection engine', engineChoose: 'Choose…', enginePython: 'Python (stable, tested on real appliances)', engineJs: 'JavaScript (newer, no Python needed)',
       engineNeed: 'Choose the connection engine first. The next steps open after that.',
       engineNote: 'Same features with either engine. Python: one download of its runtime, in use the longest. JavaScript: no download, newer. After a command, each appliance below shows its measured response time with the engine in use, so you can compare the two on your own appliances. Restart the bridge after changing the engine.',
-      commandMs: 'Command response (average)',
+      commandMs: 'Command response (average)', readMs: 'State read (average)', pushOn: 'changes made elsewhere arrive at once', pushOff: 'changes made elsewhere arrive at the next read',
       badgeVerified: 'Homebridge Verified', badgeVersion: 'Version', badgeEngine: 'Engine', badgeConnected: 'connected', badgeOf: 'of',
       follow: 'Find an appliance again when its address changes',
       followNote: 'When an appliance stops answering for a while, the plugin sends one small question to every address of your home network (the /24 it is on) to see where it went, at most once every five minutes. Nothing leaves your network. Switch this off to keep to the address you entered.',
@@ -326,7 +326,7 @@
       engine: 'محرك الاتصال', engineChoose: 'اختر…', enginePython: 'Python (مستقر، مجرَّب على أجهزة حقيقية)', engineJs: 'JavaScript (الأحدث، دون Python)',
       engineNeed: 'اختر محرك الاتصال أولًا. تُفتح الخطوات التالية بعد ذلك.',
       engineNote: 'المزايا نفسها مع المحركين. Python: ينزّل بيئته مرة واحدة، وهو الأقدم استخدامًا. JavaScript: دون تنزيل، وهو الأحدث. بعد أي أمر يظهر تحت كل جهاز زمن استجابته المقاس مع المحرك المستخدم، فتقارن بينهما على أجهزتك أنت. أعد تشغيل الجسر بعد تغيير المحرك.',
-      commandMs: 'زمن استجابة الأمر (متوسط)',
+      commandMs: 'زمن استجابة الأمر (متوسط)', readMs: 'زمن قراءة الحالة (متوسط)', pushOn: 'التغيير من مكان آخر يصل فورًا', pushOff: 'التغيير من مكان آخر يصل مع القراءة التالية',
       badgeVerified: 'موثقة من Homebridge', badgeVersion: 'الإصدار', badgeEngine: 'المحرك', badgeConnected: 'متصل', badgeOf: 'من',
       follow: 'ابحث عن الجهاز من جديد إذا تغيّر عنوانه',
       followNote: 'عندما يتوقف جهاز عن الاستجابة مدة، ترسل الإضافة سؤالًا صغيرًا واحدًا إلى كل عنوان في شبكة منزلك (نطاق /24 الذي هو فيه) لتعرف أين صار، مرة كل خمس دقائق على الأكثر. لا يخرج شيء من شبكتك. أطفئ هذا الخيار للالتزام بالعنوان الذي أدخلته.',
@@ -1042,7 +1042,7 @@
       const arrow = `<button type="button" class="btn btn-sm btn-outline-secondary sl-exp" data-exp="${i}" aria-expanded="${shownOpen}" aria-label="${t('devMore')}" title="${t('devMore')}">${shownOpen ? ICON.down : ICON.next}</button>`;
       const html = `<div class="sl-dev${shownOpen ? ' sl-open' : ''}"><div class="sl-dev-head">${title}${arrow}</div>
         ${shownOpen ? `<div class="sl-muted" dir="ltr" style="text-align:start">${address}</div>
-        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}
+        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}${snap?.readMs != null ? `<div class="sl-muted">${t('readMs')}: <span dir="ltr">${snap.readMs} ms</span> · ${snap.pushes > 0 ? t('pushOn') : t('pushOff')}</div>` : ''}
         <div class="sl-acts">
           <button class="btn btn-sm ${open ? 'btn-primary' : 'btn-outline-primary'}" data-cfg="${i}" aria-expanded="${open}">${ICON.gear}<span>${t('options')}</span></button>
           <button class="btn btn-sm btn-outline-secondary" data-rn="${i}">${ICON.edit}<span>${t('rename')}</span></button>
