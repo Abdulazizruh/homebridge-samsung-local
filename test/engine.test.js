@@ -90,3 +90,16 @@ test('engine choice: stable versions default to Python, the setting switches to 
   const spawn = await helperSpawn(pluginPaths(tmpDir()), { engine: 'javascript' });
   assert.deepEqual([spawn.engine, spawn.command, spawn.args], ['javascript', process.execPath, [JS_HELPER_SCRIPT]]);
 });
+
+test('appliances starting together take turns for the handshake, two at a time', async () => {
+  const { oneOfFewHandshakes } = await import('../engine/bridge.mjs');
+  let running = 0; let most = 0;
+  const work = () => oneOfFewHandshakes(async () => {
+    running += 1; most = Math.max(most, running);
+    await new Promise((r) => setTimeout(r, 30));
+    running -= 1;
+  });
+  await Promise.all(Array.from({ length: 6 }, work));
+  assert.equal(most, 2);
+  assert.equal(running, 0);
+});

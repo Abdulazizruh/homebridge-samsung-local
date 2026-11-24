@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.7
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.6, plus:
+
+- **Pointer: a tap clicks what the pointer shows.** Tried on a real TV in beta.6: the pointer moved well, but a tap selected whatever had the focus (a card elsewhere, or the first place the pointer had been), and on the TV keyboard a letter needed two taps. A tap right after the pointer moved is now a mouse click where it points (the command Samsung's own phone app sends). Once the pointer has been still for 8 seconds, the TV hides it and a tap is Select again.
+- **Appliances starting together take turns for the handshake, two at a time, in both engines.** After a restart, two or three appliances answered the first try with a TLS alert ("decode error", "handshake failure") and connected only on a later round, sometimes 45 seconds later. With every appliance handshaking at once, each answer comes late; two at a time keeps each prompt. This is a cause read from the logs, not yet confirmed: the next restart's log will show whether the alerts are gone.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.6، ومعه:
+
+- **المؤشر: اللمسة تضغط ما يشير إليه.** جُرِّب على تلفزيون حقيقي في beta.6: الحركة جيدة، لكن اللمسة كانت تختار ما عليه التحديد (بطاقة في مكان آخر، أو أول مكان كان فيه المؤشر)، وفي كيبورد التلفزيون احتاج الحرف لمستين. صارت اللمسة بعد تحريك المؤشر ضغطة ماوس في مكانه (الأمر نفسه الذي يرسله تطبيق Samsung للجوال). وإذا بقي المؤشر ساكنًا 8 ثوانٍ يخفيه التلفزيون وتعود اللمسة «اختيار».
+- **الأجهزة التي تبدأ معًا تتناوب على المصافحة، اثنين اثنين، في المحركين.** بعد إعادة التشغيل كان جهازان أو ثلاثة يردّون على المحاولة الأولى بتنبيه TLS ‏(«decode error» أو «handshake failure») ولا يتصلون إلا في جولة لاحقة، أحيانًا بعد 45 ثانية. عندما يصافح الجميع في وقت واحد يتأخر كل رد، واثنان في كل مرة يُبقي كل مصافحة سريعة. هذا سبب مقروء من السجل ولم يتأكد بعد: سجل إعادة التشغيل القادمة سيُظهر هل اختفت التنبيهات.
+
 ## 1.6.0-beta.6
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.5, plus:

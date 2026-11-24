@@ -34,7 +34,7 @@ import ipaddress
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.6"
+HELPER_VERSION = "0.1.7"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -59,6 +59,11 @@ READ_RETRY_PAUSE_S = 1.5
 # appliance is reported unreachable only if it is still gone afterwards.
 OFFLINE_GRACE_S = 30.0
 QUIET_RECONNECT_WAIT_S = 12.0
+# Handshakes run at once across all appliances. When every appliance started together, some
+# answered the first try with a TLS alert (decode error, handshake failure) and only connected
+# on a later round; a few at a time keeps each handshake prompt.
+HANDSHAKES_AT_ONCE = 2
+HANDSHAKES = threading.BoundedSemaphore(HANDSHAKES_AT_ONCE)
 
 OBSERVE_HREFS = (
     "/power/vs/0",
@@ -437,7 +442,8 @@ def open_link(host, port, cert, key, on_notification=None):
             for again in (False, True):
                 link = Link(host, candidate, cert, key, on_notification)
                 try:
-                    link.connect()
+                    with HANDSHAKES:
+                        link.connect()
                     return link, details
                 except Exception as exc:  # noqa: BLE001
                     last = exc

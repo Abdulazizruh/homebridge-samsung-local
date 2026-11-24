@@ -176,6 +176,13 @@ export class TizenRemote {
     await this.#send({ Cmd: 'Move', Position: { x: Math.round(dx), y: Math.round(dy), Time: '0' }, TypeOfRemote: 'ProcessMouseDevice' });
   }
 
+  /** A mouse click where the pointer is, as Samsung's own phone app sends it. */
+  async click() {
+    await this.open();
+    this.#touch();
+    await this.#send({ Cmd: 'LeftClick', TypeOfRemote: 'ProcessMouseDevice' });
+  }
+
   /** While `held`, the channel stays open: the TV can only say "keyboard opened" to a listener. */
   #touch() {
     clearTimeout(this.idleTimer);

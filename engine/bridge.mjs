@@ -26,7 +26,7 @@ const { CoapSession } = require('./vendor/coap/session.js');
 const { decodeCbor, encodeCbor } = require('./vendor/ocf/cbor.js');
 const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/cert.js');
 
-export const HELPER_VERSION = 'js-0.1.2';
+export const HELPER_VERSION = 'js-0.1.3';
 const SUBSCRIBE_CONFIRM_MS = 3000;
 const SEND_RATE_PER_S = 25;
 const KNOWN_PORT_TIMEOUT_MS = 6000;
@@ -358,6 +358,17 @@ class Link {
 }
 
 /** Connect, trying a known port first and discovering otherwise. */
+// Handshakes run at once across all appliances: when all started together, some answered the
+// first try with a TLS alert and connected only on a later round. A few at a time keeps each prompt.
+const HANDSHAKES_AT_ONCE = 2;
+let handshakesRunning = 0;
+const handshakeQueue = [];
+export async function oneOfFewHandshakes(work) {
+  if (handshakesRunning >= HANDSHAKES_AT_ONCE) { await new Promise((resolve) => handshakeQueue.push(resolve)); }
+  handshakesRunning += 1;
+  try { return await work(); } finally { handshakesRunning -= 1; handshakeQueue.shift()?.(); }
+}
+
 async function openLink(host, port, cred, onNotification) {
   const tried = [];
   const details = { advertised: [], probe_outcome: null };
@@ -366,7 +377,7 @@ async function openLink(host, port, cred, onNotification) {
     tried.push(candidate);
     const link = new Link(host, candidate, cred, onNotification, connectMs);
     try {
-      await link.connect();
+      await oneOfFewHandshakes(() => link.connect());
       return link;
     } catch (err) {
       last = err;

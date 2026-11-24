@@ -323,3 +323,37 @@ class PeerInitiatedRetry(unittest.TestCase):
     def test_only_one_extra_try(self):
         with self.assertRaises(bridge.HelperError):
             self._run(failures=5)
+
+
+class FewHandshakesAtOnce(unittest.TestCase):
+    def test_appliances_starting_together_take_turns_for_the_handshake(self):
+        import threading as th
+        running, most = [0], [0]
+        guard = th.Lock()
+
+        class SlowLink:
+            def __init__(self, host, port, cert, key, on_notification=None):
+                self.port = port
+
+            def connect(self):
+                with guard:
+                    running[0] += 1
+                    most[0] = max(most[0], running[0])
+                bridge.time.sleep(0.05)
+                with guard:
+                    running[0] -= 1
+
+            def close(self):
+                pass
+
+        saved = bridge.Link
+        bridge.Link = SlowLink
+        try:
+            threads = [th.Thread(target=bridge.open_link, args=(f"192.0.2.{30 + i}", 49153, "c", "k")) for i in range(6)]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
+        finally:
+            bridge.Link = saved
+        self.assertEqual(most[0], bridge.HANDSHAKES_AT_ONCE)

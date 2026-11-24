@@ -33,6 +33,9 @@ const MAX_CONNECTIONS = 8;
 const MAX_WRONG_CODES = 10;
 const VOLUME_FLAG = 0x0100;
 const SELECT_REPEAT_MS = 250;
+// After the pointer moved, a tap clicks where it points. Once it has been still this long the TV
+// hides it and moves by focus again, so a tap is Select once more.
+const POINTER_CLICK_MS = 8000;
 
 // What each remote button means for a TV. 18 and 19 are how current iOS sends Mute and Power.
 const BUTTONS = new Map([
@@ -344,6 +347,10 @@ class Connection {
       const now = Date.now();
       if (now - this.lastSelect < SELECT_REPEAT_MS) { return; }
       this.lastSelect = now;
+      if (this.server.touch === 'pointer' && now - (this.server.pointerAt ?? 0) < POINTER_CLICK_MS) {
+        this.server.emit('click');
+        return;
+      }
     }
     this.server.emit('key', name);
   }
@@ -462,7 +469,7 @@ const HANDLERS = {
     if (this.server.touch === 'pointer') {
       // The touch area as a mouse. A tap still arrives as the Select button, and is sent as one.
       const move = this.pointer.feed(phase, x, y);
-      if (move) { this.server.emit('pointer', move.dx, move.dy); }
+      if (move) { this.server.pointerAt = Date.now(); this.server.emit('pointer', move.dx, move.dy); }
       return;
     }
     const direction = this.swipes.feed(phase, x, y);

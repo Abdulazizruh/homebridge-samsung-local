@@ -170,6 +170,7 @@ export class TvAccessory {
     phone.on('power', (want) => this.#setPower(want === 'toggle' ? !this.on : want).catch(() => {}));
     phone.on('text', (text) => this.#type(text));
     phone.on('pointer', (dx, dy) => { if (this.on) { this.remote.pointer(dx, dy).catch(() => {}); } });
+    phone.on('click', () => { if (this.on) { this.remote.click().catch(() => {}); } });
     phone.on('sessions', (count) => {
       // The TV tells only a listener that its keyboard opened, so the channel is kept while a remote is open.
       this.remote.hold(count > 0);

@@ -42,7 +42,7 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
         return;
       }
       if (msg.params.TypeOfRemote === 'ProcessMouseDevice') {
-        (tv.moves ??= []).push([msg.params.Cmd, msg.params.Position.x, msg.params.Position.y]);
+        (tv.moves ??= []).push(msg.params.Position ? [msg.params.Cmd, msg.params.Position.x, msg.params.Position.y] : [msg.params.Cmd]);
         return;
       }
       tv.keys.push(msg.params.DataOfCmd);
@@ -443,4 +443,15 @@ test('iPhone remote, touch area as a pointer: movements reach the TV as mouse mo
   t.after(() => { other.platform.stop(); plain.close(); });
   await waitFor(() => other.platform.tvs[0].phone);
   assert.equal(other.platform.tvs[0].phone.touch, 'arrows');
+});
+
+test('iPhone remote, pointer: a tap right after moving clicks where the pointer is; later it is Select again', async (t) => {
+  const tv = await fakeTv();
+  const { platform } = await bootTv(tv, 'tile', tmpDir(), { appleRemote: true, appleRemoteTouch: 'pointer' });
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  await waitFor(() => handler.phone);
+  handler.phone.emit('click');
+  await waitFor(() => tv.moves?.some((m) => m[0] === 'LeftClick'));
+  assert.deepEqual(tv.keys, [], 'no Select: the item under the pointer is clicked');
 });
