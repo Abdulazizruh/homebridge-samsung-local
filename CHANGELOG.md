@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.13
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.12, plus:
+
+- **An air conditioner tile no longer goes off, back on, and off again.** Switching the display light off (or a mode switch, the fan, swing, the mode or the temperature) showed the new value, then the old one, then the new one again. The plugin already kept a just-set value on the tile while the appliance caught up, but only against readings it pushed itself; when the Home app asked for the tile again in between, it was answered with the appliance's last report, from before the command. Both now follow one rule: the value just set stays until the appliance reports it, or for at most 10 seconds. Switching the unit off counts for every switch and the display too, so none of them is lit again by an earlier reading. How commands are sent is unchanged.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.12، ومعه:
+
+- **مفاتيح المكيف لن تنطفئ ثم تشتغل ثم تنطفئ.** إطفاء الشاشة (أو مفتاح وضع، أو المروحة، أو التأرجح، أو الوضع، أو الحرارة) كان يُظهر القيمة الجديدة، ثم القديمة، ثم الجديدة. الإضافة كانت تُبقي القيمة المطلوبة على البطاقة ريثما يلحق المكيف، لكن أمام القراءات التي ترسلها هي فقط. فإذا سأل تطبيق Home عن البطاقة في الأثناء، أجابته بآخر حالة أبلغ عنها المكيف قبل الأمر. صار الاثنان على قاعدة واحدة: القيمة المطلوبة تبقى حتى يبلغ المكيف عنها، أو 10 ثوانٍ على الأكثر. وإطفاء المكيف نفسه يشمل كل المفاتيح والشاشة، فلا تعيد قراءة قديمة إضاءة أيٍّ منها. طريقة إرسال الأوامر لم تتغير.
+
 ## 1.6.0-beta.12
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.11, plus:

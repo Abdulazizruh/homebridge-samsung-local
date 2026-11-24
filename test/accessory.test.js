@@ -207,6 +207,25 @@ test('confirmation: a stale read right after a write does not bounce the tile', 
   assert.equal(svc('light').getCharacteristic(C.On).value, false, 'held during the settle window');
 });
 
+test('confirmation: Apple Home asking again before the appliance reports gets the value just set, on every tile', async () => {
+  const { link, set, get, C, res } = setup();
+  link.apply = null; // the appliance acknowledged but has not applied yet
+  link.autoReport = false;
+  await set('light', C.On, false);
+  assert.equal(await get('light', C.On), false, 'the display stays off; it was read back as on before');
+  await set('fast', C.On, true);
+  assert.equal(await get('fast', C.On), true);
+  await set('thermostat', C.TargetTemperature, 19);
+  assert.equal(await get('thermostat', C.TargetTemperature), 19);
+  // Once the appliance reports, its own state is what the tile shows.
+  res['/temperature/desired/0'].temperature = 19;
+  res['/mode/convenient/vs/0'][`${V}modes`] = 'Speed';
+  res['/light/vs/0'] = { ...res['/light/vs/0'], [`${V}lightIndicator`]: 'Off' };
+  link.report();
+  assert.equal(await get('thermostat', C.TargetTemperature), 19);
+  assert.equal(await get('fast', C.On), true);
+});
+
 test('availability: offline shows No Response; services survive', async () => {
   const { link, get, handler, C } = setup();
   const count = handler.services.size;

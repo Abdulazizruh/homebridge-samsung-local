@@ -312,14 +312,27 @@ export class AcAccessory {
     return `${this.displayName} ${LABELS[key] ?? key}`;
   }
 
+  /**
+   * A tile's answer when Apple Home asks for it. A value just asked for stays on the tile until the
+   * appliance reports it (or the settle time ends), whether the plugin pushes a reading or the Home
+   * app asks again in between: the same rule as #push, so the tile does not go back and forth.
+   */
+  #shown(characteristic, kinds, read) {
+    return () => {
+      const st = this.#requireOnline();
+      const held = this.#heldKinds();
+      return kinds.some((k) => held.has(k)) ? characteristic.value : read(st);
+    };
+  }
+
   #switch(key, wanted, isOn, setOn) {
     const { Service, Characteristic } = this.hap;
     const service = this.#service(key, Service.Switch, this.#label(key), wanted);
     if (!service) {
       return;
     }
-    service.getCharacteristic(Characteristic.On)
-      .onGet(() => Boolean(isOn(this.#requireOnline())))
+    const on = service.getCharacteristic(Characteristic.On);
+    on.onGet(this.#shown(on, switchKinds(key), (st) => Boolean(isOn(st))))
       .onSet(async (value) => {
         await setOn(Boolean(value), this.#requireOnline());
       });
@@ -401,8 +414,8 @@ export class AcAccessory {
     this.#switch('autoClean', Boolean(s.autoClean) && f.autoClean, (st) => st.autoClean, (on) => this.#command('autoClean', on, 'auto clean'));
 
     const light = this.#service('light', Service.Lightbulb, this.#label('light'), Boolean(s.light) && f.light);
-    light?.getCharacteristic(Characteristic.On)
-      .onGet(() => lightShown(this.#requireOnline()))
+    const lightOn = light?.getCharacteristic(Characteristic.On);
+    lightOn?.onGet(this.#shown(lightOn, ['light', 'power'], lightShown))
       .onSet((value) => this.#command('light', Boolean(value), 'display light'));
 
     const humidity = this.#service('humidity', Service.HumiditySensor, this.#label('humidity'), s.humidity === true && f.humidity);
@@ -439,7 +452,7 @@ export class AcAccessory {
     }
     service.getCharacteristic(T)
       .setProps({ validValues: valid })
-      .onGet(() => this.#targetState(this.#requireOnline()))
+      .onGet(this.#shown(service.getCharacteristic(T), ['power', 'mode'], (st) => this.#targetState(st)))
       .onSet(async (value) => {
         if (value === T.OFF) {
           await this.#command('power', false, 'power off');
@@ -448,7 +461,7 @@ export class AcAccessory {
         await this.#setMode(value === T.HEAT ? 'heat' : value === T.COOL ? 'cool' : 'auto');
       });
     service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
-      .onGet(() => this.#currentState(this.#requireOnline()));
+      .onGet(this.#shown(service.getCharacteristic(Characteristic.CurrentHeatingCoolingState), ['power', 'mode'], (st) => this.#currentState(st)));
     service.getCharacteristic(Characteristic.CurrentTemperature)
       .setProps({ minValue: -40, maxValue: 100, minStep: 0.1 })
       .onGet(() => this.#requireOnline().currentTemperature ?? 0);
@@ -460,7 +473,7 @@ export class AcAccessory {
       target.updateValue(Math.min(range.max, Math.max(range.min, this.model.state.targetTemperature ?? 24)));
     }
     target.setProps({ minValue: range.min, maxValue: range.max, minStep: range.step })
-      .onGet(() => this.#clampTarget(this.#requireOnline().targetTemperature))
+      .onGet(this.#shown(target, ['targetTemperature'], (st) => this.#clampTarget(st.targetTemperature)))
       .onSet((value) => this.#command('targetTemperature', Number(value), `target ${value}°C`));
 
     // Celsius only: the appliance's own unit is converted in the model.
@@ -500,7 +513,7 @@ export class AcAccessory {
     // The fan tile mirrors power but never switches the air conditioner off:
     // HomeKit sends "inactive" when the slider is dragged to zero.
     service.getCharacteristic(Characteristic.Active)
-      .onGet(() => (this.#requireOnline().power ? 1 : 0))
+      .onGet(this.#shown(service.getCharacteristic(Characteristic.Active), ['power'], (st) => (st.power ? 1 : 0)))
       .onSet(async (value) => {
         const st = this.#requireOnline();
         if (value === 1 && !st.power) {
@@ -514,7 +527,7 @@ export class AcAccessory {
     if (manual.length) {
       service.getCharacteristic(Characteristic.RotationSpeed)
         .setProps({ minValue: 0, maxValue: 100, minStep: step })
-        .onGet(() => this.#rotation(this.#requireOnline()))
+        .onGet(this.#shown(service.getCharacteristic(Characteristic.RotationSpeed), ['fan'], (st) => this.#rotation(st)))
         .onSet(async (value) => {
           if (Number(value) <= 0) {
             // Zero on the slider means Auto, as in homebridge-smartthings-oauth.
@@ -532,7 +545,7 @@ export class AcAccessory {
     }
     if (s.fan.speeds.auto !== undefined) {
       service.getCharacteristic(Characteristic.TargetFanState)
-        .onGet(() => (this.#requireOnline().fan === 'auto' ? 1 : 0))
+        .onGet(this.#shown(service.getCharacteristic(Characteristic.TargetFanState), ['fan'], (st) => (st.fan === 'auto' ? 1 : 0)))
         .onSet(async (value) => {
           const st = this.#requireOnline();
           if (value === 1) {
@@ -547,7 +560,7 @@ export class AcAccessory {
     }
     if (s.swing) {
       service.getCharacteristic(Characteristic.SwingMode)
-        .onGet(() => (this.#requireOnline().swing && this.#requireOnline().swing !== 'off' ? 1 : 0))
+        .onGet(this.#shown(service.getCharacteristic(Characteristic.SwingMode), ['swing'], (st) => (st.swing && st.swing !== 'off' ? 1 : 0)))
         .onSet(async (value) => {
           const on = ['both', 'vertical', 'horizontal'].find((o) => s.swing.options.includes(o));
           await this.#command('swing', value === 1 ? on : 'off', `swing ${value === 1 ? on : 'off'}`);
@@ -681,14 +694,12 @@ export class AcAccessory {
       }
     }
 
-    const kindOf = (key) => (key === 'dry' || key === 'fanOnly' ? ['power', 'mode']
-      : key.startsWith('fan') ? ['fan'] : PRESET_FEATURES.includes(key) ? ['preset', 'windFreeResource'] : [key]);
     for (const [key, service] of this.services) {
-      if (service.sl?.isOn && free(...kindOf(key))) {
+      if (service.sl?.isOn && free(...switchKinds(key))) {
         service.updateCharacteristic(Characteristic.On, Boolean(service.sl.isOn(st)));
       }
     }
-    if (free('light')) {
+    if (free('light', 'power')) {
       get('light')?.updateCharacteristic(Characteristic.On, lightShown(st));
     }
     if (st.humidity !== null && st.humidity !== undefined) {
@@ -706,6 +717,15 @@ export class AcAccessory {
  * The display is dark while the air conditioner is off, whatever its light
  * setting says. Showing it "on" then would make the tile read "Powered On".
  */
+/**
+ * The commands a switch tile waits on. Power is one of them: switching the unit off shows every
+ * switch off at once, and that must not be undone by a reading taken before the unit reported it.
+ */
+function switchKinds(key) {
+  return key === 'dry' || key === 'fanOnly' ? ['power', 'mode']
+    : key.startsWith('fan') ? ['fan', 'power'] : PRESET_FEATURES.includes(key) ? ['preset', 'windFreeResource', 'power'] : [key, 'power'];
+}
+
 function lightShown(state) {
   return Boolean(state.power) && Boolean(state.light);
 }
