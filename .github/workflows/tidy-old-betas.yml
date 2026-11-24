@@ -2,10 +2,13 @@
 #
 # - GitHub: removes the release pages of 1.4.0-beta.N, keeping the newest three. Tags are kept,
 #   so every version stays in the history; only the long list on the Releases page gets shorter.
-# - npm: nothing is removed (npm does not allow a number to be used again). The 1.4.0 trial
-#   versions are marked as superseded, with a pointer to the full release.
+# - npm: the 1.4.0 trial versions are marked as superseded, with a pointer to the full release.
+#   Then the trial versions of finished lines are removed from npm, so they leave the version
+#   list in Homebridge: every 1.1.0-beta.N, and 1.4.0-beta.N except the newest three. Their
+#   code stays in the tags. The first steps (0.0.0-stage, 0.1.0-beta.N), the running trial and
+#   every full release are never touched. A removed number can never be published again.
 #
-# "preview" only lists what would be done. "apply" does it; removed release pages do not come back.
+# "preview" only lists what would be done. "apply" does it; removed release pages and npm versions do not come back.
 # Requires the repository secret NPM_TOKEN, as the Release workflow does.
 name: Tidy old trial versions
 on:
@@ -63,3 +66,26 @@ jobs:
             exit 0
           fi
           npm deprecate "homebridge-samsung-local@$range" "$note"
+      - name: Remove the trial versions of finished lines from npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          case "$KEEP" in ''|*[!0-9]*) echo "keep must be a number" >&2; exit 1 ;; esac
+          npm view homebridge-samsung-local versions --json \
+            | node -e 'const v=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log([].concat(v).join("\n"))' > versions.txt
+          grep -E '^1\.1\.0-beta\.[0-9]+$' versions.txt > gone.txt || true
+          grep -E '^1\.4\.0-beta\.[0-9]+$' versions.txt | sort -t. -k4 -n -r > line14.txt || true
+          echo "Kept on npm:"; head -n "$KEEP" line14.txt
+          tail -n +"$((KEEP + 1))" line14.txt >> gone.txt
+          echo "To remove from npm ($(wc -l < gone.txt)):"; cat gone.txt
+          if [ "$MODE" != "apply" ]; then echo "Preview only: nothing was removed."; exit 0; fi
+          failed=0
+          while read -r version; do
+            [ -n "$version" ] || continue
+            if npm unpublish "homebridge-samsung-local@$version"; then
+              echo "removed $version from npm"
+            else
+              echo "npm refused to remove $version" >&2; failed=$((failed + 1))
+            fi
+          done < gone.txt
+          if [ "$failed" -gt 0 ]; then echo "$failed versions were not removed." >&2; exit 1; fi
