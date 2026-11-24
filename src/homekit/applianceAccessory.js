@@ -1,6 +1,7 @@
 import { failureText } from '../deviceLink.js';
 import { applianceWrites, buildApplianceModel, partWanted } from '../capabilities/appliance.js';
 import { eveCharacteristics } from './eve.js';
+import { markPrimary } from './primary.js';
 
 const HOLD_MS = 8000; // how long a command just accepted is shown before the appliance's own report takes over
 const LABELS = {
@@ -138,6 +139,8 @@ export class ApplianceAccessory {
         this.accessory.removeService(service); // a part switched off in the settings, or no longer reported
       }
     }
+    // The main tile (the first part: power or speed) is the face of the group in the Home app.
+    markPrimary(this.accessory, [...keep][0] ?? null);
     // Power and energy ride on the first tile, for Eve.
     this.energyHost = partWanted({ id: 'energy', type: 'energy' }, this.features) && this.#part('energy')
       ? [...keep][0] ?? null : null;

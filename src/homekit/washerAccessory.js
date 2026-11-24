@@ -1,6 +1,7 @@
 import { failureText } from '../deviceLink.js';
 import { buildWasherModel, WASHER_STAGES } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
+import { markPrimary } from './primary.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = {
@@ -169,6 +170,8 @@ export class WasherAccessory {
     }
     // Power and energy ride on whichever tile is shown.
     this.energyHost = this.services.get('cycle') ?? this.services.get('finished') ?? null;
+    // The cycle tile is the face of the group; without it, the finished sensor.
+    markPrimary(this.accessory, this.energyHost);
     for (const C of [this.eve.Consumption, this.eve.TotalConsumption]) {
       for (const service of this.services.values()) {
         const wanted = this.features.energyEve && service === this.energyHost;

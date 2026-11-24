@@ -674,6 +674,8 @@ test('washer stages: a sensor for each stage the washer lists, drum clean as its
   assert.deepEqual(['wash', 'rinse', 'spin', 'drumClean'].map((k) => handler.services.get(k)?.getCharacteristic(C.ConfiguredName).value),
     ['Washer Washing', 'Washer Rinsing', 'Washer Spinning', 'Washer Drum Clean']);
   assert.deepEqual(['wash', 'rinse', 'spin', 'drumClean'].map(on), [0, 0, 0, 0], 'idle: nothing detected');
+  // One group in the Home app, with the cycle tile in front.
+  assert.deepEqual([...handler.services].filter(([, svc]) => svc.isPrimaryService).map(([k]) => k), ['cycle']);
 
   const state = (body) => platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body });
   await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Wash', [`${V}remainingTime`]: '00:41:00' });
@@ -693,6 +695,12 @@ test('washer stages: a sensor for each stage the washer lists, drum clean as its
   await online(off.platform, W);
   const other = off.platform.devices.get(W).handler;
   assert.deepEqual(['wash', 'rinse', 'spin', 'drumClean'].filter((k) => other.services.has(k)), [], 'switched off: removed');
+
+  const bare = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { cycleTile: false } }] } });
+  t.after(() => bare.platform.stop());
+  await online(bare.platform, W);
+  const third = bare.platform.devices.get(W).handler;
+  assert.deepEqual([...third.services].filter(([, svc]) => svc.isPrimaryService).map(([k]) => k), ['finished'], 'no cycle tile: the finished sensor in front');
 });
 
 test('washer course: the code, its table and drum clean; the last drum clean from the appliance log', async () => {
