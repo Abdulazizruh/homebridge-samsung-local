@@ -198,13 +198,19 @@ export class WasherAccessory {
     // bridge neither repeats a notice already given nor misses a cycle that
     // ended while it was down.
     const seen = this.context.washerSeen ?? null;
-    if (st.finished) {
+    // Switched off during the cycle: on while it ran, off now. A change, not a reading alone, since
+    // some washers report "off" all along (a captured idle washer stayed "off" while running).
+    const switchedOff = Boolean(seen?.inCycle && seen.poweredOn && st.poweredOff);
+    if (st.finished && !switchedOff) {
       this.context.sendsFinish = true;
     }
     if (st.inCycle) {
       if (this.finished) {
         this.#clearFinished();
       }
+    } else if (switchedOff) {
+      // Switched off in the middle of a cycle: stopped, not finished, whatever else it reports.
+      this.log.info(`[${this.displayName}] cycle stopped: the washer was switched off; no "finished" notice.`);
     } else if (st.finished && seen && !seen.finished) {
       // The appliance itself says the cycle is complete.
       this.#markFinished();
@@ -217,7 +223,7 @@ export class WasherAccessory {
         this.#markFinished();
       }
     }
-    this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished };
+    this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished, poweredOn: st.inCycle ? (seen?.poweredOn || !st.poweredOff) : false };
     this.#push();
   }
 

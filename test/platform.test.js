@@ -721,3 +721,34 @@ test('washer alarm: a code confirmed on a real washer is explained; any other is
   const res = { '/alarms/vs/0': { [`${V}items`]: [{ [`${V}code`]: 'ErrorCode_DC', [`${V}state`]: 'Created' }, { [`${V}code`]: 'ErrorCode_XX', [`${V}state`]: 'Created' }] } };
   assert.equal(washerFeatureRows(buildWasherModel(res)).find((r) => r.id === 'alarms').value, 'ErrorCode_DC / ErrorCode_XX');
 });
+
+test('washer switched off in the middle of a cycle: stopped, not finished, no notice; on again, a new cycle', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler, accessory } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const done = handler.services.get('finished').getCharacteristic(C.OccupancyDetected);
+  const sim = (path, body) => platform.helper.request('sim', { key: W, action: 'remote', path, body });
+  const state = (body) => sim(['operational', 'state', 'vs', '0'], body);
+  const lines = [];
+  const info = handler.log.info;
+  handler.log.info = (m) => { lines.push(m); return info.call(handler.log, m); };
+  t.after(() => { handler.log.info = info; });
+
+  await sim(['power', 'vs', '0'], { [`${V}power`]: 'On' });
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Drumcleaning', [`${V}remainingTime`]: '01:42:00' });
+  await waitFor(() => accessory.context.washerSeen?.poweredOn === true);
+  // Switched off from another app: the washer says Off and, on some models, Finish.
+  await sim(['power', 'vs', '0'], { [`${V}power`]: 'Off' });
+  await state({ [`${V}state`]: 'Finish', [`${V}progress`]: 'Finish', [`${V}remainingTime`]: '00:00:00' });
+  await waitFor(() => accessory.context.washerSeen?.inCycle === false);
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(done.value, 0, 'no "finished" notice');
+  assert.ok(lines.some((m) => /switched off; no "finished" notice/.test(m)));
+
+  await sim(['power', 'vs', '0'], { [`${V}power`]: 'On' });
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Drumcleaning', [`${V}remainingTime`]: '01:40:00' });
+  await waitFor(() => lines.some((m) => /cycle started/.test(m)));
+});

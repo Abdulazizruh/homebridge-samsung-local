@@ -14,7 +14,7 @@ export const LAUNDRY_KINDS = new Set(['washer', 'dryer', 'dishwasher']);
 /** Resources this model reads; anything else is listed as not used yet. */
 export const LAUNDRY_CONSUMED = new Set([
   '/operational/state/vs/0', '/operational/state/0', '/energy/consumption/vs/0', '/information/vs/0',
-  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/course/vs/0', '/st/washercourse/vs/0',
+  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/course/vs/0', '/st/washercourse/vs/0', '/power/vs/0', '/power/0',
 ]);
 /** The stages a washer names, each shown as its own sensor. */
 export const WASHER_STAGES = ['wash', 'rinse', 'spin'];
@@ -131,6 +131,10 @@ export function buildWasherModel(resources = {}) {
   const cleanKnown = progress === 'drumcleaning' || Boolean(course?.drumClean) || lastClean !== null
     || (Array.isArray(options) && options.some((o) => typeof o === 'string' && o.startsWith('DrumCleanProposal_')));
   const inCycle = running || paused;
+  // Switched off: the plain boolean when present, else the vendor word. A WA80F switched off in the
+  // middle of a drum clean (from another app) ended its cycle that way; that is not a finish.
+  const powerWord = lower(resources['/power/vs/0']?.[`${V}power`]);
+  const poweredOff = powerWord ? powerWord === 'off' : resources['/power/0']?.value === false;
 
   return {
     model: info[`${V}description`] || null,
@@ -164,6 +168,7 @@ export function buildWasherModel(resources = {}) {
       drumClean: inCycle && (progress === 'drumcleaning' || Boolean(course?.drumClean)),
       course,
       lastDrumClean: lastClean,
+      poweredOff,
       // The idle value is the length of the selected course, not a countdown.
       remainingSeconds: running || paused ? (remaining ?? 0) : 0,
       // Idle appliances report a negative placeholder.
