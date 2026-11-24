@@ -455,3 +455,35 @@ test('iPhone remote, pointer: a tap right after moving clicks where the pointer 
   await waitFor(() => tv.moves?.some((m) => m[0] === 'LeftClick'));
   assert.deepEqual(tv.keys, [], 'no Select: the item under the pointer is clicked');
 });
+
+test('iPhone remote: a press while the TV is shown as off asks the TV at once, and each remote is told what became of its presses', async (t) => {
+  const tv = await fakeTv();
+  const { platform } = await bootTv(tv, 'tile', tmpDir(), { appleRemote: true });
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  await waitFor(() => handler.phone && handler.on);
+  clearInterval(handler.timer); // only the press itself asks the TV from here on
+  const from = { notes: [], note(kind, outcome) { this.notes.push(`${kind}:${outcome}`); } };
+
+  // Switched on a moment ago, or one question missed: still shown as off.
+  handler.on = false;
+  handler.reachable = false;
+  handler.phone.emit('key', 'KEY_DOWN', from);
+  await waitFor(() => from.notes.length === 1);
+  assert.deepEqual(from.notes, ['button:sent']);
+  assert.deepEqual(tv.keys, ['KEY_DOWN']);
+  assert.equal(handler.on, true, 'the fresh answer is shown too');
+
+  // Really gone: nothing is sent, and the log says why once.
+  tv.deaf = 1000;
+  handler.on = false;
+  handler.reachable = false;
+  handler.offCheckedAt = 0;
+  quietLog.lines.length = 0;
+  handler.phone.emit('key', 'KEY_UP', from);
+  handler.phone.emit('pointer', 5, 5, from);
+  await waitFor(() => from.notes.length === 3, 15_000);
+  assert.deepEqual(from.notes.slice(1).sort(), ['button:off', 'move:off']);
+  assert.deepEqual(tv.keys, ['KEY_DOWN']);
+  assert.equal(quietLog.lines.filter(([, m]) => /not sent: the TV is shown as off/.test(m)).length, 1);
+});

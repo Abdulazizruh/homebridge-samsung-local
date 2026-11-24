@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.12
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.11, plus:
+
+- **A remote press while the TV is shown as off is no longer dropped without a word.** The plugin asks the TV every 4 seconds whether it is on. A TV switched on a moment ago, or one that missed one question, was still shown as off until the next round, and every press of the iPhone remote and the Home remote in that time was dropped silently: the remote did nothing, then worked. Now a press on a TV shown as off asks the TV at once and is sent if it answers. One that still does not answer is written to the log, at most once a minute.
+- **The log says what became of each iPhone remote's presses.** The "remote closed" line now counts its button presses and touch moves: how many reached the TV, how many were not sent because the TV was off, and how many failed. Counts only; no button names and no typed text.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.11، ومعه:
+
+- **زر الريموت والتلفزيون يظهر مطفأً لن يضيع بصمت.** الإضافة تسأل التلفزيون كل 4 ثوانٍ هل هو شغّال. فالتلفزيون الذي شُغّل للتو، أو فاته سؤال، كان يبقى مطفأً عند الإضافة حتى السؤال التالي، وكل ضغطة من ريموت الآيفون أو ريموت Home في تلك المدة كانت تضيع دون أثر: الريموت لا يستجيب، ثم يعمل. صارت الضغطة على تلفزيون يظهر مطفأً تسأله فورًا، وتُرسل إن ردّ. وإن لم يردّ كُتب ذلك في السجل، مرة في الدقيقة على الأكثر.
+- **السجل يذكر ما جرى لضغطات كل ريموت آيفون.** سطر «إغلاق الريموت» صار يعدّ الضغطات وحركات اللمس: كم وصل إلى التلفزيون، وكم لم يُرسل لأن التلفزيون مطفأ، وكم فشل. أعداد فقط، دون أسماء الأزرار ودون أي نص مكتوب.
+
 ## 1.6.0-beta.11
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.10, plus:

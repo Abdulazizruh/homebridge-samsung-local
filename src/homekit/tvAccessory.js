@@ -2,6 +2,10 @@ import { TizenRemote, portOpen, tvInfo, wake } from '../tv/tizenClient.js';
 import { AppleRemote } from '../appleRemote/bridge.js';
 
 const POLL_MS = 4000;
+// A TV shown as off is asked once before a press is dropped; while it keeps not answering, it is
+// not asked again for every press of a run (a finger on the touch area makes many).
+const OFF_RECHECK_MS = 3000;
+const NOT_SENT_LOG_MS = 60_000; // at most one "not sent" line a minute
 const SCREEN_PORT = 9197;
 // The remote channel stays open this long after the last key, so the next
 // press goes out at once instead of waiting for a new secure connection.
@@ -166,11 +170,15 @@ export class TvAccessory {
     const phone = await this.appleRemote.start();
     this.phone = phone;
     phone.awake = this.on;
-    phone.on('key', (code) => this.#press(code, 'iPhone remote key').catch(() => {}));
-    phone.on('power', (want) => this.#setPower(want === 'toggle' ? !this.on : want).catch(() => {}));
+    // Each press and move is reported back to the remote it came from, which says on closing
+    // how many reached the TV, how many were not sent because the TV was off, and how many failed.
+    phone.on('key', (code, from) => this.#press(code, 'iPhone remote key')
+      .then((r) => from?.note('button', r), () => from?.note('button', 'failed')));
+    phone.on('power', (want, from) => this.#setPower(want === 'toggle' ? !this.on : want)
+      .then(() => from?.note('button', 'sent'), () => from?.note('button', 'failed')));
     phone.on('text', (text) => this.#type(text));
-    phone.on('pointer', (dx, dy) => { if (this.on) { this.remote.pointer(dx, dy).catch(() => {}); } });
-    phone.on('click', () => { if (this.on) { this.remote.click().catch(() => {}); } });
+    phone.on('pointer', (dx, dy, from) => this.#gesture(() => this.remote.pointer(dx, dy), 'move', from));
+    phone.on('click', (from) => this.#gesture(() => this.remote.click(), 'button', from, 'iPhone remote click'));
     phone.on('sessions', (count) => {
       // The TV tells only a listener that its keyboard opened, so the channel is kept while a remote is open.
       this.remote.hold(count > 0);
@@ -325,8 +333,9 @@ export class TvAccessory {
   }
 
   async #press(code, label) {
-    if (!this.on && !this.reachable) {
-      return;
+    if (!(await this.#canTake())) {
+      this.#notSent(label);
+      return 'off';
     }
     try {
       await this.#key(code);
@@ -335,6 +344,44 @@ export class TvAccessory {
       const { HapStatusError, HAPStatus } = this.hap;
       throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
     }
+    return 'sent';
+  }
+
+  /** A pointer move or click from the iPhone remote, with the same check as a key. */
+  async #gesture(send, kind, from, label) {
+    if (!(await this.#canTake())) {
+      if (label) { this.#notSent(label); }
+      from?.note(kind, 'off');
+      return;
+    }
+    await send().then(() => from?.note(kind, 'sent'), () => from?.note(kind, 'failed'));
+  }
+
+  /**
+   * Whether the TV can take a press now. One shown as off may just have been switched on, or have
+   * missed one question: it is asked at once rather than the press dropped until the next round.
+   */
+  async #canTake() {
+    if (this.on || this.reachable) {
+      return true;
+    }
+    if (!this.checking && Date.now() - (this.offCheckedAt ?? 0) < OFF_RECHECK_MS) {
+      return false;
+    }
+    this.checking ??= this.poll({ sure: true }).catch(() => {}).finally(() => {
+      this.checking = null;
+      this.offCheckedAt = Date.now();
+    });
+    await this.checking;
+    return Boolean(this.on || this.reachable);
+  }
+
+  #notSent(label) {
+    if (Date.now() - (this.notSentAt ?? 0) < NOT_SENT_LOG_MS) {
+      return;
+    }
+    this.notSentAt = Date.now();
+    this.log.info(`[${this.displayName}] ${label} not sent: the TV is shown as off and did not answer when asked.`);
   }
 
   // ------------------------------------------------------------- TV tile
@@ -349,10 +396,10 @@ export class TvAccessory {
     tv.getCharacteristic(Characteristic.Active).onGet(() => (this.on ? 1 : 0)).onSet((v) => this.#setPower(v === 1));
     tv.getCharacteristic(Characteristic.ActiveIdentifier).onSet((id) => {
       const input = INPUTS.find((i) => i.id === id);
-      return input ? this.#press(input.key, `input ${input.name}`) : undefined;
+      return input ? this.#press(input.key, `input ${input.name}`).then(() => undefined) : undefined;
     });
     const keys = remoteKeys(Characteristic);
-    tv.getCharacteristic(Characteristic.RemoteKey).onSet((k) => (keys.has(k) ? this.#press(keys.get(k), 'remote key') : undefined));
+    tv.getCharacteristic(Characteristic.RemoteKey).onSet((k) => (keys.has(k) ? this.#press(keys.get(k), 'remote key').then(() => undefined) : undefined));
     this.services.set('tv', tv);
 
     const speaker = this.accessory.getService(Service.TelevisionSpeaker)
@@ -366,7 +413,7 @@ export class TvAccessory {
       }
     });
     speaker.getCharacteristic(Characteristic.VolumeSelector).onSet((v) => this.#press(
-      v === Characteristic.VolumeSelector.INCREMENT ? 'KEY_VOLUP' : 'KEY_VOLDOWN', 'volume'));
+      v === Characteristic.VolumeSelector.INCREMENT ? 'KEY_VOLUP' : 'KEY_VOLDOWN', 'volume').then(() => undefined));
     tv.addLinkedService(speaker);
     this.services.set('speaker', speaker);
 

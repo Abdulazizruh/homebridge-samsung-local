@@ -104,11 +104,13 @@ const until = async (check) => { const end = Date.now() + 3000; while (!check() 
 
 test('iPhone remote: pairs with the code once, then buttons, swipes and typed text come through; the keyboard follows the TV', async (t) => {
   const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'sl-phone-')), 'apple-remote.json');
-  const bridge = new AppleRemote({ file, tvId: 'tv-1', name: 'Bed TV +', log: quiet, advertise: false });
+  const lines = [];
+  const bridge = new AppleRemote({ file, tvId: 'tv-1', name: 'Bed TV +', log: { ...quiet, info: (m) => lines.push(m) }, advertise: false });
   const server = await bridge.start();
   t.after(() => bridge.stop());
   const seen = { keys: [], texts: [], power: [], sessions: [] };
-  server.on('key', (k) => seen.keys.push(k)); server.on('text', (x) => seen.texts.push(x));
+  // The TV side reports back what became of each press; here the arrows reach it and Mute does not.
+  server.on('key', (k, from) => { seen.keys.push(k); from.note('button', k === 'KEY_MUTE' ? 'off' : 'sent'); }); server.on('text', (x) => seen.texts.push(x));
   server.on('power', (p) => seen.power.push(p)); server.on('sessions', (n) => seen.sessions.push(n));
   const { pin, port } = JSON.parse(fs.readFileSync(file, 'utf8'))['tv-1'];
   assert.equal(pin, '0000', 'the default code');
@@ -162,6 +164,13 @@ test('iPhone remote: pairs with the code once, then buttons, swipes and typed te
   assert.deepEqual(seen.power, ['toggle']);
   assert.deepEqual(seen.texts, ['مكه', 'مك', 'مكة 2026', 'المدينة', 'مكة 2026']);
   assert.deepEqual(seen.sessions, [1]);
+
+  // On closing, the remote says what became of its presses: counts only, no names or text.
+  again.socket.destroy();
+  await until(() => lines.some((m) => m.includes('closed after')));
+  const closed = lines.find((m) => m.includes('closed after'));
+  assert.match(closed, /4 button presses, 2 reached the TV, 1 not sent \(the TV was off and did not answer when asked\), 1 still on their way/);
+  assert.doesNotMatch(closed, /KEY_|مك/);
 
   const unknown = new Phone(port); // never paired: refused without the code
   t.after(() => unknown.socket.destroy());

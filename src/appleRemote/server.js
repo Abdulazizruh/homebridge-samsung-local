@@ -83,7 +83,7 @@ class Connection {
     const s = this.server;
     const lasted = ((Date.now() - this.born) / 1000).toFixed(1);
     if (this.opened) {
-      s.log.info(`[${s.name}] remote of ${this.who()} closed after ${lasted}s${this.remote ? ' (its connection dropped)' : ''}.`);
+      s.log.info(`[${s.name}] remote of ${this.who()} closed after ${lasted}s${this.remote ? ' (its connection dropped)' : ''}; ${this.#outcome()}.`);
     } else if (this.verified) {
       s.silent = (s.silent ?? 0) + 1; // counted for the hourly line; the detail is for debug mode
       (s.lastSilent ??= new Map()).set(this.verified, Date.now());
@@ -93,6 +93,29 @@ class Connection {
       s.log.debug?.(`[${s.name}] a device connected and left ${lasted}s later without proving itself; it got as far as: ${this.stage}.`);
     }
     this.server.forget(this);
+  }
+
+  /**
+   * What became of the buttons and touch moves of this remote, as counts only: a remote that
+   * "did nothing" is told apart from one whose presses never reached the TV, and why.
+   */
+  #outcome() {
+    const part = (tally, what) => {
+      if (!tally?.made) { return null; }
+      const done = tally.sent + tally.off + tally.failed;
+      return [`${tally.made} ${what}, ${tally.sent} reached the TV`,
+        tally.off ? `${tally.off} not sent (the TV was off and did not answer when asked)` : null,
+        tally.failed ? `${tally.failed} failed` : null,
+        tally.made > done ? `${tally.made - done} still on their way` : null].filter(Boolean).join(', ');
+    };
+    const said = [part(this.tally?.button, 'button presses'), part(this.tally?.move, 'touch moves')].filter(Boolean);
+    return said.length ? said.join('; ') : 'no button was pressed';
+  }
+
+  /** Counts what a press or move turned into: sent, not sent because the TV is off, or failed. */
+  note(kind, outcome) {
+    const tally = ((this.tally ??= {})[kind] ??= { made: 0, sent: 0, off: 0, failed: 0 });
+    if (outcome === 'made') { tally.made += 1; } else if (outcome in tally) { tally[outcome] += 1; }
   }
 
   /** What arrived on this connection, as kinds and counts only: for a connection that stayed silent. */
@@ -348,11 +371,13 @@ class Connection {
       if (now - this.lastSelect < SELECT_REPEAT_MS) { return; }
       this.lastSelect = now;
       if (this.server.touch === 'pointer' && now - (this.server.pointerAt ?? 0) < POINTER_CLICK_MS) {
-        this.server.emit('click');
+        this.note('button', 'made');
+        this.server.emit('click', this);
         return;
       }
     }
-    this.server.emit('key', name);
+    this.note('button', 'made');
+    this.server.emit('key', name, this);
   }
 
   flags(xid) {
@@ -455,7 +480,7 @@ const HANDLERS = {
     const code = Number(c._hidC); const state = Number(c._hBtS);
     this.reply(message, {});
     if (state !== 2 && state !== 0) { return; } // act once, when the finger lifts
-    if (BUTTONS.has(code)) { this.key(BUTTONS.get(code)); } else if (POWER.has(code)) { this.server.emit('power', POWER.get(code)); }
+    if (BUTTONS.has(code)) { this.key(BUTTONS.get(code)); } else if (POWER.has(code)) { this.note('button', 'made'); this.server.emit('power', POWER.get(code), this); }
   },
   _touchstart(message, c) {
     const fine = (n) => Number.isFinite(n) && n > 0 && n <= 1000;
@@ -469,7 +494,7 @@ const HANDLERS = {
     if (this.server.touch === 'pointer') {
       // The touch area as a mouse. A tap still arrives as the Select button, and is sent as one.
       const move = this.pointer.feed(phase, x, y);
-      if (move) { this.server.pointerAt = Date.now(); this.server.emit('pointer', move.dx, move.dy); }
+      if (move) { this.server.pointerAt = Date.now(); this.note('move', 'made'); this.server.emit('pointer', move.dx, move.dy, this); }
       return;
     }
     const direction = this.swipes.feed(phase, x, y);
