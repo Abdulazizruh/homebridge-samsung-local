@@ -7,7 +7,15 @@ import { UUID_NAMESPACE } from '../src/settings.js';
 import { FakeLink, fixture, makeApi, quietLog } from './support.js';
 
 const V = 'x.com.samsung.da.';
-const apply = (resources, write) => { Object.assign(resources[`/${write.path.join('/')}`], write.body); };
+const apply = (resources, write) => {
+  const rep = resources[`/${write.path.join('/')}`];
+  const items = write.body[`${V}items`];
+  if (items) { // a list is changed entry by entry, as the appliance does
+    for (const item of items) { Object.assign(rep[`${V}items`].find((x) => x[`${V}id`] === item[`${V}id`]), item); }
+    return;
+  }
+  Object.assign(rep, write.body);
+};
 
 function setup(name, kind, { features } = {}) {
   const api = makeApi();
@@ -86,8 +94,8 @@ test('a control switched off in the settings is removed; the readings stay', () 
 
 test('refrigerator: a sensor per zone and per door, in Celsius, and the two boost switches', async () => {
   const { link, handler, C, value, set } = setup('refrigerator_french', 'refrigerator');
-  assert.equal(Math.round(value('temperature.0', C.CurrentTemperature) * 10) / 10, -17.8, 'the freezer reports 0 °F');
-  assert.equal(Math.round(value('temperature.1', C.CurrentTemperature) * 10) / 10, 3.9);
+  assert.equal(Math.round(value('setpoint.0', C.CurrentTemperature) * 10) / 10, -17.8, 'the freezer reports 0 °F');
+  assert.equal(Math.round(value('setpoint.1', C.CurrentTemperature) * 10) / 10, 3.9);
   assert.equal(value('door.0', C.ContactSensorState), 0);
   link.resources['/doors/vs/0'][`${V}items`][1][`${V}openState`] = 'Open';
   link.report();
@@ -95,6 +103,12 @@ test('refrigerator: a sensor per zone and per door, in Celsius, and the two boos
   await set('boost.freezer', C.On, true);
   assert.deepEqual(link.sent.at(-1), { path: ['refrigeration', 'vs', '0'], body: { [`${V}rapidFreezing`]: 'On' } });
   assert.equal(handler.services.has('power'), false, 'a refrigerator has no power switch');
+  // Setting a zone: one tile carries the reading and the setting; the appliance is told in its own unit.
+  assert.equal(handler.services.has('temperature.1'), false, 'no second sensor for a zone that has a setting tile');
+  await set('setpoint.1', C.TargetTemperature, 3);
+  assert.deepEqual(link.sent.at(-1), { path: ['temperatures', 'vs', '0'], body: { [`${V}items`]: [{ [`${V}id`]: '1', [`${V}desired`]: '37' }] } });
+  await set('setpoint.0', C.TargetTemperature, -20);
+  assert.equal(link.sent.at(-1).body[`${V}items`][0][`${V}desired`], '-4');
 });
 
 test('robot vacuum: one switch starts a run and sends it home; the battery is shown', async () => {
@@ -111,7 +125,7 @@ test('robot vacuum: one switch starts a run and sends it home; the battery is sh
 test('oven: shown, never commanded', () => {
   const f = fixture('oven_wall');
   const model = buildApplianceModel(f.resources, 'oven');
-  assert.equal(model.parts.some((p) => p.control), false);
+  assert.equal(model.parts.some((p) => p.control), false, 'not even its temperature can be set from here');
   assert.deepEqual(model.parts.map((p) => p.type).sort(), ['alert', 'door', 'kidsLock', 'running', 'temperature']);
   assert.throws(() => applianceWrites(model.parts.find((p) => p.type === 'running'), true));
 });
@@ -123,6 +137,9 @@ test('dehumidifier: a fan tile with its speeds, and the room humidity', async ()
   assert.equal(value('speed', C.TargetFanState), 1);
   await set('speed', C.RotationSpeed, 100);
   assert.deepEqual(link.sent.at(-1).body, { [`${V}modes`]: ['Max'] });
+  assert.equal(value('targetHumidity', C.RelativeHumidityDehumidifierThreshold), 50);
+  await set('targetHumidity', C.RelativeHumidityDehumidifierThreshold, 40);
+  assert.deepEqual(link.sent.at(-1), { path: ['humidity', 'vs', '0'], body: { [`${V}desiredHumidity`]: '40' } });
 });
 
 test('names follow the air conditioners: the name in the settings reaches every tile, a tile renamed in Home is left alone', () => {
@@ -134,13 +151,13 @@ test('names follow the air conditioners: the name in the settings reaches every 
   const make = (displayName) => new ApplianceAccessory({ api, log: quietLog, accessory, link: new FakeLink(f.resources, apply), displayName, kind: 'refrigerator' });
   const name = (h, id) => h.services.get(id).getCharacteristic(C.ConfiguredName).value;
   const first = make('Fridge');
-  assert.equal(name(first, 'temperature.0'), 'Fridge Freezer');
+  assert.equal(name(first, 'setpoint.0'), 'Fridge Freezer');
   assert.equal(name(first, 'door.1'), 'Fridge Door 2');
   assert.equal(name(first, 'boost.fridge'), 'Fridge Power Cool');
   // The owner renames one tile in the Home app, then changes the appliance's name in the settings.
   first.services.get('door.1').updateCharacteristic(C.ConfiguredName, 'Left door');
   const second = make('Kitchen');
-  assert.equal(name(second, 'temperature.0'), 'Kitchen Freezer');
+  assert.equal(name(second, 'setpoint.0'), 'Kitchen Freezer');
   assert.equal(name(second, 'boost.fridge'), 'Kitchen Power Cool');
   assert.equal(name(second, 'door.1'), 'Left door');
 });

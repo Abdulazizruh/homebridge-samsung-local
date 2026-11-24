@@ -38,8 +38,8 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
 | Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
-| Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed and automatic mode as trial controls |
-| Refrigerators | **Trial, not yet tried on a real one** | A temperature sensor per zone and a contact sensor per door. Power Cool and Power Freeze as trial controls |
+| Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
+| Refrigerators | **Trial, not yet tried on a real one** | The temperature of each zone and a contact sensor per door. Setting each zone's temperature, Power Cool and Power Freeze as trial controls |
 | Robot vacuums | **Trial, not yet tried on a real one** | Battery and filters. One trial switch: on starts a run, off sends the robot back to its station |
 | Ovens, ranges, microwaves, cooktops | **Trial, shown only** | Door, temperature and a "running" sensor. Never commanded |
 | Any other Samsung appliance | **Whatever it reports that the plugin knows** | Shown the same way; otherwise listed for diagnostics |

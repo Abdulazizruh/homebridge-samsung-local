@@ -5,7 +5,7 @@ import { eveCharacteristics } from './eve.js';
 const HOLD_MS = 8000; // how long a command just accepted is shown before the appliance's own report takes over
 const LABELS = {
   power: '', speed: '', clean: 'Clean', airQuality: 'Air Quality', humidity: 'Humidity', battery: 'Battery',
-  running: 'Running', kidsLock: 'Kids Lock', alert: 'Alert', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze',
+  running: 'Running', kidsLock: 'Kids Lock', alert: 'Alert', targetHumidity: 'Target Humidity', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze',
 };
 
 /**
@@ -54,7 +54,10 @@ export class ApplianceAccessory {
   }
 
   #wanted() {
-    return this.model.parts.filter((p) => partWanted(p, this.features));
+    const wanted = this.model.parts.filter((p) => partWanted(p, this.features));
+    // A zone that can be set shows its temperature on that tile; a second sensor would repeat it.
+    const set = new Set(wanted.filter((p) => p.type === 'setpoint').map((p) => p.id.replace('setpoint', 'temperature')));
+    return wanted.filter((p) => !set.has(p.id));
   }
 
   /** The service type and subtype that carry a part; null for a part that rides on another. */
@@ -69,6 +72,8 @@ export class ApplianceAccessory {
       case 'airQuality': return [Service.AirQualitySensor, 'air'];
       case 'filter': return [Service.FilterMaintenance, part.id];
       case 'temperature': return [Service.TemperatureSensor, part.id];
+      case 'setpoint': return [Service.Thermostat, part.id];
+      case 'targetHumidity': return [Service.HumidifierDehumidifier, 'target'];
       case 'humidity': return [Service.HumiditySensor, 'humidity'];
       case 'door': return [Service.ContactSensor, part.id];
       case 'battery': return [Service.Battery, 'battery'];
@@ -177,6 +182,26 @@ export class ApplianceAccessory {
       case 'temperature':
         service.getCharacteristic(Characteristic.CurrentTemperature).setProps({ minValue: -60, maxValue: 400, minStep: 0.1 });
         break;
+      case 'setpoint': {
+        // A refrigerator only cools: the tile offers the temperature and nothing else.
+        const cool = Characteristic.TargetHeatingCoolingState.COOL;
+        service.getCharacteristic(Characteristic.CurrentTemperature).setProps({ minValue: -60, maxValue: 60, minStep: 0.1 });
+        service.getCharacteristic(Characteristic.TargetHeatingCoolingState).setProps({ validValues: [cool] }).onSet(undo);
+        service.updateCharacteristic(Characteristic.TargetHeatingCoolingState, cool);
+        service.getCharacteristic(Characteristic.TargetTemperature)
+          .setProps({ minValue: Math.floor(part.min), maxValue: Math.ceil(part.max), minStep: part.fahrenheit ? 0.5 : 1 })
+          .onSet((v) => this.#command(part.id, Number(v)));
+        break;
+      }
+      case 'targetHumidity': {
+        const only = Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER;
+        service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).setProps({ validValues: [only] }).onSet(undo);
+        service.updateCharacteristic(Characteristic.TargetHumidifierDehumidifierState, only);
+        service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).setProps({ minValue: 0, maxValue: 100, minStep: part.step })
+          .onSet((v) => this.#command('targetHumidity', Number(v)));
+        service.getCharacteristic(Characteristic.Active).onSet((v) => (this.services.has('power') ? this.#command('power', v === 1) : undo()));
+        break;
+      }
       case 'kidsLock':
         // Read-only: the lock is set on the appliance. Show the truth again.
         service.getCharacteristic(Characteristic.LockTargetState).onSet(undo);
@@ -325,6 +350,17 @@ export class ApplianceAccessory {
           break;
         case 'temperature':
           service.updateCharacteristic(C.CurrentTemperature, Math.min(400, Math.max(-60, value)));
+          break;
+        case 'setpoint':
+          service.updateCharacteristic(C.CurrentTemperature, Math.min(60, Math.max(-60, part.current)));
+          service.updateCharacteristic(C.TargetTemperature, Math.min(Math.ceil(part.max), Math.max(Math.floor(part.min), value)));
+          service.updateCharacteristic(C.CurrentHeatingCoolingState, C.CurrentHeatingCoolingState.COOL);
+          break;
+        case 'targetHumidity':
+          service.updateCharacteristic(C.Active, on ? 1 : 0);
+          service.updateCharacteristic(C.CurrentHumidifierDehumidifierState, on ? 3 : 0);
+          service.updateCharacteristic(C.CurrentRelativeHumidity, Math.min(100, Math.max(0, part.current)));
+          service.updateCharacteristic(C.RelativeHumidityDehumidifierThreshold, Math.min(100, Math.max(0, value)));
           break;
         case 'humidity':
           service.updateCharacteristic(C.CurrentRelativeHumidity, Math.min(100, Math.max(0, value)));

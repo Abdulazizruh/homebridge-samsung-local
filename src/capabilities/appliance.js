@@ -110,10 +110,17 @@ function temperatures(resources, kind) {
   return items.map((item, i) => {
     const current = number(item?.[`${V}current`]);
     const name = String(item?.[`${V}description`] ?? '').trim();
+    const unit = item?.[`${V}unit`];
+    const [desired, min, max] = ['desired', 'minimum', 'maximum'].map((k) => number(item?.[`${V}${k}`]));
     return current === null ? null : {
       index: i,
       name: name && lower(name) !== 'temperature' ? name : (kind === 'oven' ? 'Oven' : `Zone ${i + 1}`),
-      celsius: celsius(current, item?.[`${V}unit`]),
+      celsius: celsius(current, unit),
+      // A zone that also says what it is set to, and within which bounds, can be set.
+      set: desired === null || min === null || max === null || min >= max ? null : {
+        id: String(item[`${V}id`] ?? i), fahrenheit: /^f/i.test(String(unit ?? '')),
+        celsius: celsius(desired, unit), min: celsius(min, unit), max: celsius(max, unit),
+      },
     };
   }).filter(Boolean);
 }
@@ -152,7 +159,7 @@ const BUSY = new Set(['run', 'running', 'active', 'cooking', 'preheat', 'preheat
  * @returns {{ kind, model, parts: Array, state: object }}
  *   part: { id, type, control, value, ... }
  *   type: 'power' | 'speed' | 'airQuality' | 'filter' | 'temperature' | 'humidity' | 'door' |
- *         'battery' | 'clean' | 'boost' | 'running' | 'kidsLock' | 'alert' | 'energy'
+ *         'battery' | 'clean' | 'boost' | 'setpoint' | 'targetHumidity' | 'running' | 'kidsLock' | 'alert' | 'energy'
  */
 export function buildApplianceModel(resources = {}, kind = 'unknown') {
   const parts = [];
@@ -180,10 +187,23 @@ export function buildApplianceModel(resources = {}, kind = 'unknown') {
   }
   for (const t of temperatures(resources, kind)) {
     parts.push({ id: `temperature.${t.index}`, type: 'temperature', control: false, value: t.celsius, name: t.name });
+    if (t.set && kind === 'refrigerator') {
+      parts.push({
+        id: `setpoint.${t.index}`, type: 'setpoint', control: true, value: t.set.celsius, name: t.name, current: t.celsius,
+        zone: t.set.id, fahrenheit: t.set.fahrenheit, min: t.set.min, max: t.set.max,
+      });
+    }
   }
   const humidity = number(resources['/humidity/vs/0']?.[`${V}humidity`]);
   if (humidity !== null && humidity > 0) {
     parts.push({ id: 'humidity', type: 'humidity', control: false, value: humidity });
+  }
+  const wantedHumidity = number(resources['/humidity/vs/0']?.[`${V}desiredHumidity`]);
+  if (wantedHumidity !== null && kind === 'dehumidifier') {
+    parts.push({
+      id: 'targetHumidity', type: 'targetHumidity', control: true, value: wantedHumidity,
+      step: number(resources['/humidity/vs/0'].increment) || 1, current: humidity ?? 0,
+    });
   }
   for (const d of doors(resources)) {
     parts.push({ id: `door.${d.index}`, type: 'door', control: false, value: d.open, name: d.name });
@@ -245,6 +265,16 @@ export function applianceWrites(part, value) {
       return [{ path: ['mode', 'vs', '0'], body: { [`${V}modes`]: [value ? 'Cleaning_Auto' : 'Control_Homing'] } }];
     case 'boost':
       return [{ path: ['refrigeration', 'vs', '0'], body: { [`${V}${part.field}`]: value ? 'On' : 'Off' } }];
+    case 'setpoint': {
+      // The appliance is spoken to in its own unit, within its own bounds.
+      const inside = Math.min(part.max, Math.max(part.min, Number(value)));
+      const own = part.fahrenheit ? inside * 9 / 5 + 32 : inside;
+      return [{ path: ['temperatures', 'vs', '0'], body: { [`${V}items`]: [{ [`${V}id`]: part.zone, [`${V}desired`]: String(Math.round(own)) }] } }];
+    }
+    case 'targetHumidity': {
+      const stepped = Math.round(Number(value) / part.step) * part.step;
+      return [{ path: ['humidity', 'vs', '0'], body: { [`${V}desiredHumidity`]: String(Math.min(100, Math.max(0, stepped))) } }];
+    }
     default:
       throw new Error(`No command for ${part.id}.`);
   }
@@ -258,7 +288,7 @@ const show = (part) => {
     default: return part.value;
   }
 };
-const NOTE = { filter: '%', temperature: '°C', humidity: '%', battery: '%', energy: 'W' };
+const NOTE = { filter: '%', temperature: '°C', setpoint: '°C', humidity: '%', targetHumidity: '%', battery: '%', energy: 'W' };
 
 /** Rows for the settings page, in the shape the other appliance kinds use. `trial` marks a control not yet confirmed on a real appliance. */
 export function applianceFeatureRows(model) {

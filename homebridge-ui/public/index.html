@@ -180,7 +180,7 @@
       cycleStyleNote: 'Apple Home sends an on/off command when a valve tile is tapped. The plugin undoes it at once; choose the sensor if you want nothing to happen at all.',
       laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
       apReadings: 'Readings', apControls: 'Controls', apTrial: 'trial', apBroken: 'Not working?', apNote: 'Trial functions have not been tried on this model yet. Untick one to remove it from Apple Home. If one does not work, press "Not working?" next to it.', apReportNote: 'The report opens ready on GitHub; you press Submit there. Attach the diagnostics file from below: identifiers, addresses and keys are removed from it.', apTableNote: 'Read from what your own appliance reports. Controls are trials until confirmed on a real appliance of this type.',
-      apPart: { power: 'Power', speed: 'Fan speed and automatic mode', clean: 'Start cleaning, and back to the station', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze', airQuality: 'Air quality', filter: 'Filter', temperature: 'Temperature', humidity: 'Humidity', door: 'Door', battery: 'Battery', running: 'Running sensor', kidsLock: 'Child lock status', alert: 'Alert sensor (appliance faults)', energy: 'Power and energy (Eve)' },
+      apPart: { power: 'Power', speed: 'Fan speed and automatic mode', clean: 'Start cleaning, and back to the station', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze', airQuality: 'Air quality', filter: 'Filter', temperature: 'Temperature', setpoint: 'Set the temperature', humidity: 'Humidity', targetHumidity: 'Target humidity', door: 'Door', battery: 'Battery', running: 'Running sensor', kidsLock: 'Child lock status', alert: 'Alert sensor (appliance faults)', energy: 'Power and energy (Eve)' },
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
@@ -326,7 +326,7 @@
       cycleStyleNote: 'تطبيق Apple Home يرسل أمر تشغيل أو إيقاف عند الضغط على بطاقة الصمام. تلغيه الإضافة فورًا، واختر الحساس إذا أردت ألا يحدث شيء إطلاقًا.',
       laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
       apReadings: 'القراءات', apControls: 'التحكم', apTrial: 'تجريبي', apBroken: 'لا تعمل؟', apNote: 'الوظائف التجريبية لم تُجرَّب على هذا الموديل بعد. أزل العلامة عن أي وظيفة لإخفائها من Apple Home. وإن لم تعمل إحداها فاضغط «لا تعمل؟» بجانبها.', apReportNote: 'يُفتح التقرير جاهزًا في GitHub، وأنت تضغط الإرسال هناك. أرفق ملف التشخيص من الأسفل: تُحذف منه المعرّفات والعناوين والمفاتيح.', apTableNote: 'مقروءة مما يعلنه جهازك نفسه. وظائف التحكم تجريبية حتى تُؤكَّد على جهاز حقيقي من هذا النوع.',
-      apPart: { power: 'التشغيل والإيقاف', speed: 'سرعة المروحة والوضع التلقائي', clean: 'بدء التنظيف، والعودة إلى المحطة', 'boost.fridge': 'التبريد السريع', 'boost.freezer': 'التجميد السريع', airQuality: 'جودة الهواء', filter: 'الفلتر', temperature: 'الحرارة', humidity: 'الرطوبة', door: 'الباب', battery: 'البطارية', running: 'حساس التشغيل', kidsLock: 'حالة قفل الأطفال', alert: 'حساس التنبيه (أعطال الجهاز)', energy: 'القدرة والطاقة (Eve)' },
+      apPart: { power: 'التشغيل والإيقاف', speed: 'سرعة المروحة والوضع التلقائي', clean: 'بدء التنظيف، والعودة إلى المحطة', 'boost.fridge': 'التبريد السريع', 'boost.freezer': 'التجميد السريع', airQuality: 'جودة الهواء', filter: 'الفلتر', temperature: 'الحرارة', setpoint: 'ضبط الحرارة', humidity: 'الرطوبة', targetHumidity: 'الرطوبة المطلوبة', door: 'الباب', battery: 'البطارية', running: 'حساس التشغيل', kidsLock: 'حالة قفل الأطفال', alert: 'حساس التنبيه (أعطال الجهاز)', energy: 'القدرة والطاقة (Eve)' },
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
@@ -538,7 +538,7 @@
   function partLabel(r) {
     const base = T[lang].apPart[r.id] ?? T[lang].apPart[r.type] ?? r.id;
     const n = r.id.includes('.') && !T[lang].apPart[r.id] ? r.id.split('.')[1] : '';
-    const extra = r.type === 'door' || r.type === 'temperature' ? (r.name || (n !== '' ? String(Number(n) + 1) : '')) : r.type === 'filter' && n !== 'main' ? n : '';
+    const extra = ['door', 'temperature', 'setpoint'].includes(r.type) ? (r.name || (n !== '' ? String(Number(n) + 1) : '')) : r.type === 'filter' && n !== 'main' ? n : '';
     return extra ? `${base} (${extra})` : base;
   }
   /** A ready GitHub report for one function that does not work. Nothing is sent by the plugin itself. */
