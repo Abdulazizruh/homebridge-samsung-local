@@ -39,7 +39,7 @@
   .sl-sec-head small { font-weight: 400; white-space: nowrap; }
   .sl-sec-head svg { width: 16px; height: 16px; flex: none; } .sl-sec-head span { flex: 1; }
   .sl-sec-body { padding: 0 10px 4px; }
-  .sl-part { display: flex; align-items: center; gap: 8px; padding: 3px 0; flex-wrap: wrap; } .sl-part > label { flex: 1 1 180px; margin: 0; }
+  .sl-part { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 3px 0; } .sl-part > label { margin: 0; } .sl-part .btn { white-space: nowrap; }
   .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
   .sl-danger { border-color: rgba(220,53,69,.5); }
   .sl-group { border: 1px solid rgba(128,90,213,.45); border-radius: 8px; padding: 0 10px 10px; overflow: hidden; }

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.6
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.5, plus:
+
+- **Settings: each trial control keeps its name, its "trial" tag and its "Not working?" button on one line,** where a long name used to push the button onto a line of its own.
+- **The project page has pictures of the new settings:** the list grouped by kind, an opened appliance card with the bar for changes not saved yet, the touch-area choice of the remote like Apple TV, and the options of an air purifier. The Arabic page shows them in Arabic.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.5، ومعه:
+
+- **الإعدادات: كل وظيفة تجريبية يبقى اسمها ووسم «تجريبي» وزر «لا تعمل؟» في سطر واحد،** وكان الاسم الطويل يدفع الزر إلى سطر وحده.
+- **صفحة المشروع فيها صور الإعدادات الجديدة:** القائمة المصنّفة حسب النوع، وبطاقة جهاز مفتوحة مع شريط التغييرات غير المحفوظة، واختيار مساحة اللمس في الريموت الذي مثل Apple TV، وخيارات منقي الهواء. والصفحة العربية تعرضها بالعربية.
+
 ## 1.6.0-beta.5
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.4, plus:

@@ -45,6 +45,8 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Any other Samsung appliance | **Whatever it reports that the plugin knows** | Shown the same way; otherwise listed for diagnostics |
 
 Readings are sensors from the first day. Controls of these new types carry the word **trial** in the settings: they are built from recorded appliances of the same families, and none has been confirmed on a real one by this project yet. Each can be removed from Apple Home by unticking it, and each has a **Not working?** button that opens a ready report.
+
+<p><img src="assets/screenshots/options-air-purifier.png" alt="Air purifier options in the plugin settings: readings with a tick each, and two trial controls, each with its trial tag and a Not working? button" width="320"></p>
 | Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
 | Appliances that refuse the automatic certificate | **Not supported** | Detected and reported with the reason |
@@ -124,6 +126,16 @@ Tested on a real home network: five air conditioners, a washer and a TV answered
 Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
 
 A static DHCP lease for each appliance is recommended. An air conditioner or washer whose address changes is found again by the plugin. To set an address yourself, press **Change IP** beside the appliance, enter the new one and press **Test & discover**: the existing entry is updated.
+
+### Your appliances in the settings
+
+The settings list your appliances by kind: air conditioners, laundry, TVs, and the newer kinds. Each appliance is one line with its name and state. Only the arrow at the line's edge opens it, so a finger scrolling down the page cannot press anything by mistake. A group can be folded from its title.
+
+<p><img src="assets/screenshots/devices-list.png" alt="The appliance list grouped by kind, each appliance on one line with its state and an arrow at the edge" width="320"></p>
+
+The open card holds everything for that appliance: address, energy, Options, Rename, Change IP, Diagnostics, On, and Remove, which asks twice. A change inside the options is not saved until you press Save or Update; until then a bar at the bottom says so, with Undo.
+
+<p><img src="assets/screenshots/device-card.png" alt="An opened appliance card with its buttons, and below it the bar for changes not saved yet, with Undo and Save" width="320"></p>
 
 ### Testing beside LocalThings
 
@@ -233,6 +245,10 @@ Under it: the TV's name, then two separate choices.
 The pairing code of the remote like Apple TV is shown under that choice and can be changed in the card below it.
 
 <p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: the remote choice, the switches for automations, and the notes on the remote like Apple TV" width="320"></p>
+
+With a remote like Apple TV chosen, the touch area of that remote can step the selection with arrows (tested) or move a pointer like a mouse (trial). The pointer shows in the TV's browser and in some apps.
+
+<p><img src="assets/screenshots/touch-area.png" alt="The choice for the remote's touch area: Arrows, tested, and Pointer, trial" width="300"></p>
 
 ## What has been tested
 
