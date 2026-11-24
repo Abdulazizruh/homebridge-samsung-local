@@ -10,6 +10,7 @@ Trial version on the "beta" channel. Everything in 1.5.1-beta.2, plus the first 
 - **Controls are offered as trials.** Power, fan speed and automatic mode (air purifier, dehumidifier), Power Cool and Power Freeze (refrigerator), start a run and back to the station (robot vacuum). They are built from recorded appliances of the same families and have not been confirmed on a real one by this project, so each carries the word "trial" in the settings. A command counts as done only once the appliance accepted it; a few seconds later the tile shows what the appliance itself reports.
 - **Settings: untick to remove, one tap to report.** Each reading and control has its own tick. Next to every trial control a "Not working?" button opens a ready report on GitHub with the type, model, function and plugin version filled in. The plugin sends nothing by itself.
 - **Ovens, ranges, microwaves and cooktops are shown, never commanded.**
+- **Names work as on the air conditioners.** The name given in the plugin settings reaches every tile of the appliance ("Kitchen Freezer", "Kitchen Door 2", "Purifier Air Quality"); a tile renamed in the Home app keeps its name.
 - **Nothing changes for air conditioners, washers and TVs.** They keep their own tested accessories; the shared reader is used only for the other kinds.
 
 Sources: the resource names and value shapes follow the recorded appliances and registry of LocalThings (MIT); the choice of HomeKit service per function follows homebridge-smartthings (Apache-2.0). Both are credited in the README.
@@ -22,6 +23,7 @@ Sources: the resource names and value shapes follow the recorded appliances and 
 - **وظائف التحكم تُعرض كتجريبية.** التشغيل وسرعة المروحة والوضع التلقائي (المنقي ومزيل الرطوبة)، التبريد السريع والتجميد السريع (الثلاجة)، بدء التنظيف والعودة إلى المحطة (المكنسة). بُنيت من أجهزة مسجَّلة من العائلات نفسها ولم يؤكدها هذا المشروع على جهاز حقيقي، فكل واحدة تحمل كلمة «تجريبي» في الإعدادات. يُعدّ الأمر منفَّذًا بعد أن يقبله الجهاز فقط، وبعد ثوانٍ تعرض البطاقة ما يعلنه الجهاز نفسه.
 - **الإعدادات: أزل العلامة للإخفاء، وضغطة واحدة للإبلاغ.** لكل قراءة ووظيفة علامتها. وبجانب كل وظيفة تجريبية زر «لا تعمل؟» يفتح تقريرًا جاهزًا في GitHub فيه النوع والموديل والوظيفة ورقم الإضافة. الإضافة لا ترسل شيئًا من تلقاء نفسها.
 - **الأفران والمواقد والميكروويف تُعرض ولا تُرسَل إليها أوامر.**
+- **الأسماء كما في المكيفات.** الاسم المكتوب في إعدادات الإضافة يصل إلى كل بطاقة في الجهاز، ثم يليه اسم الجزء (مثل «Kitchen Freezer» و«Purifier Air Quality»). والبطاقة التي غُيّر اسمها من تطبيق Home تحتفظ باسمها.
 - **المكيفات والغسالات والتلفزيونات كما هي.** تبقى على ملحقاتها المجرَّبة، والقارئ المشترك يُستعمل للأنواع الأخرى فقط.
 
 المصادر: أسماء القراءات وأشكال قيمها من الأجهزة المسجَّلة وسجل LocalThings (MIT)، واختيار خدمة HomeKit لكل وظيفة من homebridge-smartthings (Apache-2.0). كلاهما مذكور في README.

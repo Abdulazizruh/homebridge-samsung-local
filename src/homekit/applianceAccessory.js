@@ -85,6 +85,25 @@ export class ApplianceAccessory {
     return word ? `${this.displayName} ${word}` : this.displayName;
   }
 
+  /**
+   * Name a tile after the appliance's name in the plugin settings, as the air conditioners
+   * and washers do: a new name there reaches every tile, except one the owner renamed in
+   * the Home app, which is left alone.
+   */
+  #applyName(key, service, name) {
+    const { Characteristic } = this.hap;
+    const applied = (this.context.appliedNames ??= {});
+    if (!service.testCharacteristic(Characteristic.ConfiguredName)) {
+      service.addOptionalCharacteristic(Characteristic.ConfiguredName);
+    }
+    const current = service.getCharacteristic(Characteristic.ConfiguredName).value;
+    if (!current || current === applied[key]) {
+      service.updateCharacteristic(Characteristic.ConfiguredName, name);
+      service.updateCharacteristic(Characteristic.Name, name);
+      applied[key] = name;
+    }
+  }
+
   #build() {
     const { Service, Characteristic } = this.hap;
     const info = this.accessory.getService(Service.AccessoryInformation);
@@ -99,13 +118,11 @@ export class ApplianceAccessory {
       const home = this.#home(part);
       if (!home) { continue; }
       const [type, subtype] = home;
-      let service = this.accessory.getServiceById(type, subtype);
-      if (!service) {
-        // Named once, when created: a name the owner gave it in the Home app is left alone.
-        const name = this.#label(part);
-        service = this.accessory.addService(type, name, subtype);
-        service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-        service.updateCharacteristic(Characteristic.ConfiguredName, name);
+      const name = this.#label(part);
+      const service = this.accessory.getServiceById(type, subtype) ?? this.accessory.addService(type, name, subtype);
+      // Power and speed share one tile: the tile is named once, by whichever comes first.
+      if (!keep.has(service)) {
+        this.#applyName(`${type.UUID}:${subtype}`, service, name);
       }
       keep.add(service);
       this.services.set(part.id, service);

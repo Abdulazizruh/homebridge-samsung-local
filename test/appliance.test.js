@@ -124,3 +124,23 @@ test('dehumidifier: a fan tile with its speeds, and the room humidity', async ()
   await set('speed', C.RotationSpeed, 100);
   assert.deepEqual(link.sent.at(-1).body, { [`${V}modes`]: ['Max'] });
 });
+
+test('names follow the air conditioners: the name in the settings reaches every tile, a tile renamed in Home is left alone', () => {
+  const api = makeApi();
+  const f = fixture('refrigerator_french');
+  const accessory = new api.platformAccessory('Fridge', api.hap.uuid.generate(`${UUID_NAMESPACE}names`));
+  accessory.context.resources = structuredClone(f.resources);
+  const C = api.hap.Characteristic;
+  const make = (displayName) => new ApplianceAccessory({ api, log: quietLog, accessory, link: new FakeLink(f.resources, apply), displayName, kind: 'refrigerator' });
+  const name = (h, id) => h.services.get(id).getCharacteristic(C.ConfiguredName).value;
+  const first = make('Fridge');
+  assert.equal(name(first, 'temperature.0'), 'Fridge Freezer');
+  assert.equal(name(first, 'door.1'), 'Fridge Door 2');
+  assert.equal(name(first, 'boost.fridge'), 'Fridge Power Cool');
+  // The owner renames one tile in the Home app, then changes the appliance's name in the settings.
+  first.services.get('door.1').updateCharacteristic(C.ConfiguredName, 'Left door');
+  const second = make('Kitchen');
+  assert.equal(name(second, 'temperature.0'), 'Kitchen Freezer');
+  assert.equal(name(second, 'boost.fridge'), 'Kitchen Power Cool');
+  assert.equal(name(second, 'door.1'), 'Left door');
+});
