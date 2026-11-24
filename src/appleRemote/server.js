@@ -97,7 +97,7 @@ class Connection {
     if (this.bad) { notes.push(`${this.bad} not understood (${[...(this.badWhy ?? [])].join('; ')})`); }
     if (this.answers) { notes.push(`${this.answers} without a request name (${this.answerShape})`); }
     if (this.renamed) { notes.push(`${this.renamed} recognised by name although worded in another order`); }
-    if (this.infoShape !== undefined) { notes.push(`about itself it sent: ${this.infoShape || 'nothing'}`); }
+    if (this.infoFlags) { notes.push(`its switches: ${this.infoFlags}`); }
     if (this.buffer.length) { notes.push(`${this.buffer.length} bytes of an unfinished message`); }
     return `Messages after proving itself: ${kinds}; the last one ${last}${notes.length ? `; ${notes.join(', ')}` : ''}.`;
   }
@@ -383,6 +383,9 @@ const HANDLERS = {
     this.status(message._x);
     const shape = Object.keys(c ?? {}).sort().map((k) => (/^[_A-Za-z][A-Za-z]{0,23}$/.test(k) ? k : '(other)')).join(',').slice(0, 300);
     this.infoShape = shape; // the names of what the phone sent about itself, never the values
+    // Its switches, which are plain numbers and say what kind of connection this is; never an identifier or a name.
+    const plain = (v) => (typeof v === 'number' || typeof v === 'boolean' ? String(v) : typeof v === 'string' && /^\d{1,6}$/.test(v) ? v : v === undefined ? '-' : 'other');
+    this.infoFlags = `${['_sf', '_clFl', '_cf', '_bf', '_dC', '_lP'].map((k) => `${k}=${plain(c?.[k])}`).join(' ')} _btHP=${plain(message._btHP)} fields=${Object.keys(c ?? {}).length}${this.renamed ? ' other-order' : ''}`;
     // A phone also connects by itself, says who it is, and then says nothing for half a minute. While such
     // a connection sat there, the remote on that phone showed "Connecting". It is closed after a short wait,
     // unless that makes the phone come straight back again and again.
@@ -410,7 +413,7 @@ const HANDLERS = {
   tvrcsessionstart(message, c) {
     this.remote = true;
     this.opened = true;
-    this.server.log.info(`[${this.server.name}] iPhone remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}..`);
+    this.server.log.info(`[${this.server.name}] iPhone remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. Its switches: ${this.infoFlags ?? '-'}.`);
     this.server.sessionsChanged();
     this.reply(message, c);
     this.flags(message._x); // within a moment, or the iPhone keeps the volume buttons for itself

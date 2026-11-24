@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.30
+
+Trial version on the "beta" channel. Behaves as beta.29; only the log changes, to find the cause of what is left:
+
+- **iPhone remote: why some connections stay silent.** With beta.29 the message "Can't Connect to Apple TV" appeared once or twice in about twenty opens: after a silent connection was closed, the phone usually tried again at once, but twice it did not. To tell a connection that opens the remote from one that stays silent, the log now writes, for both, the switches the phone sends about itself (plain numbers such as its status flags, never an identifier or a name) in place of the long list of field names.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». تعمل مثل beta.29؛ التغيير في السجل فقط، لمعرفة سبب ما بقي:
+
+- **ريموت الآيفون: لماذا تبقى بعض الاتصالات ساكتة.** مع beta.29 ظهرت رسالة «Can't Connect to Apple TV» مرة أو مرتين في نحو عشرين فتحًا: بعد إغلاق الاتصال الساكت كان الجوال يحاول فورًا في الغالب، لكنه لم يفعل مرتين. وللتفريق بين الاتصال الذي يفتح الريموت والذي يبقى ساكتًا، صار السجل يكتب للاثنين المفاتيح التي يرسلها الجوال عن نفسه (أرقام عادية مثل أعلام حالته، دون أي معرّف أو اسم) بدل قائمة أسماء الحقول الطويلة.
+
 ## 1.4.0-beta.29
 
 Trial version on the "beta" channel. Same as beta.28, plus what its log showed:
