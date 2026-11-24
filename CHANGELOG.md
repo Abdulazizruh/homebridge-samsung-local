@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.2
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.1, plus:
+
+- **Settings: the device list is grouped by kind.** Air conditioners, laundry, TVs, air purifiers and dehumidifiers, refrigerators, robot vacuums, cooking, other. A group exists only while it has a device, and its title shows how many it holds and how many are connected. A group can be folded; the page remembers it, and opens the group again when a device joins or leaves it. Nothing inside a device's card changed: name, address, pairing code, options, diagnostics and removal are where they were.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.1، ومعه:
+
+- **الإعدادات: قائمة الأجهزة مصنّفة حسب النوع.** المكيفات، الغسيل، التلفزيونات، منقيات الهواء ومزيلات الرطوبة، الثلاجات، المكانس الآلية، الطبخ، وأجهزة أخرى. المجموعة تظهر ما دام فيها جهاز، وعنوانها يعرض عدد أجهزتها والمتصل منها. تُطوى المجموعة وتتذكر الصفحة ذلك، وتفتحها من جديد عند انضمام جهاز إليها أو خروجه منها. بطاقة الجهاز نفسها لم يتغير فيها شيء: الاسم والعنوان ورمز الإضافة والخيارات والتشخيص والحذف في أماكنها.
+
 ## 1.6.0-beta.1
 
 Trial version on the "beta" channel. Everything in 1.5.1-beta.2, plus the first step beyond air conditioners, washers and TVs:

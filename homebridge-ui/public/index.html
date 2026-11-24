@@ -24,6 +24,11 @@
   .sl-ico svg, .sl-mini svg, .sl-main svg { width: 18px; height: 18px; flex: none; } .sl-main svg { vertical-align: -4px; }
   .sl-mini { padding: 2px 6px; line-height: 1; }
   .sl-inline { border: 2px solid rgba(128,90,213,.55); border-radius: 8px; padding: 10px; margin-top: 8px; }
+  .sl-sec { border: 1px solid rgba(128,90,213,.45); border-radius: 8px; overflow: hidden; margin-top: 10px; }
+  .sl-sec-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; border: 0; font-weight: 700; color: #6f42c1; background: rgba(128,90,213,.14); text-align: start; }
+  .sl-sec-head small { font-weight: 400; white-space: nowrap; }
+  .sl-sec-head svg { width: 16px; height: 16px; flex: none; } .sl-sec-head span { flex: 1; }
+  .sl-sec-body { padding: 0 10px 4px; }
   .sl-part { display: flex; align-items: center; gap: 8px; padding: 3px 0; flex-wrap: wrap; } .sl-part > label { flex: 1 1 180px; margin: 0; }
   .sl-muted { opacity: .7; } .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
   .sl-danger { border-color: rgba(220,53,69,.5); }
@@ -179,6 +184,7 @@
       cycleStyle: 'How the cycle tile behaves', cycleStyle_valve: 'Tile with countdown (a tap is undone at once)', cycleStyle_sensor: 'Running sensor (no countdown, never reacts to a tap)',
       cycleStyleNote: 'Apple Home sends an on/off command when a valve tile is tapped. The plugin undoes it at once; choose the sensor if you want nothing to happen at all.',
       laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
+      sec: { ac: 'Air conditioners', laundry: 'Laundry', tv: 'TVs', air: 'Air purifiers and dehumidifiers', fridge: 'Refrigerators', vacuum: 'Robot vacuums', cooking: 'Cooking', other: 'Other appliances' }, secCount: (n) => (n === 1 ? '1 device' : `${n} devices`), secAll: 'all connected', secOne: 'connected', secSome: (a, n) => `${a} of ${n} connected`, secFold: 'Show or hide this group',
       apReadings: 'Readings', apControls: 'Controls', apTrial: 'trial', apBroken: 'Not working?', apNote: 'Trial functions have not been tried on this model yet. Untick one to remove it from Apple Home. If one does not work, press "Not working?" next to it.', apReportNote: 'The report opens ready on GitHub; you press Submit there. Attach the diagnostics file from below: identifiers, addresses and keys are removed from it.', apTableNote: 'Read from what your own appliance reports. Controls are trials until confirmed on a real appliance of this type.',
       apPart: { power: 'Power', speed: 'Fan speed and automatic mode', clean: 'Start cleaning, and back to the station', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze', airQuality: 'Air quality', filter: 'Filter', temperature: 'Temperature', setpoint: 'Set the temperature', humidity: 'Humidity', targetHumidity: 'Target humidity', door: 'Door', battery: 'Battery', running: 'Running sensor', kidsLock: 'Child lock status', alert: 'Alert sensor (appliance faults)', energy: 'Power and energy (Eve)' },
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
@@ -325,6 +331,7 @@
       cycleStyle: 'سلوك بطاقة الدورة', cycleStyle_valve: 'بطاقة مع عدّاد (يُلغى الضغط فورًا)', cycleStyle_sensor: 'حساس تشغيل (دون عدّاد، لا يتأثر بالضغط)',
       cycleStyleNote: 'تطبيق Apple Home يرسل أمر تشغيل أو إيقاف عند الضغط على بطاقة الصمام. تلغيه الإضافة فورًا، واختر الحساس إذا أردت ألا يحدث شيء إطلاقًا.',
       laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
+      sec: { ac: 'المكيفات', laundry: 'الغسيل', tv: 'التلفزيونات', air: 'منقيات الهواء ومزيلات الرطوبة', fridge: 'الثلاجات', vacuum: 'المكانس الآلية', cooking: 'الطبخ', other: 'أجهزة أخرى' }, secCount: (n) => (n === 1 ? 'جهاز واحد' : n === 2 ? 'جهازان' : n <= 10 ? `${n} أجهزة` : `${n} جهازًا`), secAll: 'كلها متصلة', secOne: 'متصل', secSome: (a, n) => `${a} من ${n} متصلة`, secFold: 'إظهار هذه المجموعة أو إخفاؤها',
       apReadings: 'القراءات', apControls: 'التحكم', apTrial: 'تجريبي', apBroken: 'لا تعمل؟', apNote: 'الوظائف التجريبية لم تُجرَّب على هذا الموديل بعد. أزل العلامة عن أي وظيفة لإخفائها من Apple Home. وإن لم تعمل إحداها فاضغط «لا تعمل؟» بجانبها.', apReportNote: 'يُفتح التقرير جاهزًا في GitHub، وأنت تضغط الإرسال هناك. أرفق ملف التشخيص من الأسفل: تُحذف منه المعرّفات والعناوين والمفاتيح.', apTableNote: 'مقروءة مما يعلنه جهازك نفسه. وظائف التحكم تجريبية حتى تُؤكَّد على جهاز حقيقي من هذا النوع.',
       apPart: { power: 'التشغيل والإيقاف', speed: 'سرعة المروحة والوضع التلقائي', clean: 'بدء التنظيف، والعودة إلى المحطة', 'boost.fridge': 'التبريد السريع', 'boost.freezer': 'التجميد السريع', airQuality: 'جودة الهواء', filter: 'الفلتر', temperature: 'الحرارة', setpoint: 'ضبط الحرارة', humidity: 'الرطوبة', targetHumidity: 'الرطوبة المطلوبة', door: 'الباب', battery: 'البطارية', running: 'حساس التشغيل', kidsLock: 'حالة قفل الأطفال', alert: 'حساس التنبيه (أعطال الجهاز)', energy: 'القدرة والطاقة (Eve)' },
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
@@ -947,10 +954,23 @@
       : `<div class="mt-1"><span class="sl-pill sl-warn">${t('tvCodeTitle')}</span>${code}</div>`;
   }
 
+  // --- the device list, grouped by kind of appliance ---
+  const SECTIONS = ['ac', 'laundry', 'tv', 'air', 'fridge', 'vacuum', 'cooking', 'other'];
+  const SECTION_OF = { airConditioner: 'ac', washer: 'laundry', dryer: 'laundry', dishwasher: 'laundry', tv: 'tv', airPurifier: 'air', dehumidifier: 'air',
+    refrigerator: 'fridge', robotVacuum: 'vacuum', oven: 'cooking', range: 'cooking', microwave: 'cooking', cooktop: 'cooking', hood: 'cooking' };
+  function sectionOf(dev, snap) {
+    if (dev.type === 'tv') { return 'tv'; }
+    const kind = snap?.described?.kind;
+    // An appliance not seen yet is taken for an air conditioner, as the plugin itself does.
+    return kind ? (SECTION_OF[kind] ?? 'other') : 'ac';
+  }
+  function foldedSections() {
+    try { const v = JSON.parse(localStorage.getItem('sl-folded') || '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; }
+  }
   function renderDevices() {
     const box = $('sl-devices');
     if (!config.devices.length) { box.innerHTML = `<span class="sl-muted">${t('none')}</span>`; return; }
-    box.innerHTML = config.devices.map((dev, i) => {
+    const cards = config.devices.map((dev, i) => {
       const key = keyOf(dev);
       const snap = status.devices.find((s) => s.deviceId && s.deviceId === dev.id) || status.devices.find((s) => s.host === dev.host);
       const state = dev.type === 'tv' ? `<span class="sl-pill">${esc(KINDS[lang].tv)}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
@@ -968,7 +988,7 @@
            <button class="btn btn-sm btn-link sl-mini" data-rn="${i}" aria-label="${t('rename')}" title="${t('rename')}">${ICON.edit}</button>
            <span class="sl-grow"></span>${state}
            <label class="mb-0 sl-muted"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}> ${t('enabled')}</label>`;
-      return `<div class="sl-dev"><div class="sl-dev-head">${title}</div>
+      const html = `<div class="sl-dev"><div class="sl-dev-head">${title}</div>
         <div class="sl-muted" dir="ltr" style="text-align:start">${address}</div>
         ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}
         <div class="sl-act">
@@ -978,7 +998,29 @@
           <button class="btn btn-sm btn-outline-danger sl-ico" data-rm="${i}">${ICON.trash}<span>${t('remove')}</span></button>
         </div>
         ${open ? '<div class="sl-inline" id="sl-inline"></div>' : ''}</div>`;
+      return { html, section: sectionOf(dev, snap), online: dev.type === 'tv' ? null : Boolean(snap?.online), busy: open || renaming === key };
+    });
+    // One group per kind of appliance, in a fixed order; a group exists only while it has a device.
+    const folded = foldedSections();
+    box.innerHTML = SECTIONS.map((sec) => {
+      const mine = cards.filter((c) => c.section === sec);
+      if (!mine.length) { return ''; }
+      // A group folded by the owner opens again when a device joins or leaves it, and while one of its devices is being edited.
+      const shut = folded[sec] === mine.length && !mine.some((c) => c.busy);
+      const known = mine.filter((c) => c.online !== null);
+      const up = known.filter((c) => c.online).length;
+      const link = !known.length ? '' : up === known.length ? (known.length === 1 ? T[lang].secOne : T[lang].secAll) : T[lang].secSome(up, known.length);
+      return `<div class="sl-sec"><button type="button" class="sl-sec-head" data-sec="${sec}" data-count="${mine.length}" aria-expanded="${!shut}" title="${t('secFold')}">
+          ${shut ? ICON.down : ICON.up}<span>${esc(T[lang].sec[sec])}</span><small>${esc(T[lang].secCount(mine.length))}${link ? ` · ${esc(link)}` : ''}</small></button>
+        ${shut ? '' : `<div class="sl-sec-body">${mine.map((c) => c.html).join('')}</div>`}</div>`;
     }).join('');
+    box.querySelectorAll('[data-sec]').forEach((b) => b.addEventListener('click', () => {
+      const now = foldedSections();
+      if (b.getAttribute('aria-expanded') === 'true') { now[b.dataset.sec] = Number(b.dataset.count); } else { delete now[b.dataset.sec]; }
+      try { localStorage.setItem('sl-folded', JSON.stringify(now)); } catch { /* the choice lasts for this visit only */ }
+      if (openKey && cards.find((c) => c.busy)?.section === b.dataset.sec) { openKey = null; lastProbe = null; }
+      renderDevices();
+    }));
     const saveName = async (i) => {
       const key = keyOf(config.devices[i]);
       const name = $('sl-rename').value.trim();
