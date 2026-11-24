@@ -277,10 +277,10 @@
       "pollInterval": {
         "title": "Polling interval (seconds)",
         "type": "integer",
-        "default": 15,
-        "minimum": 2,
+        "default": 5,
+        "minimum": 4,
         "maximum": 300,
-        "description": "How often the appliance is read when it sends no push update. Changes made with the remote show up within this time. Minimum 2; lower values load the appliance more."
+        "description": "How often the appliance is read when it sends no push update. Changes made with the remote show up within this time. Minimum 4: one reading takes one to two seconds, and a command waits behind a reading in progress. A lower saved value is used as 4."
       },
       "pushUpdates": {
         "title": "Use push updates when the appliance supports them",

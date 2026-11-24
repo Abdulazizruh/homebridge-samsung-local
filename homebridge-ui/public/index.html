@@ -121,10 +121,11 @@
     <h6 data-t="generalTitle"></h6>
     <div class="sl-row">
       <label class="mb-0" data-t="pollInterval"></label>
-      <input type="number" class="form-control" id="sl-poll" min="2" max="300" style="max-width:110px" dir="ltr">
+      <input type="number" class="form-control" id="sl-poll" min="4" max="300" style="max-width:110px" dir="ltr">
       <label class="mb-0"><input type="checkbox" id="sl-push"> <span data-t="push"></span></label>
     </div>
     <div class="sl-muted mt-1" data-t="pollNote"></div>
+    <div class="sl-muted mt-1" id="sl-poll-floor" style="color:#b45309" hidden></div>
     <div class="sl-row mt-2">
       <label class="mb-0"><input type="checkbox" id="sl-follow"> <span data-t="follow"></span></label>
     </div>
@@ -184,7 +185,8 @@
       pyLeft: 'The Python runtime of this plugin is still on disk:', pyLeftNote: 'It is not used now and is included in every Homebridge backup. Remove it once you are sure the JavaScript engine works for you; switching back to Python later downloads it again.',
       pyRemove: 'Remove the Python runtime', pyRemoved: 'Removed. Space freed:',
       err_runtime_in_use: 'The Python runtime is in use. Switch to the JavaScript engine first.',
-      generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 2 seconds; 5 or more is gentler on the appliance.',
+      generalTitle: 'General', pollInterval: 'Polling interval (s)', push: 'Use push updates', pollNote: 'Changes made with the remote appear within this time when the appliance sends no push update. Minimum 4 seconds, 5 recommended: one reading takes one to two seconds, and a command waits behind a reading in progress.',
+      pollFloor: 'The saved value ({v}) is below the minimum. The plugin uses 4; it is stored as 4 the next time the settings are saved.',
       kind: 'Type', model: 'Model', id: 'Stable ID', support: 'Support', source: 'Source',
       sourceProbe: 'live probe', sourceRunning: 'reading from the running plugin', sourceSnapshot: 'last stored reading',
       name: 'Name', namePh: 'e.g. Living Room AC', nameNote: 'Shown in HomeKit exactly as typed.',
@@ -334,7 +336,8 @@
       pyLeft: 'بيئة Python الخاصة بالإضافة ما زالت على القرص:', pyLeftNote: 'هي غير مستخدمة الآن وتدخل في كل نسخة احتياطية من Homebridge. احذفها بعد تأكدك من أن محرك JavaScript يعمل عندك، والرجوع إلى Python لاحقًا ينزّلها من جديد.',
       pyRemove: 'احذف بيئة Python', pyRemoved: 'تم الحذف. المساحة المحررة:',
       err_runtime_in_use: 'بيئة Python مستخدمة الآن. انتقل إلى محرك JavaScript أولًا.',
-      generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى ثانيتان؛ 5 ثوانٍ فأكثر أخف على الجهاز.',
+      generalTitle: 'عام', pollInterval: 'فترة القراءة الدورية (ثانية)', push: 'استخدام التحديثات الفورية', pollNote: 'التغييرات من الريموت تظهر خلال هذه المدة إذا لم يرسل الجهاز تحديثًا فوريًا. الحد الأدنى 4 ثوانٍ، والموصى به 5: القراءة الواحدة تأخذ ثانية إلى ثانيتين، والأمر ينتظر خلف القراءة الجارية.',
+      pollFloor: 'القيمة المحفوظة ({v}) أقل من الحد الأدنى. الإضافة تعمل بـ4، وتُحفظ 4 عند حفظ الإعدادات في المرة القادمة.',
       kind: 'النوع', model: 'الموديل', id: 'المعرّف الثابت', support: 'الدعم', source: 'المصدر',
       sourceProbe: 'فحص مباشر', sourceRunning: 'قراءة من الإضافة العاملة', sourceSnapshot: 'آخر قراءة محفوظة',
       name: 'الاسم', namePh: 'مثال: مكيف الصالة', nameNote: 'يظهر في HomeKit كما تكتبه تمامًا.',
@@ -466,6 +469,7 @@
   const $ = (id) => document.getElementById(id);
 
   let config = (await homebridge.getPluginConfig())[0] ?? { platform: 'SamsungLocal', name: 'Samsung Local' };
+  let pollWasBelow = null; // the value saved below the minimum, until 4 is stored
   config.platform = 'SamsungLocal';
   config.devices = Array.isArray(config.devices) ? config.devices : [];
   // Hand the config to Homebridge right away, so its SAVE button stores the
@@ -498,6 +502,7 @@
   async function save(message = true) {
     await homebridge.updatePluginConfig([config]);
     await homebridge.savePluginConfig();
+    pollWasBelow = null; // what was below the minimum is stored as 4 now
     if (message) { homebridge.toast.success(t('saved')); }
     render();
   }
@@ -511,6 +516,7 @@
       if (Array.isArray(saved?.devices)) {
         config.devices = saved.devices;
         for (const k of ['pollInterval', 'pushUpdates', 'engine', 'followAddress']) { if (saved[k] !== undefined) { config[k] = saved[k]; } }
+        if (Number(config.pollInterval) > 0 && Number(config.pollInterval) < 4) { config.pollInterval = 4; } // stored as 4 with this save
       }
     } catch { /* keep the copy in memory */ }
     await fn();
@@ -1240,7 +1246,13 @@
     $('sl-wipe-list').innerHTML = ['wipe1', 'wipe2', 'wipe3'].map((k) => `<li>${t(k)}</li>`).join('');
     renderBadges();
     renderSteps();
-    $('sl-poll').value = config.pollInterval ?? 15;
+    // A value saved below the minimum (older versions allowed 2) is shown as 4 and stored with the next save.
+    const savedPoll = Number(config.pollInterval);
+    const below = Number.isFinite(savedPoll) && savedPoll > 0 && savedPoll < 4;
+    if (below) { config.pollInterval = 4; }
+    $('sl-poll').value = config.pollInterval ?? 5;
+    if (below || pollWasBelow) { pollWasBelow ??= savedPoll; $('sl-poll-floor').textContent = t('pollFloor').replace('{v}', pollWasBelow); }
+    $('sl-poll-floor').hidden = !(below || pollWasBelow);
     $('sl-push').checked = config.pushUpdates !== false;
     $('sl-follow').checked = config.followAddress !== false;
     $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
@@ -1256,7 +1268,7 @@
   }
 
   $('sl-lang').addEventListener('click', () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('sl-lang', lang); render(); });
-  $('sl-poll').addEventListener('change', async (e) => { const v = Math.min(300, Math.max(2, Number(e.target.value) || 15)); await change(() => { config.pollInterval = v; }, false); });
+  $('sl-poll').addEventListener('change', async (e) => { const v = Math.min(300, Math.max(4, Number(e.target.value) || 5)); e.target.value = v; pollWasBelow = null; await change(() => { config.pollInterval = v; }, false); render(); });
   $('sl-engine').addEventListener('change', async (e) => { const v = e.target.value; if (!v) { return; } await change(() => { config.engine = v; }, false); await refreshStatus(); });
   $('sl-follow').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.followAddress = v; }, false); });
   $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });

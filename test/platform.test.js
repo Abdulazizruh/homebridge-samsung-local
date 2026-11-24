@@ -650,3 +650,15 @@ test('an air purifier found on the network gets its own accessory, where earlier
   assert.equal(handler.services.get('speed').UUID, Service.AirPurifier.UUID);
   assert.equal(handler.services.get('airQuality').getCharacteristic(C.PM2_5Density).value, 5);
 });
+
+test('polling interval: at least 4 seconds, 5 when unset; a lower saved value is used as 4', async () => {
+  const { pollSeconds, MIN_POLL_S, DEFAULT_POLL_S } = await import('../src/platform.js');
+  assert.equal(MIN_POLL_S, 4);
+  assert.equal(DEFAULT_POLL_S, 5);
+  assert.equal(pollSeconds(undefined), 5);
+  assert.equal(pollSeconds(2), 4);
+  assert.equal(pollSeconds(4), 4);
+  assert.equal(pollSeconds(10), 10);
+  assert.equal(pollSeconds(999), 300);
+  assert.equal(pollSeconds('x'), 5);
+});

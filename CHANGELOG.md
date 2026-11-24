@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.14
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.13, plus:
+
+- **Polling interval: at least 4 seconds, 5 by default.** One reading of an appliance takes one to two seconds, and a command waits behind a reading in progress. At 2 seconds the next reading started almost as the last ended, so the session was nearly always busy. The minimum is now 4 and the default 5 (it was 15). A value saved below 4 is used as 4 at once: the log says so once at start, and the settings page shows 4 with a note, and stores it with the next save. The plugin never rewrites the saved settings by itself.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.13، ومعه:
+
+- **فترة القراءة الدورية: 4 ثوانٍ على الأقل، و5 افتراضيًا.** القراءة الواحدة للجهاز تأخذ ثانية إلى ثانيتين، والأمر ينتظر خلف القراءة الجارية. ومع ثانيتين كانت القراءة التالية تبدأ فور انتهاء السابقة تقريبًا، فيبقى الاتصال مشغولًا أغلب الوقت. صار الحد الأدنى 4 والافتراضي 5 (كان 15). والقيمة المحفوظة الأقل من 4 تعمل كأنها 4 فورًا: يذكر ذلك السجل مرة عند التشغيل، وتعرض صفحة الإعدادات 4 مع ملاحظة، وتُحفظ مع الحفظ التالي. والإضافة لا تعدّل الإعدادات المحفوظة من نفسها.
+
 ## 1.6.0-beta.13
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.12, plus:

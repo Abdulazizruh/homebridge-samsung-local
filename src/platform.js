@@ -114,7 +114,16 @@ export class SamsungLocalPlatform {
     }
   }
 
+  /** Said once at start: a polling interval saved below the minimum is raised, not refused. */
+  #notePollFloor() {
+    const asked = Number(this.config.pollInterval);
+    if (Number.isFinite(asked) && asked > 0 && asked < MIN_POLL_S) {
+      this.log.info(`Polling interval ${asked}s is below the minimum; ${MIN_POLL_S}s is used. It is stored as ${MIN_POLL_S} the next time the plugin settings are saved.`);
+    }
+  }
+
   async start() {
+    this.#notePollFloor();
     ensureDir(this.paths.root);
     let entries = this.entries();
 
@@ -457,7 +466,7 @@ export class SamsungLocalPlatform {
       port: entry.port ?? null,
       mac: entry.mac ?? null,
       expectedDi: deviceId,
-      pollInterval: Math.max(2, Number(this.config.pollInterval) || 15),
+      pollInterval: pollSeconds(this.config.pollInterval),
       push: this.config.pushUpdates !== false,
       // Looking for an appliance that changed address sends one small question to
       // every address of the home network; the owner can switch that off.
@@ -574,4 +583,15 @@ export class SamsungLocalPlatform {
       await helper.stop();
     }
   }
+}
+
+/**
+ * How often an appliance is read when no push update arrives. One reading takes one to two
+ * seconds, so below 4 the next one starts almost as the last ends and a command waits behind it.
+ */
+export const MIN_POLL_S = 4;
+export const DEFAULT_POLL_S = 5;
+export function pollSeconds(value) {
+  const n = Number(value);
+  return Math.min(300, Math.max(MIN_POLL_S, Number.isFinite(n) && n > 0 ? n : DEFAULT_POLL_S));
 }
