@@ -1,0 +1,93 @@
+{
+ "identity": {
+  "di": "oven-0000-test",
+  "types": [
+   "oic.wk.d",
+   "oic.d.oven"
+  ],
+  "platformModel": "NV7000BS/ET5"
+ },
+ "resources": {
+  "/doors/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Door",
+     "x.com.samsung.da.openState": "Close"
+    }
+   ]
+  },
+  "/information/vs/0": {
+   "x.com.samsung.da.description": "NV7000BS/ET5"
+  },
+  "/mode/vs/0": {
+   "x.com.samsung.da.supportedModes": [
+    "Autocook",
+    "Convection",
+    "TopHeatPluseConvection",
+    "Conventional",
+    "LargeGrill",
+    "SmallGrill",
+    "BottomHeatPluseConvection",
+    "PlateWarm",
+    "KeepWarm",
+    "Bottom",
+    "EcoConvection",
+    "FanGrill",
+    "Defrost",
+    "SteamClean"
+   ],
+   "x.com.samsung.da.modes": [
+    "NoOperation"
+   ],
+   "x.com.samsung.da.options": [
+    "DeviceType_NV7000BS/ET5",
+    "UpperTimerCurrent_0",
+    "UpperTimerSet_0",
+    "UpperTimerState_Ready",
+    "UpperLamp_Off",
+    "Sound_On"
+   ],
+   "x.com.samsung.da.defaultMode": "Convection"
+  },
+  "/operational/state/vs/0": {
+   "x.com.samsung.da.state": "Ready",
+   "x.com.samsung.da.operationTime": "00:00:00",
+   "x.com.samsung.da.remainingTime": "00:00:00",
+   "x.com.samsung.da.progressPercentage": "0"
+  },
+  "/alarms/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Alarm",
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "OV_E_OFF",
+     "x.com.samsung.da.triggeredTime": "2026-07-23T15:26:07"
+    }
+   ]
+  },
+  "/oven/vs/0": {
+   "x.com.samsung.da.state": "Ready",
+   "x.com.samsung.da.recipe": "00000000000000"
+  },
+  "/temperatures/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Temperature",
+     "x.com.samsung.da.desired": "0",
+     "x.com.samsung.da.current": "0",
+     "x.com.samsung.da.increment": "5",
+     "x.com.samsung.da.unit": "Celsius"
+    }
+   ]
+  },
+  "/kidslock/vs/0": {
+   "x.com.samsung.da.kidsLock": "Ready"
+  },
+  "/power/vs/0": {
+   "x.com.samsung.da.power": "On"
+  }
+ }
+}

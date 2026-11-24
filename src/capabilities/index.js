@@ -1,4 +1,5 @@
 import { buildAcModel, looksLikeAc, HREF } from './ac.js';
+import { applianceFeatureRows, buildApplianceModel, isApplianceResource } from './appliance.js';
 import { redact } from '../redact.js';
 import { buildWasherModel, LAUNDRY_CONSUMED, LAUNDRY_KINDS, washerFeatureRows } from './washer.js';
 
@@ -17,10 +18,23 @@ const TYPE_LABELS = [
   [/dryer/i, 'dryer'],
   [/\btv\b|oic\.d\.tv/i, 'tv'],
   [/refrigerator/i, 'refrigerator'],
+  [/microwave/i, 'microwave'],
   [/oven/i, 'oven'],
+  [/cooktop/i, 'cooktop'],
+  [/hood/i, 'hood'],
+  [/\.range\b/i, 'range'],
   [/airpurifier/i, 'airPurifier'],
+  [/dehumidifier/i, 'dehumidifier'],
   [/robotcleaner/i, 'robotVacuum'],
 ];
+
+/** Which accessory carries a kind: the tested ones keep their own, every other kind shares one. */
+export function familyOf(kind, described = null) {
+  if (kind === 'airConditioner') { return 'ac'; }
+  if (kind === 'tv') { return 'tv'; }
+  if (described ? described.family === 'laundry' : LAUNDRY_KINDS.has(kind)) { return 'laundry'; }
+  return 'appliance';
+}
 
 export function deviceKind(identity, resources) {
   const types = identity?.types ?? [];
@@ -71,6 +85,7 @@ export function describeDevice(identity, resources) {
     const model = buildAcModel(resources);
     base.model = model.model || identity?.platformModel || null;
     base.firmware = model.firmware;
+    base.family = 'ac';
     base.support = SUPPORT.experimental;
     base.features = acFeatureRows(model);
     base.unknownResources = hrefs.filter((h) => !AC_CONSUMED.has(h) && !IGNORED.has(h));
@@ -84,6 +99,7 @@ export function describeDevice(identity, resources) {
   base.unknownResources = hrefs;
   if (LAUNDRY_KINDS.has(kind) && buildWasherModel(resources).supports.cycle) {
     base.support = SUPPORT.experimental;
+    base.family = 'laundry';
     base.features = washerFeatureRows(buildWasherModel(resources));
     base.unknownResources = hrefs.filter((h) => !LAUNDRY_CONSUMED.has(h) && !IGNORED.has(h));
     return base;
@@ -91,9 +107,19 @@ export function describeDevice(identity, resources) {
   if (kind === 'tv') {
     base.support = SUPPORT.unsupported;
     base.reason = 'tv';
-  } else {
-    base.reason = kind === 'unknown' ? 'unknown-type' : 'not-mapped-yet';
+    return base;
   }
+  // Every other kind: whatever it reports that the shared reader knows. A power and energy
+  // reading alone does not make an accessory worth having.
+  const model = buildApplianceModel(resources, kind);
+  if (model.parts.some((p) => !['energy', 'alert', 'kidsLock'].includes(p.type))) {
+    base.family = 'appliance';
+    base.support = SUPPORT.experimental;
+    base.features = applianceFeatureRows(model);
+    base.unknownResources = hrefs.filter((h) => !isApplianceResource(h) && !IGNORED.has(h));
+    return base;
+  }
+  base.reason = kind === 'unknown' ? 'unknown-type' : 'not-mapped-yet';
   return base;
 }
 

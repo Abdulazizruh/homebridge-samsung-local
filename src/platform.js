@@ -2,11 +2,11 @@ import { pruneSetup, trackSetup } from './homekit/tvSetup.js';
 import { DropLog } from './dropLog.js';
 import { AcAccessory, accessoryName } from './homekit/acAccessory.js';
 import { WasherAccessory } from './homekit/washerAccessory.js';
-import { LAUNDRY_KINDS } from './capabilities/washer.js';
+import { ApplianceAccessory } from './homekit/applianceAccessory.js';
 import { TvAccessory, switchesOf } from './homekit/tvAccessory.js';
 import { pruneAppleRemote } from './appleRemote/bridge.js';
 import { keepPort } from './homekit/tvPort.js';
-import { describeDevice, stableDeviceId } from './capabilities/index.js';
+import { describeDevice, familyOf, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
 import { shortId } from './redact.js';
 import { HelperClient } from './runtime/helperClient.js';
@@ -240,7 +240,7 @@ export class SamsungLocalPlatform {
           { code: 'identity_mismatch' });
       }
       const described = describeDevice(probe.identity, probe.resources);
-      if (described.kind !== 'airConditioner' && !(LAUNDRY_KINDS.has(described.kind) && described.support === 'experimental')) {
+      if (described.kind !== 'airConditioner' && described.support !== 'experimental') {
         this.log.warn(`${entry.host}: found a ${described.kind} (${described.model ?? 'unknown model'}). `
           + 'This version has no HomeKit accessory for it; the device is listed in the plugin settings for diagnostics.');
         writeJson(snapshotFile(this.paths, deviceId), this.#snapshot(entry, deviceId, probe, false));
@@ -418,7 +418,13 @@ export class SamsungLocalPlatform {
     const described = probe ? describeDevice(probe.identity, probe.resources) : null;
     const model = described ? described.model : accessory?.context.model;
     const kind = described?.kind ?? accessory?.context.kind ?? 'airConditioner';
-    const laundry = LAUNDRY_KINDS.has(kind);
+    // The accessory that carries it. Kept with the accessory, so a restart while the
+    // appliance is away builds the same one.
+    const family = described ? familyOf(kind, described) : (accessory?.context.family ?? familyOf(kind));
+    const laundry = family === 'laundry';
+    const { Categories } = this.api.hap;
+    const category = { ac: Categories.AIR_CONDITIONER, laundry: Categories.OTHER }[family]
+      ?? { airPurifier: Categories.AIR_PURIFIER, dehumidifier: Categories.AIR_DEHUMIDIFIER }[kind] ?? Categories.OTHER;
     const name = accessoryName(entry.name || accessory?.context.baseName || model);
     let fresh = false;
     if (!accessory) {
@@ -426,8 +432,7 @@ export class SamsungLocalPlatform {
         // Configured id with nothing cached: wait for the first real contact.
         return null;
       }
-      accessory = new this.api.platformAccessory(name, uuid,
-        laundry ? this.api.hap.Categories.OTHER : this.api.hap.Categories.AIR_CONDITIONER);
+      accessory = new this.api.platformAccessory(name, uuid, category);
       fresh = true;
     }
     if (!fresh && accessory.displayName !== name) {
@@ -436,6 +441,7 @@ export class SamsungLocalPlatform {
     }
     accessory.context.deviceId = deviceId;
     accessory.context.kind = kind;
+    accessory.context.family = family;
     accessory.context.baseName = entry.name || accessory.context.baseName || model || null;
     accessory.context.model = model ?? accessory.context.model ?? null;
     if (probe) {
@@ -456,7 +462,9 @@ export class SamsungLocalPlatform {
       follow: this.config.followAddress !== false,
       log: this.log,
     });
-    const handler = laundry
+    const handler = family === 'appliance'
+      ? new ApplianceAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features, kind })
+      : laundry
       ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features, cycleStyle: entry.cycleStyle })
       : new AcAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features });
     link.on('retried', (path, accepted) => {

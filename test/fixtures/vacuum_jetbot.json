@@ -1,0 +1,210 @@
+{
+ "identity": {
+  "di": "vacuum-0000-test",
+  "types": [
+   "oic.wk.d",
+   "oic.d.robotcleaner"
+  ],
+  "platformModel": "Jet Bot V/C"
+ },
+ "resources": {
+  "/power/vs/0": {
+   "x.com.samsung.da.power": "On"
+  },
+  "/alarms/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "4",
+     "x.com.samsung.da.state": "deleted",
+     "x.com.samsung.da.triggeredTime": "2026-11-12T06:45:07"
+    }
+   ]
+  },
+  "/energy/battery/vs/0": {
+   "x.com.samsung.da.battery": "100"
+  },
+  "/mode/vs/0": {
+   "x.com.samsung.da.modes": [
+    "Cleaning_Stop",
+    "Control_Charged",
+    "RepeatedCleaning_Off",
+    "Turbo_Off",
+    "Sound_VoiceFeed",
+    "Option_Daily",
+    "Map_Invalid",
+    "DustEmission_On",
+    "CamChange_Off",
+    "PetPoopOption_On",
+    "CleaningMethod_AtOnce",
+    "WaterLevel_Med",
+    "CleaningStatus_None",
+    "MopHolder_Attach",
+    "BixbyPrev_Control_Homing",
+    "BixbyPrev_Cleaning_Auto"
+   ],
+   "x.com.samsung.da.supportedModes": [
+    "Cleaning_Auto",
+    "Cleaning_Area",
+    "Cleaning_Object",
+    "Cleaning_Spot",
+    "Cleaning_UncleanedObject",
+    "Cleaning_Stop",
+    "Cleaning_Cancel",
+    "Control_Homing",
+    "Control_RechargeHoming",
+    "Control_EndHoming",
+    "Control_CancelHoming",
+    "Control_RelocalHoming",
+    "Control_DustEmitHoming",
+    "Control_DNDHoming",
+    "Control_Charging",
+    "Control_Charged",
+    "Control_After",
+    "Control_Moving",
+    "Control_Cleaning",
+    "Control_Pause",
+    "Control_Idle",
+    "Control_Alarm",
+    "Control_PowerOff",
+    "Control_Factory",
+    "Control_Relocal",
+    "Control_Exploring",
+    "Control_OOBE",
+    "Control_Patrol",
+    "Control_Monitoring",
+    "Control_Manual",
+    "Control_Processing",
+    "Control_Message",
+    "Control_BixbyProcessing",
+    "Turbo_On",
+    "Turbo_Off",
+    "Turbo_Silence",
+    "Sound_Mute",
+    "Sound_SoundEffect",
+    "Sound_VoiceFeed",
+    "RepeatedCleaning_On",
+    "RepeatedCleaning_Off",
+    "DustEmission_On",
+    "DustEmission_Off",
+    "DustEmission_Start",
+    "Control_CreatingMap",
+    "Cleaning_UncleanedObject",
+    "Option_Daily",
+    "Option_Intensive",
+    "Option_Intensive2",
+    "Option_Light",
+    "Cleaning_PatternMap",
+    "Control_PatternMapPause",
+    "Control_BixbyMoving",
+    "Control_PatternMap",
+    "Control_CreateMapHoming",
+    "Control_ManualNoMap",
+    "Control_CreateMapPause",
+    "Control_CreateMapRechargeHoming",
+    "Control_CreateMapAfter",
+    "Map_Valid",
+    "Map_Invalid",
+    "Control_EmitDust",
+    "Control_PatternMapAfter",
+    "Control_ExploringStation",
+    "Control_Demo",
+    "Control_PetFind",
+    "CamChange_On",
+    "CamChange_Off",
+    "Control_SelfCalibration",
+    "CleaningMethod_Vacuum",
+    "CleaningMethod_Mop",
+    "CleaningMethod_AtOnce",
+    "CleaningMethod_MopAfterVacuum",
+    "WaterLevel_VeryHigh",
+    "WaterLevel_High",
+    "WaterLevel_Med",
+    "WaterLevel_Low",
+    "WaterLevel_VeryLow",
+    "Control_Welcome",
+    "PetPoopOption_On",
+    "PetPoopOption_Off",
+    "Control_MonitoringAutomation",
+    "Control_Standby",
+    "Turbo_UltraSilence",
+    "CleaningStatus_None",
+    "CleaningStatus_Mop",
+    "CleaningStatus_Vacuum",
+    "CleaningStatus_AtOnce",
+    "Control_PadHoming",
+    "Control_MopWashHoming",
+    "Control_MopWash",
+    "Control_MopSterilization",
+    "Control_MopDry",
+    "Control_SupplyingWater",
+    "Control_PreparingWater",
+    "Control_Dehydration",
+    "Control_AccumRelocal",
+    "Control_FlexCharged",
+    "Control_MopWashAfter",
+    "Control_SupplyingWaterHoming",
+    "MopHolder_Attach",
+    "MopHolder_Detach",
+    "Control_MopWashCharging",
+    "Control_MopWashPause",
+    "Control_Descaling",
+    "Control_MopWashStop",
+    "Control_MopWashResume",
+    "Control_DrainingWater",
+    "Control_DescalingWaiting",
+    "Control_Sabbath",
+    "Control_SabbathHoming"
+   ],
+   "x.com.samsung.da.mapId": "0",
+   "causeSource.modes": [
+    "UNKN_Cleaning_Stop",
+    "UNKN_Control_Charged",
+    "UNKN_RepeatedCleaning_Off",
+    "UNKN_Turbo_Off",
+    "UNKN_Sound_VoiceFeed",
+    "UNKN_Option_Daily",
+    "UNKN_Map_Invalid",
+    "UNKN_DustEmission_On",
+    "UNKN_CamChange_Off",
+    "UNKN_PetPoopOption_On",
+    "UNKN_CleaningMethod_AtOnce",
+    "UNKN_WaterLevel_Med",
+    "UNKN_CleaningStatus_None",
+    "UNKN_MopHolder_Attach",
+    "UNKN_BixbyPrev_Control_Homing",
+    "UNKN_BixbyPrev_Cleaning_Auto"
+   ]
+  },
+  "/findrobotcleaner/vs/0": {
+   "x.com.samsung.da.findAlarm": "Stop",
+   "x.com.samsung.da.supportedFindAlarm": [
+    "Start",
+    "Stop"
+   ]
+  },
+  "/filter/motorfilter/vs/0": {
+   "x.com.samsung.da.filterStatus": "normal",
+   "x.com.samsung.da.filterResetType": [
+    "washable"
+   ],
+   "x.com.samsung.da.filterResetable": "false"
+  },
+  "/component/station/filter/hepafilter/vs/0": {
+   "x.com.samsung.da.filterStatus": "normal",
+   "x.com.samsung.da.filterResetType": [
+    "replaceable"
+   ],
+   "x.com.samsung.da.filterResetable": "true"
+  },
+  "/energy/consumption/vs/0": {
+   "x.com.samsung.da.cumulativePower": "61",
+   "x.com.samsung.da.cumulativeUnit": "Wh",
+   "x.com.samsung.da.cumulativeDate": "1794465882",
+   "x.com.samsung.da.cumulativeDateUTC": "1794433482"
+  },
+  "/information/vs/0": {
+   "x.com.samsung.da.description": "Jet Bot V/C"
+  }
+ }
+}

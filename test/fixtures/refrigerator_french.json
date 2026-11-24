@@ -1,0 +1,102 @@
+{
+ "identity": {
+  "di": "fridge-0000-test",
+  "types": [
+   "oic.wk.d",
+   "oic.d.refrigerator"
+  ],
+  "platformModel": "TP1X_REF_21K"
+ },
+ "resources": {
+  "/alarms/vs/0": {},
+  "/temperatures/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Freezer",
+     "x.com.samsung.da.desired": "0",
+     "x.com.samsung.da.current": "0",
+     "x.com.samsung.da.maximum": "5",
+     "x.com.samsung.da.minimum": "-8",
+     "x.com.samsung.da.unit": "Fahrenheit"
+    },
+    {
+     "x.com.samsung.da.id": "1",
+     "x.com.samsung.da.description": "Fridge",
+     "x.com.samsung.da.desired": "39",
+     "x.com.samsung.da.current": "39",
+     "x.com.samsung.da.maximum": "44",
+     "x.com.samsung.da.minimum": "34",
+     "x.com.samsung.da.unit": "Fahrenheit"
+    }
+   ]
+  },
+  "/energy/consumption/vs/0": {
+   "x.com.samsung.da.cumulativeConsumption": "63",
+   "x.com.samsung.da.cumulativePower": "1831899",
+   "x.com.samsung.da.cumulativeUnit": "Wh",
+   "x.com.samsung.da.instantaneousPower": "3",
+   "x.com.samsung.da.instantaneousPowerUnit": "W",
+   "x.com.samsung.da.monthlyConsumption": "52000",
+   "x.com.samsung.da.thismonthlyConsumption": "38900",
+   "x.com.samsung.da.cumulativeSavedPower": "0"
+  },
+  "/mode/vs/0": {
+   "x.com.samsung.da.supportedModes": [
+    "HOMECARE_WIZARD_V2",
+    "ENERGY_REPORT_MODEL",
+    "18K_REF_OUTDOOR_CONTROL_V2",
+    "SUPPORT_SABBATH_CONTROL"
+   ],
+   "x.com.samsung.da.modes": [
+    "CVN_CONVERTIBLE_ZONE",
+    "CV_FDR_WINE",
+    "WATERFILTER_DISABLE"
+   ],
+   "x.com.samsung.da.supportedOptions": [
+    "CV_FDR_WINE",
+    "CV_FDR_DELI",
+    "CV_FDR_BEVERAGE",
+    "CV_FDR_MEAT",
+    "CV_FDR_SOFT_FREEZER"
+   ]
+  },
+  "/information/vs/0": {
+   "x.com.samsung.da.description": "TP1X_REF_21K"
+  },
+  "/doors/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Door",
+     "x.com.samsung.da.openState": "Close"
+    },
+    {
+     "x.com.samsung.da.id": "1",
+     "x.com.samsung.da.description": "Door",
+     "x.com.samsung.da.openState": "Close"
+    },
+    {
+     "x.com.samsung.da.id": "2",
+     "x.com.samsung.da.description": "Door",
+     "x.com.samsung.da.openState": "Close"
+    }
+   ]
+  },
+  "/icemaker/status/vs/0": {
+   "x.com.samsung.da.iceMaker": "On"
+  },
+  "/refrigeration/vs/0": {
+   "x.com.samsung.da.rapidFridge": "Off",
+   "x.com.samsung.da.rapidFreezing": "Off"
+  },
+  "/filter/waterfilter/vs/0": {
+   "x.com.samsung.da.filterUsage": "31",
+   "x.com.samsung.da.filterUsageResolution": "1",
+   "x.com.samsung.da.filterStatus": "normal",
+   "x.com.samsung.da.filterResetType": [
+    "replaceable"
+   ]
+  }
+ }
+}

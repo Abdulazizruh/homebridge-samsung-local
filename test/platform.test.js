@@ -636,3 +636,17 @@ test('start-up: nothing is asked before the settle time has passed', async (t) =
   await waitFor(() => first > 0);
   assert.ok(first - began >= 190, 'the first appliance waits for the settle time');
 });
+
+test('an air purifier found on the network gets its own accessory, where earlier versions only listed it', async (t) => {
+  const P = fixture('purifier_tower').identity.di;
+  const { api, platform } = await boot({ devices: [{ host: '10.0.0.30', fixture: fixturePath('purifier_tower') }], config: { devices: [{ host: '10.0.0.30', name: 'Purifier' }] } });
+  t.after(() => platform.stop());
+  await online(platform, P);
+  assert.equal(api.registered.length, 1);
+  const { handler } = platform.devices.get(P);
+  const { Service, Characteristic: C, Categories } = platform.api.hap;
+  assert.equal(api.registered[0].accessory.category, Categories.AIR_PURIFIER);
+  assert.equal(api.registered[0].accessory.context.family, 'appliance');
+  assert.equal(handler.services.get('speed').UUID, Service.AirPurifier.UUID);
+  assert.equal(handler.services.get('airQuality').getCharacteristic(C.PM2_5Density).value, 5);
+});

@@ -17,7 +17,7 @@ export const LAUNDRY_CONSUMED = new Set([
 const UNLOCKED = new Set(['ready', 'off', 'false', 'unlock', 'unlocked', 'none', 'disable', 'disabled', '']);
 
 /** Child lock: the plain boolean when present, else the vendor word. */
-function kidsLock(resources) {
+export function kidsLock(resources) {
   const plain = resources['/kidslock/0']?.value;
   const word = resources['/kidslock/vs/0']?.[`${V}kidsLock`];
   if (typeof plain !== 'boolean' && word === undefined) {
@@ -27,7 +27,7 @@ function kidsLock(resources) {
 }
 
 /** Active alarm codes; rows ending in _OFF are placeholders. */
-function alarmCodes(resources) {
+export function alarmCodes(resources) {
   const items = resources['/alarms/vs/0']?.[`${V}items`];
   if (!Array.isArray(items)) {
     return [];

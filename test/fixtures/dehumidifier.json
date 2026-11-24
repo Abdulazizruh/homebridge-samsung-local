@@ -1,0 +1,109 @@
+{
+ "identity": {
+  "di": "dehum-0000-test",
+  "types": [
+   "oic.wk.d",
+   "oic.d.dehumidifier"
+  ],
+  "platformModel": "TP1X_DA_AC_DHM_01001_0000"
+ },
+ "resources": {
+  "/filter/airdustfilter/vs/0": {
+   "x.com.samsung.da.filterUsage": "100",
+   "x.com.samsung.da.filterUsageResolution": "1",
+   "x.com.samsung.da.filterDesiredUsage": "224",
+   "x.com.samsung.da.filterStatus": "wash",
+   "x.com.samsung.da.filterCapacity": "224",
+   "x.com.samsung.da.filterCapacityUnit": "Hour",
+   "x.com.samsung.da.filterResetType": [
+    "washable"
+   ],
+   "x.com.samsung.da.supportedFilterDesiredUsage": [
+    "224",
+    "300",
+    "500",
+    "700"
+   ]
+  },
+  "/option/autoclean/vs/0": {
+   "x.com.samsung.da.status": "Stop",
+   "x.com.samsung.da.settingStatus": "On",
+   "x.com.samsung.da.progress": "100",
+   "cleaningTime": "30",
+   "minCleaningTime": "10",
+   "maxCleaningTime": "60",
+   "cleaningTimeUnit": "10",
+   "x.com.samsung.da.supportedStatus": [
+    "Start",
+    "TimedClean",
+    "Stop"
+   ],
+   "x.com.samsung.da.supportedSettingStatus": [
+    "On",
+    "TimedClean",
+    "Off"
+   ]
+  },
+  "/alarms/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Alarm",
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "ErrorCode_OFF",
+     "x.com.samsung.da.triggeredTime": "2026-07-26T10:35:53",
+     "x.com.samsung.da.state": "Deleted"
+    },
+    {
+     "x.com.samsung.da.id": "2",
+     "x.com.samsung.da.description": "Alarm",
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "WaterTankFull_OFF",
+     "x.com.samsung.da.triggeredTime": "2026-07-26T10:35:53",
+     "x.com.samsung.da.state": "Deleted"
+    }
+   ]
+  },
+  "/energy/consumption/vs/0": {
+   "x.com.samsung.da.instantaneousPower": "259.000000",
+   "x.com.samsung.da.cumulativePower": "183099",
+   "x.com.samsung.da.cumulativeSavedPower": "0",
+   "x.com.samsung.da.cumulativeUnit": "Wh",
+   "x.com.samsung.da.instantaneousPowerUnit": "W",
+   "x.com.samsung.da.cumulativePowerType": "total"
+  },
+  "/mode/vs/0": {
+   "x.com.samsung.da.supportedModes": [
+    "Smart",
+    "Max",
+    "High",
+    "Medium",
+    "Quiet",
+    "ClothesDrying"
+   ],
+   "x.com.samsung.da.modes": [
+    "Smart"
+   ],
+   "x.com.samsung.da.options": [
+    "Volume_Mute",
+    "RacInfo_None",
+    "UpdateAllow_NotAllowed",
+    "WelcomeCoolingState_Off"
+   ]
+  },
+  "/power/vs/0": {
+   "x.com.samsung.da.power": "On",
+   "causeSource": "SMTS"
+  },
+  "/sensors/vs/0": {},
+  "/information/vs/0": {
+   "x.com.samsung.da.description": "TP1X_DA_AC_DHM_01001_0000"
+  },
+  "/humidity/vs/0": {
+   "x.com.samsung.da.humidity": "47",
+   "x.com.samsung.da.desiredHumidity": "50",
+   "increment": "5",
+   "x.com.samsung.da.fivepercentHumidity": "46"
+  }
+ }
+}

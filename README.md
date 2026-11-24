@@ -38,7 +38,13 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
 | Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
-| Refrigerators, ovens, … | **Diagnostics only** | Connects and lists what the appliance reports |
+| Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed and automatic mode as trial controls |
+| Refrigerators | **Trial, not yet tried on a real one** | A temperature sensor per zone and a contact sensor per door. Power Cool and Power Freeze as trial controls |
+| Robot vacuums | **Trial, not yet tried on a real one** | Battery and filters. One trial switch: on starts a run, off sends the robot back to its station |
+| Ovens, ranges, microwaves, cooktops | **Trial, shown only** | Door, temperature and a "running" sensor. Never commanded |
+| Any other Samsung appliance | **Whatever it reports that the plugin knows** | Shown the same way; otherwise listed for diagnostics |
+
+Readings are sensors from the first day. Controls of these new types carry the word **trial** in the settings: they are built from recorded appliances of the same families, and none has been confirmed on a real one by this project yet. Each can be removed from Apple Home by unticking it, and each has a **Not working?** button that opens a ready report.
 | Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
 | Appliances that refuse the automatic certificate | **Not supported** | Detected and reported with the reason |
@@ -230,7 +236,7 @@ The pairing code of the remote like Apple TV is shown under that choice and can 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (116 JavaScript, 21 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (124 JavaScript, 21 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

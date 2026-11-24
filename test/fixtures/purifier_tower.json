@@ -1,0 +1,126 @@
+{
+ "identity": {
+  "di": "purifier-0000-test",
+  "types": [
+   "oic.wk.d",
+   "oic.d.airpurifier"
+  ],
+  "platformModel": "TP1X_DA-AC-AIR-01031_0000"
+ },
+ "resources": {
+  "/alarms/vs/0": {
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.alarmType": "Device",
+     "x.com.samsung.da.code": "ErrorCode_OFF",
+     "x.com.samsung.da.triggeredTime": "2026-09-05T14:05:28",
+     "x.com.samsung.da.state": "Deleted"
+    }
+   ]
+  },
+  "/display/vs/0": {
+   "mode": "On",
+   "supportedModes": [
+    "On",
+    "Off"
+   ]
+  },
+  "/energy/consumption/vs/0": {
+   "x.com.samsung.da.cumulativeDate": "1788617121",
+   "x.com.samsung.da.cumulativeSavedPower": "0",
+   "x.com.samsung.da.cumulativePower": "14168",
+   "x.com.samsung.da.cumulativeUnit": "Wh",
+   "x.com.samsung.da.instantaneousPowerUnit": "W"
+  },
+  "/filter/hepafilter/vs/0": {
+   "x.com.samsung.da.filterUsage": "0",
+   "x.com.samsung.da.filterUsageResolution": "1",
+   "x.com.samsung.da.filterCapacity": "8760",
+   "x.com.samsung.da.filterCapacityUnit": "Hour",
+   "x.com.samsung.da.filterResetType": [
+    "replaceable"
+   ],
+   "x.com.samsung.da.filterStatus": "normal"
+  },
+  "/information/vs/0": {
+   "x.com.samsung.da.description": "TP1X_DA-AC-AIR-01031_0000"
+  },
+  "/kidslock/vs/0": {
+   "x.com.samsung.da.kidsLock": "Ready"
+  },
+  "/mode/vs/0": {
+   "x.com.samsung.da.modes": [
+    "Smart"
+   ],
+   "x.com.samsung.da.supportedModes": [
+    "Smart",
+    "Max",
+    "Mid",
+    "WindFree",
+    "Sleep"
+   ],
+   "x.com.samsung.da.options": [
+    "OptionCode_23418",
+    "SmartSleep_Off",
+    "WelcomeCare_On",
+    "Pollution_Off",
+    "ProtectOperation_Off",
+    "UpdateAllow_NotAllowed"
+   ]
+  },
+  "/power/vs/0": {
+   "x.com.samsung.da.power": "On",
+   "operationNumber": "131"
+  },
+  "/sensors/vs/0": {
+   "x.com.samsung.da.cleanLevel": "1",
+   "x.com.samsung.da.total": "5",
+   "x.com.samsung.da.items": [
+    {
+     "x.com.samsung.da.id": "0",
+     "x.com.samsung.da.description": "Sensor for CleanLevel",
+     "x.com.samsung.da.type": "CleanLevel",
+     "x.com.samsung.da.value": [
+      "1"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "1",
+     "x.com.samsung.da.description": "Sensor for Odor",
+     "x.com.samsung.da.type": "Odor",
+     "x.com.samsung.da.value": [
+      "1"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "2",
+     "x.com.samsung.da.description": "Sensor for Dust",
+     "x.com.samsung.da.type": "Dust",
+     "x.com.samsung.da.value": [
+      "5",
+      "1"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "3",
+     "x.com.samsung.da.description": "Sensor for FineDust",
+     "x.com.samsung.da.type": "FineDust",
+     "x.com.samsung.da.value": [
+      "5",
+      "1"
+     ]
+    },
+    {
+     "x.com.samsung.da.id": "4",
+     "x.com.samsung.da.description": "Sensor for SuperFineDust",
+     "x.com.samsung.da.type": "SuperFineDust",
+     "x.com.samsung.da.value": [
+      "5",
+      "1"
+     ]
+    }
+   ]
+  }
+ }
+}
