@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.10
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.9, except one change taken back:
+
+- **Temperature steps are sent as in 1.6.0-beta.8 again.** In beta.9, while one temperature was on its way, only the newest one asked for was sent after it. On a real air conditioner that made a run of taps send only the first; the ones after it waited and failed. Each step is again sent in turn, as before. The quick second handshake after a restart (beta.9) stays.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.9، إلا تغييرًا واحدًا أُلغي:
+
+- **خطوات الحرارة تُرسل كما في 1.6.0-beta.8.** في beta.9 كانت الإضافة، ما دامت حرارة في طريقها، ترسل بعدها أحدث قيمة طُلبت فقط. وعلى مكيف حقيقي جعل ذلك اللمسات المتتالية ترسل أولها فقط، وما بعده ينتظر ثم يفشل. فرجعت كل خطوة تُرسل بدورها كما كانت. وتبقى المصافحة الثانية السريعة بعد إعادة التشغيل (beta.9).
+
 ## 1.6.0-beta.9
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.8, plus:

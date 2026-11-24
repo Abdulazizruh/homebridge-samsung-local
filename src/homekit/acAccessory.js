@@ -65,7 +65,6 @@ export class AcAccessory {
     this.model = null;
     this.pending = new Map(); // kind -> {check, settleUntil, confirmUntil, label}
     this.inflight = new Map(); // kind -> value being sent right now
-    this.queued = new Map(); // kind -> newest value asked while one was being sent; sent next
     this.services = new Map();
     this.eve = eveCharacteristics(this.hap);
     this.context = accessory.context;
@@ -157,7 +156,7 @@ export class AcAccessory {
     const waiting = this.pending.get(key);
     const asked = this.inflight.get('power') ?? this.pending.get('power')?.value;
     const powerOff = asked ? asked === 'false' : !this.model.state.power;
-    if (this.inflight.get(key) === same || (waiting?.value === same && !waiting.queued && Date.now() < waiting.settleUntil)) {
+    if (this.inflight.get(key) === same || (waiting?.value === same && Date.now() < waiting.settleUntil)) {
       this.log.debug(`[${this.displayName}] ${label}: already on its way; not sent twice.`);
       return;
     }
@@ -167,25 +166,13 @@ export class AcAccessory {
       setTimeout(() => this.#push(), 600);
       return;
     }
-    if (this.inflight.has(key)) {
-      // A write of this kind is still on its way (tapping the temperature up step by step):
-      // only the newest value follows it, so the appliance is not sent every step in turn.
-      const now = Date.now();
-      this.queued.set(key, { kind, value, label });
-      this.pending.set(key, {
-        check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label, value: same, queued: true,
-      });
-      this.log.debug(`[${this.displayName}] ${label}: sent once the previous one is through.`);
-      return;
-    }
-    if (!waiting && expectedAfter(kind, value)(this.model.state)) {
+    if (!waiting && !this.inflight.has(key) && expectedAfter(kind, value)(this.model.state)) {
       this.log.debug(`[${this.displayName}] ${label}: the appliance is already there; nothing sent.`);
       setTimeout(() => this.#push(), 600);
       return;
     }
     this.inflight.set(key, same);
     const hold = () => {
-      if (this.queued.has(key)) { return; } // a newer value of this kind is already shown and held
       const now = Date.now();
       this.pending.set(key, {
         check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label, value: same,
@@ -198,11 +185,6 @@ export class AcAccessory {
     let timer;
     const sent = this.link.send(writes).finally(() => {
       if (this.inflight.get(key) === same) { this.inflight.delete(key); }
-      const next = this.queued.get(key);
-      if (next) {
-        this.queued.delete(key); // its held value stays on screen until the command below holds it again
-        this.#command(next.kind, next.value, next.label).catch(() => {});
-      }
     }).then(() => {
       hold();
       this.log.debug(`[${this.displayName}] ${label} accepted by the appliance; waiting for it to report the change.`);
@@ -478,13 +460,7 @@ export class AcAccessory {
       target.updateValue(Math.min(range.max, Math.max(range.min, this.model.state.targetTemperature ?? 24)));
     }
     target.setProps({ minValue: range.min, maxValue: range.max, minStep: range.step })
-      .onGet(() => {
-        const st = this.#requireOnline();
-        // A temperature just asked for is what Home shows until the appliance reports it,
-        // also when the Home app asks again in between.
-        const held = this.pending.get('targetTemperature');
-        return this.#clampTarget(held && Date.now() < held.confirmUntil ? Number(JSON.parse(held.value)) : st.targetTemperature);
-      })
+      .onGet(() => this.#clampTarget(this.#requireOnline().targetTemperature))
       .onSet((value) => this.#command('targetTemperature', Number(value), `target ${value}°C`));
 
     // Celsius only: the appliance's own unit is converted in the model.

@@ -241,25 +241,3 @@ test('display light: shown off while the air conditioner is off, even if its lig
   const on = setup({ on: true });
   assert.equal(await on.get('light', on.C.On), true);
 });
-
-test('temperature tapped up step by step: only the newest value follows the one on its way', async () => {
-  const { link, set, get, C } = setup();
-  // The appliance takes a while to answer each write.
-  let release;
-  const slow = link.send.bind(link);
-  link.send = async (writes) => { await new Promise((r) => { release = r; }); return slow(writes); };
-  const first = set('thermostat', C.TargetTemperature, 21);
-  await new Promise((r) => setTimeout(r, 10));
-  await set('thermostat', C.TargetTemperature, 22);
-  await set('thermostat', C.TargetTemperature, 23);
-  await set('thermostat', C.TargetTemperature, 24);
-  assert.equal(await get('thermostat', C.TargetTemperature), 24, 'the newest value is shown at once');
-  release();
-  await first;
-  await new Promise((r) => setTimeout(r, 30));
-  release?.();
-  await new Promise((r) => setTimeout(r, 30));
-  const temps = link.sent.filter((w) => JSON.stringify(w).includes('desired')).map((w) => JSON.stringify(w.body ?? w));
-  assert.equal(temps.length, 2, `two writes, not four: ${temps.join(' | ')}`);
-  assert.match(temps[1], /24/);
-});
