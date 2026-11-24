@@ -260,3 +260,46 @@ test('display light: shown off while the air conditioner is off, even if its lig
   const on = setup({ on: true });
   assert.equal(await on.get('light', on.C.On), true);
 });
+
+test('on, off and on again quickly: every change is sent, and the unit ends as the tile shows', async () => {
+  const { link, set, get, C } = setup();
+  link.autoReport = false;
+  link.apply = null; // acknowledged at once, reported only later: the reading still shows WindFree off
+  await set('windFree', C.On, true);
+  await set('windFree', C.On, false); // before any reading shows it on: still sent
+  await set('windFree', C.On, true); // not mistaken for the first "on"
+  assert.equal(link.sent.length, 3, 'on, off and on all reach the appliance');
+  assert.match(JSON.stringify(link.sent[1]), /Off/);
+  assert.equal(await get('windFree', C.On), true);
+});
+
+test('switching a mode off that the appliance already reports off sends nothing', async () => {
+  const { link, set, C } = setup();
+  await set('windFree', C.On, false);
+  assert.equal(link.sent.length, 0);
+});
+
+test('every switch: on and straight off again before the appliance reports, both are sent', async () => {
+  for (const key of ['windFree', 'fast', 'quiet', 'dry', 'fanOnly', 'fanTurbo', 'fanAuto', 'light']) {
+    const { link, set, get, C, svc } = setup({ features: { light: true } });
+    if (!svc(key)) { continue; }
+    const before = await get(key, C.On);
+    link.autoReport = false;
+    link.apply = null; // acknowledged, not reported yet
+    await set(key, C.On, !before);
+    await set(key, C.On, before);
+    assert.equal(link.sent.length, 2, `${key}: the change and its reverse both reach the appliance`);
+    assert.equal(await get(key, C.On), before, `${key}: the tile shows the last wish`);
+  }
+});
+
+test('modes: Dry and straight back, before the appliance reports, ends in the mode it came from', async () => {
+  const { link, set, C, res } = setup();
+  res['/mode/vs/0'][`${V}modes`] = ['Cool'];
+  link.autoReport = false;
+  link.apply = null;
+  await set('dry', C.On, true);
+  await set('dry', C.On, false);
+  const modes = link.sent.filter((w) => w.path.join('/') === 'mode/vs/0' && w.body[`${V}modes`]).map((w) => w.body[`${V}modes`][0]);
+  assert.deepEqual(modes, ['Dry', 'Cool']);
+});

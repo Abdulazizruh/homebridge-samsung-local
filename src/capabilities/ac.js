@@ -491,3 +491,32 @@ export function expectedAfter(kind, value) {
     default: return () => true;
   }
 }
+
+/**
+ * What the appliance is about to be: its last reading with the commands it acknowledged (or is
+ * being sent) and has not reported back yet, oldest first. Every decision on a new command is
+ * made on this, so a change and its reverse in quick succession are both sent: WindFree on and
+ * off again before a reading shows it on, Dry and back to Cool, Turbo and back.
+ */
+export function intendedState(model, unconfirmed) {
+  const st = { ...model.state };
+  for (const { kind, value } of unconfirmed) {
+    switch (kind) {
+      case 'power': st.power = Boolean(value); break;
+      case 'mode': st.mode = value; st.modeCode = model.supports.modes?.[value] ?? st.modeCode; break;
+      case 'fan': case 'swing': case 'targetTemperature': st[kind] = value; break;
+      case 'light': case 'beep': case 'autoClean': case 'windFreeResource': st[kind] = Boolean(value); break;
+      case 'preset':
+        if (value.on) {
+          st.preset = value.name;
+          st.presetCode = PRESETS[value.name] ?? st.presetCode;
+        } else if (st.preset === value.name) {
+          st.preset = null;
+          st.presetCode = 'Off';
+        }
+        break;
+      default: break;
+    }
+  }
+  return st;
+}

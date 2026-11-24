@@ -1,5 +1,5 @@
 import { failureText } from '../deviceLink.js';
-import { acCommand, buildAcModel, expectedAfter } from '../capabilities/ac.js';
+import { acCommand, buildAcModel, expectedAfter, intendedState } from '../capabilities/ac.js';
 import { eveCharacteristics } from './eve.js';
 
 /** Which optional services appear by default. Each can be changed per device. */
@@ -65,6 +65,8 @@ export class AcAccessory {
     this.model = null;
     this.pending = new Map(); // kind -> {check, settleUntil, confirmUntil, label}
     this.inflight = new Map(); // kind -> value being sent right now
+    this.asked = new Map(); // kind -> the newest value sent for it; an older one never counts as "already asked"
+    this.askedAt = new Map(); // kind -> { kind, value, order } of that newest value
     this.services = new Map();
     this.eve = eveCharacteristics(this.hap);
     this.context = accessory.context;
@@ -127,6 +129,20 @@ export class AcAccessory {
       new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
   }
 
+  /**
+   * The appliance as it is about to be: its reading with every command still on its way or not
+   * yet reported back. New commands are decided on this, never on a reading that predates them.
+   */
+  #intended() {
+    const st = this.#requireOnline();
+    this.#heldKinds(); // drops what the appliance has confirmed meanwhile
+    const open = [...this.askedAt.entries()]
+      .filter(([key]) => this.inflight.has(key) || this.pending.has(key))
+      .map(([, a]) => a)
+      .sort((a, b) => a.order - b.order);
+    return open.length ? intendedState({ ...this.model, state: st }, open) : st;
+  }
+
   #requireOnline() {
     if (!this.online) {
       const { HapStatusError, HAPStatus } = this.hap;
@@ -139,7 +155,8 @@ export class AcAccessory {
   async #command(kind, value, label = kind) {
     const { HapStatusError, HAPStatus } = this.hap;
     this.#requireOnline();
-    const writes = acCommand(this.model, kind, value);
+    const key = kind === 'preset' ? `preset:${value.name}` : kind;
+    const writes = acCommand({ ...this.model, state: this.#intended() }, kind, value);
     if (writes === null) {
       this.log.warn(`[${this.displayName}] "${label}" is not supported by this appliance.`);
       throw new HapStatusError(HAPStatus.INVALID_VALUE_IN_REQUEST);
@@ -147,7 +164,6 @@ export class AcAccessory {
     if (writes.length === 0) {
       return;
     }
-    const key = kind === 'preset' ? `preset:${value.name}` : kind;
     // One command, one beep. Apple Home often sends the same thing through
     // several tiles at once (thermostat "Cool" and fan "on" both mean power
     // on), and repeats values the appliance already has. Each write makes
@@ -156,7 +172,12 @@ export class AcAccessory {
     const waiting = this.pending.get(key);
     const asked = this.inflight.get('power') ?? this.pending.get('power')?.value;
     const powerOff = asked ? asked === 'false' : !this.model.state.power;
-    if (this.inflight.get(key) === same || (waiting?.value === same && Date.now() < waiting.settleUntil)) {
+    // A repeat is only a repeat of the newest value asked for. WindFree on, off and on again in
+    // quick succession: the last "on" matches the first one still awaiting confirmation, but the
+    // "off" came after it, so it must be sent, or the unit ends up off while the tile shows on.
+    const repeat = this.asked.get(key) === same
+      && (this.inflight.get(key) === same || (waiting?.value === same && Date.now() < waiting.settleUntil));
+    if (repeat) {
       this.log.debug(`[${this.displayName}] ${label}: already on its way; not sent twice.`);
       return;
     }
@@ -172,7 +193,12 @@ export class AcAccessory {
       return;
     }
     this.inflight.set(key, same);
+    this.asked.set(key, same);
+    this.askedOrder = (this.askedOrder ?? 0) + 1;
+    this.askedAt.set(key, { kind, value, order: this.askedOrder });
+    const newest = () => this.asked.get(key) === same;
     const hold = () => {
+      if (!newest()) { return; } // a later value of this kind is already on its way and held
       const now = Date.now();
       this.pending.set(key, {
         check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label, value: same,
@@ -191,9 +217,12 @@ export class AcAccessory {
     }, (err) => {
       this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}`);
       if (late) {
-        // HomeKit was already told "done": put the real state back on screen.
-        this.pending.delete(key);
-        this.#showRealState();
+        // HomeKit was already told "done": put the real state back on screen,
+        // unless a later value of this kind is already on its way.
+        if (newest()) {
+          this.pending.delete(key);
+          this.#showRealState();
+        }
         return;
       }
       throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -334,7 +363,7 @@ export class AcAccessory {
     const on = service.getCharacteristic(Characteristic.On);
     on.onGet(this.#shown(on, switchKinds(key), (st) => Boolean(isOn(st))))
       .onSet(async (value) => {
-        await setOn(Boolean(value), this.#requireOnline());
+        await setOn(Boolean(value), this.#intended());
       });
     service.sl = { isOn };
   }
@@ -515,7 +544,7 @@ export class AcAccessory {
     service.getCharacteristic(Characteristic.Active)
       .onGet(this.#shown(service.getCharacteristic(Characteristic.Active), ['power'], (st) => (st.power ? 1 : 0)))
       .onSet(async (value) => {
-        const st = this.#requireOnline();
+        const st = this.#intended();
         if (value === 1 && !st.power) {
           await this.#command('power', true, 'power on');
         } else if (value === 0 && st.power) {
@@ -532,7 +561,7 @@ export class AcAccessory {
           if (Number(value) <= 0) {
             // Zero on the slider means Auto, as in homebridge-smartthings-oauth.
             // It never powers the unit off.
-            if (s.fan.speeds.auto !== undefined && this.#requireOnline().fan !== 'auto') {
+            if (s.fan.speeds.auto !== undefined && this.#intended().fan !== 'auto') {
               await this.#command('fan', 'auto', 'fan auto');
             } else {
               setTimeout(() => this.#push(), 600);
@@ -547,7 +576,7 @@ export class AcAccessory {
       service.getCharacteristic(Characteristic.TargetFanState)
         .onGet(this.#shown(service.getCharacteristic(Characteristic.TargetFanState), ['fan'], (st) => (st.fan === 'auto' ? 1 : 0)))
         .onSet(async (value) => {
-          const st = this.#requireOnline();
+          const st = this.#intended();
           if (value === 1) {
             await this.#command('fan', 'auto', 'fan auto');
           } else if (st.fan === 'auto') {
@@ -585,7 +614,7 @@ export class AcAccessory {
   }
 
   async #setMode(mode) {
-    const st = this.#requireOnline();
+    const st = this.#intended();
     if (!st.power) {
       await this.#command('power', true, 'power on');
     }

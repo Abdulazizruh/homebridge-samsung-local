@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.16
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.15, plus:
+
+- **A switch turned on and off again quickly no longer sticks and springs back.** WindFree, Fast and the other comfort modes, Dry, Fan Only, Turbo, Auto and the display: switching one on and then off again before the air conditioner reported the first change left the unit in the first state while the tile showed the second, and after some seconds the tile sprang back. Two causes, both fixed. Turning a mode off was decided on the last reading, which did not show it on yet, so nothing was sent. And a repeated value was compared with the oldest one still awaiting confirmation, so on, off and on again dropped the last "on". New commands are now decided on one picture of the unit: its reading plus every command still on its way or not yet reported back. How commands are sent is unchanged.
+- **The main tile is the face of the accessory.** The washer's cycle tile (or its finished sensor, if the cycle tile is off) and each appliance's main tile are marked as such, so the Home app puts them in front when it shows the accessory's tiles as one group.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.15، ومعه:
+
+- **المفتاح الذي يُشغَّل ثم يُطفأ بسرعة لن يعلق ثم يرجع.** WindFree وFast وبقية أوضاع الراحة، والتجفيف، والمروحة فقط، والسرعة القصوى، والتلقائي، والشاشة: تشغيل أحدها ثم إطفاؤه قبل أن يبلغ المكيف عن الأول كان يترك المكيف على الحالة الأولى والبطاقة على الثانية، ثم ترجع البطاقة بعد ثوانٍ. السبب أمران أُصلحا معًا: إطفاء الوضع كان يُقرَّر على آخر قراءة، وهي لم تُظهره مشغّلًا بعد، فلا يُرسل شيء. والقيمة المكررة كانت تُقارن بأقدم قيمة تنتظر التأكيد، فتشغيل ثم إطفاء ثم تشغيل كان يُسقط التشغيل الأخير. صارت الأوامر الجديدة تُقرَّر على صورة واحدة للمكيف: قراءته ومعها كل أمر في الطريق أو لم يُبلَّغ عنه بعد. طريقة إرسال الأوامر لم تتغير.
+- **البطاقة الرئيسية واجهة الملحق.** بطاقة الدورة في الغسالة (أو حساس انتهاء الدورة إن أُطفئت بطاقة الدورة) والبطاقة الرئيسية لكل جهاز صارت محددة، فيضعها تطبيق Home في الواجهة حين يعرض بطاقات الملحق مجمّعة.
+
 ## 1.6.0-beta.15
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.14, plus:
