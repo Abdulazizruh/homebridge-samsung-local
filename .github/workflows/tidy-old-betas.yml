@@ -65,6 +65,11 @@ jobs:
             npm view "homebridge-samsung-local@$range" version | tail -n 5
             exit 0
           fi
+          # Marking twice with the same note is refused by npm, so look first.
+          newest=$(npm view "homebridge-samsung-local@$range" version --json | node -e 'const v=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log([].concat(v).pop())')
+          if [ "$(npm view "homebridge-samsung-local@$newest" deprecated)" = "$note" ]; then
+            echo "Already marked."; exit 0
+          fi
           npm deprecate "homebridge-samsung-local@$range" "$note"
       - name: Remove the trial versions of finished lines from npm
         env:
