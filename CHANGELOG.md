@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.11
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.10, plus:
+
+- **No reading right after a command, in both engines.** The plugin read the appliance 1.5 seconds after every command. smartthings-local and LocalThings, the projects the connection comes from, both document that reading a resource just after writing it makes some Samsung appliances put the old value back, and both wait about 4 seconds first. A reading also holds the session the next command needs, so a slow one made the next temperature step wait behind it; in the last log two steps waited 15 seconds each and failed. The plugin now waits 4 seconds after the last command before it reads, so taps that keep coming are sent one after another with no reading in between. homebridge-smartthings does the same over the cloud: commands go first, and it pauses its readings after a command. Each step is still sent in turn, as in beta.10.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.10، ومعه:
+
+- **لا تُقرأ حالة الجهاز بعد الأمر مباشرة، في المحركين.** كانت الإضافة تقرأ الجهاز بعد كل أمر بـ1.5 ثانية. ومشروعا smartthings-local وLocalThings، وهما مصدر الاتصال، يوثّقان أن قراءة الحالة بعد الأمر مباشرة تجعل بعض أجهزة سامسونج ترجع إلى القيمة القديمة، فينتظران نحو 4 ثوانٍ قبل القراءة. والقراءة تشغل الجلسة التي يحتاجها الأمر التالي، فإذا أبطأت انتظرت خطوة الحرارة التالية خلفها. وفي آخر سجل انتظرت خطوتان 15 ثانية لكل واحدة ثم فشلتا. صارت الإضافة تنتظر 4 ثوانٍ بعد آخر أمر ثم تقرأ، فتُرسل اللمسات المتتالية واحدة بعد الأخرى دون قراءة بينها. وهذا ما يفعله homebridge-smartthings عبر السحابة: الأوامر أولًا، ويوقف القراءة مدة بعد الأمر. وتبقى كل خطوة تُرسل بدورها كما في beta.10.
+
 ## 1.6.0-beta.10
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.9, except one change taken back:

@@ -4,6 +4,8 @@ import os
 import stat
 import sys
 import tempfile
+import threading
+import time
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -395,3 +397,44 @@ class FewHandshakesAtOnce(unittest.TestCase):
         finally:
             bridge.Link = saved
         self.assertEqual(most[0], bridge.HANDSHAKES_AT_ONCE)
+
+
+class NoReadRightAfterWrite(unittest.TestCase):
+    """smartthings-local and LocalThings wait before reading a just-written
+    resource; reading it at once makes some appliances put the old value back."""
+
+    def test_no_reading_starts_while_commands_keep_coming(self):
+        reads, writes = [], []
+
+        class Link(FakeLink):
+            def read_resources(self):
+                reads.append(time.monotonic())
+                return super().read_resources()
+
+            def post(self, path, body):
+                writes.append(time.monotonic())
+                return 0x44, None
+
+        saved = (bridge.open_link, bridge.emit, bridge.ensure_credentials, bridge.AFTER_WRITE_QUIET_S)
+        online = threading.Event()
+        bridge.open_link = lambda host, port, cert, key, on_notification=None: (Link(reads=1000), [])
+        bridge.emit = lambda msg: online.set() if msg.get("online") else None
+        bridge.ensure_credentials = lambda cred_dir: ("cert", "key")
+        bridge.AFTER_WRITE_QUIET_S = 0.4
+        worker = bridge.DeviceWorker("k", "10.0.0.5", None, "/nonexistent", "device-1", 2, False)
+        worker.poll_interval = 0.02
+        try:
+            worker.start()
+            self.assertTrue(online.wait(5))
+            time.sleep(0.1)
+            for _ in range(4):  # temperature tapped four times, 0.15 s apart
+                worker.write(["temperature", "vs", "0"], {})
+                time.sleep(0.15)
+            time.sleep(0.6)
+        finally:
+            worker.stop()
+            worker.join(timeout=5)
+            bridge.open_link, bridge.emit, bridge.ensure_credentials, bridge.AFTER_WRITE_QUIET_S = saved
+        between = [r for r in reads if writes[0] < r < writes[-1]]
+        self.assertEqual(between, [])
+        self.assertTrue(any(r >= writes[-1] + 0.35 for r in reads))

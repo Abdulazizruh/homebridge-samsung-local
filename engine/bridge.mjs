@@ -26,7 +26,7 @@ const { CoapSession } = require('./vendor/coap/session.js');
 const { decodeCbor, encodeCbor } = require('./vendor/ocf/cbor.js');
 const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/cert.js');
 
-export const HELPER_VERSION = 'js-0.1.5';
+export const HELPER_VERSION = 'js-0.1.6';
 const SUBSCRIBE_CONFIRM_MS = 3000;
 const SEND_RATE_PER_S = 25;
 const KNOWN_PORT_TIMEOUT_MS = 6000;
@@ -41,6 +41,12 @@ const CONNECT_TIMEOUT_MS = 12_000;
 const BACKOFF_STEPS_S = [5, 10, 20, 40, 60];
 const QUIET_RECONNECT_DELAY_MS = 2000;
 const QUIET_RECONNECT_WAIT_MS = 12_000;
+// No reading right after a command. smartthings-local and LocalThings both
+// document that reading a resource just after writing it makes some Samsung
+// appliances put the old value back, and both wait about 4 s before reading.
+// A reading also competes with the next command, so while temperature steps
+// keep coming, none starts in between.
+const AFTER_WRITE_QUIET_MS = 4000;
 const READ_RETRIES = 2;
 const READ_RETRY_PAUSE_MS = 1500;
 const OFFLINE_GRACE_MS = 30_000;
@@ -539,8 +545,15 @@ class DeviceWorker {
       throw new HelperError('offline', 'The appliance is not connected right now.');
     }
     const started = Date.now();
-    const { code, text } = await link.post(pathSegments, body);
-    this.requestRefresh(1500);
+    this.quietUntil = Date.now() + AFTER_WRITE_QUIET_MS;
+    let answer;
+    try {
+      answer = await link.post(pathSegments, body);
+    } finally {
+      this.quietUntil = Date.now() + AFTER_WRITE_QUIET_MS;
+      this.requestRefresh(AFTER_WRITE_QUIET_MS);
+    }
+    const { code, text } = answer;
     return { code: codeStr(code), accepted: code >> 5 === 2, detail: text, ms: Date.now() - started };
   }
 
@@ -695,7 +708,7 @@ class DeviceWorker {
       if (link.dead) {
         throw link.dead;
       }
-      const due = this.wakeAt === null ? nextPoll : Math.min(nextPoll, this.wakeAt);
+      const due = Math.max(this.wakeAt === null ? nextPoll : Math.min(nextPoll, this.wakeAt), this.quietUntil ?? 0);
       const now = Date.now();
       if (due > now) {
         await this.#pause(due - now);

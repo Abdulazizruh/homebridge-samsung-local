@@ -34,7 +34,7 @@ import ipaddress
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.9"
+HELPER_VERSION = "0.1.10"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -59,6 +59,12 @@ READ_RETRY_PAUSE_S = 1.5
 # appliance is reported unreachable only if it is still gone afterwards.
 OFFLINE_GRACE_S = 30.0
 QUIET_RECONNECT_WAIT_S = 12.0
+# No reading right after a command. smartthings-local and LocalThings both
+# document that reading a resource just after writing it makes some Samsung
+# appliances put the old value back, and both wait about 4 s before reading.
+# A reading also holds the session the next command needs, so while
+# temperature steps keep coming, none starts in between.
+AFTER_WRITE_QUIET_S = 4.0
 # Handshakes run at once across all appliances. When every appliance started together, some
 # answered the first try with a TLS alert (decode error, handshake failure) and only connected
 # on a later round; a few at a time keeps each handshake prompt.
@@ -681,6 +687,7 @@ class DeviceWorker(threading.Thread):
         self._wake_at = None
         self._link = None
         self._link_lock = threading.Lock()
+        self._quiet_until = 0.0  # no reading starts before this (monotonic)
         self._linked = threading.Event()
         self._reconnecting = False
         self.notifications = 0
@@ -703,8 +710,12 @@ class DeviceWorker(threading.Thread):
             link = self._link
         if link is None:
             raise HelperError("offline", "The appliance is not connected right now.")
-        code, text = link.post(path, body)
-        self.request_refresh(1.5)
+        self._quiet_until = time.monotonic() + AFTER_WRITE_QUIET_S
+        try:
+            code, text = link.post(path, body)
+        finally:
+            self._quiet_until = time.monotonic() + AFTER_WRITE_QUIET_S
+            self.request_refresh(AFTER_WRITE_QUIET_S)
         return {"code": code_str(code), "accepted": code >> 5 == 2, "detail": text}
 
     # -- worker ------------------------------------------------------------
@@ -855,6 +866,7 @@ class DeviceWorker(threading.Thread):
             self._wake.clear()
             wake_at = self._wake_at
             due = next_poll if wake_at is None else min(next_poll, wake_at)
+            due = max(due, self._quiet_until)
             now = time.monotonic()
             if due > now:
                 self._wake.wait(due - now)

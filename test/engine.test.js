@@ -62,6 +62,12 @@ test('JavaScript engine: session events, a write that reaches the appliance, and
   await waitFor(() => events.some((e) => e.ev === 'state' && e.pushes > 0), 30_000);
   const answer = await helper.request('write', { key: di, path: ['power', 'vs', '0'], body: { [`${V}power`]: 'On' } }, 20_000);
   assert.equal(answer.accepted, true);
+  // No reading right after a command (smartthings-local and LocalThings wait
+  // about 4 s): the next one comes after that, though polling is every 2 s.
+  const wrote = Date.now();
+  const before = events.length;
+  await waitFor(() => events.slice(before).some((e) => e.ev === 'state'), 20_000);
+  assert.ok(Date.now() - wrote >= 3800, `read ${Date.now() - wrote} ms after the command`);
   assert.equal(sim.writes.length, 1);
   assert.equal(sim.writes[0].href, '/power/vs/0');
   assert.deepEqual(decodeCbor(sim.writes[0].payload), { [`${V}power`]: 'On' });
