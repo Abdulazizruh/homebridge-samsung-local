@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.28
+
+Trial version on the "beta" channel. Same as beta.27, plus what its log showed:
+
+- **iPhone remote: "Can't Connect to Apple TV" for a second.** The half-minute waits are gone in the log of beta.27. What is left is a short message on the phone: it appears when the plugin closes a silent connection and the phone tries again. Two changes. The silent connection is closed after four tenths of a second instead of one, so the second try comes sooner. And, as a trial for the cause itself: the stand-in now names itself to the phone with the same identifiers it announces on the network; until now one of them differed, and a phone that connects by itself has only those to tell which device answered. Not yet confirmed.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.27، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون: «Can't Connect to Apple TV» لمدة ثانية.** انتظارات نصف الدقيقة اختفت في سجل beta.27. الباقي رسالة قصيرة على الجوال: تظهر حين تغلق الإضافة اتصالًا ساكتًا ثم يحاول الجوال من جديد. تغييران. الاتصال الساكت يُغلق بعد أربعة أعشار الثانية بدل ثانية، فتأتي المحاولة الثانية أسرع. وتجربة لأصل السبب: البديل يعرّف بنفسه للجوال بالمعرّفات نفسها التي يعلنها على الشبكة؛ وكان أحدها مختلفًا حتى الآن، والجوال الذي يتصل من نفسه يملك هذه المعرّفات فقط ليعرف أي جهاز أجابه. لم يتأكد بعد.
+
 ## 1.4.0-beta.27
 
 Trial version on the "beta" channel. Same as beta.26, plus what its log showed:

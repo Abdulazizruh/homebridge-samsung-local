@@ -22,7 +22,7 @@ const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPA
 const AUTH_FRAMES = new Set([FRAME.PS_Start, FRAME.PS_Next, FRAME.PV_Start, FRAME.PV_Next]);
 const MAX_FRAME = 256 * 1024;
 const AUTH_DEADLINE_MS = 60_000;
-const IDLE_CLOSE_MS = 1000; // a connection that only said who it is and then nothing
+const IDLE_CLOSE_MS = 400; // a connection that only said who it is and then nothing
 const IDLE_LOOP_MS = 120_000;
 const IDLE_LOOP_MAX = 30; // closed this often in two minutes, it is left alone
 const MAX_CONNECTIONS = 8;
@@ -368,9 +368,13 @@ const HANDLERS = {
     // The phone says who it is and expects the same back. An empty answer left a real phone waiting
     // half a minute on some connections, so the stand-in now names itself, as it does when pairing.
     const s = this.server;
+    // The identifiers are the ones announced on the network: a phone that connects by itself, before a
+    // remote is asked for, has only those to tell which device answered.
+    const mac = [...s.identity.mac].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':');
     this.reply(message, {
       name: s.name, model: s.model, _sv: '715.2', _bf: 0,
-      _idsID: s.identity.id, _pubID: [...s.identity.mac].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
+      _idsID: s.identity.id, _pubID: s.announced?.address ?? mac, _mRtID: s.identity.id, _mrID: s.identity.id,
+      ...(s.announced?.short ? { _i: s.announced.short } : {}),
     });
     this.status(message._x);
     const shape = Object.keys(c ?? {}).sort().map((k) => (/^[_A-Za-z][A-Za-z]{0,23}$/.test(k) ? k : '(other)')).join(',').slice(0, 300);
@@ -498,8 +502,9 @@ const HANDLERS = {
  * 'paired' (the phone's identifier).
  */
 export class CompanionServer extends EventEmitter {
-  constructor({ name, identity, pin, clients = {}, model = 'AppleTV14,1', log = console }) {
+  constructor({ name, identity, pin, clients = {}, model = 'AppleTV14,1', log = console, announced = null }) {
     super();
+    this.announced = announced;
     this.name = name;
     this.identity = { ...identity, irk: Buffer.from(identity.irk, 'hex'), mac: Buffer.from(identity.mac, 'hex') };
     this.signer = signer(Buffer.from(identity.seed, 'hex'));

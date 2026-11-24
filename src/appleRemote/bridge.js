@@ -86,7 +86,12 @@ export class AppleRemote {
   /** Start listening and announce the stand-in. Returns the server, to listen for what the remote sends. */
   async start() {
     const identity = identityOf(this.file, this.tvId, this.pin);
-    this.server = new CompanionServer({ name: this.name, identity, pin: identity.pin, clients: identity.clients, model: this.model, log: this.log });
+    const announced = txt(identity, this.model);
+    // The stand-in names itself to a phone with the very identifiers it announces on the network.
+    this.server = new CompanionServer({
+      name: this.name, identity, pin: identity.pin, clients: identity.clients, model: this.model, log: this.log,
+      announced: { address: announced.rpBA, short: announced.rpHI },
+    });
     this.server.on('paired', (id, key) => {
       const data = load(this.file);
       if (data[this.tvId]) {
@@ -110,7 +115,7 @@ export class AppleRemote {
       // has addresses of its own inner networks; a phone that tries one of those first hangs on "Connecting".
       const reachable = homeInterfaces();
       this.service = responder.createService({
-        name: this.name, type: 'companion-link', port, txt: txt(identity, this.model),
+        name: this.name, type: 'companion-link', port, txt: announced,
         ...(reachable.length ? { restrictedAddresses: reachable, disabledIpv6: true } : {}),
       });
       this.log.info(`[${this.name}] announced on ${reachable.length ? reachable.join(', ') : 'every network interface'}.`);
