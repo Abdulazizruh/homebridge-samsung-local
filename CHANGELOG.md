@@ -8,7 +8,7 @@ Trial version on the "beta" channel. Everything in 1.5.0, plus a first step on a
 
 - **The log says why an appliance refused.** When an air conditioner or washer turns down the secure session, the reason it gives was known to the Python engine but not written. The "not reachable" line now ends with it, for example "the appliance said: sslv3 alert handshake failure". Only those protocol words are written, never an address or a key. This is what is needed to find why some appliances fail the first try at start and connect on the second.
 - **A second try at once in one known case.** An appliance that was itself reaching for the plugin's address refuses the first try and clears its side by doing so. The plugin now tries again after a third of a second, in place of waiting for the next round and writing a warning. (Python engine; the JavaScript engine does not tell this case apart yet.)
-- **Settings: when to choose both remotes.** The choice "Both together" is no longer marked "not recommended". It now says what it is for: reaching the TV from outside the home, with the remote like Apple TV at home and the Apple Home tile when away (through a home hub). At home only, one remote is enough.
+- **Settings: when to choose both remotes.** The choice "Both together" is no longer marked "not recommended". Each choice now says where it works: the remote like Apple TV on the home network only, the Apple Home tile at home and away (through a home hub), and both together for the keyboard at home with the reach from outside.
 
 **بالعربية**
 
@@ -16,7 +16,7 @@ Trial version on the "beta" channel. Everything in 1.5.0, plus a first step on a
 
 - **السجل يذكر لماذا رفض الجهاز.** حين يرفض مكيف أو غسالة الجلسة الآمنة، كان محرك Python يعرف السبب الذي يعطيه الجهاز ولا يكتبه. الآن ينتهي سطر «not reachable» به، مثل «the appliance said: sslv3 alert handshake failure». تُكتب كلمات البروتوكول هذه فقط، دون أي عنوان أو مفتاح. وهذا ما نحتاجه لمعرفة لماذا تفشل بعض الأجهزة في المحاولة الأولى عند البدء وتتصل في الثانية.
 - **محاولة ثانية فورية في حالة معروفة.** الجهاز الذي كان هو نفسه يحاول الوصول إلى عنوان الإضافة يرفض المحاولة الأولى ويصفّي جهته بذلك. الآن تحاول الإضافة من جديد بعد ثلث ثانية، بدل انتظار الجولة التالية وكتابة تحذير. (محرك Python؛ ومحرك JavaScript لا يميّز هذه الحالة بعد.)
-- **الإعدادات: متى تختار الريموتين معًا.** اختيار «الاثنان معًا» لم يعد معلَّمًا «لا نوصي به». صار يذكر الغرض منه: الوصول إلى التلفزيون من خارج البيت، بريموت مثل Apple TV داخل البيت وبطاقة Apple Home خارجه (عبر المركز المنزلي). ولمن يستخدمه داخل البيت فقط، ريموت واحد يكفي.
+- **الإعدادات: متى تختار الريموتين معًا.** اختيار «الاثنان معًا» لم يعد معلَّمًا «لا نوصي به». وصار كل اختيار يذكر أين يعمل: الريموت الذي مثل Apple TV داخل شبكة البيت فقط، وبطاقة Apple Home داخل البيت وخارجه (عبر المركز المنزلي)، والاثنان معًا للكيبورد داخل البيت مع الوصول من خارجه.
 
 ## 1.5.0
 

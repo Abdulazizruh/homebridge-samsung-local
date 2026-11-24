@@ -219,7 +219,7 @@ Above the options is the TV's code for the Home app. **Scan the picture** with t
 
 Under it: the TV's name, then two separate choices.
 
-1. **Remote on the iPhone**: the remote like Apple TV (trial), the TV tile with the Home remote, both together, or no remote. Both together suits reaching the TV from outside the home: the remote like Apple TV works on your home network only, while the Apple Home tile also works when you are away, through your home hub (an Apple TV or a HomePod). The TV then has two names in the remote list; at home only, one remote is enough.
+1. **Remote on the iPhone**: the remote like Apple TV (trial), the TV tile with the Home remote, both together, or no remote. The remote like Apple TV works on your home network only. The Apple Home tile works at home and away from it, away through your home hub (an Apple TV or a HomePod). Both together gives the keyboard and touch pad at home and the reach from outside; the TV then has two names in the remote list. Without a need for the keyboard, the tile alone is enough; without a need to reach it from outside, the remote like Apple TV alone is enough.
 2. **Switches for automations**: off unless you tick it; then you choose which switches appear.
 
 The pairing code of the remote like Apple TV is shown under that choice and can be changed in the card below it.
