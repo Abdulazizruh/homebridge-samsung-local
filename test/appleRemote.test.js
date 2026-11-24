@@ -296,3 +296,31 @@ test('OPACK: a pointer past a list is read as the sender numbered it', async () 
   const emptyFirst = Buffer.concat([Buffer.from([0xe4]), s('_c'), inner, s('_i'), s('_systemInfo'), s('k'), Buffer.from([0xa5]), s('e'), Buffer.from([0x40])]);
   assert.equal(unpack(emptyFirst)[0].k, '_i');
 });
+
+test('a remote that has asked for its session is not cut by a second connection of the same phone', async (t) => {
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'sl-phone-')), 'apple-remote.json');
+  const bridge = new AppleRemote({ file, tvId: 'tv-1', name: 'Bed TV', log: quiet, advertise: false });
+  const server = await bridge.start();
+  t.after(() => bridge.stop());
+  const keys = []; server.on('key', (k) => keys.push(k));
+  const { pin, port } = JSON.parse(fs.readFileSync(file, 'utf8'))['tv-1'];
+  const paired = new Phone(port);
+  assert.equal(await paired.pair(pin), true);
+  paired.socket.destroy();
+
+  const first = new Phone(port, paired);
+  t.after(() => first.socket.destroy());
+  assert.equal(await first.verify(), true);
+  await first.request('_systemInfo', {});
+  await first.request('_sessionStart', { _srvT: 'com.apple.tvremoteservices', _sid: 7 });
+
+  // The same phone connects once more before the first has opened its remote.
+  const second = new Phone(port, paired);
+  t.after(() => second.socket.destroy());
+  assert.equal(await second.verify(), true);
+
+  await first.request('TVRCSessionStart', {}); // the first is still there and opens
+  await first.request('_hidC', { _hidC: 1, _hBtS: 1 });
+  await first.request('_hidC', { _hidC: 1, _hBtS: 2 });
+  assert.deepEqual(keys, ['KEY_UP']);
+});

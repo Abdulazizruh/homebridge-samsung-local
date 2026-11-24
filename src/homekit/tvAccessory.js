@@ -209,6 +209,14 @@ export class TvAccessory {
     if (info?.mac && !this.context.mac) {
       this.context.mac = info.mac;
     }
+    // One missed answer from a TV that was on a moment ago changes nothing: it is asked again at the
+    // next round. A TV that says it went to standby is believed at once.
+    if (!info && this.on && !this.missedOnce) {
+      this.missedOnce = true;
+      this.log.debug(`[${this.displayName}] one question went unanswered; asked again before the TV is shown as off.`);
+      return;
+    }
+    this.missedOnce = false;
     const reachable = Boolean(info);
     if (reachable !== this.reachable && this.reachable !== null) {
       this.log.debug(`[${this.displayName}] ${reachable ? 'answers' : 'stopped answering'} on the network.`);

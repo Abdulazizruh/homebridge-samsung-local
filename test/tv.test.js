@@ -13,6 +13,7 @@ import { makeApi, quietLog, tmpDir, waitFor } from './support.js';
 async function fakeTv({ power = 'on', allow = true } = {}) {
   const tv = { keys: [], texts: [], tokens: [], emits: [], power, allow, keyboardOpen: false };
   const web = http.createServer((req, res) => {
+    if (tv.deaf > 0) { tv.deaf -= 1; req.socket.destroy(); return; } // a question that goes unanswered
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ device: { id: 'uuid:tv-test-1', name: 'Living Room TV', modelName: 'QA65TEST', wifiMac: 'aa:bb:cc:00:11:22', TokenAuthSupport: 'true', ...(tv.power ? { PowerState: tv.power } : {}) } }));
   });
@@ -383,4 +384,22 @@ test('a field opened again: the iPhone keyboard starts from the text the TV says
   tv.say('ms.remote.imeUpdate', Buffer.from('xyz', 'utf8').toString('base64')); // what the TV says after that changes nothing
   await new Promise((r) => setTimeout(r, 80));
   assert.equal(handler.phone.text, 'جدة');
+});
+
+test('TV that was on: one unanswered question changes nothing, two in a row show it as off', async (t) => {
+  const tv = await fakeTv();
+  const { api, platform } = await bootTv(tv, 'tile');
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const active = handler.services.get('tv').getCharacteristic(api.hap.Characteristic.Active);
+  await waitFor(() => active.value === 1);
+  tv.deaf = 1;
+  await handler.poll();
+  assert.equal(active.value, 1, 'one missed answer: still shown as on');
+  await handler.poll();
+  assert.equal(active.value, 1, 'it answered again');
+  tv.deaf = 2;
+  await handler.poll();
+  await handler.poll();
+  assert.equal(active.value, 0, 'silent twice in a row: off');
 });

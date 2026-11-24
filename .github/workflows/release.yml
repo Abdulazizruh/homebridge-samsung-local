@@ -27,18 +27,19 @@ jobs:
       - run: python -m unittest discover -s test/python -v
       - name: Check tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
-      # A pre-release goes to the "beta" tag once a stable version exists.
-      # Until then it is also "latest", so the Homebridge plugin search can
-      # find and install the package.
+      # The channel follows the kind of release and nothing else: a pre-release goes to "beta", a full
+      # release to "latest". It never depends on a question to the registry, which could fail and send
+      # a trial version to everyone. A version number and a release kind that disagree stop the job.
       - name: Choose npm tag
         id: tag
         run: |
-          current="$(npm view homebridge-samsung-local dist-tags.latest 2>/dev/null || true)"
-          if [ "${{ github.event.release.prerelease }}" = "true" ] && [ -n "$current" ] && [ "${current#*-}" = "$current" ]; then
-            echo "tag=beta" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          version="$(node -p "require('./package.json').version")"
+          case "$version" in *-*) trial=true ;; *) trial=false ;; esac
+          if [ "$trial" != "${{ github.event.release.prerelease }}" ]; then
+            echo "Version $version and the release's pre-release tick disagree: nothing is published." >&2
+            exit 1
           fi
+          if [ "$trial" = "true" ]; then echo "tag=beta" >> "$GITHUB_OUTPUT"; else echo "tag=latest" >> "$GITHUB_OUTPUT"; fi
       - run: npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

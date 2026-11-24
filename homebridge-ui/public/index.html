@@ -195,7 +195,7 @@
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
       suTitle: '1 · Remote on the iPhone', suBest: 'recommended', suNotBest: 'not recommended', suAway: 'keyboard at home, reach from outside',
       su_apple: 'Remote like Apple TV (trial)',
-      suPin: 'Pairing code', suPinNote: 'you can change it below, under "About the remote like Apple TV"',
+      suName: 'Its name in the remote list', suPin: 'Pairing code', suPinNote: 'you can change it below, under "About the remote like Apple TV"',
       su_appleNote: 'One remote with keyboard and touch pad. Chosen from the remote list with a code of four digits, once for each device. Inputs are reached from the TV\'s own menu. Works on your home network only.',
       su_tile: 'TV tile with the Home remote',
       su_tileNote: 'A real TV tile with input buttons, and its remote with arrows, without keyboard. Works at home and away from it (away through a home hub: an Apple TV or a HomePod). Added to Apple Home on its own, with the code shown beside the TV in the list below.',
@@ -339,7 +339,7 @@
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
       suTitle: '1 · الريموت على الآيفون', suBest: 'موصى به', suNotBest: 'لا نوصي به', suAway: 'كيبورد في البيت، ووصول من خارجه',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
-      suPin: 'رمز الاقتران', suPinNote: 'تستطيع تغييره في الأسفل، تحت «عن الريموت الذي مثل Apple TV»',
+      suName: 'اسمه في قائمة الريموت', suPin: 'رمز الاقتران', suPinNote: 'تستطيع تغييره في الأسفل، تحت «عن الريموت الذي مثل Apple TV»',
       su_appleNote: 'ريموت واحد بالكيبورد ولوحة اللمس. تختاره من قائمة الريموت برمز من أربعة أرقام، مرة واحدة لكل جهاز. والمداخل تصلها من قائمة التلفزيون نفسه. يعمل داخل شبكة البيت فقط.',
       su_tile: 'بطاقة تلفزيون مع ريموت تطبيق المنزل',
       su_tileNote: 'بطاقة تلفزيون حقيقية بأزرار للمداخل، وريموتها بالأسهم دون كيبورد. تعمل داخل البيت وخارجه (خارجه عبر مركز منزلي: Apple TV أو HomePod). تُضاف إلى Apple Home بمفردها، برمزها الظاهر بجانب التلفزيون في القائمة بالأسفل.',
@@ -594,11 +594,13 @@
           const now = existing?.appleRemote === true ? (mode === 'switches' ? 'apple' : 'both') : mode === 'switches' ? 'none' : 'tile';
           const chosen = Array.isArray(existing?.tvSwitches) ? existing.tvSwitches : existing?.tvMode === 'switches' ? ['power', 'mute', 'volumeUp', 'volumeDown'] : [];
           const pinNow = /^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '0000';
+          const nameNow = existing?.name || p.tv?.name || 'Samsung TV'; // as it will read in the iPhone's remote list
           const choice = (value, tag) => `<label class="sl-choice">
               <input type="radio" name="sl-tv-setup" value="${value}" ${now === value ? 'checked' : ''}> <strong>${t('su_' + value)}</strong>
               ${tag ? `<span class="sl-pill ${tag === 'suBest' ? 'sl-ok' : tag === 'suNotBest' ? 'sl-warn' : ''}">${t(tag)}</span>` : ''}
               <div class="sl-muted">${t('su_' + value + 'Note')}</div>
-              ${value === 'apple' || value === 'both' ? `<div class="sl-pinline">${t('suPin')}: <strong class="sl-pin-now" dir="ltr">${esc(pinNow)}</strong> <span class="sl-muted">· ${t('suPinNote')}</span></div>` : ''}</label>`;
+              ${value === 'apple' || value === 'both' ? `<div class="sl-pinline">${t('suName')}: <strong dir="auto">${esc(nameNow + (value === 'both' ? ' +' : ''))}</strong></div>
+              <div class="sl-pinline">${t('suPin')}: <strong class="sl-pin-now" dir="ltr">${esc(pinNow)}</strong> <span class="sl-muted">· ${t('suPinNote')}</span></div>` : ''}</label>`;
           const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
               <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
           return `<div class="sl-group mt-2"><div class="sl-group-title">${t('suTitle')}</div>
@@ -700,7 +702,11 @@
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
-        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false }; } else { config.devices.push(entry); }
+        if (i >= 0) {
+          config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false };
+          // A code that was cleared in the field goes back to the default: the earlier one must not stay behind.
+          if ($('sl-tv-pin') && !('appleRemotePin' in entry)) { delete config.devices[i].appleRemotePin; }
+        } else { config.devices.push(entry); }
       });
     });
     $('sl-add')?.addEventListener('click', async () => {

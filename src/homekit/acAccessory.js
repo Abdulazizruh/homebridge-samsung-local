@@ -113,6 +113,10 @@ export class AcAccessory {
     }
     if (error?.code === 'helper_down') { // every appliance at once: the platform says it in one line
       this.log.debug?.(`[${this.displayName}] not reachable${failureText(error)}.`);
+    } else if (error?.code === 'timeout' && error?.stage === 'session') {
+      // Silence from the start is the everyday case of an appliance switched off at the wall:
+      // said calmly, once. A refusal or a session that drops is still a warning.
+      this.log.info(`[${this.displayName}] does not answer${failureText(error)}. It may be switched off at the wall; it connects by itself when it is back.`);
     } else {
       this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
     }

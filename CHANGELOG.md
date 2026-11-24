@@ -9,6 +9,12 @@ Trial version on the "beta" channel. Everything in 1.5.0, plus a first step on a
 - **The log says why an appliance refused.** When an air conditioner or washer turns down the secure session, the reason it gives was known to the Python engine but not written. The "not reachable" line now ends with it, for example "the appliance said: sslv3 alert handshake failure". Only those protocol words are written, never an address or a key. This is what is needed to find why some appliances fail the first try at start and connect on the second.
 - **A second try at once in one known case.** An appliance that was itself reaching for the plugin's address refuses the first try and clears its side by doing so. The plugin now tries again after a third of a second, in place of waiting for the next round and writing a warning. (Python engine; the JavaScript engine does not tell this case apart yet.)
 - **Settings: when to choose both remotes.** The choice "Both together" is no longer marked "not recommended". Each choice now says where it works: the remote like Apple TV on the home network only, the Apple Home tile at home and away (through a home hub), and both together for the keyboard at home with the reach from outside.
+- **iPhone remote: a starting session is protected.** A connection that had asked for its session, but had not yet opened the remote, could be closed when the same phone connected once more. It is now kept from the moment it asks.
+- **One line an hour with the figure that matters.** How many times the remote was opened, how many of those came after a short delay, and how many connections opened no remote.
+- **A TV that was on is not shown as off for one missed answer.** It is asked again at the next round; two silences in a row show it as off. A TV that says it went to standby is believed at once.
+- **An appliance switched off at the wall is said calmly.** Silence from the start is written once as information, with a note that it connects by itself when it is back, in place of a warning.
+- **Settings: a cleared pairing code is really cleared.** Emptying a custom code showed 0000 but kept the old code when saved. The chosen remote also shows the name the TV will have in the iPhone's remote list.
+- **Releases: the channel follows the kind of release.** A trial version can no longer reach everyone because a question to the registry failed; a version number and a release kind that disagree publish nothing.
 
 **بالعربية**
 
@@ -17,6 +23,12 @@ Trial version on the "beta" channel. Everything in 1.5.0, plus a first step on a
 - **السجل يذكر لماذا رفض الجهاز.** حين يرفض مكيف أو غسالة الجلسة الآمنة، كان محرك Python يعرف السبب الذي يعطيه الجهاز ولا يكتبه. الآن ينتهي سطر «not reachable» به، مثل «the appliance said: sslv3 alert handshake failure». تُكتب كلمات البروتوكول هذه فقط، دون أي عنوان أو مفتاح. وهذا ما نحتاجه لمعرفة لماذا تفشل بعض الأجهزة في المحاولة الأولى عند البدء وتتصل في الثانية.
 - **محاولة ثانية فورية في حالة معروفة.** الجهاز الذي كان هو نفسه يحاول الوصول إلى عنوان الإضافة يرفض المحاولة الأولى ويصفّي جهته بذلك. الآن تحاول الإضافة من جديد بعد ثلث ثانية، بدل انتظار الجولة التالية وكتابة تحذير. (محرك Python؛ ومحرك JavaScript لا يميّز هذه الحالة بعد.)
 - **الإعدادات: متى تختار الريموتين معًا.** اختيار «الاثنان معًا» لم يعد معلَّمًا «لا نوصي به». وصار كل اختيار يذكر أين يعمل: الريموت الذي مثل Apple TV داخل شبكة البيت فقط، وبطاقة Apple Home داخل البيت وخارجه (عبر المركز المنزلي)، والاثنان معًا للكيبورد داخل البيت مع الوصول من خارجه.
+- **ريموت الآيفون: الجلسة التي تبدأ محمية.** الاتصال الذي طلب جلسته ولم يفتح الريموت بعد كان يمكن أن يُغلق حين يتصل الجوال نفسه مرة أخرى. الآن يُحفظ من لحظة طلبه.
+- **سطر واحد كل ساعة بالرقم المهم.** كم مرة فُتح الريموت، وكم منها جاء بعد تأخير قصير، وكم اتصالًا لم يفتح ريموتًا.
+- **التلفزيون الذي كان يعمل لا يُعرض مطفأ بسبب ردّ واحد غائب.** يُسأل من جديد في الجولة التالية؛ وسكوتان متتاليان يعرضانه مطفأ. والتلفزيون الذي يقول إنه دخل الاستعداد يُصدَّق فورًا.
+- **الجهاز المفصول من الكهرباء يُذكر بهدوء.** السكوت من البداية يُكتب مرة واحدة معلومةً، مع ملاحظة أنه يتصل من نفسه حين يعود، بدل تحذير.
+- **الإعدادات: رمز الاقتران الممسوح يُمسح فعلًا.** تفريغ رمز مخصص كان يعرض 0000 لكنه يحتفظ بالرمز القديم عند الحفظ. والريموت المختار يعرض أيضًا الاسم الذي سيظهر به التلفزيون في قائمة الريموت على الآيفون.
+- **الإصدارات: القناة تتبع نوع الإصدار.** لم يعد ممكنًا أن تصل نسخة تجريبية إلى الجميع لأن سؤال السجل فشل؛ ورقم نسخة ونوع إصدار لا يتفقان لا يُنشر معهما شيء.
 
 ## 1.5.0
 

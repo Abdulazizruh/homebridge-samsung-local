@@ -82,6 +82,7 @@ class Connection {
       s.log.info(`[${s.name}] remote of ${this.who()} closed after ${lasted}s${this.remote ? ' (its connection dropped)' : ''}.`);
     } else if (this.verified) {
       s.silent = (s.silent ?? 0) + 1; // counted for the hourly line; the detail is for debug mode
+      (s.lastSilent ??= new Map()).set(this.verified, Date.now());
       s.log.debug?.(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. ${this.#heard()}`);
     } else if (this.stage) {
       // It reached us but never proved itself: where it stopped explains a remote that hangs before it opens.
@@ -325,7 +326,9 @@ class Connection {
     let closed = 0; let kept = 0;
     for (const other of [...s.connections]) {
       if (other === this || other.verified !== this.verified) { continue; }
-      if (other.remote) { kept += 1; } else { other.close(); closed += 1; }
+      // Protected from the moment it asked for a session, not only once the remote is open:
+      // in between, a second connection of the same phone could cut a remote that was just starting.
+      if (other.remote || other.session) { kept += 1; } else { other.close(); closed += 1; }
     }
     this.siblings = { closed, kept };
     if (closed) { s.log.debug?.(`[${s.name}] the same iPhone or iPad came back; ${closed} earlier connection${closed === 1 ? '' : 's'} without an open remote ${closed === 1 ? 'was' : 'were'} closed.`); }
@@ -383,6 +386,7 @@ const HANDLERS = {
       _idsID: s.identity.id, _pubID: s.announced?.address ?? mac, _mRtID: s.identity.id, _mrID: s.identity.id,
       ...(s.announced?.short ? { _i: s.announced.short } : {}),
     });
+    this.infoAt = Date.now();
     this.status(message._x);
     const shape = Object.keys(c ?? {}).sort().map((k) => (/^[_A-Za-z][A-Za-z]{0,23}$/.test(k) ? k : '(other)')).join(',').slice(0, 300);
     this.infoShape = shape; // the names of what the phone sent about itself, never the values
@@ -408,6 +412,8 @@ const HANDLERS = {
   },
   _sessionstart(message, c) {
     this.sid = c._sid;
+    this.session = true;
+    this.sessionGapMs = this.infoAt ? Date.now() - this.infoAt : null; // how long after introducing itself
     // A number of its own for every session: a phone that comes back while its earlier session is
     // still winding down must never be handed that session's number again.
     this.reply(message, { _sid: crypto.randomInt(1, 0x7fffffff) });
@@ -417,7 +423,12 @@ const HANDLERS = {
   tvrcsessionstart(message, c) {
     this.remote = true;
     this.opened = true;
+    // For the hourly line: how many openings came straight, and how many after a silent connection
+    // of the same device moments before, which its owner sees as a short delay.
+    this.server.opens = (this.server.opens ?? 0) + 1;
+    if (Date.now() - (this.server.lastSilent?.get(this.verified) ?? 0) < 10_000) { this.server.delayed = (this.server.delayed ?? 0) + 1; }
     this.server.log.info(`[${this.server.name}] remote of ${this.who()} opened.`);
+    this.server.log.debug?.(`[${this.server.name}] it asked for its session ${this.sessionGapMs ?? '?'} ms after introducing itself.`);
     this.server.log.debug?.(`[${this.server.name}] remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. Its switches: ${this.infoFlags ?? '-'}.`);
     this.server.sessionsChanged();
     this.reply(message, c);
@@ -541,8 +552,10 @@ export class CompanionServer extends EventEmitter {
   listen(port = 0) {
     // One line an hour in place of one per connection: how often a phone connected without opening a remote.
     this.hourly = setInterval(() => {
-      if (this.silent) { this.log.info(`[${this.name}] ${this.silent} connection${this.silent === 1 ? '' : 's'} without an open remote in the last hour (details in debug mode).`); }
-      this.silent = 0;
+      if (this.opens || this.silent) {
+        this.log.info(`[${this.name}] last hour: the remote was opened ${this.opens ?? 0} time${this.opens === 1 ? '' : 's'}, ${this.delayed ?? 0} of them after a short delay; ${this.silent ?? 0} connection${this.silent === 1 ? '' : 's'} without an open remote (details in debug mode).`);
+      }
+      this.silent = 0; this.opens = 0; this.delayed = 0;
     }, 3_600_000);
     this.hourly.unref?.();
     return new Promise((resolve, reject) => {
