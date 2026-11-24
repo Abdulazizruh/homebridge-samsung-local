@@ -35,6 +35,14 @@ export function kidsLock(resources) {
   return plain === true || (word !== undefined && !UNLOCKED.has(lower(String(word))));
 }
 
+/**
+ * What an alarm code means, only where it was confirmed on a real appliance. Any other code is
+ * shown as the appliance sends it, without a guess.
+ * DC: confirmed by the owner of a WA80F top-loader, who opened the lid during a drum clean.
+ */
+export const ALARM_MEANINGS = { ErrorCode_DC: 'the lid was opened during a cycle' };
+export const alarmText = (code) => (ALARM_MEANINGS[code] ? `${code} (${ALARM_MEANINGS[code]})` : code);
+
 /** Active alarm codes; rows ending in _OFF are placeholders. */
 export function alarmCodes(resources) {
   const items = resources['/alarms/vs/0']?.[`${V}items`];
@@ -176,7 +184,7 @@ export function washerFeatureRows(model) {
     row('cycleFinished', s.cycle, 'home', st.finished),
     row('progress', s.progress, 'home', st.percent, '%'),
     row('kidsLock', s.kidsLock, 'home', st.kidsLock),
-    row('alarms', s.alarms, 'home', st.alarms.join(', ') || 'none'),
+    row('alarms', s.alarms, 'home', st.alarms.join(' / ') || 'none'),
     row('washCount', s.washCount, 'plugin-ui', st.washCount),
     row('stages', s.stages.length > 0, 'home', st.stage && s.stages.includes(st.stage) ? st.stage : 'none', 'trial'),
     row('drumClean', s.drumClean, 'home', st.drumClean, 'trial'),

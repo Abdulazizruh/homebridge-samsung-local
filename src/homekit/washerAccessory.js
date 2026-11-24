@@ -1,5 +1,5 @@
 import { failureText } from '../deviceLink.js';
-import { buildWasherModel, WASHER_STAGES } from '../capabilities/washer.js';
+import { alarmText, buildWasherModel, WASHER_STAGES } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 import { markPrimary } from './primary.js';
 
@@ -313,7 +313,7 @@ export class WasherAccessory {
     }
     const alarms = st.alarms ?? [];
     if (alarms.length && !this.alarmed) {
-      this.log.warn(`[${this.displayName}] the appliance reports: ${alarms.join(', ')}`);
+      this.log.warn(`[${this.displayName}] the appliance reports: ${alarms.map(alarmText).join(', ')}`);
     }
     this.alarmed = alarms.length > 0;
     this.services.get('alert')?.updateCharacteristic(Characteristic.OccupancyDetected, this.alarmed ? 1 : 0);

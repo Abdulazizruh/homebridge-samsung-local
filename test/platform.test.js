@@ -713,3 +713,11 @@ test('washer course: the code, its table and drum clean; the last drum clean fro
   assert.equal(lastDrumClean(res(['DrumCleanLog_2025-10-27T21:43:10|2026-10-06T01:13:37|2026-08-27T04:16:06'])), '2026-10-06');
   assert.equal(lastDrumClean(res(['WashingTimes_5'])), null);
 });
+
+test('washer alarm: a code confirmed on a real washer is explained; any other is shown as sent', async () => {
+  const { alarmText, buildWasherModel, washerFeatureRows } = await import('../src/capabilities/washer.js');
+  assert.equal(alarmText('ErrorCode_DC'), 'ErrorCode_DC (the lid was opened during a cycle)');
+  assert.equal(alarmText('ErrorCode_XX'), 'ErrorCode_XX', 'no guess for an unconfirmed code');
+  const res = { '/alarms/vs/0': { [`${V}items`]: [{ [`${V}code`]: 'ErrorCode_DC', [`${V}state`]: 'Created' }, { [`${V}code`]: 'ErrorCode_XX', [`${V}state`]: 'Created' }] } };
+  assert.equal(washerFeatureRows(buildWasherModel(res)).find((r) => r.id === 'alarms').value, 'ErrorCode_DC / ErrorCode_XX');
+});
