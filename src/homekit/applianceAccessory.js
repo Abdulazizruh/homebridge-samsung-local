@@ -3,7 +3,11 @@ import { applianceWrites, buildApplianceModel, partWanted } from '../capabilitie
 import { eveCharacteristics } from './eve.js';
 import { markPrimary } from './primary.js';
 
-const HOLD_MS = 8000; // how long a command just accepted is shown before the appliance's own report takes over
+// The same rules as the air conditioner's: a value just asked for is shown from the moment it is
+// sent until the appliance reports it, for at most HOLD_MS; Apple Home gets its answer after at most
+// QUICK_REPLY_MS while a slow appliance is still acknowledging, and the command carries on behind it.
+const HOLD_MS = 10000;
+const QUICK_REPLY_MS = 1200;
 const LABELS = {
   power: '', speed: '', clean: 'Clean', airQuality: 'Air Quality', humidity: 'Humidity', battery: 'Battery',
   running: 'Running', kidsLock: 'Kids Lock', alert: 'Alert', targetHumidity: 'Target Humidity', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze',
@@ -240,26 +244,43 @@ export class ApplianceAccessory {
       setTimeout(() => this.#push(), 300).unref?.();
       return;
     }
-    try {
-      await this.link.send(applianceWrites(part, value));
-    } catch (err) {
-      this.log.warn(`[${this.displayName}] ${id} → ${value} failed: ${err.message}`);
-      setTimeout(() => this.#push(), 300).unref?.();
-      throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    }
-    this.log.debug(`[${this.displayName}] ${id} → ${value} accepted by the appliance.`);
-    this.pending.set(id, { value, until: Date.now() + HOLD_MS });
-    const timer = setTimeout(() => this.#push(), HOLD_MS + 200);
-    timer.unref?.();
+    // Held from the moment it is sent: a reading taken meanwhile does not put the old value back.
+    const mine = (this.asked = (this.asked ?? 0) + 1);
+    this.pending.set(id, { value, until: Date.now() + HOLD_MS, mine });
     this.#push();
+    let late = false;
+    const sent = this.link.send(applianceWrites(part, value)).then(() => {
+      this.log.debug(`[${this.displayName}] ${id} → ${value} accepted by the appliance.`);
+      const held = this.pending.get(id);
+      if (held?.mine === mine) { held.until = Date.now() + HOLD_MS; } // counted from the acknowledgement
+      const timer = setTimeout(() => this.#push(), HOLD_MS + 200);
+      timer.unref?.();
+    }, (err) => {
+      this.log.warn(`[${this.displayName}] ${id} → ${value} failed: ${err.message}`);
+      if (this.pending.get(id)?.mine === mine) { this.pending.delete(id); } // a later value stays held
+      setTimeout(() => this.#push(), 300).unref?.();
+      if (!late) { throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE); }
+    });
+    let timer;
+    const quick = new Promise((resolve) => { timer = setTimeout(() => resolve('late'), QUICK_REPLY_MS); });
+    try {
+      if (await Promise.race([sent, quick]) === 'late') { late = true; }
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /** What to show for a part: a command just accepted, until the appliance reports or the hold ends. */
   #shown(part) {
     const held = this.pending.get(part.id);
     if (!held) { return part.value; }
-    if (held.value === part.value || Date.now() > held.until) {
+    if (held.value === part.value) {
       this.pending.delete(part.id);
+      return part.value;
+    }
+    if (Date.now() > held.until) {
+      this.pending.delete(part.id);
+      this.log.warn(`[${this.displayName}] the appliance accepted "${part.id} → ${held.value}" but did not apply it. Showing its real state.`);
       return part.value;
     }
     return held.value;

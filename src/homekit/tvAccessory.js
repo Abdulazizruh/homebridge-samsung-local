@@ -12,6 +12,7 @@ const SCREEN_PORT = 9197;
 const REMOTE_IDLE_MS = 5 * 60_000;
 const FIELD_TEXT_MS = 250; // how long the TV gets to say what an opened field already holds
 const POWER_HOLD_MS = 35_000; // a TV needs this long to wake up or shut down
+const SAME_POWER_MS = 5000; // a repeat of the same power wish within this is the second tile of a pair
 const INPUTS = [
   { id: 1, name: 'TV', key: 'KEY_TV' },
   { id: 2, name: 'HDMI', key: 'KEY_HDMI' },
@@ -295,7 +296,25 @@ export class TvAccessory {
     }
   }
 
-  async #setPower(want) {
+  /**
+   * Power commands run one after another. Apple Home often sends the same one through two tiles at
+   * once (the TV tile and its power switch); run side by side, both found the TV off and both
+   * pressed the power key, which is a toggle: on, then straight off again.
+   */
+  #setPower(want) {
+    const run = () => this.#applyPower(want);
+    this.powerChain = (this.powerChain ?? Promise.resolve()).then(run, run);
+    return this.powerChain;
+  }
+
+  async #applyPower(want) {
+    // The same wish again a moment after the last one (the second tile of the pair): already done.
+    // Asking the TV here would not help: one switching on still answers "standby" for seconds.
+    const last = this.lastPower;
+    this.lastPower = { want, at: Date.now() };
+    if (last?.want === want && Date.now() - last.at < SAME_POWER_MS) {
+      return;
+    }
     // The power key is a toggle, so the TV is asked first: acting on an old
     // picture of it would switch it the wrong way.
     this.holdUntil = 0;

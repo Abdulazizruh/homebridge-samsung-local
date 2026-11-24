@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.17
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.16, plus:
+
+- **Every appliance follows the air conditioner's rules for commands.** Purifiers, fans, dehumidifiers, refrigerators and robot vacuums: a value is now held on the tile from the moment it is sent, not only once the appliance acknowledged it, so a reading taken meanwhile no longer puts the old value back; the Home app gets its answer within about a second while a slow appliance is still acknowledging; a value the appliance accepted but did not apply within 10 seconds is reported in the log and its real state shown.
+- **Robot vacuum: only a command the robot lists is sent.** As LocalThings does, the start and dock commands are taken from the robot's own list of supported commands; one that lists neither is shown read only. The other appliance commands were checked against LocalThings and match.
+- **TV: power asked twice at once presses the power key once.** The Home app sends the same power command through the TV tile and its power switch together; both found the TV off and both pressed the key, which is a toggle, so the TV came on and went straight off. Power commands now run one after another, and the same wish within 5 seconds of the last one is not repeated.
+- **Washer: switched off in the middle of a cycle is a stop, not a finish.** A washer switched off from another app during a drum clean reported the end of its cycle, and the "finished" sensor gave a notice. Now a washer that was on during the cycle and is off at its end gives no notice; the log says it was switched off.
+- **Washer: the alarm code DC is explained** ("the lid was opened during a cycle"), confirmed on a real washer. Other codes are shown as sent.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.16، ومعه:
+
+- **كل الأجهزة تتبع قواعد المكيف في الأوامر.** المنقيات والمراوح ومزيلات الرطوبة والثلاجات والمكانس: صارت القيمة تبقى على البطاقة من لحظة إرسالها، لا من لحظة تأكيد الجهاز فقط، فلا تعيد قراءةٌ في الأثناء القيمةَ القديمة. ويحصل تطبيق Home على الرد خلال ثانية تقريبًا والجهاز البطيء ما زال يؤكد. والقيمة التي قبلها الجهاز ولم يطبّقها خلال 10 ثوانٍ تُكتب في السجل وتُعرض حالته الحقيقية.
+- **المكنسة الروبوت: لا يُرسل إلا أمر تعلنه المكنسة نفسها.** كما تفعل LocalThings، يؤخذ أمرا البدء والعودة للقاعدة من قائمة الأوامر التي تعلنها المكنسة. والتي لا تعلن أيًّا منهما تُعرض للقراءة فقط. وبقية أوامر الأجهزة روجعت على LocalThings وهي مطابقة.
+- **التلفزيون: طلب التشغيل مرتين معًا يضغط زر التشغيل مرة واحدة.** تطبيق Home يرسل أمر التشغيل نفسه من بطاقة التلفزيون ومن مفتاح التشغيل معًا. وكان كلاهما يجد التلفزيون مطفأً فيضغط الزر، والزر يبدّل الحالة، فيشتغل التلفزيون ثم ينطفئ فورًا. صارت أوامر التشغيل تُنفَّذ واحدًا بعد الآخر، ولا يُكرَّر الطلب نفسه خلال 5 ثوانٍ من سابقه.
+- **الغسالة: إطفاؤها أثناء الدورة إيقاف وليس انتهاءً.** الغسالة التي أُطفئت من تطبيق آخر أثناء تنظيف الحوض أبلغت عن انتهاء دورتها، فأرسل حساس «انتهت» إشعارًا. صارت الغسالة التي كانت مشغّلة أثناء الدورة ومطفأة عند نهايتها لا ترسل إشعارًا، ويذكر السجل أنها أُطفئت.
+- **الغسالة: رمز التنبيه DC مشروح** («فُتح الغطاء أثناء الدورة»)، وقد تأكدنا منه على غسالة حقيقية. وبقية الرموز تظهر كما ترسلها الغسالة.
+
 ## 1.6.0-beta.16
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.15, plus:

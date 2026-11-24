@@ -161,3 +161,38 @@ test('names follow the air conditioners: the name in the settings reaches every 
   assert.equal(name(second, 'boost.fridge'), 'Kitchen Power Cool');
   assert.equal(name(second, 'door.1'), 'Left door');
 });
+
+test('appliance commands follow the air conditioner rules: held from sending, a quick answer, the last wish wins', async () => {
+  const { link, handler, C, value, set } = setup('purifier_tower', 'airPurifier');
+  link.autoReport = false;
+  const plain = link.send.bind(link);
+  let release;
+  link.send = (writes) => new Promise((resolve, reject) => { release = () => plain(writes).then(resolve, reject); });
+  const started = Date.now();
+  await set('speed', C.Active, 0); // a slow appliance: Apple Home is answered while it still acknowledges
+  assert.ok(Date.now() - started < 2500, 'answered quickly');
+  assert.equal(value('speed', C.Active), 0, 'shown at once');
+  link.report(); // a reading taken before the command applied
+  assert.equal(value('speed', C.Active), 0, 'held against an older reading');
+  release();
+  link.send = plain;
+  await set('speed', C.Active, 1); // switched on again: sent, and shown
+  assert.equal(value('speed', C.Active), 1);
+  assert.match(JSON.stringify(link.sent.at(-1)), /"On"/);
+  void handler;
+});
+
+test('robot vacuum: only a token the robot lists is sent', () => {
+  const f = fixture('vacuum_jetbot');
+  const model = buildApplianceModel(f.resources, 'robotVacuum');
+  const clean = model.parts.find((p) => p.id === 'clean');
+  assert.equal(clean.start, 'Cleaning_Auto');
+  assert.equal(clean.stop, 'Control_Homing');
+  const res = structuredClone(f.resources);
+  res['/mode/vs/0'][`${V}supportedModes`] = ['Cleaning_Spot', 'Cleaning_Stop'];
+  const other = buildApplianceModel(res, 'robotVacuum').parts.find((p) => p.id === 'clean');
+  assert.deepEqual([other.start, other.stop], ['Cleaning_Spot', 'Cleaning_Stop']);
+  assert.match(JSON.stringify(applianceWrites(other, true)), /Cleaning_Spot/);
+  res['/mode/vs/0'][`${V}supportedModes`] = ['Control_Homing'];
+  assert.equal(buildApplianceModel(res, 'robotVacuum').parts.find((p) => p.id === 'clean').control, false, 'nothing to start with: read only');
+});

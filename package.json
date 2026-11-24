@@ -1,7 +1,7 @@
 {
   "name": "homebridge-samsung-local",
   "displayName": "Samsung Local",
-  "version": "1.6.0-beta.16",
+  "version": "1.6.0-beta.17",
   "description": "Samsung air conditioners, TVs, washers and other SmartThings appliances in Apple Home, controlled locally over your home network: no cloud, no SmartThings API subscription. An automatic network scan finds and identifies your appliances.",
   "type": "module",
   "main": "index.js",

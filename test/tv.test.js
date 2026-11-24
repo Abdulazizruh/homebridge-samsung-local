@@ -487,3 +487,17 @@ test('iPhone remote: a press while the TV is shown as off asks the TV at once, a
   assert.deepEqual(tv.keys, ['KEY_DOWN']);
   assert.equal(quietLog.lines.filter(([, m]) => /not sent: the TV is shown as off/.test(m)).length, 1);
 });
+
+test('TV power asked twice at once (the tile and the power switch): the toggle is pressed once', async (t) => {
+  const tv = await fakeTv({ power: 'standby' });
+  const { api, platform } = await bootTv(tv, 'both', tmpDir(), { tvSwitches: ['power'] });
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const C = api.hap.Characteristic;
+  await waitFor(() => handler.reachable === true);
+  const active = handler.services.get('tv').getCharacteristic(C.Active);
+  await Promise.all([active.handleSetRequest(1), active.handleSetRequest(1)]);
+  await waitFor(() => tv.keys.length >= 1);
+  await new Promise((r) => setTimeout(r, 300));
+  assert.deepEqual(tv.keys, ['KEY_POWER'], 'pressed once, so the TV stays on');
+});

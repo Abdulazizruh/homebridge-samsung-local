@@ -150,7 +150,14 @@ function vacuum(resources, kind) {
   const cleaning = control !== null
     ? ['Cleaning', 'Point', 'PatternMap'].includes(control)
     : program !== null && program !== 'Stop';
-  return { cleaning, doing: control ?? program };
+  // Only a token the robot itself lists is ever sent, as LocalThings does: a robot that lists
+  // none is trusted with the common pair.
+  const listed = resources['/mode/vs/0']?.[`${V}supportedModes`];
+  const has = (t) => !Array.isArray(listed) || listed.includes(t);
+  const start = has('Cleaning_Auto') ? 'Cleaning_Auto'
+    : listed.find((t) => typeof t === 'string' && t.startsWith('Cleaning_') && !['Cleaning_Stop', 'Cleaning_Cancel'].includes(t)) ?? null;
+  const stop = has('Control_Homing') ? 'Control_Homing' : has('Cleaning_Stop') ? 'Cleaning_Stop' : null;
+  return { cleaning, doing: control ?? program, start, stop };
 }
 
 const BUSY = new Set(['run', 'running', 'active', 'cooking', 'preheat', 'preheating']);
@@ -176,7 +183,7 @@ export function buildApplianceModel(resources = {}, kind = 'unknown') {
     parts.push({ id: 'speed', type: 'speed', control: true, value: fan.current, auto: fan.auto, manual: fan.manual });
   }
   if (robot) {
-    parts.push({ id: 'clean', type: 'clean', control: true, value: robot.cleaning, doing: robot.doing });
+    parts.push({ id: 'clean', type: 'clean', control: Boolean(robot.start && robot.stop), value: robot.cleaning, doing: robot.doing, start: robot.start, stop: robot.stop });
   }
   const air = airQuality(resources);
   if (air) {
@@ -262,7 +269,7 @@ export function applianceWrites(part, value) {
       return [{ path: ['mode', 'vs', '0'], body: { [`${V}modes`]: [String(value)] } }];
     case 'clean':
       // Off sends the robot home, which is what "stop" means to its owner.
-      return [{ path: ['mode', 'vs', '0'], body: { [`${V}modes`]: [value ? 'Cleaning_Auto' : 'Control_Homing'] } }];
+      return [{ path: ['mode', 'vs', '0'], body: { [`${V}modes`]: [value ? (part.start ?? 'Cleaning_Auto') : (part.stop ?? 'Control_Homing')] } }];
     case 'boost':
       return [{ path: ['refrigeration', 'vs', '0'], body: { [`${V}${part.field}`]: value ? 'On' : 'Off' } }];
     case 'setpoint': {
