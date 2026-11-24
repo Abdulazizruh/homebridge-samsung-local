@@ -26,7 +26,7 @@ const { CoapSession } = require('./vendor/coap/session.js');
 const { decodeCbor, encodeCbor } = require('./vendor/ocf/cbor.js');
 const { mintClientCertificate, DEFAULT_CLIENT_UUID } = require('./vendor/auth/cert.js');
 
-export const HELPER_VERSION = 'js-0.1.4';
+export const HELPER_VERSION = 'js-0.1.5';
 const SUBSCRIBE_CONFIRM_MS = 3000;
 const SEND_RATE_PER_S = 25;
 const KNOWN_PORT_TIMEOUT_MS = 6000;
@@ -375,15 +375,22 @@ async function openLink(host, port, cred, onNotification) {
   let last = null;
   const attempt = async (candidate, connectMs) => {
     tried.push(candidate);
-    const link = new Link(host, candidate, cred, onNotification, connectMs);
-    try {
-      await oneOfFewHandshakes(() => link.connect());
-      return link;
-    } catch (err) {
-      last = err;
-      link.close();
-      return null;
+    // A first try refused at once (not timed out) is tried again at once: an appliance still
+    // holding the session of a plugin that stopped without closing it (after a restart), or one
+    // that was itself reaching for this address, drops its side on that first ClientHello.
+    for (const again of [false, true]) {
+      const link = new Link(host, candidate, cred, onNotification, connectMs);
+      try {
+        await oneOfFewHandshakes(() => link.connect());
+        return link;
+      } catch (err) {
+        last = err;
+        link.close();
+        if (again || classify(err).code !== 'connection') { return null; }
+        await new Promise((r) => setTimeout(r, 300));
+      }
     }
+    return null;
   };
   if (port) {
     // The port an appliance uses stays the same while it is powered, so the one

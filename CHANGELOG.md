@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.9
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.8, plus:
+
+- **After a restart, an appliance that refuses the first handshake is asked again at once, in both engines.** Taking turns two at a time (beta.7) did not stop it: the next restarts still showed two or three appliances answering "decode error" or "handshake failure" and connecting only on a later round. The cause is documented by the connection library itself: a plugin that stops without closing its sessions leaves them open on the appliance, and the next handshake from the same address and port is refused once while the appliance drops the old one; the one after it goes through. The plugin used to wait 5 seconds or more before that second try, sometimes much longer; it now tries again after 0.3 seconds. A try that timed out (an appliance switched off at the wall) is not repeated on the spot.
+- **Temperature tapped up or down step by step no longer slows down.** Each step was sent to the air conditioner in turn, each waiting for the one before, so a run of taps queued up and the last one arrived late. While one temperature is on its way, only the newest one asked for is sent after it. The newest value is shown at once, also when the Home app asks again in between.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.8، ومعه:
+
+- **بعد إعادة التشغيل، الجهاز الذي يرفض المصافحة الأولى يُسأل ثانية فورًا، في المحركين.** التناوب اثنين اثنين (beta.7) لم يحل المشكلة: إعادات التشغيل التالية أظهرت جهازين أو ثلاثة يردّون «decode error» أو «handshake failure» ولا يتصلون إلا في جولة لاحقة. والسبب موثّق في مكتبة الاتصال نفسها: الإضافة التي تتوقف دون إغلاق جلساتها تتركها مفتوحة على الجهاز، فيرفض الجهاز أول مصافحة من العنوان والمنفذ نفسيهما مرة واحدة وهو يُسقط القديمة، وتنجح التي بعدها. كانت الإضافة تنتظر 5 ثوانٍ أو أكثر قبل المحاولة الثانية، وأحيانًا أطول بكثير. صارت تعيدها بعد 0.3 ثانية. أما المحاولة التي انتهت مهلتها (جهاز مفصول عن الكهرباء) فلا تُعاد في الحال.
+- **تغيير الحرارة خطوة خطوة لن يبطئ.** كانت كل خطوة تُرسل إلى المكيف بدورها، وكل واحدة تنتظر التي قبلها، فتتراكم اللمسات وتصل الأخيرة متأخرة. صارت الإضافة، ما دامت حرارة في طريقها، ترسل بعدها أحدث قيمة طُلبت فقط. وأحدث قيمة تظهر فورًا، حتى لو سأل تطبيق Home عنها مرة أخرى في الأثناء.
+
 ## 1.6.0-beta.8
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.7, plus:

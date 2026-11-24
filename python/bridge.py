@@ -34,7 +34,7 @@ import ipaddress
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.8"
+HELPER_VERSION = "0.1.9"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -437,8 +437,11 @@ def open_link(host, port, cert, key, on_notification=None):
             if candidate in tried:
                 continue
             tried.append(candidate)
-            # An appliance that was itself reaching for this address refuses the first try and
-            # clears its side by doing so: the library says an immediate second try normally works.
+            # A first try refused at once (not timed out) is tried again at once. Two cases end
+            # that way, and the library documents both: an appliance that was itself reaching for
+            # this address, and one still holding the session of a plugin that stopped without
+            # closing it (after a restart). Either way the appliance drops its side on that first
+            # ClientHello, so the next handshake goes through.
             for again in (False, True):
                 link = Link(host, candidate, cert, key, on_notification)
                 try:
@@ -448,7 +451,7 @@ def open_link(host, port, cert, key, on_notification=None):
                 except Exception as exc:  # noqa: BLE001
                     last = exc
                     link.close()
-                    if again or type(exc).__name__ != "PeerInitiatedHandshakeError":
+                    if again or classify(exc).get("code") != "connection":
                         break
                     time.sleep(0.3)
         candidates = []

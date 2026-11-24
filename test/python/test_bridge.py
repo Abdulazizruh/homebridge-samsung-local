@@ -325,6 +325,44 @@ class PeerInitiatedRetry(unittest.TestCase):
             self._run(failures=5)
 
 
+class RefusedFirstHandshake(unittest.TestCase):
+    """After a restart an appliance may still hold the old session: it refuses the first try with a TLS alert."""
+
+    def _run(self, error_name, failures):
+        made = []
+        error = type(error_name, (Exception,), {})
+
+        class FakeLink:
+            def __init__(self, host, port, cert, key, on_notification=None):
+                self.port = port
+                made.append(self)
+
+            def connect(self):
+                if len(made) <= failures:
+                    raise error("tlsv1 alert decode error")
+
+            def close(self):
+                pass
+
+        saved = (bridge.Link, bridge.time.sleep, bridge.diagnose, bridge.find_secure_ports, bridge.legacy_http_open)
+        bridge.Link, bridge.time.sleep, bridge.diagnose = FakeLink, (lambda s: None), (lambda *a: None)
+        bridge.find_secure_ports, bridge.legacy_http_open = (lambda host: ([], {})), (lambda host: False)
+        try:
+            try:
+                bridge.open_link("192.0.2.21", 49153, "cert", "key")
+                return True, len(made)
+            except bridge.HelperError:
+                return False, len(made)
+        finally:
+            (bridge.Link, bridge.time.sleep, bridge.diagnose, bridge.find_secure_ports, bridge.legacy_http_open) = saved
+
+    def test_a_refused_first_try_is_tried_again_at_once(self):
+        self.assertEqual(self._run("SessionError", failures=1), (True, 2))
+
+    def test_a_timed_out_try_is_not_repeated_on_the_spot(self):
+        self.assertEqual(self._run("SessionTimeoutError", failures=1), (False, 1))
+
+
 class FewHandshakesAtOnce(unittest.TestCase):
     def test_appliances_starting_together_take_turns_for_the_handshake(self):
         import threading as th
