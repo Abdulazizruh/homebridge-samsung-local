@@ -282,3 +282,11 @@ test('OPACK: minus one, as Apple writes it, is read rather than refused', async 
   const { unpack } = await import('../src/appleRemote/opack.js');
   assert.deepEqual(unpack(Buffer.from([0xe1, 0x41, 0x61, 0x07]))[0], { a: -1 });
 });
+
+test('the tag in the announcement: SipHash-2-4 matches its published vector, and the tag is its low six bytes', async () => {
+  const { sipHash24, authTag } = await import('../src/appleRemote/crypto.js');
+  const key = Buffer.from([...Array(16).keys()]);
+  assert.equal(sipHash24(key, Buffer.from([...Array(15).keys()])).toString(16), 'a129ca6149be45e5');
+  assert.equal(sipHash24(key, Buffer.alloc(0)).toString(16), '726fdb47dd0e0e31');
+  assert.equal(authTag(key, Buffer.from([...Array(15).keys()])).toString('hex'), 'ca6149be45e5');
+});

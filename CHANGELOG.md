@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.31
+
+Trial version on the "beta" channel. Same as beta.30, plus a trial for the cause of the silent connections:
+
+- **iPhone remote: the announcement now carries a tag the paired phone can check.** The log of beta.30 shows that a connection that stays silent and one that opens the remote introduce themselves in exactly the same way, so the difference is on the phone's side. An Apple device announces itself with a short tag worked out from a key it hands over at pairing; a paired phone recognises its own device from the announcement alone. The stand-in handed over such a key but announced a tag that had nothing to do with it, so a phone could only find out who it was by connecting: that may be the silent connection. The tag is now worked out from that key (SipHash-2-4, as other open projects describe for Apple's pairing). The exact byte order Apple uses here is not published; if this trial changes nothing, the other order is next. Not yet confirmed.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.30، ومعها تجربة لسبب الاتصالات الساكتة:
+
+- **ريموت الآيفون: الإعلان يحمل الآن وسمًا يستطيع الجوال المقترن التحقق منه.** سجل beta.30 يُظهر أن الاتصال الساكت والاتصال الذي يفتح الريموت يعرّفان بنفسيهما بالطريقة نفسها تمامًا، فالفرق عند الجوال. جهاز Apple يعلن عن نفسه بوسم قصير محسوب من مفتاح يسلّمه عند الاقتران؛ والجوال المقترن يعرف جهازه من الإعلان وحده. البديل كان يسلّم مفتاحًا كهذا لكنه يعلن وسمًا لا علاقة له به، فلم يكن للجوال طريق لمعرفة من هو إلا بالاتصال: وقد يكون هذا هو الاتصال الساكت. الآن يُحسب الوسم من ذلك المفتاح (SipHash-2-4، كما تصفه مشاريع مفتوحة أخرى لاقتران Apple). ترتيب البايتات الذي تستخدمه Apple هنا غير منشور؛ فإن لم تغيّر هذه التجربة شيئًا فالترتيب الآخر هو التالي. لم يتأكد بعد.
+
 ## 1.4.0-beta.30
 
 Trial version on the "beta" channel. Behaves as beta.29; only the log changes, to find the cause of what is left:

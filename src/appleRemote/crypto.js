@@ -56,3 +56,37 @@ export function agreement() {
     }),
   };
 }
+
+/** SipHash-2-4 of a message under a 16-byte key, as a 64-bit number. */
+export function sipHash24(key, message) {
+  const M = (1n << 64n) - 1n;
+  const rotl = (x, b) => ((x << b) | (x >> (64n - b))) & M;
+  const k0 = key.readBigUInt64LE(0); const k1 = key.readBigUInt64LE(8);
+  let v0 = k0 ^ 0x736f6d6570736575n; let v1 = k1 ^ 0x646f72616e646f6dn;
+  let v2 = k0 ^ 0x6c7967656e657261n; let v3 = k1 ^ 0x7465646279746573n;
+  const round = () => {
+    v0 = (v0 + v1) & M; v1 = rotl(v1, 13n) ^ v0; v0 = rotl(v0, 32n);
+    v2 = (v2 + v3) & M; v3 = rotl(v3, 16n) ^ v2;
+    v0 = (v0 + v3) & M; v3 = rotl(v3, 21n) ^ v0;
+    v2 = (v2 + v1) & M; v1 = rotl(v1, 17n) ^ v2; v2 = rotl(v2, 32n);
+  };
+  const data = Buffer.from(message);
+  const whole = data.length - (data.length % 8);
+  for (let i = 0; i < whole; i += 8) { const m = data.readBigUInt64LE(i); v3 ^= m; round(); round(); v0 ^= m; }
+  let last = BigInt(data.length & 0xff) << 56n;
+  for (let i = whole; i < data.length; i += 1) { last |= BigInt(data[i]) << BigInt(8 * (i - whole)); }
+  v3 ^= last; round(); round(); v0 ^= last;
+  v2 ^= 0xffn; round(); round(); round(); round();
+  return v0 ^ v1 ^ v2 ^ v3;
+}
+
+/**
+ * The six-byte tag by which a paired phone recognises one of its own devices in a network
+ * announcement without connecting to it: SipHash-2-4 of the announced data under the key
+ * handed over at pairing, its low six bytes, highest first.
+ */
+export function authTag(key, data) {
+  const out = Buffer.alloc(8);
+  out.writeBigUInt64BE(sipHash24(key, data));
+  return out.subarray(2);
+}
