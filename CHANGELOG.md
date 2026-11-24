@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.5.1-beta.2
+
+Trial version on the "beta" channel. Two corrections to 1.5.1-beta.1:
+
+- **TV: "off" from Apple Home could switch a TV on.** Since beta.1 a TV that missed one answer stayed shown as on. A power command then acted on that older picture: a TV already put in standby with its own remote received the power key, which is a toggle, and came on while Apple Home showed it as off. A power command now needs a fresh answer from the TV, as in 1.5.0; the calmer display for one missed answer stays.
+- **A dishwasher is called a dishwasher.** Its type name contains "washer" and was matched as a washer. It is now recognised by its own name.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». تصحيحان على 1.5.1-beta.1:
+
+- **التلفزيون: أمر «إطفاء» من Apple Home كان قد يشغّل التلفزيون.** منذ beta.1 يبقى التلفزيون الذي فاته ردّ واحد معروضًا يعمل. وكان أمر الطاقة يعتمد على تلك الصورة القديمة: فالتلفزيون الذي وُضع في الاستعداد من ريموته يصله زر الطاقة، وهو زر تبديل، فيشتغل بينما Apple Home يعرضه مطفأ. الآن يحتاج أمر الطاقة إلى ردّ حديث من التلفزيون كما في 1.5.0، ويبقى العرض الهادئ عند غياب ردّ واحد.
+- **غسالة الصحون تُسمّى باسمها.** اسم نوعها يحتوي كلمة «washer» فكانت تُطابَق كغسالة ملابس. الآن تُعرَف باسمها.
+
 ## 1.5.1-beta.1
 
 Trial version on the "beta" channel. Everything in 1.5.0, plus a first step on appliances that fail their first connection after a restart:

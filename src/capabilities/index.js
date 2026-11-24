@@ -12,11 +12,11 @@ export const SUPPORT = {
 
 const TYPE_LABELS = [
   [/airconditioner/i, 'airConditioner'],
+  [/dishwasher/i, 'dishwasher'], // before "washer": the longer name contains the shorter one
   [/washer/i, 'washer'],
   [/dryer/i, 'dryer'],
   [/\btv\b|oic\.d\.tv/i, 'tv'],
   [/refrigerator/i, 'refrigerator'],
-  [/dishwasher/i, 'dishwasher'],
   [/oven/i, 'oven'],
   [/airpurifier/i, 'airPurifier'],
   [/robotcleaner/i, 'robotVacuum'],

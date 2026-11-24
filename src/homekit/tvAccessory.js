@@ -204,14 +204,16 @@ export class TvAccessory {
     }
   }
 
-  async poll() {
+  async poll({ sure = false } = {}) {
     const info = await tvInfo(this.entry.host, { httpPort: this.ports.httpPort });
     if (info?.mac && !this.context.mac) {
       this.context.mac = info.mac;
     }
     // One missed answer from a TV that was on a moment ago changes nothing: it is asked again at the
     // next round. A TV that says it went to standby is believed at once.
-    if (!info && this.on && !this.missedOnce) {
+    // Before a power command the answer must be fresh: the power key is a toggle, and a TV kept
+    // "on" from an older answer would be switched on by the key meant to switch it off.
+    if (!info && this.on && !this.missedOnce && !sure) {
       this.missedOnce = true;
       this.log.debug(`[${this.displayName}] one question went unanswered; asked again before the TV is shown as off.`);
       return;
@@ -287,7 +289,7 @@ export class TvAccessory {
     // The power key is a toggle, so the TV is asked first: acting on an old
     // picture of it would switch it the wrong way.
     this.holdUntil = 0;
-    await this.poll();
+    await this.poll({ sure: true });
     if (want === this.on) {
       return;
     }

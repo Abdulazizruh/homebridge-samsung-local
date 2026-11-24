@@ -403,3 +403,21 @@ test('TV that was on: one unanswered question changes nothing, two in a row show
   await handler.poll();
   assert.equal(active.value, 0, 'silent twice in a row: off');
 });
+
+test('a power command never rests on an older answer: off for a TV already in standby sends no key', async (t) => {
+  const tv = await fakeTv();
+  const { api, platform } = await bootTv(tv, 'tile');
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const active = handler.services.get('tv').getCharacteristic(api.hap.Characteristic.Active);
+  await waitFor(() => active.value === 1);
+  // Switched to standby with its own remote; the tile has not caught up, and the one
+  // question asked before the command goes unanswered.
+  tv.power = 'standby';
+  tv.deaf = 1;
+  await active.handleSetRequest(0);
+  await new Promise((resolve) => { setTimeout(resolve, 400); }); // a key that was sent would have arrived by now
+  assert.deepEqual(tv.keys, [], 'the toggle would have switched the TV on');
+  assert.equal(tv.power, 'standby');
+  assert.equal(active.value, 0);
+});

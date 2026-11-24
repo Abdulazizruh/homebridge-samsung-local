@@ -18,6 +18,8 @@ test('discovery: recognises an air conditioner by type and by resources', () => 
   assert.equal(deviceKind(wf.identity, wf.resources), 'airConditioner');
   assert.ok(looksLikeAc(wf.resources, []));
   assert.equal(deviceKind({ types: ['oic.d.tv'] }, {}), 'tv');
+  assert.equal(deviceKind({ types: ['oic.d.dishwasher'] }, {}), 'dishwasher');
+  assert.equal(deviceKind({ types: ['oic.d.washer'] }, {}), 'washer');
   assert.equal(deviceKind({ types: [] }, { '/x/0': {} }), 'unknown');
 });
 
