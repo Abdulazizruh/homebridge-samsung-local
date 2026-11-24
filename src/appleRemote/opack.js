@@ -64,13 +64,6 @@ export function pack(data) {
   throw new TypeError(`cannot pack ${typeof data}`);
 }
 
-const same = (a, b) => {
-  if (Buffer.isBuffer(a) && Buffer.isBuffer(b)) { return a.equals(b); }
-  if (a instanceof Uuid && b instanceof Uuid) { return a.bytes.equals(b.bytes); }
-  if ((typeof a === 'number' || typeof a === 'bigint') && (typeof b === 'number' || typeof b === 'bigint')) { return BigInt.asUintN(64, BigInt(Math.trunc(Number(a)))) === BigInt.asUintN(64, BigInt(Math.trunc(Number(b)))) && Number(a) === Number(b); }
-  return typeof a === typeof b && a === b;
-};
-
 /** Returns [value, bytesUsed]. The sender may point back at values it sent earlier in the same message. */
 export function unpack(data) {
   const seen = [];
@@ -117,7 +110,7 @@ export function unpack(data) {
       } else {
         for (let i = 0; i < count; i += 1) { const [v, n] = read(ptr, depth + 1); out.push(v); ptr = n; }
       }
-      value = out; next = ptr; remember = false;
+      value = out; next = ptr;
     } else if ((tag & 0xe0) === 0xe0) {
       const count = tag & 0xf; const out = {}; let ptr = at + 1;
       const pair = () => { const [k, n1] = read(ptr, depth + 1); const [v, n2] = read(n1, depth + 1); out[String(k)] = v; ptr = n2; };
@@ -126,18 +119,23 @@ export function unpack(data) {
       } else {
         for (let i = 0; i < count; i += 1) { pair(); }
       }
-      value = out; next = ptr; remember = false;
+      value = out; next = ptr;
     } else if (tag >= 0xa0 && tag <= 0xc0) {
       if (tag - 0xa0 >= seen.length) { throw new RangeError('bad OPACK reference'); }
-      return [seen[tag - 0xa0], at + 1];
+      return [seen[tag - 0xa0].value, at + 1];
     } else if (tag >= 0xc1 && tag <= 0xc4) {
       const size = tag - 0xc0; const index = Number(int(at + 1, size));
       if (index >= seen.length) { throw new RangeError('bad OPACK reference'); }
-      return [seen[index], at + 1 + size];
+      return [seen[index].value, at + 1 + size];
     } else {
       throw new TypeError(`unknown OPACK tag 0x${tag.toString(16)}`);
     }
-    if (remember && !seen.some((x) => same(x, value))) { seen.push(value); }
+    // The sender numbers every value it wrote in more than one byte, lists and dictionaries included
+    // (after what they hold), each distinct wording once; a later value may point back at a number.
+    if (remember && next - at > 1) {
+      const bytes = data.subarray(at, next);
+      if (!seen.some((x) => x.bytes.equals(bytes))) { seen.push({ bytes, value }); }
+    }
     return [value, next];
   };
   return read(0, 0);

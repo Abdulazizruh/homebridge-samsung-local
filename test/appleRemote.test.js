@@ -129,7 +129,8 @@ test('iPhone remote: pairs with the code once, then buttons, swipes and typed te
   await again.request('_systemInfo', {});
   // The same request read one place off, as a real phone's other wording came out: its name under another field.
   again.send(8, { _btHP: false, _c: { model: 'iPhone' }, _t: 2, _x: 77, 'SOME-IDENTIFIER': '_systemInfo' });
-  const named = await again.event('_systemInfo');
+  let named; for (;;) { named = await again.next(); if (named._t === 3 && named._x === 77) { break; } again.events.push(named); }
+  assert.equal(named._i, undefined, 'an answer carries no request name');
   assert.equal(named._x, 77, 'answered as the request it is');
   assert.equal(named._c.model, 'AppleTV14,1');
   await again.request('TVRCSessionStart', {});
@@ -281,4 +282,17 @@ test('pairing code: 0000 unless the owner chose four digits, and changing it kee
 test('OPACK: minus one, as Apple writes it, is read rather than refused', async () => {
   const { unpack } = await import('../src/appleRemote/opack.js');
   assert.deepEqual(unpack(Buffer.from([0xe1, 0x41, 0x61, 0x07]))[0], { a: -1 });
+});
+
+test('OPACK: a pointer past a list is read as the sender numbered it', async () => {
+  const { unpack } = await import('../src/appleRemote/opack.js');
+  const s = (t) => Buffer.concat([Buffer.from([0x40 + t.length]), Buffer.from(t)]);
+  // { _c: { l: ["xy"] }, _i: "_systemInfo", k: <pointer 5> }, numbered as a phone does:
+  // "_c"=0, "l"=1, "xy"=2, the list=3, the inner dictionary=4, "_i"=5, "_systemInfo"=6.
+  const inner = Buffer.concat([Buffer.from([0xe1]), s('l'), Buffer.from([0xd1]), s('xy')]);
+  const message = Buffer.concat([Buffer.from([0xe3]), s('_c'), inner, s('_i'), s('_systemInfo'), s('k'), Buffer.from([0xa5])]);
+  assert.deepEqual(unpack(message)[0], { _c: { l: ['xy'] }, _i: '_systemInfo', k: '_i' });
+  // An empty text takes one byte and gets no number, so the same pointer still finds "_i".
+  const emptyFirst = Buffer.concat([Buffer.from([0xe4]), s('_c'), inner, s('_i'), s('_systemInfo'), s('k'), Buffer.from([0xa5]), s('e'), Buffer.from([0x40])]);
+  assert.equal(unpack(emptyFirst)[0].k, '_i');
 });

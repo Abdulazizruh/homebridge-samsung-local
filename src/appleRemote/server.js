@@ -205,10 +205,12 @@ class Connection {
     this.socket.write(Buffer.concat([header, body]));
   }
 
-  reply(request, content = {}) { this.send(FRAME.E_OPACK, { _i: request._i, _x: request._x, _t: 3, _c: content }); }
+  // An answer carries the number of the request it answers, its kind and its content, and nothing else:
+  // that is how an Apple TV words it. The request's name is for requests and events only.
+  reply(request, content = {}) { this.send(FRAME.E_OPACK, { _c: content, _t: 3, _x: request._x }); }
   event(name, content = {}, xid = 1234) { this.send(FRAME.E_OPACK, { _i: name, _x: xid, _t: 1, _c: content }); }
   error(request, message, code = 1337) {
-    this.send(FRAME.E_OPACK, { _i: request._i, _x: request._x, _t: 3, _ec: code, _ed: 'RPErrorDomain', _em: message });
+    this.send(FRAME.E_OPACK, { _t: 3, _x: request._x, _ec: code, _ed: 'RPErrorDomain', _em: message });
   }
 
   // ---- pairing, once: the four-digit code proves the owner is at the settings page

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.34
+
+Trial version on the "beta" channel. Same behaviour as beta.33 (and beta.30) towards silent connections; two changes in how the stand-in talks, aimed at the flicker:
+
+- **Answers are worded as an Apple TV words them.** Every answer the stand-in gave also carried the name of the request it answered. An Apple TV's answers carry the request's number, their kind and their content, and nothing else. A phone that asks for a remote the moment it connects did not mind; a phone that connects first and asks a moment later may have been waiting for an answer it did not recognise as one, which would be the silent connection and the flicker that follows its closing. A trial: not yet confirmed.
+- **The phone's messages are read as it numbers them.** A phone may point back at something it wrote earlier in the same message, by number. The reader did not count lists and dictionaries among the numbered things, as the phone does, so such a pointer could land one or more places off. That is what made some introductions look "worded in another order". Counting is now the phone's, checked against the open implementation other projects use with real Apple TVs.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». السلوك تجاه الاتصالات الساكتة مثل beta.33 (وbeta.30)؛ وتغييران في طريقة كلام البديل، هدفهما الرمش:
+
+- **الردود تُصاغ كما يصوغها تلفزيون Apple.** كل ردّ من البديل كان يحمل أيضًا اسم الطلب الذي يردّ عليه. ردود تلفزيون Apple تحمل رقم الطلب ونوع الرسالة ومحتواها فقط. الجوال الذي يطلب الريموت لحظة اتصاله لم يتأثر؛ أما الجوال الذي يتصل أولًا ثم يطلب بعد لحظة فربما كان ينتظر ردًّا لم يتعرّف عليه ردًّا، وهذا هو الاتصال الساكت والرمش الذي يتبع إغلاقه. تجربة: لم تتأكد بعد.
+- **رسائل الجوال تُقرأ كما يرقّمها هو.** الجوال قد يشير بالرقم إلى شيء كتبه قبل قليل في الرسالة نفسها. القارئ لم يكن يعدّ القوائم والقواميس ضمن ما يُرقَّم، كما يفعل الجوال، فكانت الإشارة تقع في غير موضعها. وهذا ما جعل بعض رسائل التعريف تبدو «بصياغة أخرى». العدّ صار مثل عدّ الجوال، ومطابقًا للتنفيذ المفتوح الذي تستخدمه مشاريع أخرى مع أجهزة Apple TV الحقيقية.
+
 ## 1.4.0-beta.33
 
 Trial version on the "beta" channel. Goes back to how beta.30 behaved, which worked nearly every time:
