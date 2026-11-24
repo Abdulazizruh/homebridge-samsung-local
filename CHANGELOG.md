@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.33
+
+Trial version on the "beta" channel. Goes back to how beta.30 behaved, which worked nearly every time:
+
+- **The TV is back in the phone's remote list.** beta.31 announced a tag that lets a paired phone recognise the stand-in as its own device, and beta.32 left such a phone's connections open. The phones did recognise it, but then expected more of it than the stand-in can answer yet: they kept connecting, waited half a minute each time, and no longer listed the TV as a remote. Both changes are taken out. The announcement and the handling of silent connections are again exactly those of beta.30.
+- What was learned stays for later work: the tag is right, and a phone that recognises the device keeps one connection open and tells it when something changes. That is how a real Apple TV is treated, and it is the way to a remote without the short "Can't Connect" message, once it is known what the phone waits for.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». ترجع إلى سلوك beta.30 الذي كان يعمل في كل مرة تقريبًا:
+
+- **التلفزيون يعود إلى قائمة الريموت في الجوال.** beta.31 أعلنت وسمًا يجعل الجوال المقترن يعرف البديل جهازًا له، وbeta.32 تركت اتصالات هذا الجوال مفتوحة. الجوالان عرفاه فعلًا، لكنهما صارا ينتظران منه أكثر مما يستطيع البديل الردّ عليه حتى الآن: بقيا يتصلان وينتظران نصف دقيقة في كل مرة، ولم يعودا يعرضان التلفزيون ريموتًا. أُزيل التغييران. والإعلان ومعاملة الاتصالات الساكتة عادا تمامًا كما في beta.30.
+- ما عُرف يبقى لعمل لاحق: الوسم صحيح، والجوال الذي يعرف الجهاز يبقي اتصالًا واحدًا مفتوحًا ويخبره حين يتغيّر شيء. هكذا يُعامل تلفزيون Apple الحقيقي، وهذا هو الطريق إلى ريموت دون رسالة «Can't Connect» القصيرة، متى عُرف ما الذي ينتظره الجوال.
+
 ## 1.4.0-beta.32
 
 Trial version on the "beta" channel. Fixes what beta.31 broke, and keeps what it found:

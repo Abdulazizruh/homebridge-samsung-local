@@ -12,7 +12,6 @@ import fs from 'node:fs';
 import ciao from '@homebridge/ciao';
 import { homeInterfaces } from '../scan.js';
 import { CompanionServer } from './server.js';
-import { authTag } from './crypto.js';
 
 function load(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return {}; }
@@ -70,9 +69,7 @@ function txt(identity, model) {
   bt[0] = (bt[0] | 0x02) & 0xfe;
   return {
     rpMac: '1', rpHA: part('rpHA').toString('hex'), rpHN: part('rpHN').toString('hex'), rpVr: '715.2', rpMd: model,
-    // The tag is worked out from the announced address with the key given to each phone at pairing, so a
-    // paired phone can tell from the announcement alone that this is its own device.
-    rpFl: '0x36782', rpAD: authTag(Buffer.from(identity.irk, 'hex'), bt).toString('hex'), rpHI: part('rpHI').toString('hex'),
+    rpFl: '0x36782', rpAD: part('rpAD').toString('hex'), rpHI: part('rpHI').toString('hex'),
     rpBA: [...bt].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':'), rpMRtID: identity.id,
   };
 }
