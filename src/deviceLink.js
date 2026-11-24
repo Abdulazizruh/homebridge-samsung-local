@@ -229,5 +229,7 @@ export function failureText(error) {
   }
   const where = STAGES[error.stage];
   const after = Number.isFinite(error.afterMs) ? `, after ${(error.afterMs / 1000).toFixed(1)}s` : '';
-  return ` (${error.message}${where ? `; stopped at: ${where}${after}` : ''})`;
+  // The appliance's own refusal, when the engine heard one: protocol words only, never an address.
+  const why = typeof error.why === 'string' && error.why ? `; the appliance said: ${error.why.replace(/[^\w ,-]/g, ' ').slice(0, 120)}` : '';
+  return ` (${error.message}${where ? `; stopped at: ${where}${after}` : ''}${why})`;
 }

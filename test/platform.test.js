@@ -609,6 +609,8 @@ test('a failed connection says where it stopped and after how long', () => {
   assert.equal(failureText({ message: 'session operation timed out', stage: 'session', afterMs: 12040 }),
     ' (session operation timed out; stopped at: opening the secure session, after 12.0s)');
   assert.equal(failureText({ message: 'helper stopped' }), ' (helper stopped)');
+  assert.equal(failureText({ message: 'session operation failed', stage: 'session', afterMs: 4100, why: 'sslv3 alert handshake failure' }),
+    ' (session operation failed; stopped at: opening the secure session, after 4.1s; the appliance said: sslv3 alert handshake failure)');
   assert.equal(failureText(null), '');
 });
 

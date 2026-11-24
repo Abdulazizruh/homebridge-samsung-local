@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import logging
 import os
 import random
 import socket
@@ -30,9 +31,10 @@ import threading
 import time
 import zlib
 import ipaddress
+import re
 from concurrent.futures import ThreadPoolExecutor
 
-HELPER_VERSION = "0.1.5"
+HELPER_VERSION = "0.1.6"
 
 # The identity Samsung appliances of this generation grant local access to.
 # Published constant from SmartThings-Local's setup_cert.py (MIT).
@@ -97,6 +99,44 @@ class HelperError(Exception):
 
     def to_dict(self):
         return {"code": self.code, "message": str(self), **self.extra}
+
+
+class HandshakeReasons(logging.Handler):
+    """Keeps what the library says about a handshake that failed at the TLS layer.
+
+    The library puts the reason (the alert the appliance sent, in OpenSSL's own
+    words) in its log and nowhere else. This keeps the latest one for the thread
+    that was connecting, so the "not reachable" line can say it. Only that
+    protocol vocabulary is kept: letters, digits and spaces, never an address.
+    """
+
+    PREFIX = "dtls handshake failed at the TLS layer:"
+
+    def __init__(self):
+        super().__init__(level=logging.WARNING)
+        self._local = threading.local()
+
+    def emit(self, record):
+        try:
+            text = record.getMessage()
+        except Exception:  # noqa: BLE001
+            return
+        if text.startswith(self.PREFIX):
+            words = re.sub(r"[^A-Za-z0-9 ,_-]", " ", text[len(self.PREFIX):])
+            self._local.reason = (time.monotonic(), " ".join(words.split())[:120])
+
+    def clear(self):
+        self._local.reason = None
+
+    def latest(self, within=60.0):
+        at_text = getattr(self._local, "reason", None)
+        if at_text and time.monotonic() - at_text[0] <= within and at_text[1]:
+            return at_text[1]
+        return None
+
+
+HANDSHAKE_REASONS = HandshakeReasons()
+logging.getLogger("smartthings_local").addHandler(HANDSHAKE_REASONS)
 
 
 def classify(exc):
@@ -392,13 +432,19 @@ def open_link(host, port, cert, key, on_notification=None):
             if candidate in tried:
                 continue
             tried.append(candidate)
-            link = Link(host, candidate, cert, key, on_notification)
-            try:
-                link.connect()
-                return link, details
-            except Exception as exc:  # noqa: BLE001
-                last = exc
-                link.close()
+            # An appliance that was itself reaching for this address refuses the first try and
+            # clears its side by doing so: the library says an immediate second try normally works.
+            for again in (False, True):
+                link = Link(host, candidate, cert, key, on_notification)
+                try:
+                    link.connect()
+                    return link, details
+                except Exception as exc:  # noqa: BLE001
+                    last = exc
+                    link.close()
+                    if again or type(exc).__name__ != "PeerInitiatedHandshakeError":
+                        break
+                    time.sleep(0.3)
         candidates = []
     if not tried:
         if legacy_http_open(host):
@@ -674,6 +720,7 @@ class DeviceWorker(threading.Thread):
             was_online = False
             started = time.monotonic()
             stage = "session"  # how far this attempt got, for the log
+            HANDSHAKE_REASONS.clear()
             try:
                 cert, key = ensure_credentials(self.cred_dir)
                 link, _ = open_link(self.host, self.port, cert, key,
@@ -715,6 +762,9 @@ class DeviceWorker(threading.Thread):
                 info = classify(exc)
                 info["stage"] = stage
                 info["afterMs"] = int((time.monotonic() - started) * 1000)
+                why = HANDSHAKE_REASONS.latest() if stage == "session" else None
+                if why:
+                    info["why"] = why
                 if was_online:
                     grace_until = time.monotonic() + OFFLINE_GRACE_S
                     was_online = False

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.5.1-beta.1
+
+Trial version on the "beta" channel. Everything in 1.5.0, plus a first step on appliances that fail their first connection after a restart:
+
+- **The log says why an appliance refused.** When an air conditioner or washer turns down the secure session, the reason it gives was known to the Python engine but not written. The "not reachable" line now ends with it, for example "the appliance said: sslv3 alert handshake failure". Only those protocol words are written, never an address or a key. This is what is needed to find why some appliances fail the first try at start and connect on the second.
+- **A second try at once in one known case.** An appliance that was itself reaching for the plugin's address refuses the first try and clears its side by doing so. The plugin now tries again after a third of a second, in place of waiting for the next round and writing a warning. (Python engine; the JavaScript engine does not tell this case apart yet.)
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.5.0، ومعها خطوة أولى في الأجهزة التي تفشل محاولتها الأولى بعد إعادة التشغيل:
+
+- **السجل يذكر لماذا رفض الجهاز.** حين يرفض مكيف أو غسالة الجلسة الآمنة، كان محرك Python يعرف السبب الذي يعطيه الجهاز ولا يكتبه. الآن ينتهي سطر «not reachable» به، مثل «the appliance said: sslv3 alert handshake failure». تُكتب كلمات البروتوكول هذه فقط، دون أي عنوان أو مفتاح. وهذا ما نحتاجه لمعرفة لماذا تفشل بعض الأجهزة في المحاولة الأولى عند البدء وتتصل في الثانية.
+- **محاولة ثانية فورية في حالة معروفة.** الجهاز الذي كان هو نفسه يحاول الوصول إلى عنوان الإضافة يرفض المحاولة الأولى ويصفّي جهته بذلك. الآن تحاول الإضافة من جديد بعد ثلث ثانية، بدل انتظار الجولة التالية وكتابة تحذير. (محرك Python؛ ومحرك JavaScript لا يميّز هذه الحالة بعد.)
+
 ## 1.5.0
 
 Everything tried in the 1.4.0 beta versions, as one release. Your settings, pairings and accessories are kept as they are.

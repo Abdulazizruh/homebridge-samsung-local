@@ -262,3 +262,64 @@ class FollowAddress(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HandshakeReasonTest(unittest.TestCase):
+    def test_reason_is_kept_for_the_connecting_thread_only(self):
+        import logging
+        import threading
+        reasons = bridge.HANDSHAKE_REASONS
+        reasons.clear()
+        logging.getLogger("smartthings_local.protocol.dtls_session").warning(
+            "dtls handshake failed at the TLS layer: %s", ["sslv3 alert handshake failure"])
+        self.assertEqual(reasons.latest(), "sslv3 alert handshake failure")
+        seen = []
+        other = threading.Thread(target=lambda: seen.append(reasons.latest()))
+        other.start(); other.join()
+        self.assertEqual(seen, [None])
+        reasons.clear()
+        self.assertIsNone(reasons.latest())
+
+    def test_other_library_messages_are_not_kept(self):
+        import logging
+        reasons = bridge.HANDSHAKE_REASONS
+        reasons.clear()
+        logging.getLogger("smartthings_local").warning("dereg /x: 192.168.1.9 timed out")
+        self.assertIsNone(reasons.latest())
+
+
+class PeerInitiatedRetry(unittest.TestCase):
+    def _run(self, failures):
+        class PeerInitiatedHandshakeError(Exception):
+            pass
+
+        made = []
+
+        class FakeLink:
+            def __init__(self, host, port, cert, key, on_notification=None):
+                self.port = port
+                made.append(self)
+
+            def connect(self):
+                if len(made) <= failures:
+                    raise PeerInitiatedHandshakeError("peer initiated a concurrent handshake")
+
+            def close(self):
+                pass
+
+        saved = (bridge.Link, bridge.time.sleep, bridge.diagnose, bridge.find_secure_ports, bridge.legacy_http_open)
+        bridge.Link, bridge.time.sleep, bridge.diagnose = FakeLink, (lambda s: None), (lambda *a: None)
+        bridge.find_secure_ports, bridge.legacy_http_open = (lambda host: ([], {})), (lambda host: False)
+        try:
+            return bridge.open_link("192.0.2.20", 49153, "cert", "key"), made
+        finally:
+            (bridge.Link, bridge.time.sleep, bridge.diagnose, bridge.find_secure_ports, bridge.legacy_http_open) = saved
+
+    def test_second_try_at_once_when_the_appliance_was_reaching_for_us(self):
+        (link, _details), made = self._run(failures=1)
+        self.assertEqual(len(made), 2)
+        self.assertIs(link, made[1])
+
+    def test_only_one_extra_try(self):
+        with self.assertRaises(bridge.HelperError):
+            self._run(failures=5)
