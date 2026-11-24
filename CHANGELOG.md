@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.4
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.3, plus:
+
+- **Settings: the touch-area choice is where it is looked for.** In 1.6.0-beta.3 it was a drop-down far down the page, under the pairing code, and was missed. It now sits right under the remote choice, as two cards with a picture each: "Arrows" (tested) and "Pointer" (trial). It shows only while a remote like Apple TV is chosen.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.3، ومعه:
+
+- **الإعدادات: اختيار مساحة اللمس في المكان الذي يُبحث عنه فيه.** كان في 1.6.0-beta.3 قائمة منسدلة في أسفل الصفحة تحت رمز الاقتران، فلم يُلاحَظ. صار الآن تحت اختيار الريموت مباشرة، بطاقتين لكل منهما رمز: «أسهم» (مجرَّب) و«مؤشر» (تجريبي). ويظهر فقط عند اختيار ريموت مثل Apple TV.
+
 ## 1.6.0-beta.3
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.2, plus:

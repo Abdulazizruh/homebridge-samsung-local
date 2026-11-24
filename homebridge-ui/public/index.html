@@ -36,6 +36,11 @@
   .sl-group-title { margin: 0 -10px 8px; padding: 6px 10px; font-weight: 700; color: #6f42c1; background: rgba(128,90,213,.14); border-bottom: 1px solid rgba(128,90,213,.3); }
   .sl-choice { display: block; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 8px; margin-bottom: 8px; cursor: pointer; }
   .sl-choice:has(input:checked) { border-color: rgba(128,90,213,.8); background: rgba(128,90,213,.08); }
+  .sl-touch { display: none; margin-top: 10px; }
+  .sl-group:has([name="sl-tv-setup"][value="apple"]:checked) .sl-touch, .sl-group:has([name="sl-tv-setup"][value="both"]:checked) .sl-touch { display: block; }
+  .sl-touch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .sl-touch-grid .sl-choice { margin-bottom: 0; text-align: center; }
+  .sl-touch-ico svg { width: 30px; height: 30px; margin: 4px 0; color: #6f42c1; }
   .sl-pinline { display: none; margin-top: 4px; }
   .sl-choice:has(input:checked) .sl-pinline { display: block; }
   .sl-pin-now { font-size: 1.15em; letter-spacing: .12em; }
@@ -186,6 +191,7 @@
       laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
       sec: { ac: 'Air conditioners', laundry: 'Laundry', tv: 'TVs', air: 'Air purifiers and dehumidifiers', fridge: 'Refrigerators', vacuum: 'Robot vacuums', cooking: 'Cooking', other: 'Other appliances' }, secCount: (n) => (n === 1 ? '1 device' : `${n} devices`), secAll: 'all connected', secOne: 'connected', secSome: (a, n) => `${a} of ${n} connected`, secFold: 'Show or hide this group',
       phTouch: 'Touch area of this remote', phTouchArrows: 'Arrows: a slide moves the selection step by step', phTouchPointer: 'Pointer (trial): the finger moves a pointer, like a mouse', phTouchNote: 'The pointer shows in the TV\'s browser and in some apps; elsewhere nothing moves. A tap is still Select. Buttons and keyboard are the same in both.',
+      phArrows: 'Arrows', phPointer: 'Pointer', phArrowsNote: 'A slide moves the selection step by step', phPointerNote: 'The finger moves a pointer, like a mouse', phTested: 'tested',
       apReadings: 'Readings', apControls: 'Controls', apTrial: 'trial', apBroken: 'Not working?', apNote: 'Trial functions have not been tried on this model yet. Untick one to remove it from Apple Home. If one does not work, press "Not working?" next to it.', apReportNote: 'The report opens ready on GitHub; you press Submit there. Attach the diagnostics file from below: identifiers, addresses and keys are removed from it.', apTableNote: 'Read from what your own appliance reports. Controls are trials until confirmed on a real appliance of this type.',
       apPart: { power: 'Power', speed: 'Fan speed and automatic mode', clean: 'Start cleaning, and back to the station', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze', airQuality: 'Air quality', filter: 'Filter', temperature: 'Temperature', setpoint: 'Set the temperature', humidity: 'Humidity', targetHumidity: 'Target humidity', door: 'Door', battery: 'Battery', running: 'Running sensor', kidsLock: 'Child lock status', alert: 'Alert sensor (appliance faults)', energy: 'Power and energy (Eve)' },
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
@@ -334,6 +340,7 @@
       laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
       sec: { ac: 'المكيفات', laundry: 'الغسيل', tv: 'التلفزيونات', air: 'منقيات الهواء ومزيلات الرطوبة', fridge: 'الثلاجات', vacuum: 'المكانس الآلية', cooking: 'الطبخ', other: 'أجهزة أخرى' }, secCount: (n) => (n === 1 ? 'جهاز واحد' : n === 2 ? 'جهازان' : n <= 10 ? `${n} أجهزة` : `${n} جهازًا`), secAll: 'كلها متصلة', secOne: 'متصل', secSome: (a, n) => `${a} من ${n} متصلة`, secFold: 'إظهار هذه المجموعة أو إخفاؤها',
       phTouch: 'مساحة اللمس في هذا الريموت', phTouchArrows: 'أسهم: السحب يحرّك التحديد خطوة خطوة', phTouchPointer: 'مؤشر (تجريبي): الإصبع يحرّك مؤشرًا مثل الماوس', phTouchNote: 'المؤشر يظهر في متصفح التلفزيون وبعض التطبيقات، وفي غيرها لن يتحرك شيء. اللمسة تبقى «اختيار». الأزرار والكيبورد كما هي في الحالتين.',
+      phArrows: 'أسهم', phPointer: 'مؤشر', phArrowsNote: 'السحب يحرّك التحديد خطوة خطوة', phPointerNote: 'الإصبع يحرّك مؤشرًا مثل الماوس', phTested: 'مجرَّب',
       apReadings: 'القراءات', apControls: 'التحكم', apTrial: 'تجريبي', apBroken: 'لا تعمل؟', apNote: 'الوظائف التجريبية لم تُجرَّب على هذا الموديل بعد. أزل العلامة عن أي وظيفة لإخفائها من Apple Home. وإن لم تعمل إحداها فاضغط «لا تعمل؟» بجانبها.', apReportNote: 'يُفتح التقرير جاهزًا في GitHub، وأنت تضغط الإرسال هناك. أرفق ملف التشخيص من الأسفل: تُحذف منه المعرّفات والعناوين والمفاتيح.', apTableNote: 'مقروءة مما يعلنه جهازك نفسه. وظائف التحكم تجريبية حتى تُؤكَّد على جهاز حقيقي من هذا النوع.',
       apPart: { power: 'التشغيل والإيقاف', speed: 'سرعة المروحة والوضع التلقائي', clean: 'بدء التنظيف، والعودة إلى المحطة', 'boost.fridge': 'التبريد السريع', 'boost.freezer': 'التجميد السريع', airQuality: 'جودة الهواء', filter: 'الفلتر', temperature: 'الحرارة', setpoint: 'ضبط الحرارة', humidity: 'الرطوبة', targetHumidity: 'الرطوبة المطلوبة', door: 'الباب', battery: 'البطارية', running: 'حساس التشغيل', kidsLock: 'حالة قفل الأطفال', alert: 'حساس التنبيه (أعطال الجهاز)', energy: 'القدرة والطاقة (Eve)' },
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
@@ -458,6 +465,8 @@
   let renaming = null; // the configured appliance whose name is being typed
   const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICON = {
+    arrows: svg('<path d="M12 4v16"/><path d="M4 12h16"/><path d="M9.5 6.5L12 4l2.5 2.5"/><path d="M9.5 17.5L12 20l2.5-2.5"/><path d="M6.5 9.5L4 12l2.5 2.5"/><path d="M17.5 9.5L20 12l-2.5 2.5"/>'),
+    pointer: svg('<path d="M6 3l12 9-5.5 1.2L10 19z"/><path d="M13 14l3.5 6"/>'),
     edit: svg('<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>'),
     address: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'),
     download: svg('<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>'),
@@ -656,7 +665,12 @@
             ${choice('tile')}
             ${choice('both', 'suAway')}
             ${choice('none')}
-            <div class="sl-muted">${t('tvWake')}</div>
+            <div class="sl-touch"><strong>${t('phTouch')}</strong>
+              <div class="sl-touch-grid">${[['arrows', 'phArrows', 'phArrowsNote', 'sl-ok', 'phTested'], ['pointer', 'phPointer', 'phPointerNote', 'sl-warn', 'apTrial']].map(([value, name, note, tone, tag]) => `
+                <label class="sl-choice"><input type="radio" name="sl-tv-touch" value="${value}" ${(existing?.appleRemoteTouch === 'pointer') === (value === 'pointer') ? 'checked' : ''}> <strong>${t(name)}</strong>
+                  <div class="sl-touch-ico">${ICON[value]}</div><div class="sl-muted">${t(note)}</div><span class="sl-pill ${tone}">${t(tag)}</span></label>`).join('')}</div>
+              <div class="sl-muted mt-1">${t('phTouchNote')}</div></div>
+            <div class="sl-muted mt-2">${t('tvWake')}</div>
             </div>
           <div class="sl-group sl-swbox mt-3"><div class="sl-group-title">${t('swTitle')}</div>
             <label class="sl-choice mb-0"><input type="checkbox" id="sl-tv-switches-on" ${chosen.length ? 'checked' : ''}> <strong>${t('swOn')}</strong>
@@ -671,11 +685,6 @@
             <div class="mt-2"><label class="mb-0" for="sl-tv-pin">${t('phPin')}</label>
               <input id="sl-tv-pin" class="form-control form-control-sm" dir="ltr" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" style="max-width:8em" value="${esc(/^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '')}">
               <div class="sl-muted">${t('phPinNote')}</div></div>
-            <div class="mt-2"><label class="mb-0" for="sl-tv-touch">${t('phTouch')}</label>
-              <select id="sl-tv-touch" class="form-control form-control-sm">
-                <option value="arrows" ${existing?.appleRemoteTouch === 'pointer' ? '' : 'selected'}>${t('phTouchArrows')}</option>
-                <option value="pointer" ${existing?.appleRemoteTouch === 'pointer' ? 'selected' : ''}>${t('phTouchPointer')}</option></select>
-              <div class="sl-muted">${t('phTouchNote')}</div></div>
             ${p.tv.configured && existing?.appleRemote === true ? (ph?.pin ? `<div class="alert alert-info mt-2 mb-0">
                 <ol class="mb-1">${[1, 2, 3].map((n) => `<li>${t('phStep' + n).replace('{name}', `<strong>${esc((existing.name || 'Samsung TV') + (mode === 'switches' ? '' : ' +'))}</strong>`)}</li>`).join('')}</ol>
                 <div>${t('phCode')}: <strong dir="ltr" style="font-size:1.4em;letter-spacing:.15em">${esc(ph.pin)}</strong></div>
@@ -755,7 +764,7 @@
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
       entry.appleRemote = ['apple', 'both'].includes(box.querySelector('[name="sl-tv-setup"]:checked')?.value);
       if ($('sl-tv-pin')) { if (/^\d{4}$/.test($('sl-tv-pin').value.trim())) { entry.appleRemotePin = $('sl-tv-pin').value.trim(); } else { delete entry.appleRemotePin; } }
-      if ($('sl-tv-touch')) { if ($('sl-tv-touch').value === 'pointer') { entry.appleRemoteTouch = 'pointer'; } else { delete entry.appleRemoteTouch; } }
+      if (entry.appleRemote && box.querySelector('[name="sl-tv-touch"]:checked')?.value === 'pointer') { entry.appleRemoteTouch = 'pointer'; } else { delete entry.appleRemoteTouch; }
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
@@ -763,7 +772,7 @@
           config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false };
           // A code that was cleared in the field goes back to the default: the earlier one must not stay behind.
           if ($('sl-tv-pin') && !('appleRemotePin' in entry)) { delete config.devices[i].appleRemotePin; }
-          if ($('sl-tv-touch') && !('appleRemoteTouch' in entry)) { delete config.devices[i].appleRemoteTouch; }
+          if (!('appleRemoteTouch' in entry)) { delete config.devices[i].appleRemoteTouch; }
         } else { config.devices.push(entry); }
       });
     });
