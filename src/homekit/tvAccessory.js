@@ -161,14 +161,15 @@ export class TvAccessory {
    * Trial: show this TV to the iPhone's own remote as an Apple TV, so the
    * iPhone keyboard can type into the TV's text fields.
    */
-  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, pin }) {
-    this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise, pin });
+  async enableAppleRemote({ file, name = `${this.displayName} +`, advertise = true, pin, touch }) {
+    this.appleRemote = new AppleRemote({ file, tvId: this.entry.id, name, log: this.log, advertise, pin, touch });
     const phone = await this.appleRemote.start();
     this.phone = phone;
     phone.awake = this.on;
     phone.on('key', (code) => this.#press(code, 'iPhone remote key').catch(() => {}));
     phone.on('power', (want) => this.#setPower(want === 'toggle' ? !this.on : want).catch(() => {}));
     phone.on('text', (text) => this.#type(text));
+    phone.on('pointer', (dx, dy) => { if (this.on) { this.remote.pointer(dx, dy).catch(() => {}); } });
     phone.on('sessions', (count) => {
       // The TV tells only a listener that its keyboard opened, so the channel is kept while a remote is open.
       this.remote.hold(count > 0);

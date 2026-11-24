@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.3
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.2, plus:
+
+- **The remote like Apple TV: its touch area can be a pointer (trial).** A new choice in the TV's options: "Arrows" (as before, and the default) or "Pointer", where the finger moves a pointer on the TV like a mouse. A tap is still Select; buttons and keyboard are unchanged. The pointer shows in the TV's browser and in some apps; elsewhere nothing moves. Not yet tried on a real TV. The TV tile in Apple Home cannot do this: Apple sends it arrows and Select only.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.2، ومعه:
+
+- **الريموت الذي مثل Apple TV: مساحة اللمس تصير مؤشرًا (تجريبي).** خيار جديد في خيارات التلفزيون: «أسهم» (كما كان، وهو الافتراضي) أو «مؤشر»، وفيه يحرّك الإصبع مؤشرًا على التلفزيون مثل الماوس. اللمسة تبقى «اختيار»، والأزرار والكيبورد كما هي. المؤشر يظهر في متصفح التلفزيون وبعض التطبيقات، وفي غيرها لن يتحرك شيء. لم يُجرَّب بعد على تلفزيون حقيقي. بطاقة التلفزيون في Apple Home يتعذر عليها ذلك: Apple يرسل إليها الأسهم و«اختيار» فقط.
+
 ## 1.6.0-beta.2
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.1, plus:

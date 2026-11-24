@@ -77,8 +77,8 @@ function txt(identity, model) {
 let responder = null;
 
 export class AppleRemote {
-  constructor({ file, tvId, name, log, advertise = true, model = 'AppleTV14,1', pin = DEFAULT_PIN }) {
-    Object.assign(this, { file, tvId, name, log, advertise, model, pin: pinOf(pin) });
+  constructor({ file, tvId, name, log, advertise = true, model = 'AppleTV14,1', pin = DEFAULT_PIN, touch = 'arrows' }) {
+    Object.assign(this, { file, tvId, name, log, advertise, model, pin: pinOf(pin), touch });
     this.server = null;
     this.service = null;
   }
@@ -90,7 +90,7 @@ export class AppleRemote {
     // The stand-in names itself to a phone with the very identifiers it announces on the network.
     this.server = new CompanionServer({
       name: this.name, identity, pin: identity.pin, clients: identity.clients, model: this.model, log: this.log,
-      announced: { address: announced.rpBA, short: announced.rpHI },
+      announced: { address: announced.rpBA, short: announced.rpHI }, touch: this.touch,
     });
     this.server.on('paired', (id, key) => {
       const data = load(this.file);

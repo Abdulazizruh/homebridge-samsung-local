@@ -392,7 +392,7 @@ export class SamsungLocalPlatform {
       ...(this.overrides.tv ?? {}),
     });
     if (entry.appleRemote === true) {
-      handler.enableAppleRemote({ file: this.paths.appleRemote, name: mode === 'tile' ? `${name} +` : name, pin: entry.appleRemotePin, ...(this.overrides.appleRemote ?? {}) })
+      handler.enableAppleRemote({ file: this.paths.appleRemote, name: mode === 'tile' ? `${name} +` : name, pin: entry.appleRemotePin, touch: entry.appleRemoteTouch, ...(this.overrides.appleRemote ?? {}) })
         .catch((err) => this.log.warn(`[${name}] the iPhone remote option could not start: ${err.message}`));
     }
     if (accessory) {

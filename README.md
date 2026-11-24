@@ -195,6 +195,8 @@ The remote is in Control Centre: open the remote and choose the TV at the top. V
 
 **A remote like Apple TV (trial).** In place of the tile, or beside it, a TV can appear in the same Control Centre remote as an Apple TV: with a touch area and with the iPhone keyboard, which opens when the TV opens one of its own text fields (TV search, settings, browser). It is chosen from the remote list and paired once on each iPhone, iPad or Apple Watch with a code of four digits (0000 unless you choose your own). Limits: apps with their own keyboard, such as YouTube and Netflix, do not accept the keyboard; opening the remote does not always succeed at once, in two different ways: most often a flicker that recovers by itself within one to five seconds, and now and then the phone shows "Can't Connect" and goes back to the list, where choosing the TV again opens it; it is unofficial and may stop working after an iOS update. It never leaves your network.
 
+**The touch area as a pointer (trial, not yet tried on a real TV).** In the TV's options the touch area of this remote can move a pointer, like a mouse, in place of stepping the selection. The pointer shows in the TV's browser and in some apps; elsewhere nothing moves, so arrows stay the default. A tap is still Select.
+
 **Switches for automations (optional).** Power, mute, volume up and down, channel up and down, play/pause and home can each be shown as a switch, grouped under one accessory in the bridge, for use in automations and scenes. They work with any remote choice.
 
 Apple wants every TV tile added on its own. After you add the TV in the plugin settings, its code appears beside it in the list of configured appliances (see [the TV options](#tv-options) below).
@@ -236,7 +238,7 @@ The pairing code of the remote like Apple TV is shown under that choice and can 
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (125 JavaScript, 21 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (127 JavaScript, 21 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

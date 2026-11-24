@@ -12,7 +12,7 @@ import { Tlv, readTlv, writeTlv } from '../src/appleRemote/tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer } from '../src/appleRemote/crypto.js';
 import { AppleRemote, identityOf, pruneAppleRemote } from '../src/appleRemote/bridge.js';
 import { applyEdit } from '../src/appleRemote/rti.js';
-import { Swipes } from '../src/appleRemote/gestures.js';
+import { Swipes, Pointer } from '../src/appleRemote/gestures.js';
 
 const { SRP, SrpClient } = srp;
 const quiet = { info() {}, warn() {}, debug() {} };
@@ -184,6 +184,29 @@ test('iPhone remote: edits count whole characters; a short touch is Select and a
   s.feed('press', 500, 500); assert.equal(s.feed('release', 510, 505), 'SELECT');
   s.feed('press', 500, 800); assert.equal(s.feed('release', 520, 300), 'UP');
   s.feed('press', 500, 500); assert.equal(s.feed('release', 650, 640), null, 'a diagonal is no clear direction');
+});
+
+test('touch area as a pointer: the finger\'s way becomes the pointer\'s way, at a steady pace, and nothing is lost', () => {
+  let clock = 0;
+  const p = new Pointer(() => clock);
+  const moves = [];
+  const feed = (phase, x, y) => { const m = p.feed(phase, x, y); if (m) { moves.push(m); } };
+  feed('press', 100, 500);
+  for (let x = 110; x <= 300; x += 10) { clock += 8; feed('hold', x, 500); } // reports arrive faster than the TV is told
+  clock += 8; feed('release', 300, 500);
+  const total = moves.reduce((sum, m) => sum + m.dx, 0);
+  assert.equal(total, 320, 'the whole slide, scaled, reaches the TV');
+  assert.ok(moves.length < 12, 'gathered, not one command per report');
+  assert.ok(moves.every((m) => m.dy === 0));
+  // A very slow movement is kept until it adds up to a whole unit.
+  const slow = new Pointer(() => (clock += 40));
+  slow.feed('press', 0, 0);
+  assert.equal(slow.feed('hold', 0.3, 0), null);
+  assert.deepEqual(slow.feed('hold', 0.7, 0), { dx: 1, dy: 0 });
+  // A tap moves nothing.
+  const tap = new Pointer(() => (clock += 40));
+  tap.feed('press', 500, 500);
+  assert.equal(tap.feed('release', 500, 500), null);
 });
 
 test('touch area like an Apple TV: a long slide moves several steps, a flick one, a tap selects', () => {

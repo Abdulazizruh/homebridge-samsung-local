@@ -15,7 +15,7 @@ import { pack, unpack } from './opack.js';
 import { Tlv, TlvError, readTlv, writeTlv } from './tlv8.js';
 import { agreement, counterNonce, hkdf, open, seal, signer, verify } from './crypto.js';
 import { Typing, documentState, readEdit } from './rti.js';
-import { PHASE, Swipes } from './gestures.js';
+import { PHASE, Pointer, Swipes } from './gestures.js';
 
 const { SRP, SrpServer } = srp;
 const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPACK: 8 };
@@ -55,6 +55,7 @@ class Connection {
     this.pv = null;
     this.rti = { registered: false, uuid: null, open: false };
     this.swipes = new Swipes();
+    this.pointer = new Pointer();
     this.typing = new Typing();
     this.born = Date.now();
     this.remote = false; // a TV Remote session is open on this connection
@@ -458,6 +459,12 @@ const HANDLERS = {
   _hidt(message, c) {
     const phase = PHASE[Number(c._tPh)]; const x = Number(c._cx ?? 0); const y = Number(c._cy ?? 0);
     if (!Number.isFinite(x) || !Number.isFinite(y)) { return; }
+    if (this.server.touch === 'pointer') {
+      // The touch area as a mouse. A tap still arrives as the Select button, and is sent as one.
+      const move = this.pointer.feed(phase, x, y);
+      if (move) { this.server.emit('pointer', move.dx, move.dy); }
+      return;
+    }
     const direction = this.swipes.feed(phase, x, y);
     if (direction) { this.key(SWIPE_KEYS[direction]); }
   },
@@ -526,8 +533,9 @@ const HANDLERS = {
  * 'paired' (the phone's identifier).
  */
 export class CompanionServer extends EventEmitter {
-  constructor({ name, identity, pin, clients = {}, model = 'AppleTV14,1', log = console, announced = null }) {
+  constructor({ name, identity, pin, clients = {}, model = 'AppleTV14,1', log = console, announced = null, touch = 'arrows' }) {
     super();
+    this.touch = touch === 'pointer' ? 'pointer' : 'arrows'; // what the remote's touch area does
     this.announced = announced;
     this.name = name;
     this.identity = { ...identity, irk: Buffer.from(identity.irk, 'hex'), mac: Buffer.from(identity.mac, 'hex') };

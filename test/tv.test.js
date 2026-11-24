@@ -41,6 +41,10 @@ async function fakeTv({ power = 'on', allow = true } = {}) {
         socket.send(JSON.stringify({ event: 'ms.remote.imeEnd' }));
         return;
       }
+      if (msg.params.TypeOfRemote === 'ProcessMouseDevice') {
+        (tv.moves ??= []).push([msg.params.Cmd, msg.params.Position.x, msg.params.Position.y]);
+        return;
+      }
       tv.keys.push(msg.params.DataOfCmd);
       if (msg.params.DataOfCmd === 'KEY_POWER') { tv.power = tv.power === 'on' ? 'standby' : 'on'; }
     });
@@ -420,4 +424,23 @@ test('a power command never rests on an older answer: off for a TV already in st
   assert.deepEqual(tv.keys, [], 'the toggle would have switched the TV on');
   assert.equal(tv.power, 'standby');
   assert.equal(active.value, 0);
+});
+
+test('iPhone remote, touch area as a pointer: movements reach the TV as mouse moves; arrows stay the default', async (t) => {
+  const tv = await fakeTv();
+  const { platform } = await bootTv(tv, 'tile', tmpDir(), { appleRemote: true, appleRemoteTouch: 'pointer' });
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  await waitFor(() => handler.phone);
+  assert.equal(handler.phone.touch, 'pointer');
+  handler.phone.emit('pointer', 24, -8);
+  await waitFor(() => tv.moves?.length === 1);
+  assert.deepEqual(tv.moves[0], ['Move', 24, -8]);
+  assert.deepEqual(tv.keys, [], 'a movement presses no key');
+
+  const plain = await fakeTv();
+  const other = await bootTv(plain, 'tile', tmpDir(), { appleRemote: true });
+  t.after(() => { other.platform.stop(); plain.close(); });
+  await waitFor(() => other.platform.tvs[0].phone);
+  assert.equal(other.platform.tvs[0].phone.touch, 'arrows');
 });

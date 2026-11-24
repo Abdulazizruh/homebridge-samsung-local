@@ -231,6 +231,16 @@
               "default": false,
               "description": "Shows this TV to the iPhone's own remote in Control Centre as an Apple TV, so the iPhone keyboard can type into the TV. Unofficial and may stop working after an iOS update."
             },
+            "appleRemoteTouch": {
+              "title": "Touch area of the iPhone remote",
+              "type": "string",
+              "default": "arrows",
+              "oneOf": [
+                { "title": "Arrows: a slide moves the selection step by step", "enum": ["arrows"] },
+                { "title": "Pointer (trial): the finger moves a pointer, like a mouse", "enum": ["pointer"] }
+              ],
+              "description": "The pointer shows in the TV's browser and in some apps; elsewhere nothing moves."
+            },
             "appleRemotePin": {
               "title": "Pairing code of the iPhone remote",
               "type": "string",

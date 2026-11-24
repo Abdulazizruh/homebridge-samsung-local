@@ -166,6 +166,16 @@ export class TizenRemote {
     await this.#send({ Cmd: 'Click', DataOfCmd: code, Option: 'false', TypeOfRemote: 'SendRemoteKey' });
   }
 
+  /**
+   * Move the TV's pointer by a distance, as a mouse would. The command shape is the one
+   * samsungtvws uses (its move_cursor). Where the TV shows no pointer, nothing happens.
+   */
+  async pointer(dx, dy) {
+    await this.open();
+    this.#touch();
+    await this.#send({ Cmd: 'Move', Position: { x: Math.round(dx), y: Math.round(dy), Time: '0' }, TypeOfRemote: 'ProcessMouseDevice' });
+  }
+
   /** While `held`, the channel stays open: the TV can only say "keyboard opened" to a listener. */
   #touch() {
     clearTimeout(this.idleTimer);
