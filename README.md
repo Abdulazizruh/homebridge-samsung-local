@@ -195,6 +195,8 @@ The cycle tile is on while a cycle runs, with the time remaining inside it. The 
 
 Trial: a sensor for each stage the washer names (washing, rinsing, spinning) is detected only during that stage, for automations such as a notice when the spin starts. Drum clean has its own sensor: a top-loader names its drum clean as a stage of its own. The Home app shows no free text on a tile, so the course itself (its name when known, otherwise its number) and the date of the last drum clean are shown in the plugin settings and the log. Each can be switched off in the settings.
 
+<p><img src="assets/screenshots/washer-stages.png" alt="Washer stage sensors in Apple Home: drum clean detected; washing, rinsing, spinning and finished not" width="360"></p>
+
 <p><img src="assets/screenshots/washer-home.png" alt="Washer in Apple Home: a cycle tile and the finished sensor" width="280"></p>
 
 ### A Samsung TV in Apple Home
