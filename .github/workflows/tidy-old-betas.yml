@@ -1,0 +1,65 @@
+# Run by hand, from the Actions tab: tidies the trial versions of a finished line.
+#
+# - GitHub: removes the release pages of 1.4.0-beta.N, keeping the newest three. Tags are kept,
+#   so every version stays in the history; only the long list on the Releases page gets shorter.
+# - npm: nothing is removed (npm does not allow a number to be used again). The 1.4.0 trial
+#   versions are marked as superseded, with a pointer to the full release.
+#
+# "preview" only lists what would be done. "apply" does it; removed release pages do not come back.
+# Requires the repository secret NPM_TOKEN, as the Release workflow does.
+name: Tidy old trial versions
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview lists what would be done; apply does it'
+        type: choice
+        options: [preview, apply]
+        default: preview
+      keep:
+        description: 'How many of the newest 1.4.0 trial release pages to keep'
+        default: '3'
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MODE: ${{ inputs.mode }}
+      KEEP: ${{ inputs.keep }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Release pages of the finished trial line
+        run: |
+          case "$KEEP" in ''|*[!0-9]*) echo "keep must be a number" >&2; exit 1 ;; esac
+          gh api --paginate "repos/$GITHUB_REPOSITORY/releases" \
+            --jq '.[] | select(.prerelease) | .tag_name' \
+            | grep -E '^v1\.4\.0-beta\.[0-9]+$' \
+            | sort -t. -k4 -n -r > all.txt || true
+          echo "Trial release pages found: $(wc -l < all.txt)"
+          head -n "$KEEP" all.txt > keep.txt
+          tail -n +"$((KEEP + 1))" all.txt > remove.txt
+          echo "Kept:"; cat keep.txt
+          echo "To remove ($(wc -l < remove.txt)):"; cat remove.txt
+          if [ "$MODE" != "apply" ]; then echo "Preview only: nothing was removed."; exit 0; fi
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --yes   # the tag itself stays
+            echo "removed the release page of $tag"
+          done < remove.txt
+      - name: Mark the 1.4.0 trial versions on npm as superseded
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          range='>=1.4.0-beta.1 <1.4.0'
+          note='Trial version of a finished line. Use the full release (1.5.0 or later).'
+          if [ "$MODE" != "apply" ]; then
+            echo "Preview only: would mark homebridge-samsung-local@\"$range\" with: $note"
+            npm view "homebridge-samsung-local@$range" version | tail -n 5
+            exit 0
+          fi
+          npm deprecate "homebridge-samsung-local@$range" "$note"
