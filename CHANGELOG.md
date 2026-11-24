@@ -2,6 +2,80 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0
+
+Everything tried in the 1.5.1 and 1.6.0 beta versions, as one release. Your settings, pairings and accessories are kept as they are.
+
+**Commands and state (air conditioners, and now every appliance)**
+
+- **No reading right after a command, in both engines.** Samsung appliances can undo a command that is read back at once; the next reading now waits about 4 seconds, as SmartThings-Local and LocalThings do. Temperature tapped up or down step by step is sent and kept.
+- **A tile shows what you asked until the appliance confirms it.** Temperature, switches (WindFree, Fast and the other comfort modes, Dry, Fan Only, Turbo, Auto, display), fan speed and swing no longer go off, back on and off again. A value is held for up to 10 seconds while the appliance catches up; one it has not applied after 12 seconds is reported in the log.
+- **Quick on, off and on again works.** Each new command is decided on the unit's reading plus every command still on its way, so the last wish is the one applied.
+- **The same rules for purifiers, fans, dehumidifiers, refrigerators and robot vacuums.** A robot vacuum is sent only the start and dock commands it lists itself.
+- **Polling interval: at least 4 seconds, 5 by default.** A lower saved value is raised to 4 and the settings say so.
+- **After a restart:** an appliance that refuses the first handshake is asked again at once; appliances starting together take turns, two at a time. The log says why an appliance refused, and an appliance switched off at the wall is noted calmly.
+
+**Washer**
+
+- **A sensor for each stage (wash, rinse, spin) and one for drum clean (trial, on by default).** Each can be removed in the settings. Drum clean has been confirmed on a real washer.
+- **The course and the last drum clean** are shown in the settings and the log.
+- **Switched off during a cycle is a stop, not a finish:** no "finished" notice. Confirmed on a real washer.
+- **Alarm code DC is explained** ("the lid was opened during a cycle"). Confirmed on a real washer.
+
+**Other Samsung appliances (trial)**
+
+- Air purifiers, dehumidifiers, refrigerators, robot vacuums, ovens and the like get an accessory: air quality, filters, temperatures, doors, humidity, battery, power and energy. Controls are marked "trial" in the settings, each with a "Not working?" button that opens a ready report. Ovens, ranges, microwaves and cooktops are shown, never commanded.
+
+**TVs and the remote like Apple TV**
+
+- **No press is dropped without a word.** A press while the TV is shown as off asks the TV first; the log says, per remote session, how many presses reached the TV.
+- **Power asked twice at once presses the power key once,** so the TV no longer comes on and goes straight off.
+- **"Off" from Apple Home can no longer switch a TV on,** and a TV that was on is not shown as off for one missed answer.
+- **The touch area can be a pointer (trial),** and a tap clicks what the pointer shows.
+
+**Settings**
+
+- The device list is grouped by kind; each trial control keeps its name, its "trial" tag and its "Not working?" button on one line; unsaved changes are shown; safe to scroll with a finger.
+- Each appliance shows how long a reading takes and whether its push updates arrive.
+- Each accessory's main tile is marked, so the Home app puts it in front of the group.
+
+**بالعربية**
+
+كل ما جُرّب في نسخ 1.5.1 و1.6.0 التجريبية، في إصدار واحد. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+**الأوامر والحالة (المكيفات، والآن كل الأجهزة)**
+
+- **لا تُقرأ الحالة بعد الأمر مباشرة، في المحرّكين.** أجهزة Samsung قد تتراجع عن أمر تُقرأ حالته فورًا، فصارت القراءة التالية تنتظر 4 ثوانٍ تقريبًا كما تفعل SmartThings-Local و LocalThings. ورفع الحرارة أو خفضها خطوة بعد خطوة يُرسل ويثبت.
+- **البطاقة تعرض ما طلبته حتى يؤكده الجهاز.** الحرارة والمفاتيح (WindFree و Fast وبقية أوضاع الراحة، والتجفيف، والمروحة فقط، والقصوى، والتلقائي، والشاشة) وسرعة المروحة والتأرجح لم تعد تنطفئ ثم تشتغل ثم تنطفئ. تبقى القيمة حتى 10 ثوانٍ ريثما يلحق الجهاز، وما لم يطبّقه بعد 12 ثانية يُكتب في السجل.
+- **التشغيل ثم الإطفاء ثم التشغيل بسرعة يعمل.** كل أمر جديد يُقرَّر على قراءة الجهاز مع كل أمر ما زال في الطريق، فيُطبَّق آخر ما طلبته.
+- **القواعد نفسها للمنقيات والمراوح ومزيلات الرطوبة والثلاجات والمكانس.** والمكنسة الروبوت لا يُرسل إليها إلا أمرا البدء والعودة اللذان تعلنهما بنفسها.
+- **فترة القراءة: 4 ثوانٍ على الأقل، و5 افتراضيًا.** القيمة المحفوظة الأقل تُرفع إلى 4، وتنبّه الإعدادات إلى ذلك.
+- **بعد إعادة التشغيل:** الجهاز الذي يرفض أول مصافحة يُسأل مرة أخرى فورًا، والأجهزة التي تبدأ معًا تتناوب اثنين اثنين. ويذكر السجل سبب رفض الجهاز، ويكتب بهدوء عن الجهاز المطفأ من الكهرباء.
+
+**الغسالة**
+
+- **حساس لكل مرحلة (غسيل، شطف، عصر) وحساس لتنظيف الحوض (تجريبي، مفعّل افتراضيًا).** ويمكن إزالة كل واحد من الإعدادات. وتأكدنا من حساس تنظيف الحوض على غسالة حقيقية.
+- **نوع الدورة وآخر تنظيف للحوض** يظهران في الإعدادات والسجل.
+- **إطفاؤها أثناء الدورة إيقاف وليس انتهاءً،** فلا يصل إشعار «انتهت». تأكدنا منه على غسالة حقيقية.
+- **رمز التنبيه DC مشروح** («فُتح الغطاء أثناء الدورة»). تأكدنا منه على غسالة حقيقية.
+
+**أجهزة Samsung الأخرى (تجريبي)**
+
+- منقيات الهواء ومزيلات الرطوبة والثلاجات والمكانس الآلية والأفران وما شابهها صار لها ملحق: جودة الهواء، الفلاتر، الحرارة، الأبواب، الرطوبة، البطارية، القدرة والطاقة. وظائف التحكم معلَّمة «تجريبي» في الإعدادات، ولكل منها زر «لا تعمل؟» يفتح تقريرًا جاهزًا. والأفران والمواقد والميكروويف تُعرض ولا تُرسَل إليها أوامر.
+
+**التلفزيونات والريموت الذي مثل Apple TV**
+
+- **لا تضيع ضغطة دون أثر.** الضغطة والتلفزيون معروض مطفأً تسأل التلفزيون أولًا، ويذكر السجل في كل جلسة ريموت كم ضغطة وصلت إلى التلفزيون.
+- **طلب التشغيل مرتين معًا يضغط الزر مرة واحدة،** فلا يشتغل التلفزيون ثم ينطفئ فورًا.
+- **أمر «إطفاء» من Apple Home لم يعد يشغّل التلفزيون،** والتلفزيون المشغَّل لا يُعرض مطفأً لأجل رد واحد فائت.
+- **منطقة اللمس يمكن أن تكون مؤشرًا (تجريبي)،** والنقرة تضغط ما يشير إليه المؤشر.
+
+**الإعدادات**
+
+- قائمة الأجهزة مجمّعة حسب النوع، وكل وظيفة تجريبية يبقى اسمها وعلامة «تجريبي» وزر «لا تعمل؟» في سطر واحد، والتغييرات غير المحفوظة ظاهرة، والتمرير بالإصبع آمن.
+- كل جهاز يعرض مدة القراءة، وهل تصل تحديثاته الفورية.
+- البطاقة الرئيسية لكل ملحق معلَّمة، فيضعها تطبيق Home في واجهة المجموعة.
+
 ## 1.6.0-beta.17
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.16, plus:
