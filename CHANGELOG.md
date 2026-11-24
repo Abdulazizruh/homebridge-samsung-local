@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.29
+
+Trial version on the "beta" channel. Same as beta.28, plus what its log showed:
+
+- **iPhone remote: "Can't Connect to Apple TV" still flashes.** Naming the stand-in with its announced identifiers (beta.28) did not stop the phone from opening a silent connection first. The log shows that a remote that opens asks for its session within a few hundredths of a second, so the first silent connection is now closed after 0.15 seconds instead of 0.4, and the phone's second try comes that much sooner. One that keeps coming straight back is given more time each round (0.15, 0.15, 0.3, then 1 second). Whether the message disappears is not yet confirmed; why the phone opens a silent connection at all is still unknown.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». مثل beta.28، ومعها ما أظهره سجلها:
+
+- **ريموت الآيفون: رسالة «Can't Connect to Apple TV» ما زالت تومض.** تعريف البديل بمعرّفاته المعلنة (beta.28) لم يمنع الجوال من فتح اتصال ساكت أولًا. السجل يُظهر أن الريموت الذي يفتح يطلب جلسته خلال أجزاء قليلة من مئة من الثانية، فصار أول اتصال ساكت يُغلق بعد 0.15 ثانية بدل 0.4، وتأتي محاولة الجوال الثانية أسرع بهذا القدر. والاتصال الذي يعود فورًا مرة بعد مرة يُعطى وقتًا أطول في كل جولة (0.15 ثم 0.15 ثم 0.3 ثم ثانية). لم يتأكد بعد هل تختفي الرسالة؛ وسبب فتح الجوال اتصالًا ساكتًا من الأساس ما زال مجهولًا.
+
 ## 1.4.0-beta.28
 
 Trial version on the "beta" channel. Same as beta.27, plus what its log showed:

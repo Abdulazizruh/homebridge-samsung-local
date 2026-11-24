@@ -22,7 +22,11 @@ const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPA
 const AUTH_FRAMES = new Set([FRAME.PS_Start, FRAME.PS_Next, FRAME.PV_Start, FRAME.PV_Next]);
 const MAX_FRAME = 256 * 1024;
 const AUTH_DEADLINE_MS = 60_000;
-const IDLE_CLOSE_MS = 400; // a connection that only said who it is and then nothing
+// A connection that only said who it is and then nothing. A remote that opens asks for its session within a
+// few hundredths of a second, so the first silent one is closed almost at once: the sooner the phone tries
+// again, the less its owner sees of it. One that keeps coming straight back is given more time each round.
+const IDLE_CLOSE_MS = [150, 150, 300, 1000];
+const IDLE_ROUND_MS = 10_000;
 const IDLE_LOOP_MS = 120_000;
 const IDLE_LOOP_MAX = 30; // closed this often in two minutes, it is left alone
 const MAX_CONNECTIONS = 8;
@@ -383,6 +387,7 @@ const HANDLERS = {
     // a connection sat there, the remote on that phone showed "Connecting". It is closed after a short wait,
     // unless that makes the phone come straight back again and again.
     clearTimeout(this.idle);
+    const recent = (s.idleCloses?.get(this.verified) ?? []).filter((at) => Date.now() - at < IDLE_ROUND_MS).length;
     this.idle = setTimeout(() => {
       if (this.opened || (this.asked ?? []).length > 1 || this.socket.destroyed) { return; }
       const now = Date.now();
@@ -392,7 +397,7 @@ const HANDLERS = {
       closes.set(this.verified, [...mine, now]);
       this.closedIdle = true;
       this.close();
-    }, IDLE_CLOSE_MS);
+    }, IDLE_CLOSE_MS[Math.min(recent, IDLE_CLOSE_MS.length - 1)]);
     this.idle.unref?.();
   },
   _sessionstart(message, c) {
