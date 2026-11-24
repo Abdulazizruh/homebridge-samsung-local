@@ -22,13 +22,6 @@ const FRAME = { NoOp: 1, PS_Start: 3, PS_Next: 4, PV_Start: 5, PV_Next: 6, E_OPA
 const AUTH_FRAMES = new Set([FRAME.PS_Start, FRAME.PS_Next, FRAME.PV_Start, FRAME.PV_Next]);
 const MAX_FRAME = 256 * 1024;
 const AUTH_DEADLINE_MS = 60_000;
-// A connection that only said who it is and then nothing. A remote that opens asks for its session within a
-// few hundredths of a second, so the first silent one is closed almost at once: the sooner the phone tries
-// again, the less its owner sees of it. One that keeps coming straight back is given more time each round.
-const IDLE_CLOSE_MS = [150, 150, 300, 1000];
-const IDLE_ROUND_MS = 10_000;
-const IDLE_LOOP_MS = 120_000;
-const IDLE_LOOP_MAX = 30; // closed this often in two minutes, it is left alone
 const MAX_CONNECTIONS = 8;
 const MAX_WRONG_CODES = 10;
 const VOLUME_FLAG = 0x0100;
@@ -79,7 +72,7 @@ class Connection {
     const s = this.server;
     const lasted = ((Date.now() - this.born) / 1000).toFixed(1);
     if (this.opened) {
-      s.log.info(`[${s.name}] iPhone remote of ${this.who()} ended after ${lasted}s${this.remote ? ', without the phone closing its remote first' : ''}.`);
+      s.log.info(`[${s.name}] the connection of ${this.who()} that carried a remote ended after ${lasted}s${this.remote ? ', without the phone closing its remote first' : ''}. ${this.#heard()}`);
     } else if (this.verified) {
       s.log.info(`[${s.name}] ${this.who()} connected and left ${lasted}s later without opening the remote${this.closedIdle ? ' (closed by the plugin for being idle)' : ''}. It asked: ${(this.asked ?? []).join(', ') || 'nothing'}. ${this.#heard()}`);
     } else if (this.stage) {
@@ -315,17 +308,9 @@ class Connection {
     this.keys = { out: pv.out, in: pv.in };
     this.verified = id.toString('utf8');
     this.verifiedMs = Date.now() - this.born;
-    // A phone has one remote. When it comes back on a new connection, the one it left behind is closed:
-    // a real phone that found its old connection still open sat on "Connecting" for half a minute.
-    // Only a connection whose remote is not open is closed: a phone may open a second
-    // connection just to ask something, and that must never cut the remote in use.
-    let closed = 0; let kept = 0;
-    for (const other of [...s.connections]) {
-      if (other === this || other.verified !== this.verified) { continue; }
-      if (other.remote) { kept += 1; } else { other.close(); closed += 1; }
-    }
-    this.siblings = { closed, kept };
-    if (closed) { s.log.info(`[${s.name}] the same iPhone or iPad came back; ${closed} earlier connection${closed === 1 ? '' : 's'} without an open remote ${closed === 1 ? 'was' : 'were'} closed.`); }
+    // A paired phone that recognises this device keeps a connection of its own open and asks for the remote
+    // over it when its owner opens one. Its connections are left alone: closing one made the device vanish
+    // from the phone's list.
     this.pv = null;
     clearTimeout(this.deadline);
   }
@@ -381,27 +366,12 @@ const HANDLERS = {
       ...(s.announced?.short ? { _i: s.announced.short } : {}),
     });
     this.status(message._x);
+    if (!this.introduced) { this.introduced = true; s.log.info(`[${s.name}] ${this.who()} connected and introduced itself.`); }
     const shape = Object.keys(c ?? {}).sort().map((k) => (/^[_A-Za-z][A-Za-z]{0,23}$/.test(k) ? k : '(other)')).join(',').slice(0, 300);
     this.infoShape = shape; // the names of what the phone sent about itself, never the values
     // Its switches, which are plain numbers and say what kind of connection this is; never an identifier or a name.
     const plain = (v) => (typeof v === 'number' || typeof v === 'boolean' ? String(v) : typeof v === 'string' && /^\d{1,6}$/.test(v) ? v : v === undefined ? '-' : 'other');
     this.infoFlags = `${['_sf', '_clFl', '_cf', '_bf', '_dC', '_lP'].map((k) => `${k}=${plain(c?.[k])}`).join(' ')} _btHP=${plain(message._btHP)} fields=${Object.keys(c ?? {}).length}${this.renamed ? ' other-order' : ''}`;
-    // A phone also connects by itself, says who it is, and then says nothing for half a minute. While such
-    // a connection sat there, the remote on that phone showed "Connecting". It is closed after a short wait,
-    // unless that makes the phone come straight back again and again.
-    clearTimeout(this.idle);
-    const recent = (s.idleCloses?.get(this.verified) ?? []).filter((at) => Date.now() - at < IDLE_ROUND_MS).length;
-    this.idle = setTimeout(() => {
-      if (this.opened || (this.asked ?? []).length > 1 || this.socket.destroyed) { return; }
-      const now = Date.now();
-      const closes = (s.idleCloses ??= new Map());
-      const mine = (closes.get(this.verified) ?? []).filter((at) => now - at < IDLE_LOOP_MS);
-      if (mine.length >= IDLE_LOOP_MAX) { return; } // it keeps coming back: left alone
-      closes.set(this.verified, [...mine, now]);
-      this.closedIdle = true;
-      this.close();
-    }, IDLE_CLOSE_MS[Math.min(recent, IDLE_CLOSE_MS.length - 1)]);
-    this.idle.unref?.();
   },
   _sessionstart(message, c) {
     this.sid = c._sid;
@@ -413,12 +383,17 @@ const HANDLERS = {
   tvrcsessionstart(message, c) {
     this.remote = true;
     this.opened = true;
+    this.sessionAt = Date.now();
+    this.typing = new Typing(); this.swipes = new Swipes(); // a connection may carry one remote after another
     this.server.log.info(`[${this.server.name}] iPhone remote of ${this.who()} opened: the phone proved itself ${this.verifiedMs ?? 0} ms after connecting, the remote was ready after ${Date.now() - this.born} ms. Before that it asked: ${(this.asked ?? []).slice(0, -1).join(', ') || 'nothing'}. Its switches: ${this.infoFlags ?? '-'}.`);
     this.server.sessionsChanged();
     this.reply(message, c);
     this.flags(message._x); // within a moment, or the iPhone keeps the volume buttons for itself
   },
-  tvrcsessionstop(message) { this.remote = false; this.server.sessionsChanged(); this.reply(message, {}); },
+  tvrcsessionstop(message) {
+    if (this.remote) { this.server.log.info(`[${this.server.name}] iPhone remote of ${this.who()} closed after ${((Date.now() - (this.sessionAt ?? Date.now())) / 1000).toFixed(1)}s; its connection stays.`); }
+    this.remote = false; this.server.sessionsChanged(); this.reply(message, {});
+  },
   _interest(message, c) {
     for (const name of Array.isArray(c._regEvents) ? c._regEvents : []) {
       if (name === '_iMC') { this.event('_iMC', { _mcF: VOLUME_FLAG }, message._x); }

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.4.0-beta.32
+
+Trial version on the "beta" channel. Fixes what beta.31 broke, and keeps what it found:
+
+- **The TV vanished from the phone's remote list in beta.31.** The tag added to the announcement in beta.31 was right: the log shows both phones now recognise the stand-in as their own device and keep a connection of their own open to it, every few seconds, without anyone touching a remote. But the plugin still closed every connection that only introduced itself, as it had done since beta.23 to get around the wait on "Connecting". To a phone that recognises the device, that looks like a device that cannot be reached, and it drops it from the list. Those connections are now left open, and so are a phone's earlier connections when it opens another. One connection may now carry one remote after another; the log says when a remote is opened and closed on it.
+- Not yet confirmed: whether the phone now asks for the remote over the connection it keeps, and whether the wait on "Connecting" stays away without the closing.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». تصلح ما أفسدته beta.31 وتحتفظ بما اكتشفته:
+
+- **التلفزيون اختفى من قائمة الريموت في beta.31.** الوسم المضاف إلى الإعلان في beta.31 كان صحيحًا: السجل يُظهر أن الجوالين صارا يعرفان البديل جهازًا لهما ويفتحان اتصالًا خاصًّا به كل بضع ثوانٍ، دون أن يلمس أحد الريموت. لكن الإضافة بقيت تغلق كل اتصال اكتفى بالتعريف بنفسه، كما تفعل منذ beta.23 للالتفاف على انتظار «Connecting». وعند جوال يعرف الجهاز، هذا يشبه جهازًا يتعذر الوصول إليه، فيحذفه من القائمة. الآن تُترك هذه الاتصالات مفتوحة، وكذلك اتصالات الجوال السابقة حين يفتح اتصالًا آخر. والاتصال الواحد قد يحمل الآن ريموتًا بعد آخر؛ والسجل يذكر متى فُتح الريموت عليه ومتى أُغلق.
+- لم يتأكد بعد: هل يطلب الجوال الريموت الآن عبر الاتصال الذي يبقيه، وهل يبقى انتظار «Connecting» غائبًا دون الإغلاق.
+
 ## 1.4.0-beta.31
 
 Trial version on the "beta" channel. Same as beta.30, plus a trial for the cause of the silent connections:
