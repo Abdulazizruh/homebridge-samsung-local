@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.0-beta.15
+
+Trial version on the "beta" channel. Everything in 1.6.0-beta.14, plus:
+
+- **Washer: a sensor for each stage, and one for drum clean (trial, on by default).** The washer already reported its stage; it was read but not shown. Now each stage the washer itself lists (washing, rinsing, spinning) has a sensor that is detected only during that stage, for automations such as a notice when the spin starts. Drum clean has its own sensor for the whole course: a WA80F top-loader names its drum clean as a stage of its own ("Drumcleaning", missing from its own list of stages), and drum clean courses are also known by their course code (Table_02 82 from that washer, the rest from LocalThings' course tables). Each can be switched off in the settings.
+- **The course and the last drum clean in the settings and the log.** The Home app shows no free text on a tile. The settings page now shows the selected course (drum clean by name, any other course by its number, since the course tables do not cover every model) and the date of the last drum clean the washer logged. The log says when a cycle starts and each new stage.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0-beta.14، ومعه:
+
+- **الغسالة: حساس لكل مرحلة، وحساس لتنظيف الحوض (تجريبي ومفعّل تلقائيًا).** الغسالة كانت تعلن مرحلتها، والإضافة تقرؤها ولا تعرضها. صار لكل مرحلة تعلنها الغسالة نفسها (غسيل، شطف، عصر) حساس يتفعّل وقت تلك المرحلة فقط، ليُبنى عليه أتمتة مثل إشعار عند بدء العصر. ولتنظيف الحوض حساس خاص طوال الدورة: الغسالة العلوية WA80F تعلن تنظيف الحوض مرحلةً قائمة بذاتها («Drumcleaning»، وهي غير موجودة في قائمة مراحلها)، وتُعرف دورات تنظيف الحوض أيضًا برمزها (82 في الجدول Table_02 من تلك الغسالة، والباقي من جداول LocalThings). ويمكن إطفاء كل واحد منها من الإعدادات.
+- **الدورة وآخر تنظيف للحوض في الإعدادات والسجل.** تطبيق Home لا يعرض نصًا حرًا على البطاقة. صارت صفحة الإعدادات تعرض الدورة المختارة (تنظيف الحوض باسمه، وأي دورة أخرى برقمها، لأن جداول الدورات لا تغطي كل الموديلات) وتاريخ آخر تنظيف للحوض كما سجّلته الغسالة. والسجل يذكر بداية الدورة وكل مرحلة جديدة.
+
 ## 1.6.0-beta.14
 
 Trial version on the "beta" channel. Everything in 1.6.0-beta.13, plus:

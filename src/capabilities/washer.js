@@ -6,14 +6,23 @@
  * Seen in captures: state "Ready" | "Run" (also "Pause", "Finish"),
  * machine state "Ready" | "Running" | "Paused" | "Finish" | "idle" | "active" | "pause",
  * progress "None" | "Weightsensing" | "Wash" | "Rinse" | "Spin" | "Finish" | ...
+ * A top-loader (WA80F, Table_02) reports progress "Drumcleaning" for the whole drum clean,
+ * a word missing from its own supportedProgress list.
  */
 const V = 'x.com.samsung.da.';
 export const LAUNDRY_KINDS = new Set(['washer', 'dryer', 'dishwasher']);
 /** Resources this model reads; anything else is listed as not used yet. */
 export const LAUNDRY_CONSUMED = new Set([
   '/operational/state/vs/0', '/operational/state/0', '/energy/consumption/vs/0', '/information/vs/0',
-  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/course/vs/0',
+  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/course/vs/0', '/st/washercourse/vs/0',
 ]);
+/** The stages a washer names, each shown as its own sensor. */
+export const WASHER_STAGES = ['wash', 'rinse', 'spin'];
+/**
+ * Drum clean courses by course table. Table_02 82 is a WA80F top-loader's own report (its drum
+ * clean ran as Course_82 with progress "Drumcleaning"); the rest are LocalThings' tables (MIT).
+ */
+const DRUM_CLEAN_COURSES = { Table_00: new Set(['63']), Table_02: new Set(['09', '29', '3A', '74', '82']) };
 const UNLOCKED = new Set(['ready', 'off', 'false', 'unlock', 'unlocked', 'none', 'disable', 'disabled', '']);
 
 /** Child lock: the plain boolean when present, else the vendor word. */
@@ -51,6 +60,26 @@ const PAUSED = new Set(['pause', 'paused']);
 const FINISHED = new Set(['finish', 'finished', 'end', 'complete', 'completed']);
 const lower = (v) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
 
+/** The selected course: its code, the table it belongs to, and whether it is a drum clean. */
+export function washerCourse(resources) {
+  const options = resources['/course/vs/0']?.[`${V}options`];
+  const token = Array.isArray(options) ? options.find((o) => typeof o === 'string' && /^Course_[0-9A-Fa-f]+$/.test(o)) : null;
+  if (!token) {
+    return null;
+  }
+  const code = token.slice('Course_'.length).toUpperCase();
+  const table = resources['/st/washercourse/vs/0']?.[`${V}st.courseTable`] ?? null;
+  return { code, table, drumClean: Boolean(table && DRUM_CLEAN_COURSES[table]?.has(code)) };
+}
+
+/** The date of the last drum clean the appliance logged (YYYY-MM-DD), or null. */
+export function lastDrumClean(resources) {
+  const options = resources['/course/vs/0']?.[`${V}options`];
+  const token = Array.isArray(options) ? options.find((o) => typeof o === 'string' && o.startsWith('DrumCleanLog_')) : null;
+  const dates = token ? token.slice('DrumCleanLog_'.length).split('|').map((d) => d.slice(0, 10)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)) : [];
+  return dates.length ? dates.sort().at(-1) : null;
+}
+
 /** "HH:MM:SS" (or "HH:MM") to seconds; null when it is not a duration. */
 export function parseDuration(text) {
   const m = /^(\d{1,3}):(\d{2})(?::(\d{2}))?$/.exec(String(text ?? '').trim());
@@ -86,6 +115,14 @@ export function buildWasherModel(resources = {}) {
   const alarms = alarmCodes(resources);
   const percent = number(vs[`${V}progressPercentage`] ?? std.progressPercentage);
   const washCount = optionNumber(resources, 'WashingTimes');
+  const listed = [...(vs[`${V}supportedProgress`] ?? []), ...(std.jobStates ?? [])].map(lower);
+  const stages = WASHER_STAGES.filter((x) => listed.includes(x));
+  const course = washerCourse(resources);
+  const lastClean = lastDrumClean(resources);
+  const options = resources['/course/vs/0']?.[`${V}options`] ?? [];
+  const cleanKnown = progress === 'drumcleaning' || Boolean(course?.drumClean) || lastClean !== null
+    || (Array.isArray(options) && options.some((o) => typeof o === 'string' && o.startsWith('DrumCleanProposal_')));
+  const inCycle = running || paused;
 
   return {
     model: info[`${V}description`] || null,
@@ -98,6 +135,10 @@ export function buildWasherModel(resources = {}) {
       progress: percent !== null,
       alarms: '/alarms/vs/0' in resources,
       washCount: washCount !== null,
+      stages,
+      drumClean: cleanKnown,
+      course: course !== null,
+      lastDrumClean: lastClean !== null,
     },
     state: {
       running,
@@ -110,6 +151,11 @@ export function buildWasherModel(resources = {}) {
       kidsLock: locked === true,
       alarms,
       washCount,
+      // The stage of a running cycle, as one of WASHER_STAGES, "drumcleaning" or another word; null outside one.
+      stage: inCycle && progress && progress !== 'none' ? progress : null,
+      drumClean: inCycle && (progress === 'drumcleaning' || Boolean(course?.drumClean)),
+      course,
+      lastDrumClean: lastClean,
       // The idle value is the length of the selected course, not a countdown.
       remainingSeconds: running || paused ? (remaining ?? 0) : 0,
       // Idle appliances report a negative placeholder.
@@ -132,6 +178,10 @@ export function washerFeatureRows(model) {
     row('kidsLock', s.kidsLock, 'home', st.kidsLock),
     row('alarms', s.alarms, 'home', st.alarms.join(', ') || 'none'),
     row('washCount', s.washCount, 'plugin-ui', st.washCount),
+    row('stages', s.stages.length > 0, 'home', st.stage && s.stages.includes(st.stage) ? st.stage : 'none', 'trial'),
+    row('drumClean', s.drumClean, 'home', st.drumClean, 'trial'),
+    row('course', s.course, 'plugin-ui', st.course ? (st.course.drumClean ? 'drumCleanCourse' : `#${st.course.code}`) : null),
+    row('lastDrumClean', s.lastDrumClean, 'plugin-ui', st.lastDrumClean),
     row('powerWatts', s.powerWatts, 'eve', st.powerWatts, 'W'),
     row('energyKWh', s.energyKWh, 'eve', st.energyKWh, 'kWh'),
   ];

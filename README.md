@@ -36,7 +36,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Appliance | Level | Notes |
 |---|---|---|
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
-| Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it |
+| Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
 | Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
 | Refrigerators | **Trial, not yet tried on a real one** | The temperature of each zone and a contact sensor per door. Setting each zone's temperature, Power Cool and Power Freeze as trial controls |
@@ -193,6 +193,8 @@ The parts of the same air conditioner. Each one can be switched off in the plugi
 
 The cycle tile is on while a cycle runs, with the time remaining inside it. The sensor turns on when the cycle has finished, for a notification or an automation. On a washer that announces the end of a cycle itself, only that announcement turns the sensor on, so a cancelled cycle gives no notice. The washer is read only; nothing is sent to it.
 
+Trial: a sensor for each stage the washer names (washing, rinsing, spinning) is detected only during that stage, for automations such as a notice when the spin starts. Drum clean has its own sensor: a top-loader names its drum clean as a stage of its own. The Home app shows no free text on a tile, so the course itself (its name when known, otherwise its number) and the date of the last drum clean are shown in the plugin settings and the log. Each can be switched off in the settings.
+
 <p><img src="assets/screenshots/washer-home.png" alt="Washer in Apple Home: a cycle tile and the finished sensor" width="280"></p>
 
 ### A Samsung TV in Apple Home
@@ -254,7 +256,7 @@ With a remote like Apple TV chosen, the touch area of that remote can step the s
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (132 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (134 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

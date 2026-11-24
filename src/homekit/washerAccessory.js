@@ -1,12 +1,18 @@
 import { failureText } from '../deviceLink.js';
-import { buildWasherModel } from '../capabilities/washer.js';
+import { buildWasherModel, WASHER_STAGES } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
-const LABELS = { cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert' };
+const LABELS = {
+  cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
+  wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
+};
+const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];
 export const WASHER_FEATURES = {
   cycleTile: true, finishedSensor: true, energyEve: true,
+  // Trials, on until the owner switches them off: a sensor for each stage the washer names, and drum clean.
+  stageSensors: true, drumCleanSensor: true,
   // Extras, off until the owner asks for them.
   progressTile: false, kidsLockSensor: false, alertSensor: false,
 };
@@ -139,6 +145,22 @@ export class WasherAccessory {
       drop(Service.LockMechanism, 'kidsLock');
       this.services.delete('kidsLock');
     }
+    // One sensor per stage the washer itself lists, detected only during that stage: for automations
+    // such as "tell me when the spin starts". The Home app shows no free text, so a sensor it is.
+    for (const stage of WASHER_STAGES) {
+      if (this.features.stageSensors && (supports.stages ?? []).includes(stage)) {
+        this.#service(stage, Service.OccupancySensor, `stage-${stage}`);
+      } else {
+        drop(Service.OccupancySensor, `stage-${stage}`);
+        this.services.delete(stage);
+      }
+    }
+    if (this.features.drumCleanSensor && supports.drumClean) {
+      this.#service('drumClean', Service.OccupancySensor, 'drumClean');
+    } else {
+      drop(Service.OccupancySensor, 'drumClean');
+      this.services.delete('drumClean');
+    }
     if (this.features.alertSensor && supports.alarms !== false) {
       this.#service('alert', Service.OccupancySensor, 'alert');
     } else {
@@ -160,9 +182,15 @@ export class WasherAccessory {
   }
 
   #onUpdate(resources) {
+    const before = this.model;
     this.model = buildWasherModel(resources);
     this.context.resources = resources;
     const st = this.model.state;
+    // Parts that depend on what the appliance reports appear once it first reports them.
+    if (JSON.stringify(before?.supports ?? null) !== JSON.stringify(this.model.supports)) {
+      this.#buildServices();
+    }
+    this.#sayStage(before?.state ?? null, st);
     // What was last seen is kept with the accessory, so a restart of the
     // bridge neither repeats a notice already given nor misses a cycle that
     // ended while it was down.
@@ -188,6 +216,20 @@ export class WasherAccessory {
     }
     this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished };
     this.#push();
+  }
+
+  /** The course when a cycle starts, and each new stage: words and a course number only. */
+  #sayStage(was, st) {
+    if (!was) {
+      return;
+    }
+    if (st.inCycle && !was.inCycle) {
+      const course = st.course ? (st.course.drumClean ? 'drum clean' : `course ${st.course.code}`) : 'a course';
+      this.log.info(`[${this.displayName}] cycle started: ${course}.`);
+    }
+    if (st.inCycle && st.stage && st.stage !== was.stage) {
+      this.log.info(`[${this.displayName}] stage: ${STAGE_WORDS[st.stage] ?? st.stage}.`);
+    }
   }
 
   #markFinished() {
@@ -256,6 +298,10 @@ export class WasherAccessory {
     }
     this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected, this.finished ? 1 : 0);
     this.services.get('progress')?.updateCharacteristic(Characteristic.CurrentRelativeHumidity, st.percent ?? 0);
+    for (const stage of WASHER_STAGES) {
+      this.services.get(stage)?.updateCharacteristic(Characteristic.OccupancyDetected, st.inCycle && st.stage === stage ? 1 : 0);
+    }
+    this.services.get('drumClean')?.updateCharacteristic(Characteristic.OccupancyDetected, st.drumClean ? 1 : 0);
     const lock = this.services.get('kidsLock');
     if (lock) {
       const value = st.kidsLock ? Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;

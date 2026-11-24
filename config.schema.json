@@ -174,6 +174,16 @@
                   "type": "boolean",
                   "default": true
                 },
+                "stageSensors": {
+                  "title": "Laundry (trial): a sensor for each stage the washer names (washing, rinsing, spinning)",
+                  "type": "boolean",
+                  "default": true
+                },
+                "drumCleanSensor": {
+                  "title": "Laundry (trial): drum clean sensor",
+                  "type": "boolean",
+                  "default": true
+                },
                 "progressTile": {
                   "title": "Laundry: progress tile (percent)",
                   "type": "boolean",

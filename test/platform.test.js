@@ -662,3 +662,46 @@ test('polling interval: at least 4 seconds, 5 when unset; a lower saved value is
   assert.equal(pollSeconds(999), 300);
   assert.equal(pollSeconds('x'), 5);
 });
+
+test('washer stages: a sensor for each stage the washer lists, drum clean as its own, on by default and removable', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const on = (key) => handler.services.get(key)?.getCharacteristic(C.OccupancyDetected).value;
+  assert.deepEqual(['wash', 'rinse', 'spin', 'drumClean'].map((k) => handler.services.get(k)?.getCharacteristic(C.ConfiguredName).value),
+    ['Washer Washing', 'Washer Rinsing', 'Washer Spinning', 'Washer Drum Clean']);
+  assert.deepEqual(['wash', 'rinse', 'spin', 'drumClean'].map(on), [0, 0, 0, 0], 'idle: nothing detected');
+
+  const state = (body) => platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body });
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Wash', [`${V}remainingTime`]: '00:41:00' });
+  await waitFor(() => on('wash') === 1);
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Rinse', [`${V}remainingTime`]: '00:20:00' });
+  await waitFor(() => on('rinse') === 1);
+  assert.equal(on('wash'), 0, 'one stage at a time');
+  // A top-loader names its whole drum clean as a stage of its own, outside its supported list.
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Drumcleaning', [`${V}remainingTime`]: '01:42:00' });
+  await waitFor(() => on('drumClean') === 1);
+  assert.deepEqual(['wash', 'rinse', 'spin'].map(on), [0, 0, 0]);
+  await state({ [`${V}state`]: 'Ready', [`${V}progress`]: 'None', [`${V}remainingTime`]: '00:57:00' });
+  await waitFor(() => on('drumClean') === 0);
+
+  const off = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { stageSensors: false, drumCleanSensor: false } }] } });
+  t.after(() => off.platform.stop());
+  await online(off.platform, W);
+  const other = off.platform.devices.get(W).handler;
+  assert.deepEqual(['wash', 'rinse', 'spin', 'drumClean'].filter((k) => other.services.has(k)), [], 'switched off: removed');
+});
+
+test('washer course: the code, its table and drum clean; the last drum clean from the appliance log', async () => {
+  const { washerCourse, lastDrumClean } = await import('../src/capabilities/washer.js');
+  const res = (options, table) => ({ '/course/vs/0': { [`${V}options`]: options }, ...(table ? { '/st/washercourse/vs/0': { [`${V}st.courseTable`]: table } } : {}) });
+  assert.deepEqual(washerCourse(res(['Course_82'], 'Table_02')), { code: '82', table: 'Table_02', drumClean: true });
+  assert.deepEqual(washerCourse(res(['Course_01'], 'Table_02')), { code: '01', table: 'Table_02', drumClean: false });
+  assert.equal(washerCourse(res(['Course_82'])).drumClean, false, 'no table: the code alone names nothing');
+  assert.equal(washerCourse(res([])), null);
+  assert.equal(lastDrumClean(res(['DrumCleanLog_2025-10-27T21:43:10|2026-10-06T01:13:37|2026-08-27T04:16:06'])), '2026-10-06');
+  assert.equal(lastDrumClean(res(['WashingTimes_5'])), null);
+});
