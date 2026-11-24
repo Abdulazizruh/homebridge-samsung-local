@@ -193,14 +193,14 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
-      suTitle: '1 · Remote on the iPhone', suBest: 'recommended', suNotBest: 'not recommended',
+      suTitle: '1 · Remote on the iPhone', suBest: 'recommended', suNotBest: 'not recommended', suAway: 'for use away from home',
       su_apple: 'Remote like Apple TV (trial)',
       suPin: 'Pairing code', suPinNote: 'you can change it below, under "About the remote like Apple TV"',
       su_appleNote: 'One remote with keyboard and touch pad. Chosen from the remote list with a code of four digits, once for each device. Inputs are reached from the TV\'s own menu.',
       su_tile: 'TV tile with the Home remote',
       su_tileNote: 'A real TV tile with input buttons, and its remote with arrows, without keyboard. Added to Apple Home on its own, with the code shown beside the TV in the list below.',
       su_both: 'Both together',
-      su_bothNote: 'The TV tile and its remote, and a second remote like Apple TV ending in "+". Two names for one TV in the remote list, and little gained.',
+      su_bothNote: 'For reaching the TV from outside the home: the remote like Apple TV at home, and the steady Apple Home tile when you are away (Apple Home needs a home hub for that: an Apple TV or a HomePod). The TV then has two names in the remote list, the second ending in "+". At home only, one remote is enough.',
       su_none: 'No remote',
       su_noneNote: 'Only the switches below, if you choose any.',
       swTitle: '2 · Switches for automations (optional)',
@@ -337,14 +337,14 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
-      suTitle: '1 · الريموت على الآيفون', suBest: 'موصى به', suNotBest: 'لا نوصي به',
+      suTitle: '1 · الريموت على الآيفون', suBest: 'موصى به', suNotBest: 'لا نوصي به', suAway: 'للوصول من خارج البيت',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
       suPin: 'رمز الاقتران', suPinNote: 'تستطيع تغييره في الأسفل، تحت «عن الريموت الذي مثل Apple TV»',
       su_appleNote: 'ريموت واحد بالكيبورد ولوحة اللمس. تختاره من قائمة الريموت برمز من أربعة أرقام، مرة واحدة لكل جهاز. والمداخل تصلها من قائمة التلفزيون نفسه.',
       su_tile: 'بطاقة تلفزيون مع ريموت تطبيق المنزل',
       su_tileNote: 'بطاقة تلفزيون حقيقية بأزرار للمداخل، وريموتها بالأسهم دون كيبورد. تُضاف إلى Apple Home بمفردها، برمزها الظاهر بجانب التلفزيون في القائمة بالأسفل.',
       su_both: 'الاثنان معًا',
-      su_bothNote: 'بطاقة التلفزيون وريموتها، ومعهما ريموت ثانٍ مثل Apple TV ينتهي اسمه بعلامة «+». اسمان لتلفزيون واحد في قائمة الريموت، والفائدة قليلة.',
+      su_bothNote: 'لمن يريد الوصول إلى تلفزيونه من خارج البيت: ريموت مثل Apple TV داخل البيت، وبطاقة Apple Home المستقرة حين تكون خارجه (يحتاج Apple Home لذلك مركزًا منزليًّا: Apple TV أو HomePod). ويصير للتلفزيون اسمان في قائمة الريموت، الثاني ينتهي بعلامة «+». ولمن يستخدمه داخل البيت فقط، ريموت واحد يكفي.',
       su_none: 'دون ريموت',
       su_noneNote: 'المفاتيح في الأسفل فقط، إن اخترت منها شيئًا.',
       swTitle: '2 · مفاتيح للأتمتة (اختياري)',
@@ -596,7 +596,7 @@
           const pinNow = /^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '0000';
           const choice = (value, tag) => `<label class="sl-choice">
               <input type="radio" name="sl-tv-setup" value="${value}" ${now === value ? 'checked' : ''}> <strong>${t('su_' + value)}</strong>
-              ${tag ? `<span class="sl-pill ${tag === 'suBest' ? 'sl-ok' : 'sl-warn'}">${t(tag)}</span>` : ''}
+              ${tag ? `<span class="sl-pill ${tag === 'suBest' ? 'sl-ok' : tag === 'suNotBest' ? 'sl-warn' : ''}">${t(tag)}</span>` : ''}
               <div class="sl-muted">${t('su_' + value + 'Note')}</div>
               ${value === 'apple' || value === 'both' ? `<div class="sl-pinline">${t('suPin')}: <strong class="sl-pin-now" dir="ltr">${esc(pinNow)}</strong> <span class="sl-muted">· ${t('suPinNote')}</span></div>` : ''}</label>`;
           const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
@@ -604,7 +604,7 @@
           return `<div class="sl-group mt-2"><div class="sl-group-title">${t('suTitle')}</div>
             ${choice('apple', 'suBest')}
             ${choice('tile')}
-            ${choice('both', 'suNotBest')}
+            ${choice('both', 'suAway')}
             ${choice('none')}
             <div class="sl-muted">${t('tvWake')}</div>
             </div>
