@@ -167,7 +167,11 @@ What is kept is the list itself (names, rooms, models, IDs), in the plugin's fol
 
 One bar under the list decides: **Apply selected**, **Select all**, **Clear all**.
 
-<p><img src="assets/screenshots/smartthings-match.png" alt="The result: a new appliance with its SmartThings name, an appliance named differently, and a search running for one appliance that did not answer" width="360"></p>
+<p><img src="assets/screenshots/smartthings-result.png" alt="The result after the scan: a new appliance ticked with its SmartThings name, an appliance named differently with its tick, the folded group with nothing to do, one appliance that did not answer with Watch for them and Search for it, and the decision bar" width="360"></p>
+
+**Searching for one appliance.** Press **Search for it** on its line: a small bar shows the attempts on that line only, with Stop, and everything else stays where it is.
+
+<p><img src="assets/screenshots/smartthings-match.png" alt="A search running for one appliance that did not answer: its own small progress bar with Stop, the rest of the result unchanged" width="360"></p>
 
 A name from SmartThings is a name you gave, so it is remembered like one you type.
 

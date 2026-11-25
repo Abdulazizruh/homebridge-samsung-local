@@ -7,12 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 A small fix in the scan result. Your settings, pairings and accessories are kept as they are.
 
 - **"Why, and what to check" is a row of its own under the buttons**, with space around it, so a finger no longer opens it instead of "Search for it", or the other way round.
+- **The plugin page shows the SmartThings names step by step in pictures:** the bar, the import, the progress, the result with its decision bar, and the search for one appliance.
 
 **بالعربية**
 
 إصلاح صغير في نتيجة البحث. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **سطر «لماذا، وماذا أتحقق منه» صار في صف مستقل تحت الأزرار**، وحوله مسافة، فلا يفتحه الإصبع بالغلط بدل «ابحث عنه»، ولا العكس.
+- **صفحة الإضافة تشرح الأسماء من SmartThings بالصور خطوة خطوة:** الشريط، ثم الاستيراد، ثم التقدم، ثم النتيجة وشريط القرار، ثم البحث عن جهاز واحد.
 
 ## 1.8.1
 
