@@ -98,10 +98,11 @@ test('SmartThings matching: by ID first, then by the only one of its model, then
 });
 
 test('SmartThings import: a second import is joined with the kept one; nothing learned before is lost', () => {
-  const kept = { devices: [{ stId: 'a', name: 'Old name', di: 'x-1', room: 'Hall' }, { stId: 'b', name: 'Gone from the list', di: 'x-2' }], roomsRead: true, statusRead: true };
+  const kept = { devices: [{ stId: 'a', name: 'Old name', di: 'x-1', room: 'Hall', ignored: true }, { stId: 'b', name: 'Gone from the list', di: 'x-2' }], roomsRead: true, statusRead: true };
   const fresh = { devices: [{ stId: 'a', name: 'New name', di: null, room: null }, { stId: 'c', name: 'New one', di: 'x-3' }], roomsRead: false, statusRead: false };
   const out = mergeImports(kept, fresh);
   assert.deepEqual(out.devices.map((d) => [d.stId, d.name, d.di, d.room ?? null]), [['a', 'New name', 'x-1', 'Hall'], ['c', 'New one', 'x-3', null], ['b', 'Gone from the list', 'x-2', null]]);
   assert.deepEqual([out.roomsRead, out.statusRead], [true, true]);
+  assert.equal(out.devices[0].ignored, true, 'an appliance set aside stays set aside after a new import');
   assert.deepEqual(mergeImports(null, fresh).devices.length, 2);
 });

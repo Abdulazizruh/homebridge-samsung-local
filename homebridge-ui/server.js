@@ -51,6 +51,15 @@ class UiServer extends HomebridgePluginUiServer {
       const saved = readJson(this.paths.smartthings);
       return saved && Array.isArray(saved.devices) ? saved : null;
     });
+    // An appliance the owner set aside: remembered in the kept list, so it is not listed as missing again.
+    this.onRequest('/smartthings-ignore', ({ stId, on } = {}) => {
+      const saved = readJson(this.paths.smartthings);
+      const dev = Array.isArray(saved?.devices) ? saved.devices.find((d) => d.stId && d.stId === stId) : null;
+      if (!dev) { return { ok: false }; }
+      if (on) { dev.ignored = true; } else { delete dev.ignored; }
+      writeJson(this.paths.smartthings, saved);
+      return { ok: true };
+    });
     this.onRequest('/smartthings-forget', () => { fs.rmSync(this.paths.smartthings, { force: true }); return { ok: true }; });
     this.onRequest('/smartthings-progress', () => this.stProgress ?? null);
     this.onRequest('/smartthings-match', (payload) => matchDevices(

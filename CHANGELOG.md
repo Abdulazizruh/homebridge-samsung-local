@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.3
+
+One more choice in the scan result. Your settings, pairings and accessories are kept as they are.
+
+- **"Ignore it" on a SmartThings appliance that is not in this home** (a screen at the office): it leaves the list of missing ones and is remembered, also after a new import. If it answers on this network one day, it shows up like any other. "Show it again" brings it back.
+
+**بالعربية**
+
+خيار إضافي في نتيجة البحث. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **زر «تجاهله» على جهاز في SmartThings ليس في هذا البيت** (شاشة في المكتب): يخرج من قائمة الغائبين ويُحفظ اختيارك، حتى بعد استيراد جديد. وإذا رد يومًا على هذه الشبكة يظهر مثل أي جهاز آخر. و«أظهره من جديد» يعيده.
+
 ## 1.8.2
 
 A small fix in the scan result. Your settings, pairings and accessories are kept as they are.
