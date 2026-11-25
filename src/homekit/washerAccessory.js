@@ -282,6 +282,10 @@ export class WasherAccessory {
   }
 
   #push() {
+    // While the washer is not reachable its tile stays "No Response" (pushed again when it is back).
+    if (!this.link.online) {
+      return;
+    }
     const { Characteristic } = this.hap;
     const st = this.model?.state ?? { inCycle: false, running: false, remainingSeconds: 0, powerWatts: null, energyKWh: null, percent: 0, kidsLock: false, alarms: [] };
     const valve = this.cycleStyle === 'sensor' ? null : this.services.get('cycle');

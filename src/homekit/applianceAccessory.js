@@ -244,6 +244,9 @@ export class ApplianceAccessory {
       setTimeout(() => this.#push(), 300).unref?.();
       return;
     }
+    if (!this.link.online) {
+      throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE); // nothing is held or sent
+    }
     // Held from the moment it is sent: a reading taken meanwhile does not put the old value back.
     const mine = (this.asked = (this.asked ?? 0) + 1);
     this.pending.set(id, { value, until: Date.now() + HOLD_MS, mine });
@@ -321,6 +324,11 @@ export class ApplianceAccessory {
   }
 
   #push() {
+    // While the appliance is not reachable, its tiles stay "No Response": no value, old or asked,
+    // is put over that until it is back (it is pushed again when it connects).
+    if (!this.link.online) {
+      return;
+    }
     const { Characteristic: C } = this.hap;
     const power = this.#part('power');
     const on = power ? Boolean(this.#shown(power)) : true;

@@ -16,7 +16,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.5.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.6.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -27,7 +27,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 | Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
 | Setup | Press **Scan the network** in the plugin settings and tick what to add, or enter one IP or MAC address and press **Test & discover** |
 | Identity | Each appliance is keyed on its own stable device ID, so a new IP address never creates a duplicate. An air conditioner or washer whose address changes is found again by itself |
-| Updates | Push (CoAP Observe) where the appliance supports it, polling every 15 s as fallback |
+| Updates | Push (CoAP Observe) where the appliance supports it, reading every 5 s by default as fallback (4 s at least) |
 | Works offline | Yes, after the one-time setup below |
 | Runs beside | `homebridge-smartthings-oauth` and any other plugin, without touching their files |
 
@@ -37,19 +37,19 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 |---|---|---|
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
 | Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it |
+| Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
 | Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
 | Refrigerators | **Trial, not yet tried on a real one** | The temperature of each zone and a contact sensor per door. Setting each zone's temperature, Power Cool and Power Freeze as trial controls |
 | Robot vacuums | **Trial, not yet tried on a real one** | Battery and filters. One trial switch: on starts a run, off sends the robot back to its station |
 | Ovens, ranges, microwaves, cooktops | **Trial, shown only** | Door, temperature and a "running" sensor. Never commanded |
 | Any other Samsung appliance | **Whatever it reports that the plugin knows** | Shown the same way; otherwise listed for diagnostics |
+| Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
+| Appliances that refuse the automatic certificate | **Not supported** | Detected and reported with the reason |
 
 Readings are sensors from the first day. Controls of these new types carry the word **trial** in the settings: they are built from recorded appliances of the same families, and none has been confirmed on a real one by this project yet. Each can be removed from Apple Home by unticking it, and each has a **Not working?** button that opens a ready report.
 
 <p><img src="assets/screenshots/options-air-purifier.png" alt="Air purifier options in the plugin settings: readings with a tick each, and two trial controls, each with its trial tag and a Not working? button" width="320"></p>
-| Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
-| Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
-| Appliances that refuse the automatic certificate | **Not supported** | Detected and reported with the reason |
 
 An IP address alone is **not** enough for every appliance. Discovery only reports success after it has read the appliance's identity and resources over an authenticated session.
 
@@ -260,7 +260,7 @@ With a remote like Apple TV chosen, the touch area of that remote can step the s
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (143 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (145 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

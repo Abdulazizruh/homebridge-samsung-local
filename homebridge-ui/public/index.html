@@ -244,7 +244,7 @@
       phNote4: 'Trial: opening it sometimes takes a few seconds, and the phone may show "Can\'t Connect" for a moment before it connects.',
       phNote3: 'Unofficial: it may stop working after an iOS update. Choosing a set-up without it removes everything it stored.',
       phStep1: 'Press Update below and restart the bridge.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
-      phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinNote: 'Empty means 0000. Each device enters it once. Choose your own digits if others use your network.', phCode: 'Pairing code', phPhones: 'Phones paired',
+      phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinBad: 'The pairing code is four digits, or empty for 0000. Nothing was saved.', phPinNote: 'Empty means 0000. Each device enters it once. Choose your own digits if others use your network.', phCode: 'Pairing code', phPhones: 'Phones paired',
       phRestart: 'Press Update and restart the bridge. The pairing code then appears here.',
       kbTitle: 'Keyboard trial (beta)',
       kbNote: 'Open a search field on the TV so its on-screen keyboard shows, then send a text from here. This trial tells us which apps accept typing from outside. Nothing is stored, and the text is not written to the log.',
@@ -395,7 +395,7 @@
       phNote4: 'تجريبي: فتحه يأخذ أحيانًا بضع ثوانٍ، وقد يعرض الجوال «Can\'t Connect» لحظة قبل أن يتصل.',
       phNote3: 'الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. اختيار إعداد دونه يحذف كل ما حفظه.',
       phStep1: 'اضغط «تحديث» في الأسفل ثم أعد تشغيل الجسر.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
-      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinNote: 'الخانة الفارغة تعني 0000. كل جهاز يدخله مرة واحدة. اختر أرقامك إن كان غيرك يستخدم شبكتك.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
+      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinBad: 'رمز الاقتران أربعة أرقام، أو اتركه فارغًا ليكون 0000. لم يُحفظ شيء.', phPinNote: 'الخانة الفارغة تعني 0000. كل جهاز يدخله مرة واحدة. اختر أرقامك إن كان غيرك يستخدم شبكتك.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
       phRestart: 'اضغط «تحديث» ثم أعد تشغيل الجسر، وبعدها يظهر رمز الاقتران هنا.',
       kbTitle: 'تجربة الكيبورد (نسخة تجريبية)',
       kbNote: 'افتح خانة بحث على التلفزيون حتى يظهر كيبورد الشاشة، ثم أرسل نصًا من هنا. هذه التجربة تبيّن أي التطبيقات تقبل الكتابة من الخارج. لا يُحفظ شيء، ولا يُكتب النص في السجل.',
@@ -785,7 +785,17 @@
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
       entry.appleRemote = ['apple', 'both'].includes(box.querySelector('[name="sl-tv-setup"]:checked')?.value);
-      if ($('sl-tv-pin')) { if (/^\d{4}$/.test($('sl-tv-pin').value.trim())) { entry.appleRemotePin = $('sl-tv-pin').value.trim(); } else { delete entry.appleRemotePin; } }
+      if ($('sl-tv-pin')) {
+        const pin = $('sl-tv-pin').value.trim();
+        // A typing slip must not change the pairing: only an empty field goes back to 0000.
+        if (pin && !/^\d{4}$/.test(pin)) {
+          $('sl-tv-pin').classList.add('is-invalid'); $('sl-tv-pin').focus();
+          homebridge.toast.warning(t('phPinBad'));
+          return;
+        }
+        $('sl-tv-pin').classList.remove('is-invalid');
+        if (pin) { entry.appleRemotePin = pin; } else { delete entry.appleRemotePin; }
+      }
       if (entry.appleRemote && box.querySelector('[name="sl-tv-touch"]:checked')?.value === 'pointer') { entry.appleRemoteTouch = 'pointer'; } else { delete entry.appleRemoteTouch; }
       done();
       await change(() => {

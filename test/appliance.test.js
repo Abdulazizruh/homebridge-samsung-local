@@ -182,6 +182,20 @@ test('appliance commands follow the air conditioner rules: held from sending, a 
   void handler;
 });
 
+test('an appliance that is not reachable stays "No Response" after a command to it fails', async () => {
+  const { link, handler, C, set } = setup('purifier_tower', 'airPurifier');
+  const FAIL = -70402; // SERVICE_COMMUNICATION_FAILURE
+  const lead = () => handler.services.get('speed').getCharacteristic(C.Active).statusCode;
+  link.setOnline(false);
+  assert.equal(lead(), FAIL, 'shown as not responding');
+  await assert.rejects(set('speed', C.Active, 0), 'refused at once');
+  await new Promise((r) => setTimeout(r, 400)); // the refresh after a failure
+  assert.equal(lead(), FAIL, 'still not responding: no older value put back');
+  assert.equal(link.sent.length, 0, 'nothing sent');
+  link.setOnline(true);
+  assert.equal(lead(), 0, 'responding again once it is back');
+});
+
 test('robot vacuum: only a token the robot lists is sent', () => {
   const f = fixture('vacuum_jetbot');
   const model = buildApplianceModel(f.resources, 'robotVacuum');

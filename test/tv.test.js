@@ -488,6 +488,30 @@ test('iPhone remote: a press while the TV is shown as off asks the TV at once, a
   assert.equal(quietLog.lines.filter(([, m]) => /not sent: the TV is shown as off/.test(m)).length, 1);
 });
 
+test('TV power: a retry after a failed press is sent, and so is a wish after the TV was switched by its own remote', async (t) => {
+  const tv = await fakeTv({ power: 'standby' });
+  const { api, platform } = await bootTv(tv, 'tile', tmpDir());
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const C = api.hap.Characteristic;
+  await waitFor(() => handler.reachable === true);
+  const active = handler.services.get('tv').getCharacteristic(C.Active);
+  const key = handler.remote.key.bind(handler.remote);
+  let refuse = 1;
+  handler.remote.key = (code) => (refuse-- > 0 ? Promise.reject(new Error('refused')) : key(code));
+  await assert.rejects(active.handleSetRequest(1), 'the first press failed');
+  await active.handleSetRequest(1); // asked again at once: sent, not taken for the second tile of a pair
+  await waitFor(() => tv.keys.length >= 1);
+  assert.deepEqual(tv.keys, ['KEY_POWER'], 'the retry reached the TV');
+  assert.equal(tv.power, 'on');
+  tv.power = 'standby'; // switched off with the TV's own remote
+  await new Promise((r) => setTimeout(r, 1200));
+  await active.handleSetRequest(1);
+  await waitFor(() => tv.keys.length >= 2);
+  assert.deepEqual(tv.keys, ['KEY_POWER', 'KEY_POWER'], 'a later wish asks the TV and presses again');
+  assert.equal(tv.power, 'on');
+});
+
 test('TV power asked twice at once (the tile and the power switch): the toggle is pressed once', async (t) => {
   const tv = await fakeTv({ power: 'standby' });
   const { api, platform } = await bootTv(tv, 'both', tmpDir(), { tvSwitches: ['power'] });

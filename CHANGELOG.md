@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.1-beta.1
+
+Trial version on the "beta" channel. Everything in 1.6.0, plus:
+
+- **TV: power asked again after a failed press is sent.** The guard that keeps the second tile of a pair from pressing the power key twice counted a wish as done before it was carried out. When the TV refused the first press, asking again at once was skipped and the tile showed the TV on while it stayed off. Now only a wish that was carried out counts, and only for a second asked while it ran or within one second after: a later wish, for example after the TV was switched with its own remote, asks the TV and presses again.
+- **An appliance that is not reachable stays "No Response".** For purifiers, fans, dehumidifiers, refrigerators, robot vacuums and the washer, a refresh (after a failed command, or the washer's "finished" timer) put an old value back on the tile and hid that the appliance was gone. While it is not reachable nothing is written over that; a command to it is refused at once, and its state is shown again as soon as it is back. Air conditioners already worked this way.
+- **Settings: a pairing code that is not four digits is refused.** A typing slip such as three digits saved as if the field were empty, and the TV went back to 0000. Now nothing is saved and the field says why; an empty field still means 0000.
+- **Project page:** the status reads 1.6.0, the fallback reading is every 5 seconds by default (4 at least), and the TV rows are back in the table of supported appliances.
+
+**بالعربية**
+
+نسخة تجريبية على قناة «beta». كل ما في 1.6.0، ومعه:
+
+- **التلفزيون: طلب التشغيل بعد ضغطة فاشلة يُرسل.** الحماية التي تمنع البطاقة الثانية من الزوج من ضغط زر التشغيل مرتين كانت تعدّ الطلب منفَّذًا قبل تنفيذه. فإذا رفض التلفزيون الضغطة الأولى، تُجوهل الطلب المكرر فورًا، وعرضت البطاقة التلفزيون مشغَّلًا وهو مطفأ. صار الطلب يُعدّ منفَّذًا بعد تنفيذه فقط، ولا يُتجاهل إلا طلب ثانٍ جاء أثناء تنفيذه أو خلال ثانية بعده. والطلب اللاحق، مثلًا بعد تشغيل التلفزيون أو إطفائه بريموته، يسأل التلفزيون ويضغط من جديد.
+- **الجهاز غير المتصل يبقى «لا يستجيب».** في المنقيات والمراوح ومزيلات الرطوبة والثلاجات والمكانس والغسالة، كان تحديثٌ (بعد أمر فاشل، أو مؤقت «انتهت» في الغسالة) يعيد قيمة قديمة إلى البطاقة ويخفي أن الجهاز منقطع. صار لا يُكتب شيء فوق ذلك ما دام الجهاز منقطعًا، ويُرفض الأمر إليه فورًا، وتعود حالته بمجرد اتصاله. والمكيفات كانت تعمل هكذا من قبل.
+- **الإعدادات: رمز الاقتران الذي ليس أربعة أرقام يُرفض.** خطأ كتابة مثل ثلاثة أرقام كان يُحفظ كأن الخانة فارغة، فيرجع الرمز إلى 0000. صار لا يُحفظ شيء، وتوضح الخانة السبب. والخانة الفارغة ما زالت تعني 0000.
+- **صفحة المشروع:** الحالة 1.6.0، والقراءة الدورية البديلة كل 5 ثوانٍ افتراضيًا (4 على الأقل)، وصفوف التلفزيونات عادت إلى جدول الأجهزة المدعومة.
+
 ## 1.6.0
 
 Everything tried in the 1.5.1 and 1.6.0 beta versions, as one release. Your settings, pairings and accessories are kept as they are.
