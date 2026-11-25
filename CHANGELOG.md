@@ -4,17 +4,19 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 ## 1.8.7
 
-The way to the SmartThings tokens page. Your settings, pairings and accessories are kept as they are.
+The SmartThings button opens the form that creates a token. Your settings, pairings and accessories are kept as they are.
 
-- **The button opens SmartThings' own guide to personal access tokens, and the tokens page is opened from its link there.** Samsung's sign-in refuses (error 403) the tokens page when it is reached by a link from another site while the browser is already signed in to Samsung; reached from SmartThings' own pages it is the way Samsung itself sends people. The attempt of 1.8.6 to hand the address to the system on iPhone did not work and is removed.
-- The button is a plain link again, with no script. The direct address stays under it as a link, with a copy button.
+- **One button that picks its address by the device.** On an iPhone or iPad it is "Create token in Safari": a plain link that asks the system to open the form in Safari itself, from your own tap. Elsewhere it is "Create SmartThings token" and opens the form in a new tab.
+- **It goes straight to the form that creates a token** (`account.smartthings.com/tokens/new`), and the three steps say so: open the form, tick the read permissions, create the token and paste it.
+- **The help under the button keeps the other ways** for when Samsung shows an error page: press and hold for "Open in New Tab", or copy the address. The scripted attempt of 1.8.6 is removed.
 
 **بالعربية**
 
-الطريق إلى صفحة الرموز في SmartThings. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+زر SmartThings يفتح نموذج إنشاء الرمز. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **الزر يفتح شرح SmartThings الرسمي للرموز الشخصية، وصفحة الرموز تُفتح من رابطه هناك.** صفحة الدخول في Samsung ترفض (الخطأ 403) صفحة الرموز إذا وصلتها برابط من موقع آخر والمتصفح داخل إلى حساب Samsung. والوصول إليها من صفحات SmartThings نفسها هو الطريق الذي ترسل Samsung الناس منه. ومحاولة 1.8.6 تسليم العنوان إلى النظام على iPhone لم تنجح، فحُذفت.
-- الزر رابط عادي من جديد، بلا أي سكربت. والعنوان المباشر باقٍ تحته رابطًا، ومعه زر نسخ.
+- **زر واحد يختار عنوانه بحسب الجهاز.** على iPhone و iPad اسمه «إنشاء رمز في Safari»: رابط عادي يطلب من النظام فتح النموذج في Safari نفسه، من ضغطتك أنت. وعلى بقية الأجهزة اسمه «إنشاء رمز في SmartThings»، ويفتح النموذج في تبويب جديد.
+- **يذهب مباشرة إلى نموذج إنشاء الرمز** (`account.smartthings.com/tokens/new`)، والخطوات الثلاث تقول ذلك: افتح النموذج، ثم اختر صلاحيات القراءة، ثم أنشئ الرمز والصقه.
+- **المساعدة تحت الزر تُبقي الطرق الأخرى** إذا عرضت Samsung صفحة خطأ: الضغط المطوّل ثم «فتح في علامة تبويب جديدة»، أو نسخ العنوان. ومحاولة 1.8.6 بالسكربت حُذفت.
 
 ## 1.8.6
 
