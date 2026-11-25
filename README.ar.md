@@ -149,7 +149,7 @@ npm install --save homebridge-samsung-local
 
 <p><img src="assets/screenshots/smartthings-closed-ar.png" alt="الشريط المطوي: أسماء أجهزتك من SmartThings، اختياري" width="360"></p>
 
-1. اضغط **افتح صفحة SmartThings**: تفتح صفحة الدخول إلى حساب Samsung، ثم صفحة الرموز في SmartThings. اضغط **Generate new token**.
+1. اضغط **افتح صفحة SmartThings**: تفتح صفحة الرموز في SmartThings (`account.smartthings.com/tokens`)، وهي تطلب الدخول بحساب Samsung أولًا عند الحاجة. اضغط **Generate new token**.
 2. اختر صلاحيات القراءة فقط: **List all devices** و **See all devices**، ولأسماء الغرف والمواقع **See all locations** (اختياري).
 3. الصق الرمز واضغط **استورد وابحث في الشبكة**.
 

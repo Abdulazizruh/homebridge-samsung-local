@@ -143,7 +143,7 @@ It is a separate bar in "Add an appliance", closed until you open it:
 
 <p><img src="assets/screenshots/smartthings-closed.png" alt="The closed bar: Your appliance names from SmartThings, optional" width="360"></p>
 
-1. Press **Open the SmartThings page**: it opens the Samsung account sign-in, then the tokens page of SmartThings. Press **Generate new token**.
+1. Press **Open the SmartThings page**: it opens the tokens page of SmartThings (`account.smartthings.com/tokens`), which asks you to sign in with your Samsung account first if needed. Press **Generate new token**.
 2. Tick the read permissions only: **List all devices** and **See all devices**, and for room and place names **See all locations** (optional).
 3. Paste the token and press **Import and scan**.
 
