@@ -22,7 +22,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.8.4. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.8.5. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -143,7 +143,7 @@ It is a separate bar in "Add an appliance", closed until you open it:
 
 <p><img src="assets/screenshots/smartthings-closed.png" alt="The closed bar: Your appliance names from SmartThings, optional" width="360"></p>
 
-1. Press **Open the SmartThings page**: it opens the tokens page of SmartThings (`account.smartthings.com/tokens`), which asks you to sign in with your Samsung account first if needed. Press **Generate new token**.
+1. Press **Open the SmartThings page**: it opens the tokens page of SmartThings (`account.smartthings.com/tokens`), which asks you to sign in with your Samsung account first if needed. Press **Generate new token**. If Samsung shows an error page instead (such as 403), it comes from its sign-in, usually from an old sign-in kept in the browser: press the button once more, or open the address in a private window or on a computer; the settings have a button to copy it.
 2. Tick the read permissions only: **List all devices** and **See all devices**, and for room and place names **See all locations** (optional).
 3. Paste the token and press **Import and scan**.
 

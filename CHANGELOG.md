@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.5
+
+Help for the SmartThings sign-in. Your settings, pairings and accessories are kept as they are.
+
+- **When Samsung's sign-in shows an error page** (such as 403) instead of the tokens page, the step now says what to do: press the button once more, open the address in a private window or another browser, or create the token on a computer. With a button that copies the address.
+- **The first step reads in order:** the button that opens the page, then what to press on that page.
+
+**بالعربية**
+
+مساعدة عند الدخول إلى SmartThings. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **إذا عرضت صفحة الدخول في Samsung خطأ** (مثل 403) بدل صفحة الرموز، تشرح الخطوة ما تفعله: اضغط الزر مرة ثانية، أو افتح العنوان في نافذة خاصة أو متصفح آخر، أو أنشئ الرمز من كمبيوتر. ومعها زر ينسخ العنوان.
+- **الخطوة الأولى صارت بالترتيب:** الزر الذي يفتح الصفحة، ثم ما تضغطه في تلك الصفحة.
+
 ## 1.8.4
 
 Two accuracy fixes from a review of 1.8.3. Your settings, pairings and accessories are kept as they are.
