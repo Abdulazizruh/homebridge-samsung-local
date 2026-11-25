@@ -47,10 +47,27 @@ export async function tvInfo(host, { httpPort = 8001, timeoutMs = INFO_TIMEOUT_M
       power: d.PowerState ? (String(d.PowerState).toLowerCase() === 'on') : true,
       // As the TV wrote it, for the log: null when the model does not report it.
       powerState: d.PowerState ? String(d.PowerState) : null,
+      pointer: pointerSupport(body),
     };
   } catch {
     return null;
   }
+}
+
+/**
+ * Whether the TV takes a pointer (mouse) from a remote: its info page says so under
+ * isSupport.remote_touchPad. Older models (2016, 2017) have no such list at all and do not
+ * move a pointer from a remote; they are counted as not supporting it.
+ */
+export function pointerSupport(body) {
+  let list = body?.isSupport ?? body?.device?.isSupport;
+  if (typeof list === 'string') {
+    try { list = JSON.parse(list); } catch { list = null; }
+  }
+  if (!list || typeof list !== 'object') {
+    return false;
+  }
+  return String(list.remote_touchPad ?? '').toLowerCase() === 'true';
 }
 
 /** Wake-on-LAN: the only way to switch on a TV that is fully off. */

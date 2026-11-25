@@ -58,6 +58,8 @@
   .sl-touch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
   .sl-touch-grid .sl-choice { margin-bottom: 0; text-align: center; }
   .sl-touch-ico svg { width: 30px; height: 30px; margin: 4px 0; color: #6f42c1; }
+  .sl-off { opacity: .45; cursor: not-allowed; filter: grayscale(1); }
+  .sl-alert-warn { padding: 8px 10px; border-radius: 8px; background: #fff3cd; color: #7a5200; border: 1px solid #f1c75a; font-weight: 600; }
   .sl-plus { display: none; } .sl-wrap:has(#sl-tv-tile:checked) .sl-plus { display: inline; }
   .sl-sw { display: flex; align-items: center; gap: 8px; padding: 6px 2px; margin: 0; border-bottom: 1px solid rgba(128,128,128,.15); cursor: pointer; }
   .sl-swbox:not(:has(#sl-tv-switches-on:checked)) .sl-swlist { display: none; }
@@ -208,7 +210,7 @@
       laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
       sec: { ac: 'Air conditioners', laundry: 'Laundry', tv: 'TVs', air: 'Air purifiers and dehumidifiers', fridge: 'Refrigerators', vacuum: 'Robot vacuums', cooking: 'Cooking', other: 'Other appliances' }, secCount: (n) => (n === 1 ? '1 device' : `${n} devices`), secAll: 'all connected', secOne: 'connected', secSome: (a, n) => `${a} of ${n} connected`, secFold: 'Show or hide this group',
       phTouch: 'Touch area of this remote', phTouchArrows: 'Arrows: a slide moves the selection step by step', phTouchPointer: 'Pointer (trial): the finger moves a pointer, like a mouse', phTouchNote: 'The pointer shows in the TV\'s browser and in some apps; elsewhere nothing moves. A tap right after moving clicks what is under the pointer. Buttons and keyboard are the same in both.',
-      phArrows: 'Arrows', phPointer: 'Pointer', phArrowsNote: 'A slide moves the selection step by step', phPointerNote: 'The finger moves a pointer, like a mouse', phTested: 'tested',
+      phPointerNo: 'This TV does not support the pointer: older Samsung TVs take only arrows from a remote. The touch area here works with arrows.', phPointerOld: 'Older Samsung TVs do not support the pointer. Whether this TV does is known once it has answered while on; until then, choose arrows if it is an older model.', phArrows: 'Arrows', phPointer: 'Pointer', phArrowsNote: 'A slide moves the selection step by step', phPointerNote: 'The finger moves a pointer, like a mouse', phTested: 'tested',
       devMore: 'Show or hide this appliance', devOff: 'Off', dirtyNote: 'Unsaved changes in', dirtyUndo: 'Undo', dirtySave: 'Save',
       apReadings: 'Readings', apControls: 'Controls', apTrial: 'trial', apBroken: 'Not working?', apNote: 'Trial functions have not been tried on this model yet. Untick one to remove it from Apple Home. If one does not work, press "Not working?" next to it.', apReportNote: 'The report opens ready on GitHub; you press Submit there. Attach the diagnostics file from below: identifiers, addresses and keys are removed from it.', apTableNote: 'Read from what your own appliance reports. Controls are trials until confirmed on a real appliance of this type.',
       apPart: { power: 'Power', speed: 'Fan speed and automatic mode', clean: 'Start cleaning, and back to the station', 'boost.fridge': 'Power Cool', 'boost.freezer': 'Power Freeze', airQuality: 'Air quality', filter: 'Filter', temperature: 'Temperature', setpoint: 'Set the temperature', humidity: 'Humidity', targetHumidity: 'Target humidity', door: 'Door', battery: 'Battery', running: 'Running sensor', kidsLock: 'Child lock status', alert: 'Alert sensor (appliance faults)', energy: 'Power and energy (Eve)' },
@@ -353,7 +355,7 @@
       laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
       sec: { ac: 'المكيفات', laundry: 'الغسيل', tv: 'التلفزيونات', air: 'منقيات الهواء ومزيلات الرطوبة', fridge: 'الثلاجات', vacuum: 'المكانس الآلية', cooking: 'الطبخ', other: 'أجهزة أخرى' }, secCount: (n) => (n === 1 ? 'جهاز واحد' : n === 2 ? 'جهازان' : n <= 10 ? `${n} أجهزة` : `${n} جهازًا`), secAll: 'كلها متصلة', secOne: 'متصل', secSome: (a, n) => `${a} من ${n} متصلة`, secFold: 'إظهار هذه المجموعة أو إخفاؤها',
       phTouch: 'مساحة اللمس في هذا الريموت', phTouchArrows: 'أسهم: السحب يحرّك التحديد خطوة خطوة', phTouchPointer: 'مؤشر (تجريبي): الإصبع يحرّك مؤشرًا مثل الماوس', phTouchNote: 'المؤشر يظهر في متصفح التلفزيون وبعض التطبيقات، وفي غيرها لن يتحرك شيء. اللمسة بعد تحريك المؤشر تضغط ما تحته. الأزرار والكيبورد كما هي في الحالتين.',
-      phArrows: 'أسهم', phPointer: 'مؤشر', phArrowsNote: 'السحب يحرّك التحديد خطوة خطوة', phPointerNote: 'الإصبع يحرّك مؤشرًا مثل الماوس', phTested: 'مجرَّب',
+      phPointerNo: 'هذا التلفزيون لا يدعم المؤشر: تلفزيونات Samsung القديمة تقبل الأسهم فقط من الريموت. ومساحة اللمس هنا تعمل بالأسهم.', phPointerOld: 'تلفزيونات Samsung القديمة لا تدعم المؤشر. ويُعرف دعم هذا التلفزيون له بعد أن يجيب وهو مشغَّل، وإلى ذلك الحين اختر الأسهم إن كان موديلًا قديمًا.', phArrows: 'أسهم', phPointer: 'مؤشر', phArrowsNote: 'السحب يحرّك التحديد خطوة خطوة', phPointerNote: 'الإصبع يحرّك مؤشرًا مثل الماوس', phTested: 'مجرَّب',
       devMore: 'إظهار هذا الجهاز أو إخفاؤه', devOff: 'موقوف', dirtyNote: 'تغييرات لم تُحفظ في', dirtyUndo: 'تراجع', dirtySave: 'حفظ',
       apReadings: 'القراءات', apControls: 'التحكم', apTrial: 'تجريبي', apBroken: 'لا تعمل؟', apNote: 'الوظائف التجريبية لم تُجرَّب على هذا الموديل بعد. أزل العلامة عن أي وظيفة لإخفائها من Apple Home. وإن لم تعمل إحداها فاضغط «لا تعمل؟» بجانبها.', apReportNote: 'يُفتح التقرير جاهزًا في GitHub، وأنت تضغط الإرسال هناك. أرفق ملف التشخيص من الأسفل: تُحذف منه المعرّفات والعناوين والمفاتيح.', apTableNote: 'مقروءة مما يعلنه جهازك نفسه. وظائف التحكم تجريبية حتى تُؤكَّد على جهاز حقيقي من هذا النوع.',
       apPart: { power: 'التشغيل والإيقاف', speed: 'سرعة المروحة والوضع التلقائي', clean: 'بدء التنظيف، والعودة إلى المحطة', 'boost.fridge': 'التبريد السريع', 'boost.freezer': 'التجميد السريع', airQuality: 'جودة الهواء', filter: 'الفلتر', temperature: 'الحرارة', setpoint: 'ضبط الحرارة', humidity: 'الرطوبة', targetHumidity: 'الرطوبة المطلوبة', door: 'الباب', battery: 'البطارية', running: 'حساس التشغيل', kidsLock: 'حالة قفل الأطفال', alert: 'حساس التنبيه (أعطال الجهاز)', energy: 'القدرة والطاقة (Eve)' },
@@ -659,6 +661,9 @@
       const ph = status.appleRemote?.[p.deviceId];
       const pin = /^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '';
       const nameNow = existing?.name || p.tv?.name || 'Samsung TV'; // as it will read in the iPhone's remote list
+      // Whether this TV takes a pointer, as it said itself: false greys the choice out, null is not known yet.
+      const pointerOk = typeof p.tv.pointer === 'boolean' ? p.tv.pointer : (typeof status.tvPointer?.[p.deviceId] === 'boolean' ? status.tvPointer[p.deviceId] : null);
+      const pointerOn = pointerOk !== false && existing?.appleRemoteTouch === 'pointer';
       const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
           <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
       const pairing = p.tv.configured
@@ -685,8 +690,9 @@
                 : `<div class="sl-pill sl-warn mt-1">${t('phRestart')}</div>`) : ''}
               <div class="sl-touch"><strong>${t('phTouch')}</strong>
                 <div class="sl-touch-grid">${[['arrows', 'phArrows', 'phArrowsNote', 'sl-ok', 'phTested'], ['pointer', 'phPointer', 'phPointerNote', 'sl-warn', 'apTrial']].map(([value, name, note, tone, tag]) => `
-                  <label class="sl-choice"><input type="radio" name="sl-tv-touch" value="${value}" ${(existing?.appleRemoteTouch === 'pointer') === (value === 'pointer') ? 'checked' : ''}> <strong>${t(name)}</strong>
+                  <label class="sl-choice${value === 'pointer' && pointerOk === false ? ' sl-off' : ''}"><input type="radio" name="sl-tv-touch" value="${value}" ${pointerOn === (value === 'pointer') ? 'checked' : ''} ${value === 'pointer' && pointerOk === false ? 'disabled' : ''}> <strong>${t(name)}</strong>
                     <div class="sl-touch-ico">${ICON[value]}</div><div class="sl-muted">${t(note)}</div><span class="sl-pill ${tone}">${t(tag)}</span></label>`).join('')}</div>
+                ${pointerOk === false ? `<div class="sl-alert-warn mt-2">${t('phPointerNo')}</div>` : pointerOk === null ? `<div class="sl-alert-warn mt-2">${t('phPointerOld')}</div>` : ''}
                 <div class="sl-muted mt-1">${t('phTouchNote')}</div></div>
             </div></div>
         </div>
@@ -783,7 +789,7 @@
         $('sl-tv-pin').classList.remove('is-invalid');
         if (pin) { entry.appleRemotePin = pin; } else { delete entry.appleRemotePin; }
       }
-      if (entry.appleRemote && box.querySelector('[name="sl-tv-touch"]:checked')?.value === 'pointer') { entry.appleRemoteTouch = 'pointer'; } else { delete entry.appleRemoteTouch; }
+      if (entry.appleRemote && box.querySelector('[name="sl-tv-touch"]:checked:not(:disabled)')?.value === 'pointer') { entry.appleRemoteTouch = 'pointer'; } else { delete entry.appleRemoteTouch; }
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));

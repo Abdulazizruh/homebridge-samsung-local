@@ -213,7 +213,7 @@ The remote is in Control Centre: open the remote and choose the TV at the top. V
 
 <p><img src="assets/screenshots/tv-remote-like-apple-tv.png" alt="The remote like Apple TV on an iPad: the TV chosen in the Control Centre remote with the Apple TV mark, a large touch area, mute, power, play and pause, back and the TV button" width="300"></p>
 
-**The touch area as a pointer (trial, tried on one TV).** In the TV's options the touch area of this remote can move a pointer, like a mouse, in place of stepping the selection. The pointer shows in the TV's browser and in some apps; elsewhere nothing moves, so arrows stay the default. A tap right after moving clicks the item under the pointer; once the pointer has been still for 8 seconds, a tap is Select again.
+**The touch area as a pointer (trial, tried on two newer TVs).** Newer TVs only: older Samsung TVs take only arrows from a remote, and for them the choice is greyed out with a note, decided by what the TV itself reports. In the TV's options the touch area of this remote can move a pointer, like a mouse, in place of stepping the selection. The pointer shows in the TV's browser and in some apps; elsewhere nothing moves, so arrows stay the default. A tap right after moving clicks the item under the pointer; once the pointer has been still for 8 seconds, a tap is Select again.
 
 **Switches for automations (optional).** Power, mute, volume up and down, channel up and down, play/pause and home can each be shown as a switch, grouped under one accessory in the bridge, for use in automations and scenes. They work with any remote choice.
 
@@ -250,7 +250,7 @@ The TV's options are three ticks that do not exclude one another: tick all of th
 
 <p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: on the iPhone the remote like Apple TV with its code and touch area, and in the Home app the TV tile with its code and the switches for automations" width="320"></p>
 
-With a remote like Apple TV chosen, the touch area of that remote can step the selection with arrows (tested) or move a pointer like a mouse (trial). The pointer shows in the TV's browser and in some apps.
+With a remote like Apple TV chosen, the touch area of that remote can step the selection with arrows (tested) or move a pointer like a mouse (trial, newer TVs only; greyed out on older models). The pointer shows in the TV's browser and in some apps.
 
 <p><img src="assets/screenshots/touch-area.png" alt="The choice for the remote's touch area: Arrows, tested, and Pointer, trial" width="300"></p>
 
@@ -258,7 +258,7 @@ With a remote like Apple TV chosen, the touch area of that remote can step the s
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (145 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (147 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

@@ -388,6 +388,13 @@ export class SamsungLocalPlatform {
       },
       reportsPower: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.reportsPower),
       screenPortSeen: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.screenPortSeen),
+      pointer: (readJson(this.paths.tvFacts) ?? {})[entry.id]?.pointer ?? null,
+      onPointer: (pointer) => {
+        try {
+          const facts = readJson(this.paths.tvFacts) ?? {};
+          writeJson(this.paths.tvFacts, { ...facts, [entry.id]: { ...facts[entry.id], pointer } });
+        } catch { /* learned again at the next reading */ }
+      },
       onScreenPortSeen: () => {
         try {
           const facts = readJson(this.paths.tvFacts) ?? {};
@@ -403,7 +410,9 @@ export class SamsungLocalPlatform {
       ...(this.overrides.tv ?? {}),
     });
     if (entry.appleRemote === true) {
-      handler.enableAppleRemote({ file: this.paths.appleRemote, name: mode === 'tile' ? `${name} +` : name, pin: entry.appleRemotePin, touch: entry.appleRemoteTouch, ...(this.overrides.appleRemote ?? {}) })
+      handler.enableAppleRemote({ file: this.paths.appleRemote, name: mode === 'tile' ? `${name} +` : name, pin: entry.appleRemotePin,
+        // A TV that says it takes no pointer keeps the arrows, whatever was chosen before.
+        touch: (readJson(this.paths.tvFacts) ?? {})[entry.id]?.pointer === false ? 'arrows' : entry.appleRemoteTouch, ...(this.overrides.appleRemote ?? {}) })
         .catch((err) => this.log.warn(`[${name}] the iPhone remote option could not start: ${err.message}`));
     }
     if (accessory) {

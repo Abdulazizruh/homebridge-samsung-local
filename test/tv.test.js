@@ -6,7 +6,7 @@ import { WebSocketServer } from 'ws';
 import { SamsungLocalPlatform } from '../src/platform.js';
 import { PLATFORM_NAME } from '../src/settings.js';
 import { pluginPaths, readJson } from '../src/storage.js';
-import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
+import { TizenRemote, pointerSupport, tvInfo } from '../src/tv/tizenClient.js';
 import { makeApi, quietLog, tmpDir, waitFor } from './support.js';
 
 /** A stand-in TV: the info page and the remote-control channel, without TLS. */
@@ -524,4 +524,21 @@ test('TV power asked twice at once (the tile and the power switch): the toggle i
   await waitFor(() => tv.keys.length >= 1);
   await new Promise((r) => setTimeout(r, 300));
   assert.deepEqual(tv.keys, ['KEY_POWER'], 'pressed once, so the TV stays on');
+});
+
+test('TV pointer: taken from the touch-pad line of the info page; older models without that list take arrows only', () => {
+  const list = (pad) => ({ isSupport: JSON.stringify({ remote_available: 'true', remote_fourDirections: 'true', remote_touchPad: pad }) });
+  assert.equal(pointerSupport(list('true')), true, 'a newer TV that says it has a touch pad');
+  assert.equal(pointerSupport(list('false')), false);
+  assert.equal(pointerSupport({ device: { modelName: 'UE55KU6075' } }), false, 'a 2016 model gives no such list');
+  assert.equal(pointerSupport({ isSupport: '{broken' }), false);
+});
+
+test('TV pointer: what the TV says is kept, and one without a touch pad is not given the pointer', async (t) => {
+  const tv = await fakeTv({ power: 'on' }); // its info page has no touch-pad line, as on older models
+  const storage = tmpDir();
+  const { platform } = await bootTv(tv, 'tile', storage);
+  t.after(() => { platform.stop(); tv.close(); });
+  await waitFor(() => readJson(pluginPaths(storage).tvFacts)?.['tv-tv-test-1']?.pointer === false);
+  assert.equal(platform.tvs[0].pointer, false);
 });

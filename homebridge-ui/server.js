@@ -67,6 +67,9 @@ class UiServer extends HomebridgePluginUiServer {
       arch: process.arch,
       devices: listSnapshots(this.paths).map((snap) => this.present(snap)),
       tvSetup: this.tvSetup(),
+      // Whether each TV takes a pointer, as it said on its info page (absent until it has answered once).
+      tvPointer: Object.fromEntries(Object.entries(readJson(this.paths.tvFacts) ?? {})
+        .filter(([, v]) => typeof v?.pointer === 'boolean').map(([id, v]) => [id, v.pointer])),
       // Pairing code of each TV shown to the iPhone remote, and how many phones are paired.
       appleRemote: Object.fromEntries(Object.entries(readJson(this.paths.appleRemote) ?? {})
         .map(([id, v]) => [id, { pin: String(v?.pin ?? ''), phones: Object.keys(v?.clients ?? {}).length }])),
@@ -213,7 +216,7 @@ class UiServer extends HomebridgePluginUiServer {
       host, deviceId, mac: tv.mac, source: 'probe',
       described: { kind: 'tv', deviceId, model: tv.model, support: 'experimental', reason: null, features: [], unknownResources: [] },
       // Models without token support connect after one approval and hand out no token.
-      tv: { name: tv.name, power: tv.power, tokenAuth: tv.tokenAuth, paired: Boolean(deviceId && tokens[deviceId]) },
+      tv: { name: tv.name, power: tv.power, tokenAuth: tv.tokenAuth, paired: Boolean(deviceId && tokens[deviceId]), pointer: typeof tv.pointer === 'boolean' ? tv.pointer : null },
     };
   }
 

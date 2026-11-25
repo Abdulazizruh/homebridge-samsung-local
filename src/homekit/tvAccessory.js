@@ -63,7 +63,7 @@ export class TvAccessory {
    * remote alone it has nothing in Apple Home.
    */
   constructor({ api, log, accessory = null, switchAccessory = null, switches = [], name = null, entry, token, saveToken, ports = {}, pollMs = POLL_MS,
-    reportsPower = false, onReportsPower = null, screenPortSeen = false, onScreenPortSeen = null }) {
+    reportsPower = false, onReportsPower = null, screenPortSeen = false, onScreenPortSeen = null, pointer = null, onPointer = null }) {
     this.api = api;
     this.hap = api.hap;
     this.log = log;
@@ -83,6 +83,8 @@ export class TvAccessory {
     this.reportsPower = Boolean(reportsPower);
     this.screenPortSeen = Boolean(screenPortSeen);
     this.onScreenPortSeen = onScreenPortSeen;
+    this.pointer = typeof pointer === 'boolean' ? pointer : null; // whether the TV takes a pointer, once it has said
+    this.onPointer = onPointer;
     this.onReportsPower = onReportsPower;
     this.services = new Map();
     this.remote = new TizenRemote({
@@ -237,6 +239,10 @@ export class TvAccessory {
     this.reachable = reachable;
     // What the TV itself says is written to the log whenever it changes, so
     // a tile that disagrees with the screen can be explained.
+    if (typeof info?.pointer === 'boolean' && info.pointer !== this.pointer) {
+      this.pointer = info.pointer;
+      this.onPointer?.(info.pointer);
+    }
     if (info?.powerState && !this.reportsPower) {
       this.reportsPower = true;
       this.onReportsPower?.();
