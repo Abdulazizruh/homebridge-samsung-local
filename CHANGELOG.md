@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.10
+
+The SmartThings button also works for a browser already signed in to Samsung. Your settings, pairings and accessories are kept as they are.
+
+- **The button opens SmartThings' own guide in a normal tab, and the tokens page is opened from its link there.** With 1.8.9 the tokens page opened for a browser not yet signed in to Samsung, and ended in Samsung's error page (403) once it was signed in; this was seen on a real iPhone and iPad. Opened from the link inside SmartThings' own guide, in a normal tab, it opens either way. The two fixes work together: the normal tab of 1.8.9 and the guide of 1.8.8.
+- The direct address stays in the help under the button, as a link and with a copy button.
+
+**بالعربية**
+
+زر SmartThings يعمل أيضًا لمتصفح داخل إلى Samsung من قبل. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **الزر يفتح شرح SmartThings الرسمي في تبويب عادي، وصفحة الرموز تُفتح من رابطه هناك.** في 1.8.9 كانت صفحة الرموز تفتح لمتصفح لم يدخل إلى Samsung بعد، وتنتهي بصفحة خطأ Samsung (403) بعد دخوله. شوهد هذا على iPhone و iPad حقيقيين. وإذا فُتحت من الرابط الذي داخل شرح SmartThings نفسه، في تبويب عادي، تفتح في الحالتين. الإصلاحان يعملان معًا: التبويب العادي من 1.8.9، والشرح من 1.8.8.
+- العنوان المباشر باقٍ في المساعدة تحت الزر، رابطًا ومعه زر نسخ.
+
 ## 1.8.9
 
 The SmartThings button opens a normal tab. Your settings, pairings and accessories are kept as they are.
