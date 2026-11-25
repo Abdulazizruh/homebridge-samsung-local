@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.7
+
+The plugin page says first what matters most. Nothing changes in what the plugin does; your settings, pairings and accessories are kept as they are.
+
+- **Three lines at the very top of the plugin page:** no SmartThings API (no sign-in, token, API or subscription; not built on SmartThings OAuth, so it works where the SmartThings API is not offered), works at home from the first minute, and away from home from the first day with an Apple home hub. A short line under them says what the appliances need: air conditioners and washers on your Wi-Fi, set up once by Samsung's SmartThings app; TVs nothing but "Allow".
+- **The npm and Homebridge search description starts with "No SmartThings account sign-in, API or token".**
+- **HomeView is named among the Apple home hubs**, beside Apple TV and HomePod, on the page and in the TV settings.
+- **The appliance list on the page shows the list as it looks now**, grouped by kind, with TVs linked to Homebridge.
+
+**بالعربية**
+
+صفحة الإضافة تقول أولًا أهم ما فيها. لا يتغير شيء فيما تفعله الإضافة، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **ثلاثة أسطر في أعلى صفحة الإضافة:** دون API من SmartThings (لا تسجيل دخول ولا رمز ولا API ولا اشتراك؛ ليست مبنية على OAuth من SmartThings، فتعمل حيث لا تتوفر خدمة SmartThings API)، وتعمل داخل البيت من أول دقيقة، ومن خارجه من أول يوم مع مركز منزلي من Apple. وتحتها سطر قصير بما تحتاجه الأجهزة: المكيفات والغسالات على شبكة Wi-Fi البيت، تضبطها Samsung مرة واحدة بتطبيق SmartThings؛ والتلفزيونات لا تحتاج إلا «Allow».
+- **وصف npm وبحث Homebridge يبدأ بعبارة «No SmartThings account sign-in, API or token».**
+- **HomeView صار مذكورًا بين المراكز المنزلية من Apple**، بجانب Apple TV و HomePod، في الصفحة وفي إعدادات التلفزيون.
+- **صورة قائمة الأجهزة في الصفحة تعرض القائمة كما هي الآن**، مصنّفة حسب النوع، والتلفزيونات مرتبطة بـ Homebridge.
+
 ## 1.6.6
 
 The two links of a TV, named for what they are. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.

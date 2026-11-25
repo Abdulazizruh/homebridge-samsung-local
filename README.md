@@ -11,12 +11,17 @@
 
 Local, cloud-free control of Samsung appliances from Apple Home: air conditioners, washer status with a cycle-finished notice, and TVs with the Control Centre remote.
 
-**Apple Home → Homebridge → the appliance, directly over your home network.**
-**No SmartThings account, token or API needed**, unlike plugins built on SmartThings sign-in (OAuth): the plugin never signs in to Samsung. No Home Assistant, no HACS, no MQTT.
+| | |
+|---|---|
+| **No SmartThings API** | **No SmartThings account sign-in, token, API or subscription.** Not built on SmartThings OAuth: the plugin never signs in to Samsung, so it works even where the SmartThings API is not offered. No Home Assistant, no HACS, no MQTT |
+| **At home** | **Works from the first minute** on your home network: Apple Home → Homebridge → the appliance, directly |
+| **Away from home** | **From the first day** with an Apple home hub at home: **Apple TV, HomePod or HomeView**. Control and notifications, like any Apple Home accessory |
+
+<sub>Air conditioners and washers only need to be on your Wi-Fi, which Samsung sets up once with its SmartThings app when the appliance is installed. TVs need nothing: choose "Allow" on the TV once.</sub>
 
 [العربية](README.ar.md)
 
-> **Status: 1.6.6. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.6.7. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -24,7 +29,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | | |
 |---|---|
 | Account | **None.** No SmartThings account, token, API or subscription: the plugin talks to each appliance on your home network only. The appliance just has to be on your Wi-Fi, which is usually done once with the SmartThings app when it is installed, and stay registered there. TVs need no SmartThings at all: you choose "Allow" on the TV once |
-| Away from home | **Yes, with an Apple home hub** (an Apple TV or a HomePod) at home, as for any Apple Home accessory: control and notifications work from anywhere, from the first day. The remote like Apple TV in Control Centre works on the home network only |
+| Away from home | **Yes, with an Apple home hub** (an Apple TV, a HomePod or a HomeView) at home, as for any Apple Home accessory: control and notifications work from anywhere, from the first day. The remote like Apple TV in Control Centre works on the home network only |
 | Connection | Air conditioners and washers: CoAP over DTLS on the LAN. TVs: the TV's own local remote-control channel |
 | Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
 | Setup | Press **Scan the network** in the plugin settings and tick what to add, or enter one IP or MAC address and press **Test & discover** |
@@ -246,7 +251,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 The TV's options are three ticks that do not exclude one another: tick all of them, some or none. They sit in two groups.
 
 1. **On the iPhone: the remote like Apple TV (trial)**, with keyboard and touch pad, on your home network only. Under it: its pairing code, changed right there (empty means 0000), and the touch area as swipe like Apple TV or a pointer like a mouse.
-2. **In the Home app: the TV tile with the Home remote**, at home and away (away through a home hub, an Apple TV or a HomePod). Its code for the Home app is right under it: **scan the picture** from the Home app (+ → Add Accessory) **or type the digits** (More options → pick the TV). With the remote like Apple TV ticked too, the TV has two names in the remote list, the second ending in "+".
+2. **In the Home app: the TV tile with the Home remote**, at home and away (away through a home hub: an Apple TV, a HomePod or a HomeView). Its code for the Home app is right under it: **scan the picture** from the Home app (+ → Add Accessory) **or type the digits** (More options → pick the TV). With the remote like Apple TV ticked too, the TV has two names in the remote list, the second ending in "+".
 3. **In the Home app: switches for automations**. No code: they come with this plugin's bridge. You choose which switches appear.
 
 
