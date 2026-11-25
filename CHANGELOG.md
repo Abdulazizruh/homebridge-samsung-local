@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.7
+
+The way to the SmartThings tokens page. Your settings, pairings and accessories are kept as they are.
+
+- **The button opens SmartThings' own guide to personal access tokens, and the tokens page is opened from its link there.** Samsung's sign-in refuses (error 403) the tokens page when it is reached by a link from another site while the browser is already signed in to Samsung; reached from SmartThings' own pages it is the way Samsung itself sends people. The attempt of 1.8.6 to hand the address to the system on iPhone did not work and is removed.
+- The button is a plain link again, with no script. The direct address stays under it as a link, with a copy button.
+
+**بالعربية**
+
+الطريق إلى صفحة الرموز في SmartThings. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **الزر يفتح شرح SmartThings الرسمي للرموز الشخصية، وصفحة الرموز تُفتح من رابطه هناك.** صفحة الدخول في Samsung ترفض (الخطأ 403) صفحة الرموز إذا وصلتها برابط من موقع آخر والمتصفح داخل إلى حساب Samsung. والوصول إليها من صفحات SmartThings نفسها هو الطريق الذي ترسل Samsung الناس منه. ومحاولة 1.8.6 تسليم العنوان إلى النظام على iPhone لم تنجح، فحُذفت.
+- الزر رابط عادي من جديد، بلا أي سكربت. والعنوان المباشر باقٍ تحته رابطًا، ومعه زر نسخ.
+
 ## 1.8.6
 
 The SmartThings button on iPhone and iPad. Your settings, pairings and accessories are kept as they are.
