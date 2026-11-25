@@ -17,11 +17,11 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | **At home** | **Works from the first minute** on your home network: Apple Home → Homebridge → the appliance, directly |
 | **Away from home** | **From the first day** with an Apple home hub at home: **Apple TV, HomePod or HomeView**. Control and notifications, like any Apple Home accessory |
 
-<sub>Air conditioners and washers only need to be on your Wi-Fi, which Samsung sets up once with its SmartThings app when the appliance is installed. TVs need nothing: choose "Allow" on the TV once.</sub>
+<sub>Air conditioners and washers only need to be on your Wi-Fi, which Samsung sets up once with its SmartThings app when the appliance is installed. TVs need nothing: choose "Allow" on the TV once. An optional one-time import can bring your names over from SmartThings with a token you create yourself ([Names from SmartThings](#names-from-smartthings-optional)); the plugin never needs it.</sub>
 
 [العربية](README.ar.md)
 
-> **Status: 1.7.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.8.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -34,7 +34,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
 | Setup | Press **Scan the network** in the plugin settings and tick what to add, or enter one IP or MAC address and press **Test & discover** |
 | Identity | Each appliance is keyed on its own stable device ID, so a new IP address never creates a duplicate. An air conditioner or washer whose address changes is found again by itself |
-| Names | Each appliance found gets a name to start from, with where it comes from: its earlier name in this plugin, its name in `homebridge-smartthings-oauth` (same ID, read only), its own name (TVs), or a numbered suggestion such as "Air conditioner 1". The scan shows what each one is doing now (on, mode, set temperature) to tell which is which. Only a name you type is remembered (in the scan, when adding by hand, or with the pencil): it is kept after the appliance is removed, so it comes back with it. A suggestion left as it is ("Air conditioner 1", or a TV's own name) is used but not remembered. Numbered suggestions take the smallest number not in use among the names you have now, so after renaming they start again from 1. "Delete this plugin's data" clears the remembered names too |
+| Names | Each appliance found gets a name to start from, with where it comes from: its earlier name in this plugin, its name and room in SmartThings (with the [optional import](#names-from-smartthings-optional)), its name in `homebridge-smartthings-oauth` (same ID, read only), its own name (TVs), or a numbered suggestion such as "Air conditioner 1". The scan shows what each one is doing now (on, mode, set temperature) to tell which is which. Only a name you type is remembered (in the scan, when adding by hand, or with the pencil): it is kept after the appliance is removed, so it comes back with it. A suggestion left as it is ("Air conditioner 1", or a TV's own name) is used but not remembered. Numbered suggestions take the smallest number not in use among the names you have now, so after renaming they start again from 1. "Delete this plugin's data" clears the remembered names too |
 | Updates | Push (CoAP Observe) where the appliance supports it, reading every 5 s by default as fallback (4 s at least) |
 | Works offline | Yes, after the one-time setup below |
 | Runs beside | `homebridge-smartthings-oauth` and any other plugin, without touching their files |
@@ -84,6 +84,7 @@ On first start the plugin creates a private Python environment in `<homebridge s
 | You press **Scan the network** in the settings | every address of your home network (its /24) and the OCF group address `224.0.1.187`: UDP 5683 for appliances, TCP 8001 for TVs; then one read of each new appliance found | Only when you press the button, never in the background. Nothing is added or stored before you confirm, and nothing leaves your network. |
 | An appliance stopped answering (optional, on by default) | every address of the home network it was on (its /24), UDP 5683 | One small question to find the appliance at its new address, at most once every five minutes. Nothing leaves your network. Switch it off under General → "Find an appliance again when its address changes" |
 | Samsung TVs | the TV itself, TCP 8001 and 8002; one wake-on-network packet to switch it on | Local remote-control channel of the TV |
+| Optional: you press **Import and scan** under "Names from SmartThings" | `api.smartthings.com`, HTTPS, read only | Your appliance names and rooms, once, with the token you pasted. Only when you press the button; the token is not stored |
 
 The client certificate is generated on your machine. Its private key never leaves it and is stored with `0600` permissions in `samsung-local/credentials`.
 
@@ -132,6 +133,30 @@ Tested on a real home network: five air conditioners, a washer and a TV answered
 <p><img src="assets/screenshots/scan-found.png" alt="Scan result with one new air conditioner ticked as Ready to add and the Add selected button" width="360"></p>
 
 Running as a child bridge gives this plugin its own HomeKit pairing, its own QR code and its own cache files. Accessories are named exactly as you type them, so pick names that differ from the ones your existing plugin uses. Seeing the same appliance twice (once per bridge) during a trial is expected.
+
+### Names from SmartThings (optional)
+
+Only to name your appliances and match them with what the scan finds, once. If you already named many appliances in SmartThings, their names and rooms come over and you need not type them again. Nothing is controlled through SmartThings, and the plugin does not connect to it again after the import. You do not need it to use the plugin.
+
+1. Open the tokens page of SmartThings (the button in the settings), sign in with your Samsung account and press **Generate new token**.
+2. Tick the read permissions only: **List all devices** and **See all devices**, and for room names **See all locations** (optional).
+3. Paste the token and press **Import and scan**.
+
+The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import.
+
+<p><img src="assets/screenshots/smartthings-import.png" alt="Names from SmartThings, optional: its goal, three steps, the token field and how the token is handled" width="360"></p>
+
+The scan then runs and puts the two lists side by side:
+
+- **In SmartThings and on the network:** the name and room from SmartThings, with how they were matched: by the appliance's own ID, or by model when only one of that model is left on each side.
+- **On the network only:** pick its name from the SmartThings names left over, or keep a suggested name.
+- **In SmartThings only:** it did not answer on the network, with what to check (power, the same home Wi-Fi, a TV in standby, connected in the SmartThings app) and **Scan the network again**. Appliances that work through the cloud only (sensors, hubs) are folded into one line.
+
+<p><img src="assets/screenshots/smartthings-match.png" alt="Result of the import: appliances in both lists with their SmartThings names, one picked by hand, and one that did not answer" width="360"></p>
+
+A name from SmartThings is a name you gave, so it is remembered like one you type.
+
+**Subject to Samsung's policies.** This import uses Samsung's SmartThings service, so it is subject to Samsung's terms and policies. Samsung may change or limit access with these tokens at any time; it has announced that from 15 December 2026 they need a paid SmartThings API plan. The rest of the plugin does not depend on it.
 
 A static DHCP lease for each appliance is recommended. An air conditioner or washer whose address changes is found again by the plugin. To set an address yourself, press **Change IP** beside the appliance, enter the new one and press **Test & discover**: the existing entry is updated.
 
@@ -266,7 +291,7 @@ With a remote like Apple TV chosen, the touch area of that remote can be swipe l
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (152 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (156 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

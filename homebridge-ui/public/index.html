@@ -70,6 +70,15 @@
   .sl-sw { display: flex; align-items: center; gap: 8px; padding: 6px 2px; margin: 0; border-bottom: 1px solid rgba(128,128,128,.15); cursor: pointer; }
   .sl-swbox:not(:has(#sl-tv-switches-on:checked)) .sl-swlist { display: none; }
   .sl-way { border-top: 1px solid rgba(128,128,128,.2); padding-top: 10px; margin-top: 10px; }
+  .sl-st summary { cursor: pointer; }
+  .sl-st ol { padding-inline-start: 1.2em; margin: 8px 0; }
+  .sl-st li { margin-bottom: 8px; }
+  .sl-tick { display: inline-block; font-family: ui-monospace, monospace; font-size: .8rem; font-weight: 600; color: #0b57b0; background: #fff8db; border: 2px solid #f1c75a; border-radius: 6px; padding: 0 6px; margin: 2px 0; }
+  .sl-safe { background: rgba(40,167,69,.1); border: 1px solid rgba(40,167,69,.35); border-radius: 10px; padding: 8px 10px; font-size: .84rem; }
+  .sl-src-st { background: #dff3f7; }
+  .sl-policy { background: rgba(255,193,7,.14); border: 1px solid rgba(241,199,90,.9); border-radius: 10px; padding: 8px 10px; font-size: .84rem; }
+  .sl-stgroup { font-weight: 700; margin: 14px 0 2px; color: #6f42c1; }
+  .sl-why { margin: 4px 0; padding-inline-start: 1.2em; font-size: .84rem; }
   .sl-found { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,.15); }
   .sl-found .sl-grow { flex: 1; min-width: 150px; } .sl-found input[type=checkbox] { width: 20px; height: 20px; flex: none; }
   .sl-found:last-of-type { border-bottom: 0; }
@@ -108,6 +117,22 @@
   <div class="sl-card">
     <h6 data-t="addTitle"></h6>
     <div class="sl-muted" data-t="addIntro"></div>
+    <details class="sl-way sl-st" id="sl-st">
+      <summary><strong data-t="stTitle"></strong> <span class="sl-pill" data-t="stOptional"></span></summary>
+      <div class="sl-muted mt-1" data-t="stGoal"></div>
+      <ol>
+        <li><span data-t="stStep1"></span> <span class="sl-tick" dir="ltr">Generate new token</span><br>
+          <a class="btn btn-sm btn-primary mt-1" href="https://account.smartthings.com/tokens" target="_blank" rel="noopener noreferrer" data-t="stOpen"></a></li>
+        <li><span data-t="stStep2"></span> <span class="sl-tick" dir="ltr">List all devices</span> <span class="sl-tick" dir="ltr">See all devices</span>
+          <span data-t="stStep2Rooms"></span> <span class="sl-tick" dir="ltr">See all locations</span></li>
+        <li><span data-t="stStep3"></span>
+          <div class="sl-row mt-1"><input type="password" class="form-control" id="sl-st-token" autocomplete="off" spellcheck="false" dir="ltr" aria-label="SmartThings token">
+          <button class="btn btn-primary" id="sl-st-go" data-t="stGo"></button></div></li>
+      </ol>
+      <div class="sl-safe" data-t="stSafe"></div>
+      <div class="sl-policy mt-2" data-t="stPolicy"></div>
+      <div id="sl-st-result" class="mt-2"></div>
+    </details>
     <div class="sl-way">
       <strong data-t="scanTitle"></strong>
       <div class="sl-muted" data-t="scanNote"></div>
@@ -235,6 +260,7 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Linked to Homebridge',
       tvNotPaired: 'Not linked to Homebridge yet', tvOff: 'The TV looks switched off. Switch it on first.',
+      nameFrom_st: 'from SmartThings', stTitle: 'Optional: your appliance names from SmartThings', stOptional: 'optional', stGoal: 'Only to name your appliances and match them with what the scan finds, once. It brings over the names and rooms you already gave them in SmartThings, so you need not type them again. The plugin never controls anything through SmartThings and does not connect to it again after the import. You do not need it to use the plugin.', stStep1: 'Open the tokens page of SmartThings, sign in with your Samsung account and press', stOpen: 'Open the SmartThings page ↗', stStep2: 'Tick the read permissions only:', stStep2Rooms: 'and, for room names (optional):', stStep3: 'Paste the token here:', stGo: 'Import and scan', stSafe: 'The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours; you can also delete it on the same page after the import.', stReading: 'Reading from SmartThings…', stDone: 'Imported from SmartThings: {all} appliances, {local} of them can be on your network. The token was not saved.', stNoStatus: 'The appliances\' own IDs could not be read (check "See all devices"), so matching is by model and by your pick.', stNoRooms: 'Room names were not read (they need "See all locations").', stForget: 'Forget the import', stBoth: 'In SmartThings and on the network', stNetOnly: 'On the network only', stStOnly: 'In SmartThings only: did not answer on the network', stCloud: 'In SmartThings, working through the cloud only ({n}): not offered for adding', stPick: 'Pick its name from SmartThings…', stHow_id: 'matched by ID', stHow_model: 'matched by model', stHow_pick: 'your pick', stThere: 'in SmartThings as', stNoAnswer: 'did not answer', stOffline: 'offline in SmartThings too', stOnline: 'online in SmartThings', stLastSeen: 'last seen', stWhy: 'Why, and what to check', stWhy1: 'It is plugged in and switched on at the breaker.', stWhy2: 'It is on the same home Wi-Fi as Homebridge, not a guest network or another network.', stWhy3: 'A TV is on, or in standby with switching on over the network allowed.', stWhy4: 'It shows as connected in the SmartThings app now.', stWhy5: 'Some appliances do not work locally at all, such as some refrigerators.', stAgain: 'Scan the network again', stByHand: 'Add it by address', stPolicy: 'This import uses Samsung\'s SmartThings service, so it is subject to Samsung\'s terms and policies. Samsung may change or limit access with these tokens at any time; it has announced that from 15 December 2026 they need a paid SmartThings API plan. The rest of the plugin does not depend on it.', err_st_format: 'Paste the token exactly as SmartThings shows it.', err_st_token: 'SmartThings refused the token: it has expired (after 24 hours) or was deleted, or your account now needs a paid SmartThings API plan. Create a new token and try again.', err_st_scope: 'The token lacks the permission "See all devices". Create a new token with it.', err_st_unreachable: 'SmartThings could not be reached. Check that Homebridge has internet and try again.', err_st_busy: 'SmartThings asked to wait. Try again in a minute.', err_st_error: 'SmartThings did not answer as expected. Try again later.',
       nameFrom_prev: 'its earlier name here', nameFromLegacy: 'from', nameFrom_device: 'from the appliance', nameFrom_new: 'suggested name', nowOn: 'on now', nowOff: 'off', removedKept: 'Removed. Its name is kept, so it comes back with it if you add it again. Restart the child bridge to apply.', tvAskNote: 'The link between Homebridge and the TV (the TV\'s Allow) is shown beside its name. If it is lost:', tvAllows: 'linked to Homebridge', tvRefused: 'not linked to Homebridge', tvAskAgain: 'Link to Homebridge again', homeNotYet: 'not linked to HomeKit', homeLater: 'code after a restart', tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
       su_apple: 'Remote like Apple TV (trial)',
       suName: 'Its name in the remote list',
@@ -380,6 +406,7 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'مرتبط بـ Homebridge',
       tvNotPaired: 'غير مرتبط بـ Homebridge بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
+      nameFrom_st: 'من SmartThings', stTitle: 'اختياري: أسماء أجهزتك من SmartThings', stOptional: 'اختياري', stGoal: 'هدفه تسمية أجهزتك ومطابقتها بما يجده البحث في الشبكة، مرة واحدة فقط. ينقل الأسماء والغرف التي أعطيتها لأجهزتك في SmartThings، فلا تحتاج أن تكتبها من جديد. لا تتحكم الإضافة بأي جهاز عن طريق SmartThings، ولا تتصل به مرة أخرى بعد الاستيراد. ولا تحتاجه لاستعمال الإضافة.', stStep1: 'افتح صفحة الرموز في SmartThings، وسجّل الدخول بحساب Samsung، ثم اضغط', stOpen: 'افتح صفحة SmartThings ↗', stStep2: 'اختر صلاحيات القراءة فقط:', stStep2Rooms: 'ولأسماء الغرف (اختياري):', stStep3: 'الصق الرمز هنا:', stGo: 'استورد وابحث في الشبكة', stSafe: 'يُستعمل الرمز مرة واحدة لهذه القراءة ثم يُنسى: لا يُحفظ في ملف، ولا يظهر في السجل. ينتهي من نفسه بعد 24 ساعة، ويمكنك حذفه من الصفحة نفسها بعد الاستيراد.', stReading: 'جارٍ القراءة من SmartThings…', stDone: 'استُورد من SmartThings {all} جهازًا، منها {local} يمكن أن تكون على شبكتك. ولم يُحفظ الرمز.', stNoStatus: 'تعذّرت قراءة معرّفات الأجهزة (تحقق من See all devices)، فالمطابقة بالموديل وباختيارك.', stNoRooms: 'لم تُقرأ أسماء الغرف (يلزمها See all locations).', stForget: 'تجاهل الاستيراد', stBoth: 'في SmartThings وفي الشبكة', stNetOnly: 'في الشبكة فقط', stStOnly: 'في SmartThings فقط: لم يرد على الشبكة', stCloud: 'في SmartThings ويعمل عبر السحابة فقط ({n}): لا يُعرض للإضافة', stPick: 'اختر اسمه من SmartThings…', stHow_id: 'طابق بالمعرّف', stHow_model: 'طابق بالموديل', stHow_pick: 'اخترته أنت', stThere: 'في SmartThings باسم', stNoAnswer: 'لم يرد', stOffline: 'غير متصل في SmartThings أيضًا', stOnline: 'متصل في SmartThings', stLastSeen: 'آخر ظهور', stWhy: 'لماذا، وماذا أتحقق منه', stWhy1: 'موصول بالكهرباء، والقاطع مرفوع.', stWhy2: 'متصل بشبكة Wi-Fi البيت نفسها التي عليها Homebridge، وليس بشبكة الضيوف أو بشبكة أخرى.', stWhy3: 'التلفزيون مفتوح، أو في وضع الاستعداد مع تفعيل التشغيل عبر الشبكة.', stWhy4: 'يظهر متصلًا في تطبيق SmartThings الآن.', stWhy5: 'بعض الأجهزة لا تعمل محليًا أصلًا، مثل بعض الثلاجات.', stAgain: 'أعد البحث في الشبكة', stByHand: 'أضفه بالعنوان', stPolicy: 'يستعمل هذا الاستيراد خدمة SmartThings من Samsung، فهو يخضع لشروط Samsung وسياساتها. وقد تغيّر Samsung الوصول بهذه الرموز أو تقيّده في أي وقت، وقد أعلنت أنها تحتاج خطة SmartThings API مدفوعة من 15 ديسمبر 2026. وبقية الإضافة لا تعتمد عليه.', err_st_format: 'الصق الرمز كما يظهر في SmartThings تمامًا.', err_st_token: 'رفضت SmartThings الرمز: انتهت مدته (بعد 24 ساعة) أو حُذف، أو صار حسابك يحتاج خطة SmartThings API مدفوعة. أنشئ رمزًا جديدًا وحاول مرة أخرى.', err_st_scope: 'ينقص الرمز صلاحية See all devices. أنشئ رمزًا جديدًا بها.', err_st_unreachable: 'تعذّر الوصول إلى SmartThings. تحقق من اتصال Homebridge بالإنترنت وحاول مرة أخرى.', err_st_busy: 'طلبت SmartThings الانتظار. حاول بعد دقيقة.', err_st_error: 'لم ترد SmartThings كما ينبغي. حاول لاحقًا.',
       nameFrom_prev: 'اسمه السابق في هذه الإضافة', nameFromLegacy: 'من', nameFrom_device: 'من بيانات الجهاز', nameFrom_new: 'اسم مقترح', nowOn: 'يعمل الآن', nowOff: 'مطفأ', removedKept: 'تم الحذف. ويبقى اسمه محفوظًا، فيعود به إن أضفته مرة أخرى. أعد تشغيل الجسر الفرعي للتطبيق.', tvAskNote: 'الارتباط بين Homebridge والتلفزيون (موافقة التلفزيون بـ Allow) يظهر بجانب اسمه. وإذا انقطع:', tvAllows: 'مرتبط بـ Homebridge', tvRefused: 'غير مرتبط بـ Homebridge', tvAskAgain: 'اربطه بـ Homebridge من جديد', homeNotYet: 'غير مربوط بـ HomeKit', homeLater: 'الرمز بعد إعادة التشغيل', tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
       suName: 'اسمه في قائمة الريموت',
@@ -502,18 +529,20 @@
   };
   const tvPaired = new Set();
   let legacyNames = [];
+  let stImport = null; // names and rooms read once from SmartThings: kept in this page only, never stored
   let remembered = {}; let legacyById = {}; // last names given here (kept after removal), and the previous plugin's by ID
 
   /**
    * The name to offer for an appliance being added, and where it comes from: its last name in this
    * plugin, its name in the previous plugin (same ID), its own name (TVs), or a numbered suggestion.
    */
-  function suggestName(p, taken = []) {
+  function suggestName(p, taken = [], st = null) {
     const id = String(p.deviceId ?? '');
     const mac = String(p.mac ?? '').toLowerCase().replace(/[^0-9a-f]/g, '');
     const mine = remembered[id]?.name
       || (mac && Object.values(remembered).find((v) => String(v?.mac ?? '').toLowerCase().replace(/[^0-9a-f]/g, '') === mac)?.name);
     if (mine) { return { name: mine, src: 'prev' }; }
+    if (st?.dev?.name) { return { name: st.dev.name, src: 'st', room: st.dev.room, how: st.how }; }
     const old = legacyById[id.toLowerCase()] || legacyById[id.toLowerCase().replace(/^tv-/, '')];
     if (old) { return { name: old, src: 'legacy' }; }
     if (p.tv?.name) { return { name: p.tv.name, src: 'device' }; }
@@ -527,7 +556,13 @@
   }
   // A suggested name (numbered, or the TV's own) left as it was: used, but not remembered as a name given.
   const suggestedKept = (sug, name) => Boolean(sug) && ['new', 'device'].includes(sug.src) && String(name ?? '').trim() === sug.name;
-  const nameSource = (sug) => (sug ? `<span class="sl-pill sl-src-${sug.src}">${sug.src === 'legacy' ? `${t('nameFromLegacy')} homebridge-smartthings-oauth` : t('nameFrom_' + sug.src)}</span>` : '');
+  const nameSource = (sug) => {
+    if (!sug) { return ''; }
+    if (sug.src === 'st') {
+      return `<span class="sl-pill sl-src-st">${t('nameFrom_st')}${sug.room ? ` · ${esc(sug.room)}` : ''}</span> <span class="sl-pill sl-ok">${t('stHow_' + sug.how)}</span>`;
+    }
+    return `<span class="sl-pill sl-src-${sug.src}">${sug.src === 'legacy' ? `${t('nameFromLegacy')} homebridge-smartthings-oauth` : t('nameFrom_' + sug.src)}</span>`;
+  };
 
   /** What the appliance is doing now, to tell which one is which: power, mode and set temperature. */
   function nowState(d) {
@@ -914,6 +949,7 @@
       if (scan !== run) { return; }
       item.state = 'failed'; item.error = errorText(err);
     }
+    await stMatch(run);
     renderScan();
   }
 
@@ -946,7 +982,7 @@
         run.at += 1;
         await readFound(item, run);
       }
-      if (scan === run) { run.phase = 'done'; }
+      if (scan === run) { run.phase = 'done'; await stMatch(run); }
     } catch (err) {
       if (scan !== run) { return; }
       run.phase = 'done'; run.error = errorText(err);
@@ -977,6 +1013,63 @@
     return entry;
   }
 
+  /** Match the SmartThings list to what the scan found; done once the scan is over, and again after a pick. */
+  async function stMatch(run) {
+    if (!stImport || run.phase !== 'done') { run.st = null; return; }
+    const locals = run.items.map((it) => ({
+      deviceId: it.probe?.deviceId ?? it.dev?.id ?? null, model: it.probe?.described?.model ?? it.dev?.model ?? null, pick: it.stPick,
+    }));
+    try { run.st = await homebridge.request('/smartthings-match', { devices: stImport.devices, locals }); } catch { run.st = null; }
+  }
+
+  async function stImportNow() {
+    const field = $('sl-st-token');
+    const token = field.value.trim();
+    field.value = ''; // gone from the page at once
+    if (!token) { field.focus(); return; }
+    const box = $('sl-st-result');
+    box.innerHTML = `<span class="sl-muted">${t('stReading')}</span>`;
+    try {
+      stImport = await homebridge.request('/smartthings-import', { token });
+    } catch (err) {
+      box.innerHTML = `<div class="alert alert-danger mb-0">${esc(errorText(err))}</div>`;
+      return;
+    }
+    renderStBox();
+    if (scan && !scanBusy() && scan.phase === 'done') { scan = null; }
+    await startScan();
+  }
+
+  function renderStBox() {
+    const box = $('sl-st-result');
+    if (!box) { return; }
+    if (!stImport) { if (!box.querySelector('.alert-danger')) { box.innerHTML = ''; } return; }
+    const all = stImport.devices.length;
+    const local = stImport.devices.filter((d) => d.local).length;
+    box.innerHTML = `<div class="alert alert-success mb-1">${t('stDone').replace('{all}', `<span dir="ltr">${all}</span>`).replace('{local}', `<span dir="ltr">${local}</span>`)}</div>
+      ${stImport.statusRead ? '' : `<div class="sl-muted">${t('stNoStatus')}</div>`}
+      ${stImport.roomsRead ? '' : `<div class="sl-muted">${t('stNoRooms')}</div>`}
+      <button class="btn btn-sm btn-outline-secondary mt-1" id="sl-st-forget">${t('stForget')}</button>`;
+    $('sl-st-forget').addEventListener('click', async () => {
+      stImport = null; renderStBox();
+      if (scan) { scan.st = null; for (const it of scan.items) { delete it.stPick; } }
+      renderScan();
+    });
+  }
+
+  /** A SmartThings appliance that did not answer on the network, with what to check. */
+  function stOnlyRow(si) {
+    const d = stImport.devices[si];
+    const about = [KINDS[lang][d.kind] ?? '', d.model ? `<span dir="ltr">${esc(d.model)}</span>` : '', d.room ? esc(d.room) : ''].filter(Boolean).join(' · ');
+    const seen = d.lastSeen ? ` · ${t('stLastSeen')} <span dir="ltr">${esc(String(d.lastSeen).slice(0, 10))}</span>` : '';
+    const there = d.online === false ? `${t('stOffline')}${seen}` : d.online ? t('stOnline') : '';
+    return `<div class="sl-found"><div class="sl-grow"><strong>${esc(d.name)}</strong> <span class="sl-pill sl-bad">${t('stNoAnswer')}</span>
+      ${about ? `<div class="sl-muted">${about}</div>` : ''}${there ? `<div class="sl-muted">${there}</div>` : ''}
+      <details class="mt-1"><summary class="sl-muted">${t('stWhy')}</summary><ul class="sl-why">${['stWhy1', 'stWhy2', 'stWhy3', 'stWhy4', 'stWhy5'].map((k) => `<li>${t(k)}</li>`).join('')}</ul></details>
+      <div class="sl-row mt-1"><button class="btn btn-sm btn-primary" data-st-again>${t('stAgain')}</button>
+        <button class="btn btn-sm btn-outline-secondary" data-st-hand>${t('stByHand')}</button></div></div></div>`;
+  }
+
   function renderScan() {
     const btn = $('sl-scan-btn'); const box = $('sl-scan');
     btn.disabled = !engineChosen() || scanBusy();
@@ -987,19 +1080,28 @@
     const run = scan;
     const pill = { ready: 'sl-ok', added: '', moved: 'sl-ok', just: 'sl-ok', wait: '', busy: 'sl-warn', failed: 'sl-bad', unsupported: 'sl-warn', pair: 'sl-warn' };
     const word = { ready: 'scanReady', added: 'scanAdded', moved: 'scanMoved', just: 'scanJust', wait: 'scanWait', busy: 'scanBusy', failed: 'scanFailed', unsupported: 'scanUnsupported', pair: 'scanPair' };
-    const rows = run.items.map((item, i) => {
+    const rowList = run.items.map((item, i) => {
       const d = item.probe?.described;
       // An appliance already in the list is shown by the name it has here, TVs included.
       const kind = item.dev?.name ? esc(item.dev.name) : d ? (KINDS[lang][d.kind] ?? d.kind) : item.dev ? t('scanAdded') : 'Samsung';
       const title = !item.dev && item.probe?.tv?.name ? `${esc(item.probe.tv.name)}` : '';
       const tick = item.state === 'ready' ? `<input type="checkbox" data-pick="${i}" ${item.checked ? 'checked' : ''} aria-label="${t('scanAdd')}">` : '';
-      if (['ready', 'pair'].includes(item.state) && !item.sug) {
-        item.sug = suggestName(item.probe, run.items.filter((x) => x !== item && x.sug).map((x) => x.sug.name));
-        item.name = item.sug.name;
+      const m = run.st?.locals?.[i];
+      const stDev = m && m.st !== null && stImport ? stImport.devices[m.st] : null;
+      if (['ready', 'pair'].includes(item.state) && !item.typed) {
+        // Offered again while nothing is typed: a SmartThings name can arrive after the scan.
+        const sug = suggestName(item.probe, run.items.filter((x) => x !== item && x.sug).map((x) => x.sug.name), stDev ? { dev: stDev, how: m.how } : null);
+        if (!item.sug || item.sug.name !== sug.name || item.sug.src !== sug.src || item.sug.how !== sug.how) { item.sug = sug; item.name = sug.name; }
       }
+      // With a SmartThings import, an appliance without a match can take a name from the list.
+      const pickable = run.st && ['ready', 'pair'].includes(item.state) && (!stDev || m.how === 'pick');
+      const choices = pickable ? [...(m?.how === 'pick' ? [m.st] : []), ...run.st.stOnly] : [];
+      const pickList = pickable && choices.length
+        ? `<select class="form-select form-select-sm mt-1" data-st-pick="${i}"><option value="">${t('stPick')}</option>${choices.map((si) => `<option value="${si}" ${m?.how === 'pick' && m.st === si ? 'selected' : ''}>${esc(stImport.devices[si].name)}${stImport.devices[si].room ? ` · ${esc(stImport.devices[si].room)}` : ''}</option>`).join('')}</select>` : '';
       const naming = ['ready', 'pair'].includes(item.state)
-        ? `<div class="sl-row mt-1">${nameSource(item.sug)} ${nowState(d)}</div>
-           <input type="text" class="form-control form-control-sm mt-1" data-name="${i}" value="${esc(item.name ?? '')}" aria-label="${t('name')}">` : '';
+        ? `<div class="sl-row mt-1">${nameSource(item.sug)} ${nowState(d)}</div>${pickList}
+           <input type="text" class="form-control form-control-sm mt-1" data-name="${i}" value="${esc(item.name ?? '')}" aria-label="${t('name')}">`
+        : stDev ? `<div class="mt-1"><span class="sl-pill sl-src-st">${t('stThere')} ${esc(stDev.name)}</span></div>` : '';
       const act = item.state === 'pair' ? `<button class="btn btn-sm btn-primary" data-pair="${i}">${t('tvPair')}</button>`
         : (item.state === 'failed' || (item.state === 'wait' && run.phase === 'done')) ? `<button class="btn btn-sm btn-outline-secondary" data-read="${i}">${t('scanRetry')}</button>`
         : item.state === 'unsupported' ? `<button class="btn btn-sm btn-outline-secondary" data-diag="${i}">${t('diagFile')}</button>` : '';
@@ -1009,7 +1111,17 @@
           <div class="sl-muted" dir="ltr" style="text-align:start">${esc(d?.model ?? '')}${d?.model ? ' · ' : ''}${esc(item.host)}</div>
           ${item.error ? `<div class="sl-muted">${esc(item.error)}</div>` : ''}${off}</div>
         <span class="sl-pill ${pill[item.state]}">${t(word[item.state])}</span>${act}</div>`;
-    }).join('');
+    });
+    let rows = rowList.join('');
+    if (run.st && stImport) {
+      const both = []; const net = [];
+      rowList.forEach((html, i) => { (run.st.locals[i]?.st !== null && run.st.locals[i]?.st !== undefined ? both : net).push(html); });
+      const cloud = stImport.devices.filter((x) => !x.local);
+      rows = `${both.length ? `<div class="sl-stgroup">${t('stBoth')} (<span dir="ltr">${both.length}</span>)</div>${both.join('')}` : ''}
+        ${net.length ? `<div class="sl-stgroup">${t('stNetOnly')} (<span dir="ltr">${net.length}</span>)</div>${net.join('')}` : ''}
+        ${run.st.stOnly.length ? `<div class="sl-stgroup">${t('stStOnly')} (<span dir="ltr">${run.st.stOnly.length}</span>)</div>${run.st.stOnly.map(stOnlyRow).join('')}` : ''}
+        ${cloud.length ? `<details class="mt-2"><summary class="sl-muted">${t('stCloud').replace('{n}', `<span dir="ltr">${cloud.length}</span>`)}</summary><div class="sl-muted">${cloud.map((x) => esc(x.name)).join('، ')}</div></details>` : ''}`;
+    }
     const picked = run.items.filter((i) => i.state === 'ready' && i.checked).length;
     const progress = run.phase === 'reading'
       ? `<div class="sl-row"><span class="sl-pill sl-warn">${t('scanReading')} <span dir="ltr">${run.at}</span> ${t('scanOf')} <span dir="ltr">${run.total}</span></span>
@@ -1025,7 +1137,15 @@
         ${run.phase === 'done' ? `<button class="btn btn-outline-secondary" id="sl-scan-close">${t('scanClose')}</button>` : ''}
       </div>`;
     box.querySelectorAll('[data-pick]').forEach((el) => el.addEventListener('change', () => { run.items[Number(el.dataset.pick)].checked = el.checked; renderScan(); }));
-    box.querySelectorAll('[data-name]').forEach((el) => el.addEventListener('input', () => { run.items[Number(el.dataset.name)].name = el.value; }));
+    box.querySelectorAll('[data-name]').forEach((el) => el.addEventListener('input', () => { const it = run.items[Number(el.dataset.name)]; it.name = el.value; it.typed = true; }));
+    box.querySelectorAll('[data-st-pick]').forEach((el) => el.addEventListener('change', async () => {
+      const it = run.items[Number(el.dataset.stPick)];
+      if (el.value === '') { delete it.stPick; } else { it.stPick = Number(el.value); }
+      it.typed = false;
+      await stMatch(run); renderScan();
+    }));
+    box.querySelectorAll('[data-st-again]').forEach((el) => el.addEventListener('click', () => { if (!scanBusy()) { scan = null; startScan(); } }));
+    box.querySelectorAll('[data-st-hand]').forEach((el) => el.addEventListener('click', () => { $('sl-host').scrollIntoView({ block: 'center' }); $('sl-host').focus(); }));
     box.querySelectorAll('[data-read]').forEach((el) => el.addEventListener('click', () => readFound(run.items[Number(el.dataset.read)], run)));
     box.querySelectorAll('[data-diag]').forEach((el) => el.addEventListener('click', () => { const it = run.items[Number(el.dataset.diag)]; downloadDiagnostics({ deviceId: it.probe.deviceId, host: it.host }); }));
     box.querySelectorAll('[data-pair]').forEach((el) => el.addEventListener('click', async () => {
@@ -1341,7 +1461,7 @@
     $('sl-push').checked = config.pushUpdates !== false;
     $('sl-follow').checked = config.followAddress !== false;
     $('sl-engine').value = config.engine ?? (config.devices.length ? (status.engine ?? 'python') : '');
-    renderRuntime(); renderDevices(); renderResult(); renderScan();
+    renderRuntime(); renderDevices(); renderResult(); renderScan(); renderStBox();
   }
 
   $('sl-devices').addEventListener('input', markDirty);
@@ -1358,6 +1478,8 @@
   $('sl-follow').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.followAddress = v; }, false); });
   $('sl-push').addEventListener('change', async (e) => { const v = e.target.checked; await change(() => { config.pushUpdates = v; }, false); });
   $('sl-scan-btn').addEventListener('click', startScan);
+  $('sl-st-go').addEventListener('click', stImportNow);
+  $('sl-st-token').addEventListener('keydown', (e) => { if (e.key === 'Enter') { stImportNow(); } });
   $('sl-discover').addEventListener('click', async () => {
     const host = $('sl-host').value.trim();
     if (!host) { return; }

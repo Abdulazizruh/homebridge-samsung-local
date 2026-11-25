@@ -10,6 +10,7 @@ import { modelYear, pointerSupport, TizenRemote, tvInfo, tvInfoForDiagnostics, t
 import QRCode from 'qrcode-svg';
 import { scanNetwork, tidyName } from '../src/scan.js';
 import { rememberNames } from '../src/names.js';
+import { matchDevices, readSmartThings } from '../src/smartthings.js';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
 
@@ -30,6 +31,18 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/remove-runtime', () => this.removeRuntime());
     this.onRequest('/scan', () => this.scan());
     this.onRequest('/names', () => this.names());
+    // Optional, one time: names and rooms from SmartThings, read with a token that is never stored.
+    this.onRequest('/smartthings-import', async (payload) => {
+      try {
+        return await readSmartThings(payload?.token);
+      } catch (err) {
+        throw new RequestError(err.message, { code: err.code ?? 'st_error' });
+      }
+    });
+    this.onRequest('/smartthings-match', (payload) => matchDevices(
+      Array.isArray(payload?.devices) ? payload.devices : [],
+      Array.isArray(payload?.locals) ? payload.locals : [],
+    ));
     this.onRequest('/remember-names', (payload) => ({ ok: Boolean(rememberNames(this.paths.names, payload?.devices ?? [])) }));
     this.ready();
   }

@@ -2,19 +2,25 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## 1.7.1
+## 1.8.0
 
-A small fix to the network scan. Your settings, pairings and accessories are kept as they are.
+Names from SmartThings, optional and once. Your settings, pairings and accessories are kept as they are.
 
-- **A TV already in the list shows the name you gave it in the scan**, as air conditioners already did, instead of the name the TV reports (such as "Samsung 7 Series (55)").
-- **The plugin page explains naming in full:** only a name you type is remembered; a suggestion left as it is is used but not remembered; numbered suggestions take the smallest number not in use, so after renaming they start again from 1; and deleting the plugin's data clears the remembered names.
+- **Optional: your appliance names from SmartThings.** Only to name your appliances and match them with what the scan finds, once: paste a SmartThings token you create yourself, and the names and rooms you gave your appliances there come over. The token is used for these few reads and forgotten (not in a file, not in the log). Nothing is controlled through SmartThings, and the plugin does not connect to it again. You do not need it to use the plugin.
+- **The two lists side by side.** In SmartThings and on the network (matched by the appliance's own ID, or by model when only one of that model is left on each side); on the network only (pick its name from the SmartThings names left over); in SmartThings only (did not answer, with what to check and Scan the network again). Cloud-only appliances such as sensors are folded into one line.
+- **Subject to Samsung's policies.** The import uses Samsung's SmartThings service, so it follows Samsung's terms and policies; Samsung has announced that from 15 December 2026 these tokens need a paid SmartThings API plan. The rest of the plugin does not depend on it.
+- **A TV already in the list shows the name you gave it in the scan**, as air conditioners already did, instead of the name the TV reports.
+- **The plugin page explains naming in full:** only a name you give is remembered; a suggestion left as it is is used but not remembered; numbered suggestions take the smallest number not in use; deleting the plugin's data clears the remembered names.
 
 **بالعربية**
 
-إصلاح صغير في البحث في الشبكة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+الأسماء من SmartThings، اختياريًا ومرة واحدة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **التلفزيون المضاف من قبل يظهر في نتائج البحث بالاسم الذي أعطيته له**، كما كانت المكيفات تظهر، بدل الاسم الذي يرسله التلفزيون (مثل «Samsung 7 Series (55)»).
-- **صفحة الإضافة تشرح التسمية كاملة:** يُحفظ فقط الاسم الذي تكتبه بيدك، والاسم المقترح إذا تركته كما هو يُستعمل ولا يُحفظ، والاسم المرقّم يأخذ أصغر رقم غير مستعمل فيبدأ من 1 مرة أخرى بعد تغيير الأسماء، و«حذف بيانات هذه الإضافة» يمسح الأسماء المحفوظة.
+- **اختياري: أسماء أجهزتك من SmartThings.** هدفه تسمية أجهزتك ومطابقتها بما يجده البحث في الشبكة، مرة واحدة فقط: تلصق رمزًا تنشئه بنفسك في SmartThings، فتنتقل الأسماء والغرف التي أعطيتها لأجهزتك هناك. يُستعمل الرمز لهذه القراءة ثم يُنسى، فلا يُحفظ في ملف ولا يظهر في السجل. لا تتحكم الإضافة بأي جهاز عن طريق SmartThings، ولا تتصل به مرة أخرى. ولا تحتاجه لاستعمال الإضافة.
+- **القائمتان جنبًا إلى جنب.** في SmartThings وفي الشبكة (المطابقة بمعرّف الجهاز نفسه، أو بالموديل إذا بقي جهاز واحد منه في كل جهة)؛ في الشبكة فقط (تختار اسمه من أسماء SmartThings الباقية)؛ في SmartThings فقط (لم يرد، ومعه ما تتحقق منه وزر إعادة البحث). والأجهزة السحابية فقط مثل الحساسات مطوية في سطر واحد.
+- **يخضع لسياسات Samsung.** يستعمل الاستيراد خدمة SmartThings من Samsung، فهو يخضع لشروطها وسياساتها، وقد أعلنت Samsung أن هذه الرموز تحتاج خطة SmartThings API مدفوعة من 15 ديسمبر 2026. وبقية الإضافة لا تعتمد عليه.
+- **التلفزيون المضاف من قبل يظهر في نتائج البحث بالاسم الذي أعطيته له**، كما كانت المكيفات تظهر، بدل الاسم الذي يرسله التلفزيون.
+- **صفحة الإضافة تشرح التسمية كاملة:** يُحفظ فقط الاسم الذي تعطيه أنت، والاسم المقترح إذا تركته كما هو يُستعمل ولا يُحفظ، والاسم المرقّم يأخذ أصغر رقم غير مستعمل، و«حذف بيانات هذه الإضافة» يمسح الأسماء المحفوظة.
 
 ## 1.7.0
 
