@@ -677,7 +677,8 @@
             ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>
           <button class="btn btn-primary" id="sl-tv-pair">${t('tvPair')}</button>
           <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>`;
-      html += `${pairing}
+      // A TV already added has its pairing line inside the Home app group; a new one pairs first, at the top.
+      html += `${p.tv.configured ? '' : pairing}
         ${inline ? '' : `<div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>`}
         <div class="sl-group mt-2"><div class="sl-group-title">${t('gIphone')}<small>${t('gIphoneSub')}</small></div>
@@ -700,6 +701,7 @@
             </div></div>
         </div>
         <div class="sl-group mt-3"><div class="sl-group-title">${t('gHome')}<small>${t('gHomeSub')}</small></div>
+          ${p.tv.configured ? pairing.replace('sl-paired', 'sl-paired mt-0 mb-1') : ''}
           <div class="sl-opt"><label><input type="checkbox" id="sl-tv-tile" ${tile ? 'checked' : ''}>
               <span><strong>${t('su_tile')}</strong> <span class="sl-pill sl-ok">${t('phTested')}</span>
               <div class="sl-muted">${t('su_tileNote')}</div></span></label>
