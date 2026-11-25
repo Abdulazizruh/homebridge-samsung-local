@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.11
+
+The SmartThings button on iPhone and iPad hands the address to Safari. Your settings, pairings and accessories are kept as they are.
+
+- **On an iPhone or iPad the button hands the address to the system, which opens the tokens page in Safari as if typed.** On a real iPad already signed in to Samsung, the page still ended in Samsung's error page (403) when reached by a link, also through SmartThings' own guide in a normal tab; the same address opened when another app handed it to Safari. The hand-over is now made from the Homebridge page itself; earlier attempts made it from inside the sandboxed settings frame, which may not start it.
+- **If the system does not take the address, the button turns into the way through SmartThings' own guide**, which stays the way on every other device.
+- The help under the button says plainly that the error page is Samsung's side, and keeps the direct address with a copy button.
+
+**بالعربية**
+
+زر SmartThings على iPhone و iPad يسلّم العنوان إلى Safari. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **على iPhone و iPad يسلّم الزر العنوان إلى النظام، فيفتح صفحة الرموز في Safari كأنه مكتوب.** على iPad حقيقي داخل إلى Samsung بقيت الصفحة تنتهي بصفحة خطأ Samsung (403) إذا وصلتها برابط، حتى عن طريق شرح SmartThings نفسه وفي تبويب عادي. والعنوان نفسه فتح حين سلّمه تطبيق آخر إلى Safari. التسليم الآن يخرج من صفحة Homebridge نفسها، والمحاولات السابقة كانت من داخل إطار الإعدادات المقيّد، وهو لا يُسمح له ببدئه.
+- **إذا لم يأخذ النظام العنوان، يتحول الزر إلى الطريق عن طريق شرح SmartThings**، وهو الطريق على بقية الأجهزة.
+- المساعدة تحت الزر تقول بوضوح إن صفحة الخطأ من جهة Samsung، وتُبقي العنوان المباشر مع زر نسخ.
+
 ## 1.8.10
 
 The SmartThings button also works for a browser already signed in to Samsung. Your settings, pairings and accessories are kept as they are.

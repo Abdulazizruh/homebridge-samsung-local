@@ -22,7 +22,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.8.10. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.8.11. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -143,11 +143,11 @@ It is a separate bar in "Add an appliance", closed until you open it:
 
 <p><img src="assets/screenshots/smartthings-closed.png" alt="The closed bar: Your appliance names from SmartThings, optional" width="360"></p>
 
-1. Press **Open the SmartThings guide**: it opens SmartThings' own guide to personal access tokens in a normal tab. In it, press its link `account.smartthings.com/tokens`, sign in with your Samsung account if it asks, and press **Generate new token**.
+1. Press the button under step 1. On an iPhone or iPad it is **Open the tokens page in Safari**: the address is handed to the system, which opens `account.smartthings.com/tokens` in Safari as if typed. On other devices, or when the system does not take it, it is **Open the SmartThings guide**: SmartThings' own guide to personal access tokens opens, and you press its link `account.smartthings.com/tokens` there. Sign in with your Samsung account if it asks, and press **Generate new token**.
 2. In the form, give the token any name and tick the read permissions only: **List all devices** and **See all devices**, and for room and place names **See all locations** (optional).
 3. Create the token, copy it, paste it in the settings and press **Import and scan**.
 
-Why through the guide: opened straight from the settings page, the tokens page opened for a browser not yet signed in to Samsung and ended in Samsung's error page (403) once it was; opened from the link inside SmartThings' own guide it opens either way. This was seen on a real iPhone and iPad; it is Samsung's behaviour, not something the plugin controls. The help under the button keeps the direct address, as a link and with a copy button.
+Reached by a link, the tokens page can end in Samsung's error page (403) when the browser is already signed in to Samsung; the same address opens when pasted in a new tab. This is Samsung's side and the plugin cannot change it, so the help under the button keeps the direct address, as a link and with a copy button.
 
 The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import.
 
