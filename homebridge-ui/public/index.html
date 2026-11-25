@@ -232,7 +232,7 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
-      tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
+      tvAllowsTitle: 'Permission from the TV for this plugin:', tvAllows: 'allowed', tvAskAgain: 'Ask the TV again', homeNotYet: 'not in Apple Home', homeLater: 'code after a restart', tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
       su_apple: 'Remote like Apple TV (trial)',
       suName: 'Its name in the remote list',
       su_appleNote: 'One remote with keyboard and touch pad. Chosen from the remote list with a code of four digits, once for each device. Inputs are reached from the TV\'s own menu. Works on your home network only.',
@@ -377,7 +377,7 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
-      tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
+      tvAllowsTitle: 'إذن التلفزيون لهذه الإضافة:', tvAllows: 'مسموح', tvAskAgain: 'اطلب الإذن من التلفزيون من جديد', homeNotYet: 'غير مضاف إلى Apple Home', homeLater: 'الرمز بعد إعادة التشغيل', tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
       suName: 'اسمه في قائمة الريموت',
       su_appleNote: 'ريموت واحد بالكيبورد ولوحة اللمس. تختاره من قائمة الريموت برمز من أربعة أرقام، مرة واحدة لكل جهاز. والمداخل تصلها من قائمة التلفزيون نفسه. يعمل داخل شبكة البيت فقط.',
@@ -667,18 +667,23 @@
       // Whether this TV takes a pointer, as it said itself: false greys the choice out, null is not known yet.
       const pointerOk = typeof p.tv.pointer === 'boolean' ? p.tv.pointer : (typeof status.tvPointer?.[p.deviceId] === 'boolean' ? status.tvPointer[p.deviceId] : null);
       const pointerOn = pointerOk !== false && existing?.appleRemoteTouch === 'pointer';
+      // Whether the TV tile is in Apple Home now, as Homebridge itself tracks it (added, or removed there).
+      const setup = existing ? status.tvSetup?.[existing.id] : null;
+      const homeState = !tile || !existing ? '' : !setup ? `<span class="sl-pill">${t('homeLater')}</span>`
+        : setup.paired ? `<span class="sl-pill sl-ok">${t('tvCodePaired')}</span>` : `<span class="sl-pill sl-warn">${t('homeNotYet')}</span>`;
       const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
           <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
       const pairing = p.tv.configured
-        ? `<div class="sl-paired"><span><span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span> ${t('tvWithTv')}</span>
-            <button type="button" class="sl-linkbtn" id="sl-tv-pair">${t('tvPairAgain')}</button></div>`
+        ? `<div class="sl-paired"><span>${t('tvAllowsTitle')} <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvAllows') : t('tvNotPaired')}</span></span>
+            <button type="button" class="sl-linkbtn" id="sl-tv-pair">${t('tvAskAgain')}</button></div>`
         : `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
             <ol class="mb-1">${[1, 2, 3, 4].map((n) => `<li>${t('tvStep' + n)}</li>`).join('')}</ol>
             ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>
           <button class="btn btn-primary" id="sl-tv-pair">${t('tvPair')}</button>
           <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>`;
-      // A TV already added has its pairing line inside the Home app group; a new one pairs first, at the top.
-      html += `${p.tv.configured ? '' : pairing}
+      // The TV's own permission for this plugin, at the top: it is not the Apple Home pairing, which
+      // sits with the TV tile below.
+      html += `${pairing}
         ${inline ? '' : `<div class="mt-2"><strong>${t('name')}</strong>
           <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>`}
         <div class="sl-group mt-2"><div class="sl-group-title">${t('gIphone')}<small>${t('gIphoneSub')}</small></div>
@@ -701,9 +706,8 @@
             </div></div>
         </div>
         <div class="sl-group mt-3"><div class="sl-group-title">${t('gHome')}<small>${t('gHomeSub')}</small></div>
-          ${p.tv.configured ? pairing.replace('sl-paired', 'sl-paired mt-0 mb-1') : ''}
           <div class="sl-opt"><label><input type="checkbox" id="sl-tv-tile" ${tile ? 'checked' : ''}>
-              <span><strong>${t('su_tile')}</strong> <span class="sl-pill sl-ok">${t('phTested')}</span>
+              <span><strong>${t('su_tile')}</strong> <span class="sl-pill sl-ok">${t('phTested')}</span> ${homeState}
               <div class="sl-muted">${t('su_tileNote')}</div></span></label>
             <div class="sl-sub">${existing && existing.tvMode !== 'switches' ? tvSetupBox(existing) : `<div class="sl-muted">${t('tvCodeLater')}</div>`}</div></div>
           <div class="sl-opt"><label><input type="checkbox" id="sl-tv-switches-on" ${chosen.length ? 'checked' : ''}>
@@ -998,8 +1002,8 @@
       <div class="sl-muted">${t(setup.paired ? 'tvCodePairedNote' : 'tvCodeNote')}</div></div>`;
     // Once the TV is in Apple Home the code is rarely needed: one tap away, out of the way.
     return setup.paired
-      ? `<details class="mt-1"><summary><span class="sl-pill sl-ok">${t('tvCodePaired')}</span> <span class="sl-muted">${t('tvCodeShow')}</span></summary>${code}</details>`
-      : `<div class="mt-1"><span class="sl-pill sl-warn">${t('tvCodeTitle')}</span>${code}</div>`;
+      ? `<details class="mt-1"><summary><span class="sl-muted">${t('tvCodeShow')}</span></summary>${code}</details>`
+      : `<div class="mt-1">${code}</div>`; // whether it is in Apple Home is shown beside the tile's name
   }
 
   // --- the device list, grouped by kind of appliance ---

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.5
+
+Clearer TV settings. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.
+
+- **Two different pairings, each said for what it is.** The line "Paired with the TV" sat in the "In the Home app" group and read like a pairing with Apple Home, though it is the TV's own permission for this plugin. It is back at the top as "Permission from the TV for this plugin: allowed", with "Ask the TV again".
+- **Whether the TV tile is in Apple Home is shown beside its name:** "Added to Apple Home", or "not in Apple Home" with its code under it. It follows Apple Home itself: a tile removed there shows as not added.
+
+**بالعربية**
+
+إعدادات تلفزيون أوضح. لا يتغير شيء فيما يفعله التلفزيون، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **اقترانان مختلفان، وكل واحد باسمه.** سطر «تم الاقتران مع التلفزيون» كان داخل مجموعة «في تطبيق Home»، فبدا كأنه اقتران مع Apple Home، وهو في الحقيقة إذن التلفزيون نفسه لهذه الإضافة. عاد إلى الأعلى باسم «إذن التلفزيون لهذه الإضافة: مسموح»، ومعه «اطلب الإذن من التلفزيون من جديد».
+- **هل بطاقة التلفزيون مضافة إلى Apple Home يظهر بجانب اسمها:** «مضاف إلى Apple Home»، أو «غير مضاف إلى Apple Home» ورمزها تحتها. وهي تتبع Apple Home نفسه: البطاقة المحذوفة منه تظهر غير مضافة.
+
 ## 1.6.4
 
 Clearer names for the touch area of the remote like Apple TV, and a fuller TV diagnostics file; your settings, pairings and accessories are kept as they are.
