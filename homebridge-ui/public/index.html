@@ -890,6 +890,7 @@
     const d = p.described;
     const known = config.devices.find((x) => x.id && x.id === p.deviceId);
     if (known) {
+      item.dev = known;
       // Same appliance on a new address: keep one entry and follow it, as the manual path does.
       if (known.host !== p.host) {
         await change(() => { const dev = config.devices.find((x) => x.id === p.deviceId); if (dev) { dev.host = p.host; } }, false);
@@ -988,8 +989,9 @@
     const word = { ready: 'scanReady', added: 'scanAdded', moved: 'scanMoved', just: 'scanJust', wait: 'scanWait', busy: 'scanBusy', failed: 'scanFailed', unsupported: 'scanUnsupported', pair: 'scanPair' };
     const rows = run.items.map((item, i) => {
       const d = item.probe?.described;
-      const kind = d ? (KINDS[lang][d.kind] ?? d.kind) : item.dev ? esc(item.dev.name || t('scanAdded')) : 'Samsung';
-      const title = item.probe?.tv?.name ? `${esc(item.probe.tv.name)}` : '';
+      // An appliance already in the list is shown by the name it has here, TVs included.
+      const kind = item.dev?.name ? esc(item.dev.name) : d ? (KINDS[lang][d.kind] ?? d.kind) : item.dev ? t('scanAdded') : 'Samsung';
+      const title = !item.dev && item.probe?.tv?.name ? `${esc(item.probe.tv.name)}` : '';
       const tick = item.state === 'ready' ? `<input type="checkbox" data-pick="${i}" ${item.checked ? 'checked' : ''} aria-label="${t('scanAdd')}">` : '';
       if (['ready', 'pair'].includes(item.state) && !item.sug) {
         item.sug = suggestName(item.probe, run.items.filter((x) => x !== item && x.sug).map((x) => x.sug.name));

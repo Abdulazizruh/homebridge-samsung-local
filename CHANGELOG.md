@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.7.1
+
+A small fix to the network scan. Your settings, pairings and accessories are kept as they are.
+
+- **A TV already in the list shows the name you gave it in the scan**, as air conditioners already did, instead of the name the TV reports (such as "Samsung 7 Series (55)").
+- **The plugin page explains naming in full:** only a name you type is remembered; a suggestion left as it is is used but not remembered; numbered suggestions take the smallest number not in use, so after renaming they start again from 1; and deleting the plugin's data clears the remembered names.
+
+**بالعربية**
+
+إصلاح صغير في البحث في الشبكة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **التلفزيون المضاف من قبل يظهر في نتائج البحث بالاسم الذي أعطيته له**، كما كانت المكيفات تظهر، بدل الاسم الذي يرسله التلفزيون (مثل «Samsung 7 Series (55)»).
+- **صفحة الإضافة تشرح التسمية كاملة:** يُحفظ فقط الاسم الذي تكتبه بيدك، والاسم المقترح إذا تركته كما هو يُستعمل ولا يُحفظ، والاسم المرقّم يأخذ أصغر رقم غير مستعمل فيبدأ من 1 مرة أخرى بعد تغيير الأسماء، و«حذف بيانات هذه الإضافة» يمسح الأسماء المحفوظة.
+
 ## 1.7.0
 
 Appliances come with names. Your settings, pairings and accessories are kept as they are.
