@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { idKey, matchDevices, modelKey, readSmartThings } from '../src/smartthings.js';
+import { idKey, matchDevices, mergeImports, modelKey, readSmartThings } from '../src/smartthings.js';
 
 const TOKEN = '11111111-2222-3333-4444-555555555555';
 const API = 'https://api.smartthings.com/v1';
@@ -34,7 +34,9 @@ test('SmartThings import: reads every page, rooms and each appliance\'s local ID
     [`${API}/devices/st-ac/status`]: { components: { main: { ocf: { di: { value: 'ABC-1' }, mnmo: { value: 'ARTIK051_PRAC_20K|10193441|600' } } } } },
     [`${API}/devices/st-wash/status`]: { components: { main: { ocf: { di: { value: 'wash-1' } } } } },
   }, seen);
-  const out = await readSmartThings(` ${TOKEN} `, { fetchImpl });
+  const steps = [];
+  const out = await readSmartThings(` ${TOKEN} `, { fetchImpl, onProgress: (p) => steps.push(`${p.stage} ${p.done}/${p.total}`) });
+  assert.equal(steps.at(-1), 'import 2/2');
   assert.equal(out.roomsRead, true);
   assert.equal(out.statusRead, true);
   const [ac, wash, door] = out.devices;
@@ -86,7 +88,20 @@ test('SmartThings matching: by ID first, then by the only one of its model, then
   m = matchDevices(st, locals.map((l, i) => (i === 3 ? { ...l, pick: 2 } : l)));
   assert.deepEqual(m.locals[3], { st: 2, how: 'pick' });
   assert.deepEqual(m.stOnly, [1]);
+  // SmartThings' own ID is the appliance's ID; a longer spelling of the model is the same model.
+  m = matchDevices([{ name: 'A', local: true, di: null, stId: 'ABC-9', model: 'x' }, { name: 'B', local: true, di: null, stId: 'q', model: 'QA65QN70FAUXSA' }],
+    [{ deviceId: 'tv-abc-9', model: 'y' }, { deviceId: 'zz', model: 'QA65QN70F' }]);
+  assert.deepEqual(m.locals.map((x) => [x.st, x.how]), [[0, 'id'], [1, 'model']]);
   // An appliance already in the list that is off now: found by its name.
   m = matchDevices(st, [{ deviceId: 'tv-other', model: null, name: ' office ' }]);
   assert.deepEqual(m.locals[0], { st: 1, how: 'name' });
+});
+
+test('SmartThings import: a second import is joined with the kept one; nothing learned before is lost', () => {
+  const kept = { devices: [{ stId: 'a', name: 'Old name', di: 'x-1', room: 'Hall' }, { stId: 'b', name: 'Gone from the list', di: 'x-2' }], roomsRead: true, statusRead: true };
+  const fresh = { devices: [{ stId: 'a', name: 'New name', di: null, room: null }, { stId: 'c', name: 'New one', di: 'x-3' }], roomsRead: false, statusRead: false };
+  const out = mergeImports(kept, fresh);
+  assert.deepEqual(out.devices.map((d) => [d.stId, d.name, d.di, d.room ?? null]), [['a', 'New name', 'x-1', 'Hall'], ['c', 'New one', 'x-3', null], ['b', 'Gone from the list', 'x-2', null]]);
+  assert.deepEqual([out.roomsRead, out.statusRead], [true, true]);
+  assert.deepEqual(mergeImports(null, fresh).devices.length, 2);
 });

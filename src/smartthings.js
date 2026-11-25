@@ -50,7 +50,7 @@ const TOKEN = /^[A-Za-z0-9._~+/=-]{20,2048}$/;
  * Read the appliance list from SmartThings with a personal access token.
  * Returns names, rooms and what is needed to match each one on the network.
  */
-export async function readSmartThings(token, { fetchImpl = globalThis.fetch, timeoutMs = 15000, maxStatus = 80 } = {}) {
+export async function readSmartThings(token, { fetchImpl = globalThis.fetch, timeoutMs = 15000, maxStatus = 80, onProgress = () => {} } = {}) {
   token = String(token ?? '').trim();
   if (!TOKEN.test(token)) {
     throw stError('st_format', 'Paste the token exactly as SmartThings shows it.');
@@ -82,6 +82,7 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
   let url = `${API}/devices?includeHealth=true`;
   for (let page = 0; url && page < 20; page += 1) {
     const body = await get(url);
+    onProgress({ stage: 'import', done: 0, total: 0 });
     items.push(...(Array.isArray(body?.items) ? body.items : []));
     const next = body?._links?.next?.href;
     url = typeof next === 'string' && next.startsWith(`${API}/`) ? next : null;
@@ -123,6 +124,8 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
   // The local ID of each appliance that can be on the network, from its status.
   let statusRead = false;
   const wanted = devices.filter((d) => d.local && d.stId).slice(0, maxStatus);
+  let read = 0;
+  onProgress({ stage: 'import', done: 0, total: wanted.length });
   for (let i = 0; i < wanted.length; i += 4) {
     await Promise.all(wanted.slice(i, i + 4).map(async (d) => {
       const body = await get(`${API}/devices/${encodeURIComponent(d.stId)}/status`, { quiet: true });
@@ -133,6 +136,8 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
       const mnmo = ocf.mnmo?.value;
       if (mnmo) { d.model = String(mnmo).split('|')[0]; }
     }));
+    read = Math.min(wanted.length, i + 4);
+    onProgress({ stage: 'import', done: read, total: wanted.length });
   }
   return { devices, roomsRead, statusRead };
 }
@@ -161,12 +166,15 @@ export function matchDevices(stDevices, locals) {
   locals.forEach((l, li) => {
     if (out[li].st !== null) { return; }
     const key = idKey(l.deviceId);
-    const hit = key && candidates.find(({ d, i }) => !used.has(i) && d.di && d.di === key);
+    // SmartThings' own ID of a Samsung appliance is the appliance's ID too, so it matches even where the status was not read.
+    const hit = key && candidates.find(({ d, i }) => !used.has(i) && ((d.di && d.di === key) || idKey(d.stId) === key));
     if (hit) { out[li] = { st: hit.i, how: 'id' }; used.add(hit.i); }
   });
   // 3. The only one of its model left on both sides.
-  const left = (model) => candidates.filter(({ d, i }) => !used.has(i) && modelKey(d.model) === model);
-  const localLeft = (model) => locals.filter((l, li) => out[li].st === null && modelKey(l.model) === model);
+  // The same model, or one spelled longer than the other (a TV says "QA65QN70F", SmartThings "QA65QN70FAUXSA").
+  const sameModel = (a, b) => Boolean(a && b) && (a === b || (Math.min(a.length, b.length) >= 6 && (a.startsWith(b) || b.startsWith(a))));
+  const left = (model) => candidates.filter(({ d, i }) => !used.has(i) && sameModel(modelKey(d.model), model));
+  const localLeft = (model) => locals.filter((l, li) => out[li].st === null && sameModel(modelKey(l.model), model));
   locals.forEach((l, li) => {
     const model = modelKey(l.model);
     if (out[li].st !== null || !model) { return; }
@@ -183,4 +191,26 @@ export function matchDevices(stDevices, locals) {
   });
   const stOnly = candidates.filter(({ i }) => !used.has(i)).map(({ i }) => i);
   return { locals: out, stOnly };
+}
+
+/**
+ * A new import joined with the one kept before: an appliance read again is brought
+ * up to date (what the new read lacks is kept from the old one), and one that the
+ * new read does not list stays.
+ */
+export function mergeImports(prev, next) {
+  const old = new Map((prev?.devices ?? []).filter((d) => d?.stId).map((d) => [d.stId, d]));
+  const devices = (next?.devices ?? []).map((d) => {
+    const before = old.get(d.stId);
+    old.delete(d.stId);
+    if (!before) { return d; }
+    const out = { ...before, ...d };
+    for (const k of ['di', 'room', 'model', 'place', 'placeName', 'kind', 'lastSeen']) { if (out[k] === null || out[k] === undefined) { out[k] = before[k] ?? null; } }
+    return out;
+  });
+  return {
+    devices: [...devices, ...old.values()],
+    roomsRead: Boolean(next?.roomsRead || prev?.roomsRead),
+    statusRead: Boolean(next?.statusRead || prev?.statusRead),
+  };
 }

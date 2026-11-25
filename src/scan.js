@@ -178,12 +178,13 @@ async function sweepTvs(hosts, { port, timeoutMs, concurrency }) {
  * Look around once. Resolves { networks, appliances: [ip], tvs: [{host, ...}] }.
  * `hosts` replaces the address list (tests).
  */
-export async function scanNetwork({ hints = [], hosts = null, ocfPort = 5683, tvPort = 8001, waitMs = 1500, tvTimeoutMs = 1500, concurrency = 32 } = {}) {
+export async function scanNetwork({ hints = [], hosts = null, ocfPort = 5683, tvPort = 8001, waitMs = 1500, tvTimeoutMs = 1500, concurrency = 32, only = null } = {}) {
   const { bases, own } = scanNetworks(hints);
   const list = hosts ?? hostsOf(bases, own);
   const [ocf, tvs] = await Promise.all([
-    sweepOcf(list, { port: ocfPort, waitMs, own }),
-    sweepTvs(list, { port: tvPort, timeoutMs: tvTimeoutMs, concurrency }),
+    // "only" narrows the look to one kind, for a search after a single appliance.
+    only === 'tv' ? [] : sweepOcf(list, { port: ocfPort, waitMs, own }),
+    only === 'ocf' ? [] : sweepTvs(list, { port: tvPort, timeoutMs: tvTimeoutMs, concurrency }),
   ]);
   const tvHosts = new Set(tvs.map((tv) => tv.host));
   const byAddress = (a, b) => a.split('.').map((x) => x.padStart(3, '0')).join('').localeCompare(b.split('.').map((x) => x.padStart(3, '0')).join(''));

@@ -25,6 +25,8 @@ export function pluginPaths(homebridgeStoragePath) {
     stability: path.join(root, 'stability.json'),
     // The last name given to each appliance in the settings, kept after it is removed.
     names: path.join(root, 'names.json'),
+    // The appliance list imported once from SmartThings (names, rooms, models, IDs; never the token).
+    smartthings: path.join(root, 'smartthings.json'),
   };
 }
 
@@ -105,7 +107,7 @@ export function wipePluginData(homebridgeStoragePath, { keepRuntime = false } = 
     throw new Error('Refusing to wipe: unexpected storage path.');
   }
   const removed = [];
-  const targets = keepRuntime ? [paths.credentials, paths.state, paths.names] : [paths.root];
+  const targets = keepRuntime ? [paths.credentials, paths.state, paths.names, paths.smartthings] : [paths.root];
   for (const target of targets) {
     if (fs.existsSync(target)) {
       fs.rmSync(target, { recursive: true, force: true });

@@ -4,25 +4,33 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 ## 1.8.1
 
-Names from SmartThings, after a first run in a real home. Your settings, pairings and accessories are kept as they are.
+Names from SmartThings, after a first run in a real home: a scan that shows its work and keeps its result. Your settings, pairings and accessories are kept as they are.
 
 - **Tested in a real home:** five air conditioners and a washer were matched to their SmartThings names by their own ID.
-- **An appliance already in your list that is off now** (a TV in standby) is no longer offered as "did not answer, add it by address": it is listed as already in your list, matched by ID or by its name.
-- **An appliance in another SmartThings place, such as an office, is no longer shown as "did not answer"**: it is folded into one line as not expected on this network. This home is the place most matched appliances are in.
-- **The SmartThings button opens the Samsung account sign-in, then the tokens page.** The earlier address could stop at the SmartThings home page.
-- **The import is a clear bar of its own**, closed until opened, with its title, one line on its goal and the "optional" label.
+- **A progress bar with stages:** connect to SmartThings, import, scan the network, match; an ordinary scan shows scan and read. With the time passed, the appliance being read, and Stop.
+- **The result stays on the page.** A new scan adds to it and never clears it: what was found stays with its match even when it does not answer the next time ("not answering now"), and what is found now is marked. A name being typed keeps its place.
+- **Search for one appliance only**, up to three times, stopping when it is found; **Watch for them** keeps looking for a few minutes, so an appliance switched on meanwhile shows up by itself. An appliance that fails to be read is asked a second time by itself, and the scan takes a second look when SmartThings shows an appliance online that did not answer.
+- **One decision bar:** new appliances are ticked with their names; an appliance already in your list takes its SmartThings name only where you tick it; Apply selected, Select all, Clear all.
+- **The imported list is kept on your own Homebridge** (names, rooms, models, IDs; never the token; sent nowhere), so a later scan, or adding by address, matches without connecting to SmartThings again. A later import is joined with it; "Forget the import" and deleting the plugin's data remove it.
+- **Smarter matching:** also by SmartThings' own ID of the appliance, by a model spelled longer on one side, and by name for an appliance already in your list that is off now. An appliance in another SmartThings place, such as an office, is folded as not expected on this network.
+- **The SmartThings button opens the Samsung account sign-in, then the tokens page**, and pasting the token starts the import. The import is a clear bar of its own, closed until opened.
 - **Every push checks that the outside links on the settings page still open.**
+- The ordinary scan without SmartThings works as before, with names from this plugin and from `homebridge-smartthings-oauth`.
 
 **بالعربية**
 
-الأسماء من SmartThings بعد أول تجربة في بيت حقيقي. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+الأسماء من SmartThings بعد أول تجربة في بيت حقيقي: بحث يُظهر عمله ويحفظ نتيجته. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **جُرّب في بيت حقيقي:** تطابقت خمسة مكيفات وغسالة مع أسمائها في SmartThings بمعرّفها.
-- **الجهاز الموجود في قائمتك والمطفأ الآن** (تلفزيون في وضع الاستعداد) لم يعد يُعرض بأنه «لم يرد، أضفه بالعنوان»: يظهر أنه في قائمتك، طابق بالمعرّف أو باسمه.
-- **الجهاز الذي في موقع آخر في SmartThings، مثل المكتب، لم يعد يظهر بأنه «لم يرد»**: يُطوى في سطر واحد لأنه لا يُنتظر على هذه الشبكة. والبيت هو الموقع الذي فيه أكثر الأجهزة المتطابقة.
-- **زر SmartThings يفتح صفحة الدخول إلى حساب Samsung، ثم صفحة الرموز.** العنوان السابق قد يتوقف عند الصفحة الرئيسية لـ SmartThings.
-- **الاستيراد شريط واضح مستقل**، مطوي حتى تفتحه، فيه عنوانه وسطر عن هدفه وعلامة «اختياري».
+- **شريط تقدّم بمراحل:** الاتصال بـ SmartThings، ثم الاستيراد، ثم مسح الشبكة، ثم المطابقة. والبحث العادي يعرض المسح والقراءة. ومعه الوقت المنقضي، والجهاز الذي يُقرأ الآن، وزر الإيقاف.
+- **النتيجة تبقى في الصفحة.** البحث الجديد يضيف إليها ولا يمسحها: ما وُجد يبقى بمطابقته حتى لو لم يرد في المرة التالية («لم يرد الآن»)، وما يوجد الآن عليه علامة. والاسم الذي تكتبه يبقى في مكانه.
+- **البحث عن جهاز واحد فقط** حتى ثلاث محاولات، ويتوقف حين يجده. وزر **راقب حتى تظهر** يواصل البحث دقائق، فالجهاز الذي تشغّله يظهر وحده. والجهاز الذي تتعذر قراءته يُسأل مرة ثانية تلقائيًا، ويعيد البحث النظر مرة ثانية إذا ظهر في SmartThings جهاز متصل لم يرد.
+- **شريط واحد للقرار:** الأجهزة الجديدة محددة بأسمائها، والجهاز الذي في قائمتك يأخذ اسمه من SmartThings حيث تحدده فقط. وفيه: طبّق المحدد، وحدد الكل، وألغِ الكل.
+- **القائمة المستوردة تُحفظ على Homebridge عندك** (الأسماء والغرف والموديلات والمعرّفات، دون الرمز، ولا تُرسل إلى أي مكان)، فيطابق بها البحث اللاحق والإضافة بالعنوان دون اتصال جديد بـ SmartThings. والاستيراد اللاحق يُدمج معها، و«تجاهل الاستيراد» و«حذف بيانات هذه الإضافة» يحذفانها.
+- **مطابقة أذكى:** بمعرّف الجهاز في SmartThings نفسه أيضًا، وبالموديل المكتوب أطول في إحدى الجهتين، وبالاسم للجهاز الذي في قائمتك وهو مطفأ الآن. والجهاز الذي في موقع آخر في SmartThings، مثل المكتب، يُطوى لأنه لا يُنتظر على هذه الشبكة.
+- **زر SmartThings يفتح صفحة الدخول إلى حساب Samsung ثم صفحة الرموز**، ولصق الرمز يبدأ الاستيراد. والاستيراد شريط واضح مستقل، مطوي حتى تفتحه.
 - **كل رفع للتعديلات يتحقق أن الروابط الخارجية في صفحة الإعدادات ما زالت تعمل.**
+- البحث العادي دون SmartThings يعمل كما كان، بالأسماء من هذه الإضافة ومن `homebridge-smartthings-oauth`.
 
 ## 1.8.0
 

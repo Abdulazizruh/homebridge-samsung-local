@@ -10,7 +10,7 @@ import { modelYear, pointerSupport, TizenRemote, tvInfo, tvInfoForDiagnostics, t
 import QRCode from 'qrcode-svg';
 import { scanNetwork, tidyName } from '../src/scan.js';
 import { rememberNames } from '../src/names.js';
-import { matchDevices, readSmartThings } from '../src/smartthings.js';
+import { matchDevices, mergeImports, readSmartThings } from '../src/smartthings.js';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
 
@@ -29,16 +29,30 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/tv-pair', (payload) => this.tvPair(payload));
     this.onRequest('/tv-text', (payload) => this.tvText(payload));
     this.onRequest('/remove-runtime', () => this.removeRuntime());
-    this.onRequest('/scan', () => this.scan());
+    this.onRequest('/scan', (payload) => this.scan(payload));
     this.onRequest('/names', () => this.names());
     // Optional, one time: names and rooms from SmartThings, read with a token that is never stored.
     this.onRequest('/smartthings-import', async (payload) => {
       try {
-        return await readSmartThings(payload?.token);
+        this.stProgress = { stage: 'connect', done: 0, total: 0 };
+        const list = await readSmartThings(payload?.token, { onProgress: (p) => { this.stProgress = p; } });
+        // Kept in the plugin's own folder, so a later scan can match an appliance that was off, without connecting again.
+        // The token is not part of it.
+        // A second import is joined with the first: nothing learned before is lost.
+        const saved = { ...mergeImports(readJson(this.paths.smartthings), list), savedAt: Date.now() };
+        ensureDir(this.paths.root);
+        writeJson(this.paths.smartthings, saved);
+        return saved;
       } catch (err) {
         throw new RequestError(err.message, { code: err.code ?? 'st_error' });
       }
     });
+    this.onRequest('/smartthings-saved', () => {
+      const saved = readJson(this.paths.smartthings);
+      return saved && Array.isArray(saved.devices) ? saved : null;
+    });
+    this.onRequest('/smartthings-forget', () => { fs.rmSync(this.paths.smartthings, { force: true }); return { ok: true }; });
+    this.onRequest('/smartthings-progress', () => this.stProgress ?? null);
     this.onRequest('/smartthings-match', (payload) => matchDevices(
       Array.isArray(payload?.devices) ? payload.devices : [],
       Array.isArray(payload?.locals) ? payload.locals : [],
@@ -106,12 +120,12 @@ class UiServer extends HomebridgePluginUiServer {
    * appliances come back as addresses only: reading what each one is opens a
    * session, which the page then does one appliance at a time through /probe.
    */
-  async scan() {
+  async scan({ only } = {}) {
     try {
       const config = await this.pluginConfig();
       const hints = [...listSnapshots(this.paths).map((s) => s.host), ...(config.devices ?? []).map((d) => d.host)]
         .filter((h) => typeof h === 'string');
-      const found = await scanNetwork({ hints });
+      const found = await scanNetwork({ hints, only: ['tv', 'ocf'].includes(only) ? only : null });
       return {
         networks: found.networks,
         asked: found.asked,

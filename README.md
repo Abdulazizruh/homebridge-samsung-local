@@ -146,18 +146,27 @@ It is a separate bar in "Add an appliance", closed until you open it:
 2. Tick the read permissions only: **List all devices** and **See all devices**, and for room and place names **See all locations** (optional).
 3. Paste the token and press **Import and scan**.
 
-The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import.
+The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import. Pasting it starts the import by itself.
 
 <p><img src="assets/screenshots/smartthings-import.png" alt="Names from SmartThings, optional: its goal, three steps, the token field and how the token is handled" width="360"></p>
 
-The scan then runs and puts the two lists side by side:
+What is kept is the list itself (names, rooms, models, IDs), in the plugin's folder on your own Homebridge and sent nowhere: any later scan matches against it, so an appliance that was off shows up later without connecting to SmartThings again. A later import is joined with the kept list. "Forget the import" deletes it, and so does deleting the plugin's data.
 
-- **In SmartThings and on the network:** the name and room from SmartThings, with how they were matched: by the appliance's own ID, or by model when only one of that model is left on each side. Tested in a real home: five air conditioners and a washer were matched by their own ID.
-- **On the network only:** pick its name from the SmartThings names left over, or keep a suggested name.
-- **Already in your list, not answering now:** an appliance you added before that is off at the moment (a TV in standby), matched by ID or by its name; nothing to do.
-- **In SmartThings only:** it did not answer on the network, with what to check (power, the same home Wi-Fi, a TV in standby, connected in the SmartThings app) and **Scan the network again**. Appliances in another SmartThings place, such as an office, are folded into one line as not expected on this network, and so are appliances that work through the cloud only (sensors, hubs).
+**A bar shows where the work is**, in four stages: connect to SmartThings, import, scan the network, match. A later scan runs on the network only.
 
-<p><img src="assets/screenshots/smartthings-match.png" alt="Result of the import: appliances in both lists with their SmartThings names, one picked by hand, and one that did not answer" width="360"></p>
+<p><img src="assets/screenshots/smartthings-progress.png" alt="The progress bar in four stages: Connect and Import done, Scan running with the appliance being read, Match next" width="360"></p>
+
+**The result stays on the page.** A new scan adds to it and never clears it: what was found stays with its match, even when it does not answer the next time, and what is found now is marked "found now". The lines are grouped by what you decide:
+
+- **New: added with their names.** Ticked, with the name and room from SmartThings and how it was matched: by the appliance's own ID (tested in a real home on five air conditioners and a washer), by model, or by your own pick from the names left over.
+- **Already in your list, named differently in SmartThings.** Tick "Use the SmartThings name" for the ones you want; untouched, your name stays.
+- **Already in your list: nothing to do.** Folded.
+- **In SmartThings only: did not answer.** **Search for it** looks for that one appliance only, up to three times, and stops when it is found. **Watch for them** keeps looking for a few minutes: switch the appliance on and it shows up by itself. With what to check (power, the same home Wi-Fi, a TV in standby).
+- Appliances in another SmartThings place, such as an office, and cloud-only ones (sensors, hubs) are folded into one line each.
+
+One bar under the list decides: **Apply selected**, **Select all**, **Clear all**.
+
+<p><img src="assets/screenshots/smartthings-match.png" alt="The result: a new appliance with its SmartThings name, an appliance named differently, and a search running for one appliance that did not answer" width="360"></p>
 
 A name from SmartThings is a name you gave, so it is remembered like one you type.
 
@@ -296,7 +305,7 @@ With a remote like Apple TV chosen, the touch area of that remote can be swipe l
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (156 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (157 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |
