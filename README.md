@@ -12,7 +12,7 @@
 Local, cloud-free control of Samsung appliances from Apple Home: air conditioners, washer status with a cycle-finished notice, and TVs with the Control Centre remote.
 
 **Apple Home → Homebridge → the appliance, directly over your home network.**
-No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
+**No SmartThings account, token or API needed**, unlike plugins built on SmartThings sign-in (OAuth): the plugin never signs in to Samsung. No Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
@@ -23,6 +23,8 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 | | |
 |---|---|
+| Account | **None.** No SmartThings account, token, API or subscription: the plugin talks to each appliance on your home network only. The appliance just has to be on your Wi-Fi, which is usually done once with the SmartThings app when it is installed, and stay registered there. TVs need no SmartThings at all: you choose "Allow" on the TV once |
+| Away from home | **Yes, with an Apple home hub** (an Apple TV or a HomePod) at home, as for any Apple Home accessory: control and notifications work from anywhere, from the first day. The remote like Apple TV in Control Centre works on the home network only |
 | Connection | Air conditioners and washers: CoAP over DTLS on the LAN. TVs: the TV's own local remote-control channel |
 | Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
 | Setup | Press **Scan the network** in the plugin settings and tick what to add, or enter one IP or MAC address and press **Test & discover** |
