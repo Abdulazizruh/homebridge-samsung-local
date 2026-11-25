@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.6
+
+The SmartThings button on iPhone and iPad. Your settings, pairings and accessories are kept as they are.
+
+- **On an iPhone or iPad the SmartThings button hands the address to the system, which opens it in Safari as if typed.** Samsung's sign-in refuses (error 403) a page reached by a link when the browser is already signed in to Samsung, although the same address opens when typed, pasted, or opened with "Open in New Tab"; this was confirmed on a real iPhone. If the system does not take it, the help under the button opens by itself.
+- **The help under the button names what works everywhere:** press and hold the button and choose "Open in New Tab", or copy the address.
+
+**بالعربية**
+
+زر SmartThings على iPhone و iPad. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **على iPhone و iPad يسلّم زر SmartThings العنوان إلى النظام، فيفتحه في Safari كأنه مكتوب.** صفحة الدخول في Samsung ترفض (الخطأ 403) الصفحة التي تصلها برابط إذا كان المتصفح داخلًا إلى حساب Samsung، مع أن العنوان نفسه يفتح إذا كُتب أو لُصق أو فُتح بـ«فتح في علامة تبويب جديدة». تأكد هذا على iPhone حقيقي. وإذا لم يأخذه النظام تنفتح المساعدة تحت الزر تلقائيًا.
+- **المساعدة تحت الزر تذكر ما ينجح في كل مكان:** اضغط مطولًا على الزر واختر «فتح في علامة تبويب جديدة»، أو انسخ العنوان.
+
 ## 1.8.5
 
 Help for the SmartThings sign-in. Your settings, pairings and accessories are kept as they are.
