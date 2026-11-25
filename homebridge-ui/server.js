@@ -300,8 +300,7 @@ class UiServer extends HomebridgePluginUiServer {
 
   async diagnostics({ deviceId, host } = {}) {
     // A TV keeps no readings: its own info page is asked now, with what the plugin learned about it.
-    const config = await this.pluginConfig();
-    const tv = (config.devices ?? []).find((d) => d.type === 'tv' && ((deviceId && d.id === deviceId) || (!deviceId && host && d.host === host)));
+    const tv = this.configDevices().find((d) => d.type === 'tv' && ((deviceId && d.id === deviceId) || (!deviceId && host && d.host === host)));
     if (tv || String(deviceId ?? '').startsWith('tv-')) {
       const page = await tvInfoPage(tv?.host ?? host, { timeoutMs: 3000 });
       if (!page) {
@@ -348,6 +347,17 @@ class UiServer extends HomebridgePluginUiServer {
       return { engine: block.engine, pythonPath: block.pythonPath };
     } catch {
       return {};
+    }
+  }
+
+  /** This plugin's appliance list as saved in the Homebridge config file (read-only). */
+  configDevices() {
+    try {
+      const all = JSON.parse(fs.readFileSync(this.homebridgeConfigPath, 'utf8'));
+      const block = (all.platforms || []).find((p) => p?.platform === 'SamsungLocal');
+      return Array.isArray(block?.devices) ? block.devices : [];
+    } catch {
+      return [];
     }
   }
 
