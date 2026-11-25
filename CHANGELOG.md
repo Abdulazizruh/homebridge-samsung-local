@@ -4,15 +4,17 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 ## 1.6.6
 
-The TV's permission beside its name. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.
+The two links of a TV, named for what they are. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.
 
-- **The TV's permission for this plugin is shown beside its name.** It is the TV's answer to "Allow", the base of everything else: "TV · allowed" in green, or "TV · turned away" in red. It follows what the TV last answered, when paired from the settings and with every press. "Ask the TV again" stays at the top of the options. The Apple Home pairing of the TV tile stays beside the tile, as in 1.6.5.
+- **The link between Homebridge and the TV sits beside the TV's name.** It is the TV's answer to "Allow", the first link and the base of everything else: "linked to Homebridge" in green, or "not linked to Homebridge" in red. It follows what the TV last answered, when linked from the settings and with every press. "Link to Homebridge again" stays at the top of the options.
+- **The link with HomeKit sits beside the TV tile**, with its scan picture and code: "linked to HomeKit" in green, or "not linked to HomeKit" in yellow with the code under it. It follows HomeKit itself: a tile removed in the Home app shows as not linked.
 
 **بالعربية**
 
-إذن التلفزيون بجانب اسمه. لا يتغير شيء فيما يفعله التلفزيون، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+ارتباطا التلفزيون، وكل واحد باسمه. لا يتغير شيء فيما يفعله التلفزيون، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **إذن التلفزيون لهذه الإضافة يظهر بجانب اسمه.** هو جواب التلفزيون على «Allow»، وأساس كل شيء: «تلفزيون · مسموح» بالأخضر، أو «تلفزيون · مرفوض» بالأحمر. ويتبع آخر جواب من التلفزيون، عند الاقتران من الإعدادات ومع كل ضغطة. و«اطلب الإذن من التلفزيون من جديد» باقٍ أعلى الخيارات. أما اقتران بطاقة التلفزيون مع Apple Home فيبقى بجانب البطاقة كما في 1.6.5.
+- **الارتباط بين Homebridge والتلفزيون يظهر بجانب اسم التلفزيون.** هو موافقة التلفزيون بـ «Allow»، الارتباط الأول وأساس كل شيء: «مرتبط بـ Homebridge» بالأخضر، أو «غير مرتبط بـ Homebridge» بالأحمر. ويتبع آخر جواب من التلفزيون، عند الربط من الإعدادات ومع كل ضغطة. و«اربطه بـ Homebridge من جديد» باقٍ أعلى الخيارات.
+- **الارتباط مع HomeKit يظهر بجانب بطاقة التلفزيون**، مع صورة المسح والرمز: «مربوط بـ HomeKit» بالأخضر، أو «غير مربوط بـ HomeKit» بالأصفر والرمز تحتها. ويتبع HomeKit نفسه: البطاقة المحذوفة من تطبيق Home تظهر غير مربوطة.
 
 ## 1.6.5
 
