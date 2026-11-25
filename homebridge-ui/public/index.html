@@ -232,7 +232,7 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
-      tvAllowsTitle: 'Permission from the TV for this plugin:', tvAllows: 'allowed', tvAskAgain: 'Ask the TV again', homeNotYet: 'not in Apple Home', homeLater: 'code after a restart', tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
+      tvAskNote: 'The TV\'s permission for this plugin is shown beside its name. If the TV turns it away:', tvAllows: 'allowed', tvRefused: 'turned away', tvAskAgain: 'Ask the TV again', homeNotYet: 'not in Apple Home', homeLater: 'code after a restart', tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
       su_apple: 'Remote like Apple TV (trial)',
       suName: 'Its name in the remote list',
       su_appleNote: 'One remote with keyboard and touch pad. Chosen from the remote list with a code of four digits, once for each device. Inputs are reached from the TV\'s own menu. Works on your home network only.',
@@ -377,7 +377,7 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
-      tvAllowsTitle: 'إذن التلفزيون لهذه الإضافة:', tvAllows: 'مسموح', tvAskAgain: 'اطلب الإذن من التلفزيون من جديد', homeNotYet: 'غير مضاف إلى Apple Home', homeLater: 'الرمز بعد إعادة التشغيل', tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
+      tvAskNote: 'إذن التلفزيون لهذه الإضافة يظهر بجانب اسمه. وإذا رفضها التلفزيون:', tvAllows: 'مسموح', tvRefused: 'مرفوض', tvAskAgain: 'اطلب الإذن من التلفزيون من جديد', homeNotYet: 'غير مضاف إلى Apple Home', homeLater: 'الرمز بعد إعادة التشغيل', tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
       suName: 'اسمه في قائمة الريموت',
       su_appleNote: 'ريموت واحد بالكيبورد ولوحة اللمس. تختاره من قائمة الريموت برمز من أربعة أرقام، مرة واحدة لكل جهاز. والمداخل تصلها من قائمة التلفزيون نفسه. يعمل داخل شبكة البيت فقط.',
@@ -674,7 +674,7 @@
       const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
           <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
       const pairing = p.tv.configured
-        ? `<div class="sl-paired"><span>${t('tvAllowsTitle')} <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvAllows') : t('tvNotPaired')}</span></span>
+        ? `<div class="sl-paired"><span class="sl-muted">${t('tvAskNote')}</span> <span id="sl-tv-state"></span>
             <button type="button" class="sl-linkbtn" id="sl-tv-pair">${t('tvAskAgain')}</button></div>`
         : `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
             <ol class="mb-1">${[1, 2, 3, 4].map((n) => `<li>${t('tvStep' + n)}</li>`).join('')}</ol>
@@ -1040,7 +1040,9 @@
     const cards = config.devices.map((dev, i) => {
       const key = keyOf(dev);
       const snap = status.devices.find((s) => s.deviceId && s.deviceId === dev.id) || status.devices.find((s) => s.host === dev.host);
-      const state = dev.type === 'tv' ? `<span class="sl-pill">${esc(KINDS[lang].tv)}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
+      // A TV: whether it allows this plugin (its answer to "Allow"), the base of everything else, beside its name.
+      const allowed = dev.type === 'tv' ? status.tvAllowed?.[dev.id] : undefined;
+      const state = dev.type === 'tv' ? `<span class="sl-pill ${allowed === true ? 'sl-ok' : allowed === false ? 'sl-bad' : ''}">${esc(KINDS[lang].tv)}${allowed === true ? ` · ${t('tvAllows')}` : allowed === false ? ` · ${t('tvRefused')}` : ''}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
       const energy = snap?.described?.features?.filter((r) => ['powerWatts', 'energyKWh'].includes(r.id) && r.device === true)
         .map((r) => `${esc(T[lang].f[r.id])}: <span dir="ltr">${esc(r.value ?? '—')}</span>`).join(' · ') ?? '';
       const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;

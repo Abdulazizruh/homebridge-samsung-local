@@ -67,6 +67,14 @@ class UiServer extends HomebridgePluginUiServer {
       arch: process.arch,
       devices: listSnapshots(this.paths).map((snap) => this.present(snap)),
       tvSetup: this.tvSetup(),
+      // Whether each TV allows this plugin: what it last answered, else whether a key from it is kept.
+      tvAllowed: (() => {
+        const facts = readJson(this.paths.tvFacts) ?? {};
+        const tokens = readJson(this.paths.tvTokens) ?? {};
+        const ids = new Set([...Object.keys(facts), ...Object.keys(tokens)]);
+        return Object.fromEntries([...ids].map((id) => [id, typeof facts[id]?.allowed === 'boolean' ? facts[id].allowed : (tokens[id] ? true : null)])
+          .filter(([, v]) => v !== null));
+      })(),
       // Whether each TV takes a pointer, as it said on its info page (absent until it has answered once).
       tvPointer: Object.fromEntries(Object.entries(readJson(this.paths.tvFacts) ?? {})
         .filter(([, v]) => typeof v?.pointer === 'boolean').map(([id, v]) => [id, v.pointer])),
@@ -277,6 +285,9 @@ class UiServer extends HomebridgePluginUiServer {
       ensureDir(this.paths.root);
       writeJson(this.paths.tvTokens, { ...(readJson(this.paths.tvTokens) ?? {}), [deviceId]: token });
     }
+    // The TV said yes: remembered as its permission for this plugin, shown beside the TV's name.
+    const facts = readJson(this.paths.tvFacts) ?? {};
+    writeJson(this.paths.tvFacts, { ...facts, [deviceId]: { ...facts[deviceId], allowed: true } });
     return { paired: true, deviceId };
   }
 

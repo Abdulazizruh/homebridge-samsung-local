@@ -63,7 +63,7 @@ export class TvAccessory {
    * remote alone it has nothing in Apple Home.
    */
   constructor({ api, log, accessory = null, switchAccessory = null, switches = [], name = null, entry, token, saveToken, ports = {}, pollMs = POLL_MS,
-    reportsPower = false, onReportsPower = null, screenPortSeen = false, onScreenPortSeen = null, pointer = null, onPointer = null }) {
+    reportsPower = false, onReportsPower = null, screenPortSeen = false, onScreenPortSeen = null, pointer = null, onPointer = null, onAllowed = null }) {
     this.api = api;
     this.hap = api.hap;
     this.log = log;
@@ -85,6 +85,7 @@ export class TvAccessory {
     this.onScreenPortSeen = onScreenPortSeen;
     this.pointer = typeof pointer === 'boolean' ? pointer : null; // whether the TV takes a pointer, once it has said
     this.onPointer = onPointer;
+    this.onAllowed = onAllowed; // told when the TV accepts this plugin again, or turns it away
     this.onReportsPower = onReportsPower;
     this.services = new Map();
     this.remote = new TizenRemote({
@@ -351,11 +352,20 @@ export class TvAccessory {
     this.#push();
   }
 
+  #allowed(yes) {
+    if (this.allowedNow !== yes) {
+      this.allowedNow = yes;
+      this.onAllowed?.(yes);
+    }
+  }
+
   async #key(code) {
     try {
       await this.remote.key(code);
+      this.#allowed(true);
     } catch (err) {
       if (err.code === 'tv_denied') {
+        this.#allowed(false);
         this.log.warn(`[${this.displayName}] the TV no longer accepts this plugin. Open the plugin settings and pair the TV again.`);
       }
       throw err;

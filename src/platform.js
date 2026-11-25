@@ -389,6 +389,12 @@ export class SamsungLocalPlatform {
       reportsPower: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.reportsPower),
       screenPortSeen: Boolean((readJson(this.paths.tvFacts) ?? {})[entry.id]?.screenPortSeen),
       pointer: (readJson(this.paths.tvFacts) ?? {})[entry.id]?.pointer ?? null,
+      onAllowed: (allowed) => {
+        try {
+          const facts = readJson(this.paths.tvFacts) ?? {};
+          writeJson(this.paths.tvFacts, { ...facts, [entry.id]: { ...facts[entry.id], allowed } });
+        } catch { /* learned again at the next press */ }
+      },
       onPointer: (pointer) => {
         try {
           const facts = readJson(this.paths.tvFacts) ?? {};

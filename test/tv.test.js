@@ -549,3 +549,20 @@ test('TV pointer: a 2016 model lists a touch pad but takes no pointer; its year 
   assert.equal(pointerSupport(page('25_PONTUSM_QTV', 'true')), true);
   assert.equal(pointerSupport(page('22_KANTSU2E_UB2', 'true')), true);
 });
+
+test('TV permission: a press the TV accepts is remembered as allowed; a TV that turns the plugin away as refused', async (t) => {
+  const tv = await fakeTv({ power: 'on' });
+  const storage = tmpDir();
+  const { api, platform } = await bootTv(tv, 'tile', storage);
+  t.after(() => { platform.stop(); tv.close(); });
+  const handler = platform.tvs[0];
+  const C = api.hap.Characteristic;
+  await waitFor(() => handler.reachable === true);
+  const remote = handler.services.get('tv').getCharacteristic(C.RemoteKey);
+  await remote.handleSetRequest(C.RemoteKey.ARROW_UP);
+  await waitFor(() => readJson(pluginPaths(storage).tvFacts)?.['tv-tv-test-1']?.allowed === true);
+  tv.allow = false;
+  handler.remote.close?.();
+  await remote.handleSetRequest(C.RemoteKey.ARROW_UP).catch(() => {});
+  await waitFor(() => readJson(pluginPaths(storage).tvFacts)?.['tv-tv-test-1']?.allowed === false);
+});
