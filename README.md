@@ -22,7 +22,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.8.3. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.8.4. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -162,7 +162,7 @@ What is kept is the list itself (names, rooms, models, IDs), in the plugin's fol
 - **New: added with their names.** Ticked, with the name and room from SmartThings and how it was matched: by the appliance's own ID (tested in a real home on five air conditioners and a washer), by model, or by your own pick from the names left over.
 - **Already in your list, named differently in SmartThings.** Tick "Use the SmartThings name" for the ones you want; untouched, your name stays.
 - **Already in your list: nothing to do.** Folded.
-- **In SmartThings only: did not answer.** **Search for it** looks for that one appliance only, up to three times, and stops when it is found. **Watch for them** keeps looking for a few minutes: switch the appliance on and it shows up by itself. With what to check (power, the same home Wi-Fi, a TV in standby). **Ignore it** sets aside an appliance that is not in this home, such as a screen at the office: it is remembered, and if it answers on this network one day it shows up like any other.
+- **In SmartThings only: did not answer.** **Search for it** looks for that one appliance only, up to three times, and stops when it is found. **Watch for them** keeps looking for a few minutes: switch the appliance on and it shows up by itself. With what to check (power, the same home Wi-Fi, a TV in standby). **Ignore it** sets aside an appliance that is not in this home, such as a screen at the office: it is remembered, and if it answers on this network one day it shows up like any other. An ignored appliance, or one in another SmartThings place, is matched by its own ID only: a second appliance of the same model at home never takes its name.
 - Appliances in another SmartThings place, such as an office, and cloud-only ones (sensors, hubs) are folded into one line each.
 
 One bar under the list decides: **Apply selected**, **Select all**, **Clear all**.
@@ -310,7 +310,7 @@ With a remote like Apple TV chosen, the touch area of that remote can be swipe l
 
 | Kind of test | Status |
 |---|---|
-| Unit and simulation tests (157 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
+| Unit and simulation tests (159 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
 | Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |

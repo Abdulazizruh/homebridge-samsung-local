@@ -312,14 +312,19 @@ export class ApplianceAccessory {
     } else {
       this.log.warn(`[${this.displayName}] not reachable${failureText(error)}. Will keep retrying.`);
     }
-    // "No Response" on the first tile, as the other appliance kinds do.
-    const { Characteristic, HapStatusError, HAPStatus } = this.hap;
-    const first = this.#wanted().find((p) => this.services.has(p.id));
-    const lead = { power: this.#speedShown() ? Characteristic.Active : Characteristic.On, speed: Characteristic.Active, clean: Characteristic.On,
-      boost: Characteristic.On, airQuality: Characteristic.AirQuality, temperature: Characteristic.CurrentTemperature,
-      door: Characteristic.ContactSensorState, humidity: Characteristic.CurrentRelativeHumidity }[first?.type];
-    if (first && lead) {
-      this.services.get(first.id).updateCharacteristic(lead, new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+    // "No Response" on every tile of the appliance, whatever its kind: each one says so, not only the first.
+    const { Characteristic: C, HapStatusError, HAPStatus } = this.hap;
+    const lead = { power: this.#speedShown() ? C.Active : C.On, speed: C.Active, clean: C.On, boost: C.On, airQuality: C.AirQuality,
+      filter: C.FilterChangeIndication, temperature: C.CurrentTemperature, setpoint: C.CurrentTemperature, targetHumidity: C.Active,
+      humidity: C.CurrentRelativeHumidity, door: C.ContactSensorState, battery: C.BatteryLevel, running: C.OccupancyDetected,
+      kidsLock: C.LockCurrentState, alert: C.OccupancyDetected };
+    const done = new Set();
+    for (const part of this.model.parts) {
+      const service = this.services.get(part.id);
+      const characteristic = lead[part.type];
+      if (!service || !characteristic || done.has(service)) { continue; } // tiles that share a service are marked once
+      done.add(service);
+      service.updateCharacteristic(characteristic, new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
     }
   }
 

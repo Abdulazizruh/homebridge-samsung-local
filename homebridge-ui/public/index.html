@@ -1169,7 +1169,7 @@
     // The place most matched appliances are in is this home; appliances in another place (an office) are not expected here.
     const count = new Map();
     for (const m of res.locals) { const pl = m && m.st !== null ? stImport.devices[m.st].place : null; if (pl) { count.set(pl, (count.get(pl) ?? 0) + 1); } }
-    const home = [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const home = res.home ?? [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
     run.stAway = home ? run.stOnly.filter((si) => stImport.devices[si].place && stImport.devices[si].place !== home) : [];
     // Set aside by the owner: off the list of missing ones. Found on the network, it shows like any other appliance.
     run.stIgnored = run.stOnly.filter((si) => !run.stAway.includes(si) && stImport.devices[si].ignored);

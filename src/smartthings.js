@@ -148,8 +148,8 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
  * on each side, by the owner's own pick when given, and last by the same name
  * for an appliance already in the list.
  * locals: [{ deviceId, model, name, pick }] where pick is an index into stDevices.
- * Returns, per local, { st, how } (st is an index or null) and the indexes
- * of SmartThings appliances found on no line.
+ * Returns, per local, { st, how } (st is an index or null), the indexes
+ * of SmartThings appliances found on no line, and the place taken as this home.
  */
 export function matchDevices(stDevices, locals) {
   const used = new Set();
@@ -170,10 +170,17 @@ export function matchDevices(stDevices, locals) {
     const hit = key && candidates.find(({ d, i }) => !used.has(i) && ((d.di && d.di === key) || idKey(d.stId) === key));
     if (hit) { out[li] = { st: hit.i, how: 'id' }; used.add(hit.i); }
   });
+  // This home is the place most appliances matched by their ID (or picked) are in. An appliance of another
+  // place (an office), or one the owner set aside, is the same appliance only by its own ID: a like model
+  // or name is not enough, so a second TV of that model at home keeps its own identity.
+  const count = new Map();
+  for (const m of out) { const pl = m.st !== null ? stDevices[m.st].place : null; if (pl) { count.set(pl, (count.get(pl) ?? 0) + 1); } }
+  const home = [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const guessable = ({ d }) => !d.ignored && !(home && d.place && d.place !== home);
   // 3. The only one of its model left on both sides.
   // The same model, or one spelled longer than the other (a TV says "QA65QN70F", SmartThings "QA65QN70FAUXSA").
   const sameModel = (a, b) => Boolean(a && b) && (a === b || (Math.min(a.length, b.length) >= 6 && (a.startsWith(b) || b.startsWith(a))));
-  const left = (model) => candidates.filter(({ d, i }) => !used.has(i) && sameModel(modelKey(d.model), model));
+  const left = (model) => candidates.filter((c) => guessable(c) && !used.has(c.i) && sameModel(modelKey(c.d.model), model));
   const localLeft = (model) => locals.filter((l, li) => out[li].st === null && sameModel(modelKey(l.model), model));
   locals.forEach((l, li) => {
     const model = modelKey(l.model);
@@ -186,11 +193,11 @@ export function matchDevices(stDevices, locals) {
   locals.forEach((l, li) => {
     const key = nameKey(l.name);
     if (out[li].st !== null || !key) { return; }
-    const hit = candidates.filter(({ d, i }) => !used.has(i) && nameKey(d.name) === key);
+    const hit = candidates.filter((c) => guessable(c) && !used.has(c.i) && nameKey(c.d.name) === key);
     if (hit.length === 1) { out[li] = { st: hit[0].i, how: 'name' }; used.add(hit[0].i); }
   });
   const stOnly = candidates.filter(({ i }) => !used.has(i)).map(({ i }) => i);
-  return { locals: out, stOnly };
+  return { locals: out, stOnly, home };
 }
 
 /**

@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.4
+
+Two accuracy fixes from a review of 1.8.3. Your settings, pairings and accessories are kept as they are.
+
+- **A TV at home no longer takes the name of the same model at the office.** A SmartThings appliance you ignored, or one in another SmartThings place, is now matched by its own ID only; a like model or name is not enough, and linking by hand from the list stays possible. The same appliance moved home is still known by its ID.
+- **"No Response" on every tile of an appliance that is not reachable**, not only the first one: a refrigerator's temperature setting, a filter, a lock or a battery tile say so too.
+
+**بالعربية**
+
+إصلاحان في الدقة بعد مراجعة 1.8.3. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **تلفزيون البيت لم يعد يأخذ اسم تلفزيون المكتب إذا تشابه الموديل.** الجهاز الذي تجاهلته في SmartThings، أو الذي في موقع آخر فيه، يطابق الآن بمعرّفه فقط. تشابه الموديل أو الاسم لا يكفي، ويبقى الربط اليدوي من القائمة ممكنًا. والجهاز نفسه إذا نُقل إلى البيت يُعرف بمعرّفه كما كان.
+- **«لا يستجيب» على كل بطاقات الجهاز المنقطع**، لا على الأولى فقط: ضبط حرارة الثلاجة، والفلتر، والقفل، والبطارية، كلها تقولها.
+
 ## 1.8.3
 
 One more choice in the scan result. Your settings, pairings and accessories are kept as they are.

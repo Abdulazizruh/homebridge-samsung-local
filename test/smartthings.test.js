@@ -106,3 +106,25 @@ test('SmartThings import: a second import is joined with the kept one; nothing l
   assert.equal(out.devices[0].ignored, true, 'an appliance set aside stays set aside after a new import');
   assert.deepEqual(mergeImports(null, fresh).devices.length, 2);
 });
+
+test('SmartThings matching: an appliance set aside, or one in another place, is matched by its own ID only', () => {
+  const st = [
+    { stId: 'h1', name: 'Hall AC', local: true, di: 'ac-1', model: 'A', place: 'home' },
+    { stId: 'h2', name: 'Room AC', local: true, di: 'ac-2', model: 'A', place: 'home' },
+    { stId: 'o1', name: 'Office TV', local: true, di: 'office', model: 'QA65QN70FAUXSA', place: 'home', ignored: true },
+    { stId: 'o2', name: 'Work screen', local: true, di: 'work', model: 'QA50Q60DAUXSA', place: 'office' },
+    { stId: 'h3', name: 'Hall TV', local: true, di: null, model: 'UA55KU7000', place: 'home' },
+  ];
+  const acs = [{ deviceId: 'ac-1', model: 'A' }, { deviceId: 'ac-2', model: 'A' }];
+  // A second TV of the office model at home, and one of the other place's model: neither takes the office names.
+  let m = matchDevices(st, [...acs, { deviceId: 'tv-new', model: 'QA65QN70F' }, { deviceId: 'tv-new2', model: 'QA50Q60D', name: 'Work screen' }]);
+  assert.equal(m.home, 'home');
+  assert.deepEqual(m.locals.slice(2), [{ st: null, how: null }, { st: null, how: null }]);
+  assert.deepEqual(m.stOnly, [2, 3, 4]);
+  // The office TV itself, moved home: known by its ID, set aside or not, whatever its place.
+  m = matchDevices(st, [...acs, { deviceId: 'tv-office', model: 'x' }, { deviceId: 'tv-work', model: 'y' }]);
+  assert.deepEqual(m.locals.slice(2).map((x) => [x.st, x.how]), [[2, 'id'], [3, 'id']]);
+  // The owner's own pick still links one by hand; a home appliance is still found by its model.
+  m = matchDevices(st, [...acs, { deviceId: 'tv-new', model: 'QA65QN70F', pick: 2 }, { deviceId: 'tv-hall', model: 'UA55KU7000' }]);
+  assert.deepEqual(m.locals.slice(2).map((x) => [x.st, x.how]), [[2, 'pick'], [4, 'model']]);
+});

@@ -196,6 +196,17 @@ test('an appliance that is not reachable stays "No Response" after a command to 
   assert.equal(lead(), 0, 'responding again once it is back');
 });
 
+test('an appliance that is not reachable: every tile says "No Response", the temperature setting of a refrigerator included', () => {
+  const FAIL = -70402; // SERVICE_COMMUNICATION_FAILURE
+  const { link, handler, C } = setup('refrigerator_french', 'refrigerator');
+  const code = (id, char) => handler.services.get(id).getCharacteristic(char).statusCode;
+  const tiles = [['setpoint.0', C.CurrentTemperature], ['door.1', C.ContactSensorState], ['boost.fridge', C.On]];
+  link.setOnline(false);
+  for (const [id, char] of tiles) { assert.equal(code(id, char), FAIL, `${id} shown as not responding`); }
+  link.setOnline(true);
+  for (const [id, char] of tiles) { assert.equal(code(id, char), 0, `${id} responding again`); }
+});
+
 test('robot vacuum: only a token the robot lists is sent', () => {
   const f = fixture('vacuum_jetbot');
   const model = buildApplianceModel(f.resources, 'robotVacuum');
