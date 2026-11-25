@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.2
+
+Simpler settings for TVs. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.
+
+- **Three ticks in place of four choices.** The TV options are now three ticks that do not exclude one another: the remote like Apple TV, the TV tile with the Home remote, and switches for automations. Tick all of them, some or none; "Both together" and "No remote" are gone, since the ticks say the same.
+- **Each setting sits under the option it belongs to.** Under the remote like Apple TV: its pairing code, changed right there, and the touch area (arrows or pointer). Under the TV tile: its code for the Home app. The switches need no code: they come with the plugin's bridge. The tile and the switches are grouped as "In the Home app".
+- **The name is edited in the card's head, for every appliance.** A pencil beside the name turns it into a field in place; the separate Rename button and the name field inside the TV options are gone.
+- **Pairing with the TV is one short line** at the top of the options, with "Pair with the TV again" beside it.
+
+**بالعربية**
+
+إعدادات أبسط للتلفزيونات. لا يتغير شيء فيما يفعله التلفزيون، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **ثلاث علامات بدل أربعة اختيارات.** صارت خيارات التلفزيون ثلاث علامات لا يمنع أحدها الآخر: الريموت الذي مثل Apple TV، وبطاقة التلفزيون مع ريموت Home، ومفاتيح الأتمتة. تختارها كلها أو بعضها أو لا شيء منها. وحُذف «الاثنان معًا» و«دون ريموت» لأن العلامات تؤدي المعنى نفسه.
+- **كل إعداد تحت خياره.** تحت الريموت الذي مثل Apple TV: رمز اقترانه وتعدّله في مكانه، ومساحة اللمس (أسهم أو مؤشر). وتحت بطاقة التلفزيون: رمزها لتطبيق Home. والمفاتيح دون رمز لأنها تأتي مع جسر الإضافة. والبطاقة والمفاتيح مجموعتان تحت «في تطبيق Home».
+- **الاسم يُعدّل من رأس البطاقة، في كل الأجهزة.** قلم بجانب الاسم يحوّله إلى خانة في مكانه. وحُذف زر «تغيير الاسم» وخانة الاسم داخل خيارات التلفزيون.
+- **الاقتران بالتلفزيون سطر قصير** أعلى الخيارات، وبجانبه «اقتران مع التلفزيون من جديد».
+
 ## 1.6.1
 
 Fixes to 1.6.0. Your settings, pairings and accessories are kept as they are.

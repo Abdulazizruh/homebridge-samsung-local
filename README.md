@@ -16,7 +16,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.6.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.6.2. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -133,7 +133,7 @@ The settings list your appliances by kind: air conditioners, laundry, TVs, and t
 
 <p><img src="assets/screenshots/devices-list.png" alt="The appliance list grouped by kind, each appliance on one line with its state and an arrow at the edge" width="320"></p>
 
-The open card holds everything for that appliance: address, energy, Options, Rename, Change IP, Diagnostics, On, and Remove, which asks twice. A change inside the options is not saved until you press Save or Update; until then a bar at the bottom says so, with Undo.
+The open card holds everything for that appliance: its name with a pencil to rename it in place, address, energy, Options, Change IP, Diagnostics, On, and Remove, which asks twice. A change inside the options is not saved until you press Save or Update; until then a bar at the bottom says so, with Undo.
 
 <p><img src="assets/screenshots/device-card.png" alt="An opened appliance card with its buttons, and below it the bar for changes not saved yet, with Undo and Save" width="320"></p>
 
@@ -241,16 +241,14 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 
 ### TV options
 
-Above the options is the TV's code for the Home app. **Scan the picture** with the iPhone or iPad camera from the Home app (+ → Add Accessory), **or type the digits by hand** (More options → pick the TV). Either way works. The code in the picture is an example.
+The TV's options are three ticks that do not exclude one another: tick all of them, some or none. They sit in two groups.
 
-Under it: the TV's name, then two separate choices.
+1. **On the iPhone: the remote like Apple TV (trial)**, with keyboard and touch pad, on your home network only. Under it: its pairing code, changed right there (empty means 0000), and the touch area as arrows or a pointer.
+2. **In the Home app: the TV tile with the Home remote**, at home and away (away through a home hub, an Apple TV or a HomePod). Its code for the Home app is right under it: **scan the picture** from the Home app (+ → Add Accessory) **or type the digits** (More options → pick the TV). With the remote like Apple TV ticked too, the TV has two names in the remote list, the second ending in "+".
+3. **In the Home app: switches for automations**. No code: they come with this plugin's bridge. You choose which switches appear.
 
-1. **Remote on the iPhone**: the remote like Apple TV (trial), the TV tile with the Home remote, both together, or no remote. The remote like Apple TV works on your home network only. The Apple Home tile works at home and away from it, away through your home hub (an Apple TV or a HomePod). Both together gives the keyboard and touch pad at home and the reach from outside; the TV then has two names in the remote list. Without a need for the keyboard, the tile alone is enough; without a need to reach it from outside, the remote like Apple TV alone is enough.
-2. **Switches for automations**: off unless you tick it; then you choose which switches appear.
 
-The pairing code of the remote like Apple TV is shown under that choice and can be changed in the card below it.
-
-<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: the remote choice, the switches for automations, and the notes on the remote like Apple TV" width="320"></p>
+<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: on the iPhone the remote like Apple TV with its code and touch area, and in the Home app the TV tile with its code and the switches for automations" width="320"></p>
 
 With a remote like Apple TV chosen, the touch area of that remote can step the selection with arrows (tested) or move a pointer like a mouse (trial). The pointer shows in the TV's browser and in some apps.
 
@@ -289,7 +287,7 @@ With a remote like Apple TV chosen, the touch area of that remote can step the s
 
 Use the Homebridge Plugins tab. The settings, the certificate and the accessories are kept.
 
-Going back to a version before 1.5.0: first choose a TV set-up without the remote like Apple TV and press Update, so that what it stored is removed; then install the older version. Switches for automations are not known to older versions and disappear from the Home app until you update again.
+Going back to a version before 1.5.0: first untick the remote like Apple TV in the TV options and press Update, so that what it stored is removed; then install the older version. Switches for automations are not known to older versions and disappear from the Home app until you update again.
 
 ## Remove
 

@@ -26,7 +26,7 @@
   .sl-exp { width: 44px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex: none; }
   .sl-exp svg { width: 20px; height: 20px; } [dir="rtl"] .sl-exp[aria-expanded="false"] svg { transform: scaleX(-1); }
   .sl-dev.sl-open { background: rgba(0,123,255,.05); margin: 0 -10px; padding: 10px; }
-  .sl-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .sl-acts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
   .sl-acts .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-transform: none; }
   .sl-acts svg, .sl-rm svg { width: 16px; height: 16px; flex: none; }
   .sl-rm { display: inline-flex; align-items: center; gap: 6px; text-transform: none; }
@@ -46,14 +46,19 @@
   .sl-group-title { margin: 0 -10px 8px; padding: 6px 10px; font-weight: 700; color: #6f42c1; background: rgba(128,90,213,.14); border-bottom: 1px solid rgba(128,90,213,.3); }
   .sl-choice { display: block; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 8px; margin-bottom: 8px; cursor: pointer; }
   .sl-choice:has(input:checked) { border-color: rgba(128,90,213,.8); background: rgba(128,90,213,.08); }
-  .sl-touch { display: none; margin-top: 10px; }
-  .sl-group:has([name="sl-tv-setup"][value="apple"]:checked) .sl-touch, .sl-group:has([name="sl-tv-setup"][value="both"]:checked) .sl-touch { display: block; }
+  .sl-touch { margin-top: 10px; }
+  .sl-group-title small { display: block; font-weight: 400; opacity: .8; }
+  .sl-opt { padding: 8px 0; border-top: 1px solid rgba(128,128,128,.18); } .sl-opt:first-of-type { border-top: 0; }
+  .sl-opt > label { display: flex; gap: 8px; align-items: flex-start; margin: 0; cursor: pointer; } .sl-opt > label input { margin-top: 4px; flex: none; }
+  .sl-sub { display: none; margin-top: 8px; margin-inline-start: 22px; padding: 8px 10px; border-radius: 8px; background: rgba(128,90,213,.06); }
+  .sl-opt:has(> label input:checked) > .sl-sub { display: block; }
+  .sl-paired { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(128,128,128,.08); }
+  .sl-linkbtn { border: 0; background: none; padding: 0; color: #6f42c1; text-decoration: underline; }
+  .sl-pinrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .sl-pinrow input { max-width: 7em; font-size: 1.1rem; letter-spacing: .25em; text-align: center; }
   .sl-touch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
   .sl-touch-grid .sl-choice { margin-bottom: 0; text-align: center; }
   .sl-touch-ico svg { width: 30px; height: 30px; margin: 4px 0; color: #6f42c1; }
-  .sl-pinline { display: none; margin-top: 4px; }
-  .sl-choice:has(input:checked) .sl-pinline { display: block; }
-  .sl-pin-now { font-size: 1.15em; letter-spacing: .12em; }
+  .sl-plus { display: none; } .sl-wrap:has(#sl-tv-tile:checked) .sl-plus { display: inline; }
   .sl-sw { display: flex; align-items: center; gap: 8px; padding: 6px 2px; margin: 0; border-bottom: 1px solid rgba(128,128,128,.15); cursor: pointer; }
   .sl-swbox:not(:has(#sl-tv-switches-on:checked)) .sl-swlist { display: none; }
   .sl-way { border-top: 1px solid rgba(128,128,128,.2); padding-top: 10px; margin-top: 10px; }
@@ -222,18 +227,13 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Paired',
       tvNotPaired: 'Not paired yet', tvOff: 'The TV looks switched off. Switch it on first.',
-      suTitle: '1 · Remote on the iPhone', suBest: 'recommended', suNotBest: 'not recommended', suAway: 'keyboard at home, reach from outside',
+      tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
       su_apple: 'Remote like Apple TV (trial)',
-      suName: 'Its name in the remote list', suPin: 'Pairing code', suPinNote: 'you can change it below, under "About the remote like Apple TV"',
+      suName: 'Its name in the remote list',
       su_appleNote: 'One remote with keyboard and touch pad. Chosen from the remote list with a code of four digits, once for each device. Inputs are reached from the TV\'s own menu. Works on your home network only.',
       su_tile: 'TV tile with the Home remote',
-      su_tileNote: 'A real TV tile with input buttons, and its remote with arrows, without keyboard. Works at home and away from it (away through a home hub: an Apple TV or a HomePod). Added to Apple Home on its own, with the code shown beside the TV in the list below.',
-      su_both: 'Both together',
-      su_bothNote: 'The remote like Apple TV for keyboard and touch pad at home, together with the Apple Home tile, which also reaches the TV from outside the home. The TV then has two names in the remote list, the second ending in "+". Without a need for the keyboard, the tile alone is enough; without a need to reach it from outside, the remote like Apple TV alone is enough.',
-      su_none: 'No remote',
-      su_noneNote: 'Only the switches below, if you choose any.',
-      swTitle: '2 · Switches for automations (optional)',
-      swOn: 'I want switches for automations', swNote: 'Separate from the remote; they work with any choice above. Leave this off if you do not use automations.',
+      su_tileNote: 'A real TV tile with input buttons, and its remote with arrows, without keyboard. Works at home and away from it (away through a home hub: an Apple TV or a HomePod). Added to Apple Home on its own, with the code shown here.',
+      swOn: 'Switches for automations', swNote: 'No code: they appear in Apple Home with this plugin. Leave this off if you do not use automations.',
       swPick: 'Tick the switches to show in Apple Home:',
       sw_power: 'Power, on and off', sw_mute: 'Mute, on and off', sw_volumeUp: 'Volume up', sw_volumeDown: 'Volume down',
       sw_channelUp: 'Channel up', sw_channelDown: 'Channel down', sw_playPause: 'Play or pause', sw_home: 'Home screen of the TV',
@@ -242,9 +242,8 @@
       phNote1: 'Remote like Apple TV: the iPhone keyboard opens when the TV opens one of its own text fields (TV search, settings, browser).',
       phNote2: 'Apps with their own keyboard, such as YouTube and Netflix, do not accept it.',
       phNote4: 'Trial: opening it sometimes takes a few seconds, and the phone may show "Can\'t Connect" for a moment before it connects.',
-      phNote3: 'Unofficial: it may stop working after an iOS update. Choosing a set-up without it removes everything it stored.',
-      phStep1: 'Press Update below and restart the bridge.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
-      phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinBad: 'The pairing code is four digits, or empty for 0000. Nothing was saved.', phPinNote: 'Empty means 0000. Each device enters it once. Choose your own digits if others use your network.', phCode: 'Pairing code', phPhones: 'Phones paired',
+      phNote3: 'Unofficial: it may stop working after an iOS update. Unticking it removes everything it stored.', phStep2: 'On the iPhone: Control Centre → Apple TV Remote → choose {name}.',
+      phStep3: 'Enter this code on the iPhone, once.', phPin: 'Pairing code for new devices (four digits)', phPinBad: 'The pairing code is four digits, or empty for 0000. Nothing was saved.', phPinNote: 'Empty means 0000. Each device enters it once. Choose your own digits if others use your network.', phPhones: 'Phones paired',
       phRestart: 'Press Update and restart the bridge. The pairing code then appears here.',
       kbTitle: 'Keyboard trial (beta)',
       kbNote: 'Open a search field on the TV so its on-screen keyboard shows, then send a text from here. This trial tells us which apps accept typing from outside. Nothing is stored, and the text is not written to the log.',
@@ -373,18 +372,13 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'تم الاقتران',
       tvNotPaired: 'لم يقترن بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
-      suTitle: '1 · الريموت على الآيفون', suBest: 'موصى به', suNotBest: 'لا نوصي به', suAway: 'كيبورد في البيت، ووصول من خارجه',
+      tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
-      suName: 'اسمه في قائمة الريموت', suPin: 'رمز الاقتران', suPinNote: 'تستطيع تغييره في الأسفل، تحت «عن الريموت الذي مثل Apple TV»',
+      suName: 'اسمه في قائمة الريموت',
       su_appleNote: 'ريموت واحد بالكيبورد ولوحة اللمس. تختاره من قائمة الريموت برمز من أربعة أرقام، مرة واحدة لكل جهاز. والمداخل تصلها من قائمة التلفزيون نفسه. يعمل داخل شبكة البيت فقط.',
       su_tile: 'بطاقة تلفزيون مع ريموت تطبيق المنزل',
-      su_tileNote: 'بطاقة تلفزيون حقيقية بأزرار للمداخل، وريموتها بالأسهم دون كيبورد. تعمل داخل البيت وخارجه (خارجه عبر مركز منزلي: Apple TV أو HomePod). تُضاف إلى Apple Home بمفردها، برمزها الظاهر بجانب التلفزيون في القائمة بالأسفل.',
-      su_both: 'الاثنان معًا',
-      su_bothNote: 'ريموت مثل Apple TV للكيبورد ولوحة اللمس داخل البيت، ومعه بطاقة Apple Home التي تصل إلى التلفزيون من خارج البيت أيضًا. ويصير للتلفزيون اسمان في قائمة الريموت، الثاني ينتهي بعلامة «+». إن لم تحتج الكيبورد فالبطاقة وحدها تكفي، وإن لم تحتج الوصول من الخارج فالريموت الذي مثل Apple TV وحده يكفي.',
-      su_none: 'دون ريموت',
-      su_noneNote: 'المفاتيح في الأسفل فقط، إن اخترت منها شيئًا.',
-      swTitle: '2 · مفاتيح للأتمتة (اختياري)',
-      swOn: 'أريد مفاتيح للأتمتة', swNote: 'مستقلة عن الريموت، وتعمل مع أي اختيار في الأعلى. اتركها دون علامة إن كنت لا تستخدم الأتمتة.',
+      su_tileNote: 'بطاقة تلفزيون حقيقية بأزرار للمداخل، وريموتها بالأسهم دون كيبورد. تعمل داخل البيت وخارجه (خارجه عبر مركز منزلي: Apple TV أو HomePod). تُضاف إلى Apple Home بمفردها، برمزها الظاهر هنا.',
+      swOn: 'مفاتيح للأتمتة', swNote: 'دون رمز: تظهر في Apple Home مع هذه الإضافة. اتركها دون علامة إن كنت لا تستخدم الأتمتة.',
       swPick: 'علّم المفاتيح التي تظهر في Apple Home:',
       sw_power: 'التشغيل والإطفاء', sw_mute: 'كتم الصوت وإلغاؤه', sw_volumeUp: 'رفع الصوت', sw_volumeDown: 'خفض الصوت',
       sw_channelUp: 'القناة التالية', sw_channelDown: 'القناة السابقة', sw_playPause: 'تشغيل أو إيقاف مؤقت', sw_home: 'الشاشة الرئيسية للتلفزيون',
@@ -393,9 +387,8 @@
       phNote1: 'الريموت الذي مثل Apple TV: يفتح كيبورد الآيفون حين يفتح التلفزيون إحدى خاناته (بحث التلفزيون، الإعدادات، المتصفح).',
       phNote2: 'التطبيقات التي لها كيبورد خاص، مثل YouTube و Netflix، لا تقبله.',
       phNote4: 'تجريبي: فتحه يأخذ أحيانًا بضع ثوانٍ، وقد يعرض الجوال «Can\'t Connect» لحظة قبل أن يتصل.',
-      phNote3: 'الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. اختيار إعداد دونه يحذف كل ما حفظه.',
-      phStep1: 'اضغط «تحديث» في الأسفل ثم أعد تشغيل الجسر.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
-      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinBad: 'رمز الاقتران أربعة أرقام، أو اتركه فارغًا ليكون 0000. لم يُحفظ شيء.', phPinNote: 'الخانة الفارغة تعني 0000. كل جهاز يدخله مرة واحدة. اختر أرقامك إن كان غيرك يستخدم شبكتك.', phCode: 'رمز الاقتران', phPhones: 'الجوالات المقترنة',
+      phNote3: 'الطريقة غير رسمية وقد تتوقف بعد تحديث iOS. وإزالة علامته تحذف كل ما حفظه.', phStep2: 'على الآيفون: مركز التحكم ← Apple TV Remote ← اختر {name}.',
+      phStep3: 'أدخل هذا الرمز على الآيفون مرة واحدة.', phPin: 'رمز الاقتران للأجهزة الجديدة (أربعة أرقام)', phPinBad: 'رمز الاقتران أربعة أرقام، أو اتركه فارغًا ليكون 0000. لم يُحفظ شيء.', phPinNote: 'الخانة الفارغة تعني 0000. كل جهاز يدخله مرة واحدة. اختر أرقامك إن كان غيرك يستخدم شبكتك.', phPhones: 'الجوالات المقترنة',
       phRestart: 'اضغط «تحديث» ثم أعد تشغيل الجسر، وبعدها يظهر رمز الاقتران هنا.',
       kbTitle: 'تجربة الكيبورد (نسخة تجريبية)',
       kbNote: 'افتح خانة بحث على التلفزيون حتى يظهر كيبورد الشاشة، ثم أرسل نصًا من هنا. هذه التجربة تبيّن أي التطبيقات تقبل الكتابة من الخارج. لا يُحفظ شيء، ولا يُكتب النص في السجل.',
@@ -657,62 +650,60 @@
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;
     }
     if (d.kind === 'tv' && p.tv) {
-      const mode = existing?.tvMode === 'switches' ? 'switches' : 'tile';
       // Models without token support need one approval on screen and nothing stored.
       const ready = p.tv.paired || tvPaired.has(p.deviceId);
-      html += `${p.tv.configured ? '' : `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
-          <ol class="mb-1">${[1, 2, 3, 4].map((n) => `<li>${t('tvStep' + n)}</li>`).join('')}</ol>
-          ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>`}
-        <button class="btn ${p.tv.configured ? 'btn-outline-secondary btn-sm mt-2' : 'btn-primary'}" id="sl-tv-pair">${t(p.tv.configured ? 'tvPairAgain' : 'tvPair')}</button>
-        <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>
-        <div class="mt-2"><strong>${t('name')}</strong>
-          <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>
-        ${(() => {
-          // Two separate matters, so no two answers can disagree: the remote, and the switches for automations.
-          const ph = status.appleRemote?.[p.deviceId];
-          const now = existing?.appleRemote === true ? (mode === 'switches' ? 'apple' : 'both') : mode === 'switches' ? 'none' : 'tile';
-          const chosen = Array.isArray(existing?.tvSwitches) ? existing.tvSwitches : existing?.tvMode === 'switches' ? ['power', 'mute', 'volumeUp', 'volumeDown'] : [];
-          const pinNow = /^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '0000';
-          const nameNow = existing?.name || p.tv?.name || 'Samsung TV'; // as it will read in the iPhone's remote list
-          const choice = (value, tag) => `<label class="sl-choice">
-              <input type="radio" name="sl-tv-setup" value="${value}" ${now === value ? 'checked' : ''}> <strong>${t('su_' + value)}</strong>
-              ${tag ? `<span class="sl-pill ${tag === 'suBest' ? 'sl-ok' : tag === 'suNotBest' ? 'sl-warn' : ''}">${t(tag)}</span>` : ''}
-              <div class="sl-muted">${t('su_' + value + 'Note')}</div>
-              ${value === 'apple' || value === 'both' ? `<div class="sl-pinline">${t('suName')}: <strong dir="auto">${esc(nameNow + (value === 'both' ? ' +' : ''))}</strong></div>
-              <div class="sl-pinline">${t('suPin')}: <strong class="sl-pin-now" dir="ltr">${esc(pinNow)}</strong> <span class="sl-muted">· ${t('suPinNote')}</span></div>` : ''}</label>`;
-          const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
-              <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
-          return `<div class="sl-group mt-2"><div class="sl-group-title">${t('suTitle')}</div>
-            ${choice('apple', 'suBest')}
-            ${choice('tile')}
-            ${choice('both', 'suAway')}
-            ${choice('none')}
-            <div class="sl-touch"><strong>${t('phTouch')}</strong>
-              <div class="sl-touch-grid">${[['arrows', 'phArrows', 'phArrowsNote', 'sl-ok', 'phTested'], ['pointer', 'phPointer', 'phPointerNote', 'sl-warn', 'apTrial']].map(([value, name, note, tone, tag]) => `
-                <label class="sl-choice"><input type="radio" name="sl-tv-touch" value="${value}" ${(existing?.appleRemoteTouch === 'pointer') === (value === 'pointer') ? 'checked' : ''}> <strong>${t(name)}</strong>
-                  <div class="sl-touch-ico">${ICON[value]}</div><div class="sl-muted">${t(note)}</div><span class="sl-pill ${tone}">${t(tag)}</span></label>`).join('')}</div>
-              <div class="sl-muted mt-1">${t('phTouchNote')}</div></div>
-            <div class="sl-muted mt-2">${t('tvWake')}</div>
-            </div>
-          <div class="sl-group sl-swbox mt-3"><div class="sl-group-title">${t('swTitle')}</div>
-            <label class="sl-choice mb-0"><input type="checkbox" id="sl-tv-switches-on" ${chosen.length ? 'checked' : ''}> <strong>${t('swOn')}</strong>
-              <div class="sl-muted">${t('swNote')}</div></label>
-            <div class="sl-swlist mt-2">
-              <div class="mb-1">${t('swPick')}</div>
+      // Three choices that do not exclude one another: tick all of them, some or none.
+      const apple = existing?.appleRemote === true;
+      const tile = existing ? existing.tvMode !== 'switches' : true;
+      const chosen = Array.isArray(existing?.tvSwitches) ? existing.tvSwitches : existing?.tvMode === 'switches' ? ['power', 'mute', 'volumeUp', 'volumeDown'] : [];
+      const ph = status.appleRemote?.[p.deviceId];
+      const pin = /^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '';
+      const nameNow = existing?.name || p.tv?.name || 'Samsung TV'; // as it will read in the iPhone's remote list
+      const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
+          <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
+      const pairing = p.tv.configured
+        ? `<div class="sl-paired"><span><span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span> ${t('tvWithTv')}</span>
+            <button type="button" class="sl-linkbtn" id="sl-tv-pair">${t('tvPairAgain')}</button></div>`
+        : `<div class="alert alert-info mt-2 mb-2"><strong>${t('tvTitle')}</strong><div>${t('tvSteps')}</div>
+            <ol class="mb-1">${[1, 2, 3, 4].map((n) => `<li>${t('tvStep' + n)}</li>`).join('')}</ol>
+            ${p.tv.power ? '' : `<div class="sl-pill sl-warn">${t('tvOff')}</div>`}</div>
+          <button class="btn btn-primary" id="sl-tv-pair">${t('tvPair')}</button>
+          <span class="sl-pill ${ready ? 'sl-ok' : ''}" id="sl-tv-state">${ready ? t('tvPaired') : t('tvNotPaired')}</span>`;
+      html += `${pairing}
+        ${inline ? '' : `<div class="mt-2"><strong>${t('name')}</strong>
+          <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>`}
+        <div class="sl-group mt-2"><div class="sl-group-title">${t('gIphone')}<small>${t('gIphoneSub')}</small></div>
+          <div class="sl-opt"><label><input type="checkbox" id="sl-tv-apple" ${apple ? 'checked' : ''}>
+              <span><strong>${t('su_apple')}</strong> <span class="sl-pill sl-ok">${t('suBest')}</span>
+              <div class="sl-muted">${t('su_appleNote')}</div></span></label>
+            <div class="sl-sub">
+              <label class="mb-1" for="sl-tv-pin">${t('phPin')}</label>
+              <div class="sl-pinrow"><input id="sl-tv-pin" class="form-control form-control-sm" dir="ltr" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" value="${esc(pin)}">
+                <span class="sl-muted">${t('phPinNote')}</span></div>
+              <div class="sl-muted mt-1">${t('suName')}: <strong dir="auto">${esc(nameNow)}<span class="sl-plus"> +</span></strong></div>
+              ${p.tv.configured && apple ? (ph?.pin ? `<div class="sl-muted mt-1">${t('phStep2').replace('{name}', `<strong dir="auto">${esc(nameNow)}<span class="sl-plus"> +</span></strong>`)} ${t('phStep3')} · ${t('phPhones')}: <span dir="ltr">${ph.phones}</span></div>`
+                : `<div class="sl-pill sl-warn mt-1">${t('phRestart')}</div>`) : ''}
+              <div class="sl-touch"><strong>${t('phTouch')}</strong>
+                <div class="sl-touch-grid">${[['arrows', 'phArrows', 'phArrowsNote', 'sl-ok', 'phTested'], ['pointer', 'phPointer', 'phPointerNote', 'sl-warn', 'apTrial']].map(([value, name, note, tone, tag]) => `
+                  <label class="sl-choice"><input type="radio" name="sl-tv-touch" value="${value}" ${(existing?.appleRemoteTouch === 'pointer') === (value === 'pointer') ? 'checked' : ''}> <strong>${t(name)}</strong>
+                    <div class="sl-touch-ico">${ICON[value]}</div><div class="sl-muted">${t(note)}</div><span class="sl-pill ${tone}">${t(tag)}</span></label>`).join('')}</div>
+                <div class="sl-muted mt-1">${t('phTouchNote')}</div></div>
+            </div></div>
+        </div>
+        <div class="sl-group mt-3"><div class="sl-group-title">${t('gHome')}<small>${t('gHomeSub')}</small></div>
+          <div class="sl-opt"><label><input type="checkbox" id="sl-tv-tile" ${tile ? 'checked' : ''}>
+              <span><strong>${t('su_tile')}</strong> <span class="sl-pill sl-ok">${t('phTested')}</span>
+              <div class="sl-muted">${t('su_tileNote')}</div></span></label>
+            <div class="sl-sub">${existing && existing.tvMode !== 'switches' ? tvSetupBox(existing) : `<div class="sl-muted">${t('tvCodeLater')}</div>`}</div></div>
+          <div class="sl-opt"><label><input type="checkbox" id="sl-tv-switches-on" ${chosen.length ? 'checked' : ''}>
+              <span><strong>${t('swOn')}</strong><div class="sl-muted">${t('swNote')}</div></span></label>
+            <div class="sl-sub"><div class="mb-1">${t('swPick')}</div>
               ${sw('power')}${sw('mute')}${sw('volumeUp', true)}${sw('volumeDown', true)}${sw('channelUp', true)}${sw('channelDown', true)}${sw('playPause', true)}${sw('home', true)}
-              <div class="sl-muted mt-2">${t('swGroup')}</div></div>
-            </div>
-          <div class="sl-group mt-3"><div class="sl-group-title">${t('phTitle')}</div>
-            <ul class="sl-muted mb-2" style="padding-inline-start:1.2em"><li>${t('phNote1')}</li><li>${t('phNote2')}</li><li>${t('phNote4')}</li><li>${t('phNote3')}</li></ul>
-            <div class="mt-2"><label class="mb-0" for="sl-tv-pin">${t('phPin')}</label>
-              <input id="sl-tv-pin" class="form-control form-control-sm" dir="ltr" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" style="max-width:8em" value="${esc(/^\d{4}$/.test(existing?.appleRemotePin ?? '') ? existing.appleRemotePin : '')}">
-              <div class="sl-muted">${t('phPinNote')}</div></div>
-            ${p.tv.configured && existing?.appleRemote === true ? (ph?.pin ? `<div class="alert alert-info mt-2 mb-0">
-                <ol class="mb-1">${[1, 2, 3].map((n) => `<li>${t('phStep' + n).replace('{name}', `<strong>${esc((existing.name || 'Samsung TV') + (mode === 'switches' ? '' : ' +'))}</strong>`)}</li>`).join('')}</ol>
-                <div>${t('phCode')}: <strong dir="ltr" style="font-size:1.4em;letter-spacing:.15em">${esc(ph.pin)}</strong></div>
-                <div class="sl-muted">${t('phPhones')}: <span dir="ltr">${ph.phones}</span></div></div>`
-              : `<div class="sl-pill sl-warn mt-1">${t('phRestart')}</div>`) : ''}</div>`;
-        })()}
+              <div class="sl-muted mt-2">${t('swGroup')}</div></div></div>
+        </div>
+        <div class="sl-muted mt-2">${t('tvNothing')}</div>
+        <details class="mt-2"><summary>${t('phTitle')}</summary>
+          <ul class="sl-muted mt-1 mb-0" style="padding-inline-start:1.2em"><li>${t('phNote1')}</li><li>${t('phNote2')}</li><li>${t('phNote4')}</li><li>${t('phNote3')}</li><li>${t('tvWake')}</li></ul></details>
         <button class="btn btn-success mt-2" id="sl-add-tv" ${ready ? '' : 'disabled'}>${existing ? t('update') : t('add')}</button>
         ${p.tv.configured ? `<details class="mt-3"><summary>${t('kbTitle')}</summary>
           <div class="sl-muted mt-1">${t('kbNote')}</div>
@@ -773,18 +764,14 @@
         state.className = 'sl-pill sl-bad'; state.textContent = errorText(err);
       } finally { button.disabled = false; }
     });
-    $('sl-tv-pin')?.addEventListener('input', () => { // the code shown under the choice follows what is typed below
-      const v = $('sl-tv-pin').value.trim();
-      for (const el of document.querySelectorAll('.sl-pin-now')) { el.textContent = /^\d{4}$/.test(v) ? v : '0000'; }
-    });
     $('sl-add-tv')?.addEventListener('click', async () => {
       const entry = { host: p.host, id: p.deviceId, type: 'tv', enabled: true,
-        tvMode: ['tile', 'both'].includes(box.querySelector('[name="sl-tv-setup"]:checked')?.value) ? 'tile' : 'switches',
+        tvMode: $('sl-tv-tile')?.checked ? 'tile' : 'switches',
         tvSwitches: $('sl-tv-switches-on')?.checked ? [...box.querySelectorAll('[name="sl-tv-switch"]:checked')].map((x) => x.value) : [] };
       if (p.mac) { entry.mac = p.mac; }
       if (d.model) { entry.model = d.model; }
-      entry.name = $('sl-name').value.trim() || p.tv.name || 'Samsung TV';
-      entry.appleRemote = ['apple', 'both'].includes(box.querySelector('[name="sl-tv-setup"]:checked')?.value);
+      entry.name = $('sl-name')?.value.trim() || existing?.name || p.tv.name || 'Samsung TV'; // a known TV is renamed in its card
+      entry.appleRemote = Boolean($('sl-tv-apple')?.checked);
       if ($('sl-tv-pin')) {
         const pin = $('sl-tv-pin').value.trim();
         // A typing slip must not change the pairing: only an empty field goes back to 0000.
@@ -1052,16 +1039,16 @@
            <button class="btn btn-sm btn-success sl-mini" data-rn-save="${i}" aria-label="${t('saveName')}" title="${t('saveName')}">${ICON.check}</button>
            <button class="btn btn-sm btn-outline-secondary sl-mini" data-rn-cancel="${i}" aria-label="${t('cancel')}" title="${t('cancel')}">${ICON.close}</button>`
         : `<strong class="sl-grow">${esc(shown)}</strong>
+           ${shownOpen ? `<button class="btn btn-sm btn-outline-secondary sl-mini" data-rn="${i}" aria-label="${t('rename')}" title="${t('rename')}">${ICON.edit}</button>` : ''}
            ${!shownOpen && Number(watts) > 0 ? `<span class="sl-muted" dir="ltr">${esc(watts)} W</span>` : ''}
            ${dev.enabled === false ? `<span class="sl-pill">${t('devOff')}</span>` : ''}${state}`;
       // Only the arrow at the row's edge opens or closes it: the rest of the row is safe to scroll over.
       const arrow = `<button type="button" class="btn btn-sm btn-outline-secondary sl-exp" data-exp="${i}" aria-expanded="${shownOpen}" aria-label="${t('devMore')}" title="${t('devMore')}">${shownOpen ? ICON.down : ICON.next}</button>`;
       const html = `<div class="sl-dev${shownOpen ? ' sl-open' : ''}"><div class="sl-dev-head">${title}${arrow}</div>
         ${shownOpen ? `<div class="sl-muted" dir="ltr" style="text-align:start">${address}</div>
-        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${tvSetupBox(dev)}${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}${snap?.readMs != null ? `<div class="sl-muted">${t('readMs')}: <span dir="ltr">${snap.readMs} ms</span> · ${snap.pushes > 0 ? t('pushOn') : t('pushOff')}</div>` : ''}
+        ${moved ? `<div class="sl-pill sl-ok">${t('followed')} <span dir="ltr">${esc(dev.host)} → ${esc(snap.host)}</span></div>` : ''}<div class="sl-muted">${energy}</div>${snap?.commandMs != null ? `<div class="sl-muted">${t('commandMs')}: <span dir="ltr">${snap.commandMs} ms</span> · ${snap.engine === 'javascript' ? 'JavaScript' : 'Python'}</div>` : ''}${snap?.readMs != null ? `<div class="sl-muted">${t('readMs')}: <span dir="ltr">${snap.readMs} ms</span> · ${snap.pushes > 0 ? t('pushOn') : t('pushOff')}</div>` : ''}
         <div class="sl-acts">
           <button class="btn btn-sm ${open ? 'btn-primary' : 'btn-outline-primary'}" data-cfg="${i}" aria-expanded="${open}">${ICON.gear}<span>${t('options')}</span></button>
-          <button class="btn btn-sm btn-outline-secondary" data-rn="${i}">${ICON.edit}<span>${t('rename')}</span></button>
           <button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${ICON.address}<span>${t('changeIp')}</span></button>
           <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${ICON.download}<span>${t('diagnostics')}</span></button>
         </div>
