@@ -220,7 +220,7 @@
       diagTitle: 'Diagnostics file', diagHelp: 'If nothing was downloaded, use Share or Copy and send the text.', diagShare: 'Share file', diagCopy: 'Copy text', diagCopied: 'Copied.',
       diagFile: 'Download diagnostics file', diagNote: 'Readings only. Identifiers, addresses and keys are removed.',
       unknownRes: 'Reported but not used yet', sameDevice: 'This appliance is already configured; its IP address was updated.',
-      support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
+      support_supported: 'supported', err_tv_off: 'The TV does not answer. Switch it on and try again.', err_no_snapshot: 'No reading of this appliance is stored yet. Wait until it has connected once, then try again.', support_experimental: 'experimental', 'support_diagnostics-only': 'diagnostics only', support_unsupported: 'not supported',
       tvCodeShow: 'Show the code', tvPairAgain: 'Pair with the TV again',
       tvCodeTitle: 'Add to Apple Home', tvCodePaired: 'Added to Apple Home', tvCodeLater: 'The code for Apple Home appears here after the bridge restarts.',
       tvCodeNote: 'Home app → + → Add Accessory, then scan this picture. Or choose More options, pick the TV and type the digits.',
@@ -365,7 +365,7 @@
       diagTitle: 'ملف التشخيص', diagHelp: 'إن لم ينزل ملف، استخدم «مشاركة» أو «نسخ» وأرسل النص.', diagShare: 'مشاركة الملف', diagCopy: 'نسخ النص', diagCopied: 'تم النسخ.',
       diagFile: 'تنزيل ملف التشخيص', diagNote: 'قراءات فقط، بعد حذف المعرّفات والعناوين والمفاتيح.',
       unknownRes: 'موارد يعلنها الجهاز ولم تُستخدم بعد', sameDevice: 'هذا الجهاز مضاف مسبقًا؛ تم تحديث عنوانه.',
-      support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
+      support_supported: 'مدعوم', err_tv_off: 'التلفزيون لا يجيب. شغّله ثم حاول مرة أخرى.', err_no_snapshot: 'لا توجد قراءة محفوظة لهذا الجهاز بعد. انتظر حتى يتصل مرة واحدة ثم حاول مرة أخرى.', support_experimental: 'تجريبي', 'support_diagnostics-only': 'تشخيص فقط', support_unsupported: 'غير مدعوم',
       tvCodeShow: 'عرض الرمز', tvPairAgain: 'اقتران مع التلفزيون من جديد',
       tvCodeTitle: 'أضفه إلى Apple Home', tvCodePaired: 'مضاف إلى Apple Home', tvCodeLater: 'يظهر رمز Apple Home هنا بعد إعادة تشغيل الجسر.',
       tvCodeNote: 'تطبيق Home ← + ← Add Accessory ثم امسح هذه الصورة. أو اختر More options ثم التلفزيون واكتب الأرقام.',
@@ -1061,7 +1061,7 @@
         <div class="sl-acts">
           <button class="btn btn-sm ${open ? 'btn-primary' : 'btn-outline-primary'}" data-cfg="${i}" aria-expanded="${open}">${ICON.gear}<span>${t('options')}</span></button>
           <button class="btn btn-sm btn-outline-secondary" data-ip="${i}">${ICON.address}<span>${t('changeIp')}</span></button>
-          <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described ? '' : 'disabled'}>${ICON.download}<span>${t('diagnostics')}</span></button>
+          <button class="btn btn-sm btn-outline-secondary" data-diag="${i}" ${snap?.described || dev.type === 'tv' ? '' : 'disabled'}>${ICON.download}<span>${t('diagnostics')}</span></button>
         </div>
         <div class="sl-foot"><label class="sl-muted"><input type="checkbox" data-en="${i}" ${dev.enabled === false ? '' : 'checked'}> ${t('enabled')}</label>
           <button class="btn btn-sm btn-outline-danger sl-rm" data-rm="${i}">${ICON.trash}<span>${t('remove')}</span></button></div>` : ''}

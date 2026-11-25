@@ -542,3 +542,10 @@ test('TV pointer: what the TV says is kept, and one without a touch pad is not g
   await waitFor(() => readJson(pluginPaths(storage).tvFacts)?.['tv-tv-test-1']?.pointer === false);
   assert.equal(platform.tvs[0].pointer, false);
 });
+
+test('TV pointer: a 2016 model lists a touch pad but takes no pointer; its year decides', () => {
+  const page = (model, pad) => ({ device: { model, modelName: 'UA55KU7000' }, isSupport: JSON.stringify({ remote_touchPad: pad }) });
+  assert.equal(pointerSupport(page('16_JAZZL_UHD_BASIC', 'true')), false, 'UA55KU7000, seen on a real TV');
+  assert.equal(pointerSupport(page('25_PONTUSM_QTV', 'true')), true);
+  assert.equal(pointerSupport(page('22_KANTSU2E_UB2', 'true')), true);
+});

@@ -27,11 +27,7 @@ export function portOpen(host, port, timeoutMs = 1500) {
 /** Device info from the TV, or null when no TV answers there. */
 export async function tvInfo(host, { httpPort = 8001, timeoutMs = INFO_TIMEOUT_MS } = {}) {
   try {
-    const res = await fetch(`http://${host}:${httpPort}/api/v2/`, { signal: AbortSignal.timeout(timeoutMs) });
-    if (!res.ok) {
-      return null;
-    }
-    const body = await res.json();
+    const body = await tvInfoPage(host, { httpPort, timeoutMs });
     const d = body?.device;
     if (!d || typeof d !== 'object') {
       return null;
@@ -48,18 +44,48 @@ export async function tvInfo(host, { httpPort = 8001, timeoutMs = INFO_TIMEOUT_M
       // As the TV wrote it, for the log: null when the model does not report it.
       powerState: d.PowerState ? String(d.PowerState) : null,
       pointer: pointerSupport(body),
+      year: modelYear(body),
     };
   } catch {
     return null;
   }
 }
 
+/** The TV's own info page, as it sent it; null when it does not answer. */
+export async function tvInfoPage(host, { httpPort = 8001, timeoutMs = INFO_TIMEOUT_MS } = {}) {
+  try {
+    const res = await fetch(`http://${host}:${httpPort}/api/v2/`, { signal: AbortSignal.timeout(timeoutMs) });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The model year, from the platform code the TV gives ("16_JAZZL_UHD_BASIC" is a 2016 model). */
+export function modelYear(body) {
+  const m = /^(\d{2})_/.exec(String(body?.device?.model ?? ''));
+  return m ? 2000 + Number(m[1]) : null;
+}
+
+/** The info page without anything that identifies the TV or the home: for a diagnostics file. */
+export function tvInfoForDiagnostics(body) {
+  const drop = new Set(['id', 'duid', 'udn', 'ip', 'wifiMac', 'ssid', 'name', 'developerIP', 'uri']);
+  const clean = (o) => Object.fromEntries(Object.entries(o ?? {}).filter(([k]) => !drop.has(k)));
+  return { ...clean(body), device: clean(body?.device) };
+}
+
 /**
  * Whether the TV takes a pointer (mouse) from a remote: its info page says so under
- * isSupport.remote_touchPad. Older models (2016, 2017) have no such list at all and do not
- * move a pointer from a remote; they are counted as not supporting it.
+ * isSupport.remote_touchPad. Models without that list, and 2016 models whatever they list, do
+ * not move a pointer from a remote; they are counted as not supporting it.
  */
 export function pointerSupport(body) {
+  // A 2016 model lists a touch pad (for Samsung's old phone app) yet moves no pointer from a
+  // remote: seen on a real UA55KU7000. Its model year decides.
+  const year = modelYear(body);
+  if (year !== null && year <= 2016) {
+    return false;
+  }
   let list = body?.isSupport ?? body?.device?.isSupport;
   if (typeof list === 'string') {
     try { list = JSON.parse(list); } catch { list = null; }

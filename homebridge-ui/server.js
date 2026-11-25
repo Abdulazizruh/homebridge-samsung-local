@@ -6,7 +6,7 @@ import { HelperClient } from '../src/runtime/helperClient.js';
 import { chosenEngine, DEFAULT_ENGINE, helperSpawn, VERSION as PLUGIN_VERSION } from '../src/runtime/engine.js';
 import { ensureRuntime, findPython, runtimeStatus } from '../src/runtime/pythonRuntime.js';
 import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePythonRuntime, wipePluginData, writeJson } from '../src/storage.js';
-import { TizenRemote, tvInfo } from '../src/tv/tizenClient.js';
+import { modelYear, pointerSupport, TizenRemote, tvInfo, tvInfoForDiagnostics, tvInfoPage } from '../src/tv/tizenClient.js';
 import QRCode from 'qrcode-svg';
 import { scanNetwork, tidyName } from '../src/scan.js';
 
@@ -298,7 +298,26 @@ class UiServer extends HomebridgePluginUiServer {
     }
   }
 
-  diagnostics({ deviceId, host } = {}) {
+  async diagnostics({ deviceId, host } = {}) {
+    // A TV keeps no readings: its own info page is asked now, with what the plugin learned about it.
+    const config = await this.pluginConfig();
+    const tv = (config.devices ?? []).find((d) => d.type === 'tv' && ((deviceId && d.id === deviceId) || (!deviceId && host && d.host === host)));
+    if (tv || String(deviceId ?? '').startsWith('tv-')) {
+      const page = await tvInfoPage(tv?.host ?? host, { timeoutMs: 3000 });
+      if (!page) {
+        throw new RequestError('The TV does not answer. Switch it on and try again.', { code: 'tv_off' });
+      }
+      const facts = (readJson(this.paths.tvFacts) ?? {})[tv?.id ?? deviceId] ?? {};
+      return {
+        kind: 'tv',
+        model: page.device?.modelName ?? page.device?.model ?? null,
+        modelYear: modelYear(page),
+        pointer: pointerSupport(page),
+        learned: { pointer: facts.pointer ?? null, reportsPower: facts.reportsPower ?? null, screenPortSeen: facts.screenPortSeen ?? null },
+        options: tv ? { tile: tv.tvMode !== 'switches', appleRemote: tv.appleRemote === true, touch: tv.appleRemoteTouch ?? 'arrows', switches: tv.tvSwitches ?? [] } : null,
+        info: tvInfoForDiagnostics(page),
+      };
+    }
     const snap = (deviceId && listSnapshots(this.paths).find((s) => s.deviceId === deviceId))
       || (host && this.lastProbes.get(host))
       || (host && listSnapshots(this.paths).find((s) => s.host === host));
