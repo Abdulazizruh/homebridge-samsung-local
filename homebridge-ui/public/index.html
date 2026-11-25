@@ -100,6 +100,9 @@
   .sl-fresh { background: #e8dcff; color: #5b2aa8; font-weight: 700; }
   .sl-found-fresh { background: rgba(128,90,213,.07); border-radius: 8px; padding-inline: 6px; }
   .sl-same > summary { cursor: pointer; }
+  /* The help line is a row of its own, well away from the buttons, so a finger does not open one for the other. */
+  .sl-whybox { margin-top: 14px; border-top: 1px dashed rgba(128,128,128,.35); }
+  .sl-whybox > summary { cursor: pointer; padding: 10px 2px; font-size: .84rem; color: #6c6c6c; }
   .sl-use { display: flex; gap: 8px; align-items: center; cursor: pointer; }
   .sl-decide { border-top: 2px solid #8e2fb0; padding-top: 10px; }
   .sl-stgroup { font-weight: 700; margin: 14px 0 2px; color: #6f42c1; }
@@ -1307,9 +1310,9 @@
       <span class="sl-pill sl-bad">${s?.failed ? t('stSeekFail').replace('{b}', `<span dir="ltr">${s.max}</span>`) : t('stNoAnswer')}</span>
       ${about ? `<div class="sl-muted">${about}</div>` : ''}${there ? `<div class="sl-muted">${there}</div>` : ''}
       ${s?.error ? `<div class="sl-muted">${esc(s.error)}</div>` : ''}
-      ${s?.busy ? '<div id="sl-seek-prog"></div>' : `<details class="mt-1" ${s?.failed ? 'open' : ''}><summary class="sl-muted">${t('stWhy')}</summary><ul class="sl-why">${['stWhy1', 'stWhy2', 'stWhy3', 'stWhy4', 'stWhy5'].map((k) => `<li>${t(k)}</li>`).join('')}</ul></details>
-      <div class="sl-row mt-1"><button class="btn btn-sm btn-primary" data-seek="${si}" ${busy ? 'disabled' : ''}>${t(s?.failed ? 'stSeekAgain' : 'stSeek')}</button>
-        <button class="btn btn-sm btn-outline-secondary" data-st-hand>${t('stByHand')}</button></div>`}</div></div>`;
+      ${s?.busy ? '<div id="sl-seek-prog"></div>' : `<div class="sl-row mt-2"><button class="btn btn-sm btn-primary" data-seek="${si}" ${busy ? 'disabled' : ''}>${t(s?.failed ? 'stSeekAgain' : 'stSeek')}</button>
+        <button class="btn btn-sm btn-outline-secondary" data-st-hand>${t('stByHand')}</button></div>
+      <details class="sl-whybox" ${s?.failed ? 'open' : ''}><summary>${t('stWhy')}</summary><ul class="sl-why">${['stWhy1', 'stWhy2', 'stWhy3', 'stWhy4', 'stWhy5'].map((k) => `<li>${t(k)}</li>`).join('')}</ul></details>`}</div></div>`;
   }
 
   function renderScan() {
