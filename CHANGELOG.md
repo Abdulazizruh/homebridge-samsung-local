@@ -14,6 +14,7 @@ Names from SmartThings, after a first run in a real home: a scan that shows its 
 - **The imported list is kept on your own Homebridge** (names, rooms, models, IDs; never the token; sent nowhere), so a later scan, or adding by address, matches without connecting to SmartThings again. A later import is joined with it; "Forget the import" and deleting the plugin's data remove it.
 - **Smarter matching:** also by SmartThings' own ID of the appliance, by a model spelled longer on one side, and by name for an appliance already in your list that is off now. An appliance in another SmartThings place, such as an office, is folded as not expected on this network.
 - **The SmartThings button opens the Samsung account sign-in, then the tokens page.** "Import and scan" is greyed with a wheel after it is pressed, until the work is over. The import is a clear bar of its own, closed until opened.
+- **The page reads from top to bottom for a new setup:** 1 · the engine, 2 · adding (A names from SmartThings if wanted, B the automatic scan, C one address by hand), then the two last steps (child bridge, Home app) repeated under the appliance list beside SAVE.
 - **Every push checks that the outside links on the settings page still open.**
 - **The plugin page and its description in Homebridge say it plainly:** SmartThings is only an option, used once, to bring names and rooms over automatically; the plugin never depends on it.
 - The ordinary scan without SmartThings works as before, with names from this plugin and from `homebridge-smartthings-oauth`.
@@ -30,6 +31,7 @@ Names from SmartThings, after a first run in a real home: a scan that shows its 
 - **القائمة المستوردة تُحفظ على Homebridge عندك** (الأسماء والغرف والموديلات والمعرّفات، دون الرمز، ولا تُرسل إلى أي مكان)، فيطابق بها البحث اللاحق والإضافة بالعنوان دون اتصال جديد بـ SmartThings. والاستيراد اللاحق يُدمج معها، و«تجاهل الاستيراد» و«حذف بيانات هذه الإضافة» يحذفانها.
 - **مطابقة أذكى:** بمعرّف الجهاز في SmartThings نفسه أيضًا، وبالموديل المكتوب أطول في إحدى الجهتين، وبالاسم للجهاز الذي في قائمتك وهو مطفأ الآن. والجهاز الذي في موقع آخر في SmartThings، مثل المكتب، يُطوى لأنه لا يُنتظر على هذه الشبكة.
 - **زر SmartThings يفتح صفحة الدخول إلى حساب Samsung ثم صفحة الرموز.** وزر «استورد وابحث في الشبكة» يصير باهتًا وعليه علامة دوران بعد ضغطه، حتى ينتهي العمل. والاستيراد شريط واضح مستقل، مطوي حتى تفتحه.
+- **الصفحة تُقرأ من الأعلى إلى الأسفل في الإعداد الجديد:** 1 · المحرك، ثم 2 · الإضافة (أ الأسماء من SmartThings إن أردتها، ب المسح التلقائي، ج عنوان واحد يدويًا)، ثم الخطوتان الأخيرتان (الجسر الفرعي وتطبيق Home) مكررتان تحت قائمة الأجهزة بجانب SAVE.
 - **كل رفع للتعديلات يتحقق أن الروابط الخارجية في صفحة الإعدادات ما زالت تعمل.**
 - **صفحة الإضافة ووصفها في Homebridge يقولان ذلك بوضوح:** SmartThings خيار فقط، يُستعمل مرة واحدة لجلب الأسماء والغرف تلقائيًا، ولا تعتمد عليه الإضافة أبدًا.
 - البحث العادي دون SmartThings يعمل كما كان، بالأسماء من هذه الإضافة ومن `homebridge-smartthings-oauth`.
