@@ -6,6 +6,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 Help for the SmartThings sign-in. Your settings, pairings and accessories are kept as they are.
 
+- **The SmartThings button opens the page from the Homebridge window itself**, not from inside the settings frame: opened from inside the frame, Samsung's sign-in could refuse it with error 403 although the same address opens when typed.
 - **When Samsung's sign-in shows an error page** (such as 403) instead of the tokens page, the step now says what to do: press the button once more, open the address in a private window or another browser, or create the token on a computer. With a button that copies the address.
 - **The first step reads in order:** the button that opens the page, then what to press on that page.
 
@@ -13,6 +14,7 @@ Help for the SmartThings sign-in. Your settings, pairings and accessories are ke
 
 مساعدة عند الدخول إلى SmartThings. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
+- **زر SmartThings يفتح الصفحة من نافذة Homebridge نفسها**، لا من داخل إطار الإعدادات: فتحها من داخل الإطار قد يجعل صفحة الدخول في Samsung ترفضها بالخطأ 403، مع أن العنوان نفسه يفتح إذا كُتب مباشرة.
 - **إذا عرضت صفحة الدخول في Samsung خطأ** (مثل 403) بدل صفحة الرموز، تشرح الخطوة ما تفعله: اضغط الزر مرة ثانية، أو افتح العنوان في نافذة خاصة أو متصفح آخر، أو أنشئ الرمز من كمبيوتر. ومعها زر ينسخ العنوان.
 - **الخطوة الأولى صارت بالترتيب:** الزر الذي يفتح الصفحة، ثم ما تضغطه في تلك الصفحة.
 

@@ -1791,6 +1791,17 @@
   $('sl-scan-btn').addEventListener('click', startScan);
   $('sl-scan').addEventListener('click', (e) => { if (e.target.closest('[data-stop]') && scan) { scan.stop = true; renderProgress(); } });
   $('sl-st-go').addEventListener('click', stImportNow);
+  // The settings page lives in a frame inside Homebridge. A page opened from inside that frame can inherit the
+  // frame's limits, and Samsung's sign-in then refuses it (403) although the same address opens when typed.
+  // So the page is opened by the Homebridge window itself; if that is not allowed, the link opens as usual.
+  document.querySelector('#sl-st a[data-t="stOpen"]').addEventListener('click', (e) => {
+    try {
+      const outer = window.top && window.top !== window ? window.top : null;
+      if (!outer) { return; }
+      outer.open(e.currentTarget.href, '_blank', 'noopener,noreferrer');
+      e.preventDefault();
+    } catch { /* another origin: the link opens as usual */ }
+  });
   $('sl-st-copy').addEventListener('click', async () => {
     const url = $('sl-st-url').textContent;
     try { await navigator.clipboard.writeText(url); } catch {
