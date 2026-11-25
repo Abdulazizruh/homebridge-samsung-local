@@ -131,7 +131,7 @@ A static DHCP lease for each appliance is recommended. An air conditioner or was
 
 The settings list your appliances by kind: air conditioners, laundry, TVs, and the newer kinds. Each appliance is one line with its name and state. Only the arrow at the line's edge opens it, so a finger scrolling down the page cannot press anything by mistake. A group can be folded from its title.
 
-<p><img src="assets/screenshots/devices-list.png" alt="The appliance list grouped by kind, each appliance on one line with its state and an arrow at the edge" width="320"></p>
+<p><img src="assets/screenshots/devices-list.png" alt="The appliance list grouped by kind: air conditioners with their power and connection, the washer, and TVs marked linked to Homebridge" width="320"></p>
 
 The open card holds everything for that appliance: its name with a pencil to rename it in place, address, energy, Options, Change IP, Diagnostics, On, and Remove, which asks twice. A change inside the options is not saved until you press Save or Update; until then a bar at the bottom says so, with Undo.
 
