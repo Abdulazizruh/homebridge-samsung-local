@@ -8,6 +8,7 @@ Names from SmartThings, after a first run in a real home. Your settings, pairing
 
 - **Tested in a real home:** five air conditioners and a washer were matched to their SmartThings names by their own ID.
 - **An appliance already in your list that is off now** (a TV in standby) is no longer offered as "did not answer, add it by address": it is listed as already in your list, matched by ID or by its name.
+- **An appliance in another SmartThings place, such as an office, is no longer shown as "did not answer"**: it is folded into one line as not expected on this network. This home is the place most matched appliances are in.
 - **The SmartThings button opens the Samsung account sign-in, then the tokens page.** The earlier address could stop at the SmartThings home page.
 - **The import is a clear bar of its own**, closed until opened, with its title, one line on its goal and the "optional" label.
 - **Every push checks that the outside links on the settings page still open.**
@@ -18,6 +19,7 @@ Names from SmartThings, after a first run in a real home. Your settings, pairing
 
 - **جُرّب في بيت حقيقي:** تطابقت خمسة مكيفات وغسالة مع أسمائها في SmartThings بمعرّفها.
 - **الجهاز الموجود في قائمتك والمطفأ الآن** (تلفزيون في وضع الاستعداد) لم يعد يُعرض بأنه «لم يرد، أضفه بالعنوان»: يظهر أنه في قائمتك، طابق بالمعرّف أو باسمه.
+- **الجهاز الذي في موقع آخر في SmartThings، مثل المكتب، لم يعد يظهر بأنه «لم يرد»**: يُطوى في سطر واحد لأنه لا يُنتظر على هذه الشبكة. والبيت هو الموقع الذي فيه أكثر الأجهزة المتطابقة.
 - **زر SmartThings يفتح صفحة الدخول إلى حساب Samsung، ثم صفحة الرموز.** العنوان السابق قد يتوقف عند الصفحة الرئيسية لـ SmartThings.
 - **الاستيراد شريط واضح مستقل**، مطوي حتى تفتحه، فيه عنوانه وسطر عن هدفه وعلامة «اختياري».
 - **كل رفع للتعديلات يتحقق أن الروابط الخارجية في صفحة الإعدادات ما زالت تعمل.**

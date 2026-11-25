@@ -143,7 +143,7 @@ It is a separate bar in "Add an appliance", closed until you open it:
 <p><img src="assets/screenshots/smartthings-closed.png" alt="The closed bar: Your appliance names from SmartThings, optional" width="360"></p>
 
 1. Press **Open the SmartThings page**: it opens the Samsung account sign-in, then the tokens page of SmartThings. Press **Generate new token**.
-2. Tick the read permissions only: **List all devices** and **See all devices**, and for room names **See all locations** (optional).
+2. Tick the read permissions only: **List all devices** and **See all devices**, and for room and place names **See all locations** (optional).
 3. Paste the token and press **Import and scan**.
 
 The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import.
@@ -155,7 +155,7 @@ The scan then runs and puts the two lists side by side:
 - **In SmartThings and on the network:** the name and room from SmartThings, with how they were matched: by the appliance's own ID, or by model when only one of that model is left on each side. Tested in a real home: five air conditioners and a washer were matched by their own ID.
 - **On the network only:** pick its name from the SmartThings names left over, or keep a suggested name.
 - **Already in your list, not answering now:** an appliance you added before that is off at the moment (a TV in standby), matched by ID or by its name; nothing to do.
-- **In SmartThings only:** it did not answer on the network, with what to check (power, the same home Wi-Fi, a TV in standby, connected in the SmartThings app) and **Scan the network again**. Appliances that work through the cloud only (sensors, hubs) are folded into one line.
+- **In SmartThings only:** it did not answer on the network, with what to check (power, the same home Wi-Fi, a TV in standby, connected in the SmartThings app) and **Scan the network again**. Appliances in another SmartThings place, such as an office, are folded into one line as not expected on this network, and so are appliances that work through the cloud only (sensors, hubs).
 
 <p><img src="assets/screenshots/smartthings-match.png" alt="Result of the import: appliances in both lists with their SmartThings names, one picked by hand, and one that did not answer" width="360"></p>
 

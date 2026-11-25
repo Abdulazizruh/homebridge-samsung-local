@@ -29,6 +29,7 @@ test('SmartThings import: reads every page, rooms and each appliance\'s local ID
   const fetchImpl = fakeSmartThings({
     [`${API}/devices?includeHealth=true`]: LIST,
     [`${API}/devices?page=2`]: PAGE2,
+    [`${API}/locations`]: { items: [{ locationId: 'loc', name: 'البيت' }] },
     [`${API}/locations/loc/rooms`]: { items: [{ roomId: 'r1', name: 'الصالة' }, { roomId: 'r2', name: 'الغسيل' }] },
     [`${API}/devices/st-ac/status`]: { components: { main: { ocf: { di: { value: 'ABC-1' }, mnmo: { value: 'ARTIK051_PRAC_20K|10193441|600' } } } } },
     [`${API}/devices/st-wash/status`]: { components: { main: { ocf: { di: { value: 'wash-1' } } } } },
@@ -39,6 +40,7 @@ test('SmartThings import: reads every page, rooms and each appliance\'s local ID
   const [ac, wash, door] = out.devices;
   assert.deepEqual([ac.name, ac.room, ac.kind, ac.local, ac.di, ac.model, ac.online], ['مكيف الصالة', 'الصالة', 'airConditioner', true, 'abc-1', 'ARTIK051_PRAC_20K', true]);
   assert.deepEqual([wash.model, wash.online, wash.lastSeen], ['WA80F', false, '2026-11-20T10:00:00Z']);
+  assert.deepEqual([ac.place, ac.placeName], ['loc', 'البيت']);
   assert.equal(door.local, false);
   assert.ok(seen.every((s) => s.auth === `Bearer ${TOKEN}` && s.url.startsWith(`${API}/`)));
   assert.ok(!seen.some((s) => s.url.includes('st-sensor')), 'no status read for what cannot be on the network');

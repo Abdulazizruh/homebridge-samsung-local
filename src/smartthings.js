@@ -87,10 +87,13 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
     url = typeof next === 'string' && next.startsWith(`${API}/`) ? next : null;
   }
 
-  // Room names, when the token may see locations; without them the import still works.
+  // Room and place names (home, office…), when the token may see locations; without them the import still works.
   const rooms = new Map();
+  const places = new Map();
   let roomsRead = false;
   const locations = new Set(items.map((d) => d.locationId).filter(Boolean));
+  const placeList = await get(`${API}/locations`, { quiet: true });
+  for (const l of placeList?.items ?? []) { if (l.locationId) { places.set(l.locationId, l.name ?? ''); } }
   for (const loc of locations) {
     const body = await get(`${API}/locations/${encodeURIComponent(loc)}/rooms`, { quiet: true });
     if (body) {
@@ -105,6 +108,8 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
       stId: d.deviceId ?? null,
       name: String(d.label || d.name || '').trim(),
       room: (d.roomId && rooms.get(d.roomId)) || null,
+      place: d.locationId ?? null,
+      placeName: (d.locationId && places.get(d.locationId)) || null,
       kind: ST_KIND[ocfType] ?? null,
       // Samsung Wi-Fi appliances and TVs are OCF devices; sensors, plugs and hubs are not.
       local: d.type === 'OCF' || Boolean(d.ocf),
