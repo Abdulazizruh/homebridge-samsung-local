@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.8
+
+The way to the SmartThings tokens page that works on an iPhone. Your settings, pairings and accessories are kept as they are.
+
+- **The button opens SmartThings' own guide to personal access tokens, and the tokens page is opened from its link there.** Opened straight from the settings page, the tokens page could end in an error page from Samsung (403); opened from the link inside SmartThings' own guide it opens. This was tested on a real iPhone before the release.
+- **The Safari address of 1.8.7 is removed:** it did not open from inside the settings page. The button is a plain link, the same on every device.
+- The direct address stays in the help under the button, as a link and with a copy button.
+
+**بالعربية**
+
+الطريق إلى صفحة الرموز في SmartThings الذي يعمل على iPhone. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **الزر يفتح شرح SmartThings الرسمي للرموز الشخصية، وصفحة الرموز تُفتح من رابطه هناك.** إذا فُتحت صفحة الرموز من صفحة الإعدادات مباشرة فقد تنتهي بصفحة خطأ من Samsung (403)، وإذا فُتحت من الرابط الذي داخل شرح SmartThings نفسه تفتح. جُرّب هذا على iPhone حقيقي قبل الإصدار.
+- **حُذف عنوان Safari الذي في 1.8.7:** لم يفتح من داخل صفحة الإعدادات. والزر رابط عادي، وهو نفسه على كل الأجهزة.
+- العنوان المباشر باقٍ في المساعدة تحت الزر، رابطًا ومعه زر نسخ.
+
 ## 1.8.7
 
 The SmartThings button opens the form that creates a token. Your settings, pairings and accessories are kept as they are.
