@@ -2,11 +2,19 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## Not released yet
+
+- **Settings: the pointer note says what older TVs do.** Older Samsung TVs show no pointer on their screen, while the touch area still works on them: a slide moves the selection, as with Arrows.
+
+**بالعربية**
+
+- **الإعدادات: تنبيه المؤشر يصف ما تفعله التلفزيونات القديمة.** تلفزيونات Samsung القديمة لا تُظهر مؤشرًا على شاشتها، ومساحة اللمس تعمل عليها: السحب يحرّك التحديد، كما في «أسهم».
+
 ## 1.6.3
 
 Fixes to 1.6.2. Your settings, pairings and accessories are kept as they are.
 
-- **The pointer is greyed out on 2016 TVs.** A 2016 model (seen on a real UA55KU7000) lists a touch pad on its info page, made for Samsung's old phone app, yet moves no pointer from a remote, so the choice stayed open. The TV's model year, which its info page gives, now decides first: 2016 models keep the touch area as slides that move the selection (Arrows), with a note that they show no pointer on screen. A pointer chosen before is replaced by arrows.
+- **The pointer is greyed out on 2016 TVs.** A 2016 model (seen on a real UA55KU7000) lists a touch pad on its info page, made for Samsung's old phone app, yet moves no pointer from a remote, so the choice stayed open. The TV's model year, which its info page gives, now decides first: 2016 models get arrows only, with the note. A pointer chosen before is replaced by arrows.
 - **TVs have a diagnostics file.** The Diagnostics button of a TV was greyed out, and the one inside its options said there was no stored reading. It now asks the TV for its info page (the TV must be on) and saves it with what the plugin learned about it; identifiers, addresses and names are removed.
 - **The pairing line of a TV already added sits in the "In the Home app" group.** A new TV still pairs first, at the top.
 - **Settings: "supported" is written as a word** in place of an untranslated label.
@@ -15,7 +23,7 @@ Fixes to 1.6.2. Your settings, pairings and accessories are kept as they are.
 
 إصلاحات على 1.6.2. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **المؤشر يظهر باهتًا في تلفزيونات 2016.** موديل 2016 (رأيناه على تلفزيون حقيقي UA55KU7000) يذكر لوحة لمس في صفحة معلوماته، لأجل تطبيق Samsung القديم للجوال، لكنه لا يحرّك مؤشرًا من الريموت، فبقي الخيار متاحًا. صارت سنة الموديل التي تذكرها صفحة التلفزيون هي التي تحكم أولًا: موديلات 2016 تبقى فيها مساحة اللمس بالسحب الذي يحرّك التحديد («أسهم»)، مع تنبيه أنها لا تُظهر مؤشرًا على الشاشة، ويُستبدل المؤشر بالأسهم إن كان مختارًا من قبل.
+- **المؤشر يظهر باهتًا في تلفزيونات 2016.** موديل 2016 (رأيناه على تلفزيون حقيقي UA55KU7000) يذكر لوحة لمس في صفحة معلوماته، لأجل تطبيق Samsung القديم للجوال، لكنه لا يحرّك مؤشرًا من الريموت، فبقي الخيار متاحًا. صارت سنة الموديل التي تذكرها صفحة التلفزيون هي التي تحكم أولًا: موديلات 2016 لها الأسهم فقط مع التنبيه، ويُستبدل المؤشر بالأسهم إن كان مختارًا من قبل.
 - **صار للتلفزيونات ملف تشخيص.** زر «التشخيص» في بطاقة التلفزيون كان باهتًا، والزر داخل خياراته كان يقول إنه لا توجد قراءة محفوظة. صار يسأل التلفزيون عن صفحة معلوماته (يجب أن يكون مشغَّلًا) ويحفظها مع ما عرفته الإضافة عنه، بعد حذف المعرّفات والعناوين والأسماء.
 - **سطر الاقتران للتلفزيون المضاف صار داخل مجموعة «في تطبيق Home».** والتلفزيون الجديد ما زال يقترن أولًا في الأعلى.
 - **الإعدادات: «مدعوم» تظهر كلمةً** بدل اسم داخلي غير مترجم.
