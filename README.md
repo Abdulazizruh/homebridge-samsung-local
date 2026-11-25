@@ -16,7 +16,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.6.3. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.6.4. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -213,7 +213,7 @@ The remote is in Control Centre: open the remote and choose the TV at the top. V
 
 <p><img src="assets/screenshots/tv-remote-like-apple-tv.png" alt="The remote like Apple TV on an iPad: the TV chosen in the Control Centre remote with the Apple TV mark, a large touch area, mute, power, play and pause, back and the TV button" width="300"></p>
 
-**The touch area as a pointer (trial, tried on two newer TVs).** Newer TVs only: older Samsung TVs take only arrows from a remote, and for them the choice is greyed out with a note, decided by what the TV itself reports. In the TV's options the touch area of this remote can move a pointer, like a mouse, in place of stepping the selection. The pointer shows in the TV's browser and in some apps; elsewhere nothing moves, so arrows stay the default. A tap right after moving clicks the item under the pointer; once the pointer has been still for 8 seconds, a tap is Select again.
+**The touch area: swipe like Apple TV, or a pointer like a mouse (trial, tried on two newer TVs).** Swipe like Apple TV is the default and works on every TV: a slide moves the selection step by step. Pointer like a mouse moves a pointer on the screen and works on newer TVs only: older Samsung TVs (2016 models among them) show no pointer, so for them the choice is greyed out with a note, decided by what the TV itself reports. The pointer shows in the TV's browser and in some apps; elsewhere nothing moves. A tap right after moving clicks the item under the pointer; once the pointer has been still for 8 seconds, a tap is Select again.
 
 **Switches for automations (optional).** Power, mute, volume up and down, channel up and down, play/pause and home can each be shown as a switch, grouped under one accessory in the bridge, for use in automations and scenes. They work with any remote choice.
 
@@ -243,16 +243,16 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 
 The TV's options are three ticks that do not exclude one another: tick all of them, some or none. They sit in two groups.
 
-1. **On the iPhone: the remote like Apple TV (trial)**, with keyboard and touch pad, on your home network only. Under it: its pairing code, changed right there (empty means 0000), and the touch area as arrows or a pointer.
+1. **On the iPhone: the remote like Apple TV (trial)**, with keyboard and touch pad, on your home network only. Under it: its pairing code, changed right there (empty means 0000), and the touch area as swipe like Apple TV or a pointer like a mouse.
 2. **In the Home app: the TV tile with the Home remote**, at home and away (away through a home hub, an Apple TV or a HomePod). Its code for the Home app is right under it: **scan the picture** from the Home app (+ → Add Accessory) **or type the digits** (More options → pick the TV). With the remote like Apple TV ticked too, the TV has two names in the remote list, the second ending in "+".
 3. **In the Home app: switches for automations**. No code: they come with this plugin's bridge. You choose which switches appear.
 
 
 <p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: on the iPhone the remote like Apple TV with its code and touch area, and in the Home app the TV tile with its code and the switches for automations" width="320"></p>
 
-With a remote like Apple TV chosen, the touch area of that remote can step the selection with arrows (tested) or move a pointer like a mouse (trial, newer TVs only; greyed out on older models). The pointer shows in the TV's browser and in some apps.
+With a remote like Apple TV chosen, the touch area of that remote can be swipe like Apple TV (tested, every TV) or a pointer like a mouse (trial, newer TVs only; greyed out on older models). The pointer shows in the TV's browser and in some apps.
 
-<p><img src="assets/screenshots/touch-area.png" alt="The choice for the remote's touch area: Arrows, tested, and Pointer, trial" width="300"></p>
+<p><img src="assets/screenshots/touch-area.png" alt="The choice for the remote's touch area: Swipe like Apple TV, tested, and Pointer like a mouse, trial" width="300"></p>
 
 ## What has been tested
 

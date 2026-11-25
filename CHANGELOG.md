@@ -2,13 +2,19 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## Not released yet
+## 1.6.4
 
-- **Settings: the pointer note says what older TVs do.** Older Samsung TVs show no pointer on their screen, while the touch area still works on them: a slide moves the selection, as with Arrows.
+Clearer names for the touch area of the remote like Apple TV. Nothing changes in what it does; your settings, pairings and accessories are kept as they are.
+
+- **"Swipe like Apple TV" and "Pointer like a mouse".** The two choices were called Arrows and Pointer, and Arrows read like buttons. Swipe like Apple TV is the touch area you know from Apple's remote: a slide moves the selection, and it works on every TV. Pointer like a mouse moves a pointer on the screen and works on newer TVs only. The icons stay as they were.
+- **The note on older TVs says what they do:** Apple TV touch works on them; the pointer does not show on their screen.
 
 **بالعربية**
 
-- **الإعدادات: تنبيه المؤشر يصف ما تفعله التلفزيونات القديمة.** تلفزيونات Samsung القديمة لا تُظهر مؤشرًا على شاشتها، ومساحة اللمس تعمل عليها: السحب يحرّك التحديد، كما في «أسهم».
+أسماء أوضح لمساحة اللمس في الريموت الذي مثل Apple TV. لا يتغير شيء فيما تفعله، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **«سحب مثل Apple TV» و«مؤشر مثل الماوس».** كان اسما الاختيارين «أسهم» و«مؤشر»، و«أسهم» توحي بأزرار. «سحب مثل Apple TV» هو اللمس الذي تعرفه من ريموت Apple: السحب يحرّك التحديد، ويعمل على كل التلفزيونات. و«مؤشر مثل الماوس» يحرّك مؤشرًا على الشاشة، وهو للتلفزيونات الحديثة فقط. والأيقونات كما هي.
+- **تنبيه التلفزيونات القديمة يصف ما تفعله:** لمس Apple TV يعمل عليها، والمؤشر لا يظهر على شاشتها.
 
 ## 1.6.3
 
