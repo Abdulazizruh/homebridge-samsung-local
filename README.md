@@ -21,7 +21,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.6.7. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.7.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -34,6 +34,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | Engine | You choose one in the settings. **JavaScript**: nothing to prepare. **Python**: the [`smartthings-local`](https://github.com/QuiteYellow/SmartThings-Local) library in a private environment. Both do the same job; each appliance shows its measured command response time with the engine in use, so you can compare them on your own appliances |
 | Setup | Press **Scan the network** in the plugin settings and tick what to add, or enter one IP or MAC address and press **Test & discover** |
 | Identity | Each appliance is keyed on its own stable device ID, so a new IP address never creates a duplicate. An air conditioner or washer whose address changes is found again by itself |
+| Names | Each appliance found gets a name to start from, with where it comes from: its earlier name in this plugin, its name in `homebridge-smartthings-oauth` (same ID, read only), its own name (TVs), or a numbered suggestion such as "Air conditioner 1". The scan shows what each one is doing now (on, mode, set temperature) to tell which is which. The last name given here is kept after an appliance is removed, so it comes back with it |
 | Updates | Push (CoAP Observe) where the appliance supports it, reading every 5 s by default as fallback (4 s at least) |
 | Works offline | Yes, after the one-time setup below |
 | Runs beside | `homebridge-smartthings-oauth` and any other plugin, without touching their files |

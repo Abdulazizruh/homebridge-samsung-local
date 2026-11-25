@@ -64,6 +64,8 @@
   .sl-off { opacity: .45; cursor: not-allowed; filter: grayscale(1); }
   .sl-alert-warn { padding: 8px 10px; border-radius: 8px; background: #fff3cd; color: #7a5200; border: 1px solid #f1c75a; font-weight: 600; }
   .sl-link { display: inline-flex; align-items: center; gap: 4px; } .sl-link svg { width: 14px; height: 14px; flex: none; }
+  .sl-src-prev { background: #d9f0de; } .sl-src-legacy { background: #e5dcf5; } .sl-src-device { background: #e7f0ff; } .sl-src-new { background: rgba(128,128,128,.12); }
+  .sl-now { background: #e7f0ff; color: #0b57b0; }
   .sl-plus { display: none; } .sl-wrap:has(#sl-tv-tile:checked) .sl-plus { display: inline; }
   .sl-sw { display: flex; align-items: center; gap: 8px; padding: 6px 2px; margin: 0; border-bottom: 1px solid rgba(128,128,128,.15); cursor: pointer; }
   .sl-swbox:not(:has(#sl-tv-switches-on:checked)) .sl-swlist { display: none; }
@@ -233,7 +235,7 @@
       tvStep4: 'Give the TV a name, choose how it appears, then press Add.',
       tvPair: 'Pair with the TV', tvPairing: 'Look at the TV screen and choose "Allow"…', tvPaired: 'Linked to Homebridge',
       tvNotPaired: 'Not linked to Homebridge yet', tvOff: 'The TV looks switched off. Switch it on first.',
-      tvAskNote: 'The link between Homebridge and the TV (the TV\'s Allow) is shown beside its name. If it is lost:', tvAllows: 'linked to Homebridge', tvRefused: 'not linked to Homebridge', tvAskAgain: 'Link to Homebridge again', homeNotYet: 'not linked to HomeKit', homeLater: 'code after a restart', tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
+      nameFrom_prev: 'its earlier name here', nameFromLegacy: 'from', nameFrom_device: 'from the appliance', nameFrom_new: 'suggested name', nowOn: 'on now', nowOff: 'off', removedKept: 'Removed. Its name is kept, so it comes back with it if you add it again. Restart the child bridge to apply.', tvAskNote: 'The link between Homebridge and the TV (the TV\'s Allow) is shown beside its name. If it is lost:', tvAllows: 'linked to Homebridge', tvRefused: 'not linked to Homebridge', tvAskAgain: 'Link to Homebridge again', homeNotYet: 'not linked to HomeKit', homeLater: 'code after a restart', tvWithTv: 'with the TV', gIphone: 'On the iPhone', gIphoneSub: 'Control Centre remote', gHome: 'In the Home app', gHomeSub: 'Tiles and automations', tvNothing: 'Nothing ticked: the TV is not shown on the iPhone or in Apple Home.', suBest: 'recommended',
       su_apple: 'Remote like Apple TV (trial)',
       suName: 'Its name in the remote list',
       su_appleNote: 'One remote with keyboard and touch pad. Chosen from the remote list with a code of four digits, once for each device. Inputs are reached from the TV\'s own menu. Works on your home network only.',
@@ -269,7 +271,7 @@
       'reason_not-mapped-yet': 'The appliance answered locally, but this version has no HomeKit mapping for this type yet. Send the diagnostics file to get it supported.',
       'reason_unknown-type': 'The appliance answered, but its type is not recognized.',
       wipeTitle: 'Delete this plugin\'s data',
-      wipe1: 'Deletes only the folder "samsung-local" in the Homebridge storage: certificate, cached readings and the Python runtime.',
+      wipe1: 'Deletes only the folder "samsung-local" in the Homebridge storage: certificate, cached readings, remembered names and the Python runtime.',
       wipe2: 'Does not delete the saved settings on this page, other plugins, or anything on the appliances or in SmartThings.',
       wipe3: 'To remove the accessories from the Home app, remove the child bridge there.',
       wipeButton: 'Delete data', wipeDone: 'Deleted: ', wipeNothing: 'Nothing to delete.', wipeType: 'Type DELETE to confirm.',
@@ -378,7 +380,7 @@
       tvStep4: 'سمِّ التلفزيون، واختر شكل ظهوره، ثم اضغط «إضافة».',
       tvPair: 'اقتران مع التلفزيون', tvPairing: 'انظر إلى شاشة التلفزيون واختر «سماح»…', tvPaired: 'مرتبط بـ Homebridge',
       tvNotPaired: 'غير مرتبط بـ Homebridge بعد', tvOff: 'يبدو التلفزيون مطفأً. شغّله أولًا.',
-      tvAskNote: 'الارتباط بين Homebridge والتلفزيون (موافقة التلفزيون بـ Allow) يظهر بجانب اسمه. وإذا انقطع:', tvAllows: 'مرتبط بـ Homebridge', tvRefused: 'غير مرتبط بـ Homebridge', tvAskAgain: 'اربطه بـ Homebridge من جديد', homeNotYet: 'غير مربوط بـ HomeKit', homeLater: 'الرمز بعد إعادة التشغيل', tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
+      nameFrom_prev: 'اسمه السابق في هذه الإضافة', nameFromLegacy: 'من', nameFrom_device: 'من بيانات الجهاز', nameFrom_new: 'اسم مقترح', nowOn: 'يعمل الآن', nowOff: 'مطفأ', removedKept: 'تم الحذف. ويبقى اسمه محفوظًا، فيعود به إن أضفته مرة أخرى. أعد تشغيل الجسر الفرعي للتطبيق.', tvAskNote: 'الارتباط بين Homebridge والتلفزيون (موافقة التلفزيون بـ Allow) يظهر بجانب اسمه. وإذا انقطع:', tvAllows: 'مرتبط بـ Homebridge', tvRefused: 'غير مرتبط بـ Homebridge', tvAskAgain: 'اربطه بـ Homebridge من جديد', homeNotYet: 'غير مربوط بـ HomeKit', homeLater: 'الرمز بعد إعادة التشغيل', tvWithTv: 'مع التلفزيون', gIphone: 'على الآيفون', gIphoneSub: 'ريموت مركز التحكم', gHome: 'في تطبيق Home', gHomeSub: 'البطاقات والأتمتة', tvNothing: 'إن لم تختر شيئًا، لا يظهر التلفزيون على الآيفون ولا في Apple Home.', suBest: 'موصى به',
       su_apple: 'ريموت مثل Apple TV (تجريبي)',
       suName: 'اسمه في قائمة الريموت',
       su_appleNote: 'ريموت واحد بالكيبورد ولوحة اللمس. تختاره من قائمة الريموت برمز من أربعة أرقام، مرة واحدة لكل جهاز. والمداخل تصلها من قائمة التلفزيون نفسه. يعمل داخل شبكة البيت فقط.',
@@ -414,7 +416,7 @@
       'reason_not-mapped-yet': 'استجاب الجهاز محليًا، لكن هذه النسخة لم تُضف له خدمات HomeKit بعد. أرسل ملف التشخيص لدعمه.',
       'reason_unknown-type': 'استجاب الجهاز، لكن نوعه غير معروف.',
       wipeTitle: 'حذف بيانات هذه الإضافة',
-      wipe1: 'يحذف مجلد samsung-local فقط داخل تخزين Homebridge: الشهادة والقراءات المحفوظة وبيئة Python.',
+      wipe1: 'يحذف مجلد samsung-local فقط داخل تخزين Homebridge: الشهادة والقراءات المحفوظة والأسماء المحفوظة وبيئة Python.',
       wipe2: 'تبقى إعدادات هذه الصفحة والإضافات الأخرى وكل ما على الأجهزة وفي SmartThings دون تغيير.',
       wipe3: 'لإزالة الأجهزة من تطبيق Home احذف الجسر الفرعي من التطبيق نفسه.',
       wipeButton: 'احذف البيانات', wipeDone: 'تم حذف: ', wipeNothing: 'لم يوجد ما يُحذف.', wipeType: 'اكتب DELETE للتأكيد.',
@@ -500,10 +502,51 @@
   };
   const tvPaired = new Set();
   let legacyNames = [];
+  let remembered = {}; let legacyById = {}; // last names given here (kept after removal), and the previous plugin's by ID
+
+  /**
+   * The name to offer for an appliance being added, and where it comes from: its last name in this
+   * plugin, its name in the previous plugin (same ID), its own name (TVs), or a numbered suggestion.
+   */
+  function suggestName(p, taken = []) {
+    const id = String(p.deviceId ?? '');
+    const mac = String(p.mac ?? '').toLowerCase().replace(/[^0-9a-f]/g, '');
+    const mine = remembered[id]?.name
+      || (mac && Object.values(remembered).find((v) => String(v?.mac ?? '').toLowerCase().replace(/[^0-9a-f]/g, '') === mac)?.name);
+    if (mine) { return { name: mine, src: 'prev' }; }
+    const old = legacyById[id.toLowerCase()] || legacyById[id.toLowerCase().replace(/^tv-/, '')];
+    if (old) { return { name: old, src: 'legacy' }; }
+    if (p.tv?.name) { return { name: p.tv.name, src: 'device' }; }
+    const base = KINDS[lang][p.described?.kind] ?? 'Samsung';
+    const used = new Set([...config.devices.map((x) => x.name), ...taken].filter(Boolean).map((n) => n.trim().toLowerCase()));
+    const numbered = p.described?.kind === 'airConditioner'; // several of the same are the rule for these
+    if (!numbered && !used.has(base.toLowerCase())) { return { name: base, src: 'new' }; }
+    for (let n = numbered ? 1 : 2; ; n += 1) {
+      if (!used.has(`${base} ${n}`.toLowerCase())) { return { name: `${base} ${n}`, src: 'new' }; }
+    }
+  }
+  // A suggested name (numbered, or the TV's own) left as it was: used, but not remembered as a name given.
+  const suggestedKept = (sug, name) => Boolean(sug) && ['new', 'device'].includes(sug.src) && String(name ?? '').trim() === sug.name;
+  const nameSource = (sug) => (sug ? `<span class="sl-pill sl-src-${sug.src}">${sug.src === 'legacy' ? `${t('nameFromLegacy')} homebridge-smartthings-oauth` : t('nameFrom_' + sug.src)}</span>` : '');
+
+  /** What the appliance is doing now, to tell which one is which: power, mode and set temperature. */
+  function nowState(d) {
+    const f = Object.fromEntries((d?.features ?? []).filter((r) => r.device).map((r) => [r.id, r.value]));
+    if (d?.kind === 'tv' || !('power' in f) || f.power === null || f.power === undefined) { return ''; }
+    const parts = [f.power ? t('nowOn') : t('nowOff')];
+    const mode = Object.keys(f).find((k) => k.startsWith('mode.') && f[k] === true);
+    if (f.power && mode) { parts.push(T[lang].f[mode] ?? mode.slice(5)); }
+    if (typeof f.targetTemperature === 'number') { parts.push(`<span dir="ltr">${f.targetTemperature}°</span>`); }
+    return `<span class="sl-pill sl-now">${parts.join(' · ')}</span>`;
+  }
 
   async function save(message = true) {
     await homebridge.updatePluginConfig([config]);
     await homebridge.savePluginConfig();
+    try { // the names given here are kept, so an appliance removed and added again comes back with its name
+      await homebridge.request('/remember-names', { devices: config.devices });
+      for (const dev of config.devices) { if (dev.id && dev.name && !dev.nameSuggested) { remembered[dev.id] = { ...remembered[dev.id], name: dev.name, mac: dev.mac ?? remembered[dev.id]?.mac }; } }
+    } catch { /* kept at the next save or start */ }
     pollWasBelow = null; // what was below the minimum is stored as 4 now
     if (message) { homebridge.toast.success(t('saved')); }
     render();
@@ -592,15 +635,15 @@
     return `${REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
   }
   const applianceDefaults = (d) => Object.fromEntries((d.features || []).map((r) => [r.id, r.default !== false]));
-  function applianceOptions(d, existing) {
+  function applianceOptions(d, existing, sug = null) {
     const feats = { ...applianceDefaults(d), ...(existing?.features || {}) };
     const box = (r) => `<label><input type="checkbox" data-feat="${esc(r.id)}" ${feats[r.id] ? 'checked' : ''}> ${esc(partLabel(r))}</label>`;
     const readings = d.features.filter((r) => !r.write).map((r) => `<div class="sl-part">${box(r)}</div>`).join('');
     const controls = d.features.filter((r) => r.write).map((r) => `<div class="sl-part">${box(r)}
         <span class="sl-pill sl-warn">${t('apTrial')}</span>
         <a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener" href="${esc(reportLink(d, r))}">${t('apBroken')}</a></div>`).join('');
-    return `<div class="mt-2"><strong>${t('name')}</strong>
-        <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
+    return `<div class="mt-2"><strong>${t('name')}</strong> ${nameSource(sug)}
+        <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? sug?.name ?? '')}">
         <div class="sl-muted">${t('nameNote')}</div></div>
       ${readings ? `<div class="mt-2"><strong>${t('apReadings')}</strong>${readings}</div>` : ''}
       ${controls ? `<div class="mt-2"><strong>${t('apControls')}</strong>${controls}
@@ -632,6 +675,7 @@
     const p = lastProbe; const d = p.described;
     const done = () => { lastProbe = null; openKey = null; if (!inline) { $('sl-host').value = ''; } };
     const existing = config.devices.find((x) => x.id && x.id === p.deviceId);
+    const sug = existing ? null : suggestName(p); // a new appliance gets a name to start from
     const supportClass = d.support === 'experimental' ? 'sl-warn' : d.support === 'unsupported' ? 'sl-bad' : '';
     const src = { probe: t('sourceProbe'), 'running-plugin': t('sourceRunning'), snapshot: t('sourceSnapshot') }[p.source];
     let reports = '';
@@ -651,8 +695,8 @@
       const boxes = Object.keys(DEFAULTS).filter((k) => NEEDS[k].some((id) => supported.has(id))).map((k) =>
         `<label class="mb-0"><input type="checkbox" data-feat="${k}" ${feats[k] ? 'checked' : ''}> ${esc(T[lang].feat[k])}</label>`).join('');
       reports = featureTable(d);
-      html += `<div class="mt-2"><strong>${t('name')}</strong>
-          <input type="text" class="form-control" id="sl-name" list="sl-names" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
+      html += `<div class="mt-2"><strong>${t('name')}</strong> ${nameSource(sug)}
+          <input type="text" class="form-control" id="sl-name" list="sl-names" placeholder="${t('namePh')}" value="${esc(existing?.name ?? sug?.name ?? '')}">
           <datalist id="sl-names">${legacyNames.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
@@ -688,8 +732,8 @@
       // The TV's own permission for this plugin, at the top: it is not the Apple Home pairing, which
       // sits with the TV tile below.
       html += `${pairing}
-        ${inline ? '' : `<div class="mt-2"><strong>${t('name')}</strong>
-          <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? p.tv.name ?? '')}"></div>`}
+        ${inline ? '' : `<div class="mt-2"><strong>${t('name')}</strong> ${nameSource(sug)}
+          <input type="text" class="form-control" id="sl-name" placeholder="${esc(p.tv.name ?? '')}" value="${esc(existing?.name ?? sug?.name ?? p.tv.name ?? '')}"></div>`}
         <div class="sl-group mt-2"><div class="sl-group-title">${t('gIphone')}<small>${t('gIphoneSub')}</small></div>
           <div class="sl-opt"><label><input type="checkbox" id="sl-tv-apple" ${apple ? 'checked' : ''}>
               <span><strong>${t('su_apple')}</strong> <span class="sl-pill sl-ok">${t('suBest')}</span>
@@ -733,7 +777,7 @@
     }
     if (d.family === 'appliance' && d.support === 'experimental') {
       reports = featureTable(d, 'apTableNote');
-      html += applianceOptions(d, existing);
+      html += applianceOptions(d, existing, sug);
     } else if (d.kind !== 'airConditioner' && d.kind !== 'tv' && d.support === 'experimental') {
       const feats = { ...LAUNDRY_DEFAULTS, ...(existing?.features || {}) };
       const has = new Set(d.features.filter((r) => r.device === true).map((r) => r.id));
@@ -741,8 +785,8 @@
       const boxes = Object.keys(LAUNDRY_DEFAULTS).filter((k) => !needs[k] || has.has(needs[k])).map((k) =>
         `<label class="mb-0"><input type="checkbox" data-feat="${k}" ${feats[k] ? 'checked' : ''}> ${esc(T[lang].feat[k])}</label>`).join('');
       reports = featureTable(d, 'laundryNote');
-      html += `<div class="mt-2"><strong>${t('name')}</strong>
-          <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? '')}">
+      html += `<div class="mt-2"><strong>${t('name')}</strong> ${nameSource(sug)}
+          <input type="text" class="form-control" id="sl-name" placeholder="${t('namePh')}" value="${esc(existing?.name ?? sug?.name ?? '')}">
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
         <div class="mt-2"><strong>${t('cycleStyle')}</strong>
@@ -790,6 +834,7 @@
       if (p.mac) { entry.mac = p.mac; }
       if (d.model) { entry.model = d.model; }
       entry.name = $('sl-name')?.value.trim() || existing?.name || p.tv.name || 'Samsung TV'; // a known TV is renamed in its card
+      if (!existing && suggestedKept(sug, entry.name)) { entry.nameSuggested = true; }
       entry.appleRemote = Boolean($('sl-tv-apple')?.checked);
       if ($('sl-tv-pin')) {
         const pin = $('sl-tv-pin').value.trim();
@@ -821,11 +866,16 @@
       if (p.mac) { entry.mac = p.mac; }
       const name = $('sl-name').value.trim();
       if (name) { entry.name = name; }
+      if (!existing && suggestedKept(sug, name)) { entry.nameSuggested = true; } // a suggestion left as it was is not remembered
       if ($('sl-cycle-style')) { entry.cycleStyle = $('sl-cycle-style').value; }
       done();
       await change(() => {
         const i = config.devices.findIndex((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host));
-        if (i >= 0) { config.devices[i] = { ...config.devices[i], ...entry, enabled: config.devices[i].enabled !== false }; } else { config.devices.push(entry); }
+        if (i >= 0) {
+          const before = config.devices[i];
+          config.devices[i] = { ...before, ...entry, enabled: before.enabled !== false };
+          if (entry.name && entry.name !== before.name && !entry.nameSuggested) { delete config.devices[i].nameSuggested; } // a name typed is a real one
+        } else { config.devices.push(entry); }
       });
     });
   }
@@ -941,12 +991,19 @@
       const kind = d ? (KINDS[lang][d.kind] ?? d.kind) : item.dev ? esc(item.dev.name || t('scanAdded')) : 'Samsung';
       const title = item.probe?.tv?.name ? `${esc(item.probe.tv.name)}` : '';
       const tick = item.state === 'ready' ? `<input type="checkbox" data-pick="${i}" ${item.checked ? 'checked' : ''} aria-label="${t('scanAdd')}">` : '';
+      if (['ready', 'pair'].includes(item.state) && !item.sug) {
+        item.sug = suggestName(item.probe, run.items.filter((x) => x !== item && x.sug).map((x) => x.sug.name));
+        item.name = item.sug.name;
+      }
+      const naming = ['ready', 'pair'].includes(item.state)
+        ? `<div class="sl-row mt-1">${nameSource(item.sug)} ${nowState(d)}</div>
+           <input type="text" class="form-control form-control-sm mt-1" data-name="${i}" value="${esc(item.name ?? '')}" aria-label="${t('name')}">` : '';
       const act = item.state === 'pair' ? `<button class="btn btn-sm btn-primary" data-pair="${i}">${t('tvPair')}</button>`
         : (item.state === 'failed' || (item.state === 'wait' && run.phase === 'done')) ? `<button class="btn btn-sm btn-outline-secondary" data-read="${i}">${t('scanRetry')}</button>`
         : item.state === 'unsupported' ? `<button class="btn btn-sm btn-outline-secondary" data-diag="${i}">${t('diagFile')}</button>` : '';
       const off = item.state === 'pair' && item.probe?.tv && !item.probe.tv.power ? `<div class="sl-muted">${t('tvOff')}</div>` : '';
       return `<div class="sl-found">${tick}
-        <div class="sl-grow"><strong>${kind}</strong> ${title ? `<span>${title}</span>` : ''}
+        <div class="sl-grow"><strong>${kind}</strong> ${title && !naming ? `<span>${title}</span>` : ''}${naming}
           <div class="sl-muted" dir="ltr" style="text-align:start">${esc(d?.model ?? '')}${d?.model ? ' · ' : ''}${esc(item.host)}</div>
           ${item.error ? `<div class="sl-muted">${esc(item.error)}</div>` : ''}${off}</div>
         <span class="sl-pill ${pill[item.state]}">${t(word[item.state])}</span>${act}</div>`;
@@ -966,6 +1023,7 @@
         ${run.phase === 'done' ? `<button class="btn btn-outline-secondary" id="sl-scan-close">${t('scanClose')}</button>` : ''}
       </div>`;
     box.querySelectorAll('[data-pick]').forEach((el) => el.addEventListener('change', () => { run.items[Number(el.dataset.pick)].checked = el.checked; renderScan(); }));
+    box.querySelectorAll('[data-name]').forEach((el) => el.addEventListener('input', () => { run.items[Number(el.dataset.name)].name = el.value; }));
     box.querySelectorAll('[data-read]').forEach((el) => el.addEventListener('click', () => readFound(run.items[Number(el.dataset.read)], run)));
     box.querySelectorAll('[data-diag]').forEach((el) => el.addEventListener('click', () => { const it = run.items[Number(el.dataset.diag)]; downloadDiagnostics({ deviceId: it.probe.deviceId, host: it.host }); }));
     box.querySelectorAll('[data-pair]').forEach((el) => el.addEventListener('click', async () => {
@@ -986,7 +1044,13 @@
       await change(() => {
         for (const item of picks) {
           const p = item.probe;
-          if (!config.devices.some((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host))) { config.devices.push(entryOf(p)); }
+          if (!config.devices.some((x) => (x.id && x.id === p.deviceId) || (!x.id && x.host === p.host))) {
+            const entry = entryOf(p);
+            const name = String(item.name ?? '').trim();
+            if (name) { entry.name = name; } // as typed in the list; a TV keeps its own name when left empty
+            if (suggestedKept(item.sug, name)) { entry.nameSuggested = true; } else { delete entry.nameSuggested; }
+            config.devices.push(entry);
+          }
         }
       }, false);
       for (const item of picks) { item.state = 'just'; item.checked = false; }
@@ -1116,7 +1180,7 @@
       const name = $('sl-rename').value.trim();
       renaming = null;
       if (!name || name === config.devices[i].name) { render(); return; }
-      await change(() => { const dev = config.devices.find((x) => keyOf(x) === key); if (dev) { dev.name = name; } });
+      await change(() => { const dev = config.devices.find((x) => keyOf(x) === key); if (dev) { dev.name = name; delete dev.nameSuggested; } });
     };
     box.querySelectorAll('[data-rn]').forEach((b) => b.addEventListener('click', () => {
       renaming = keyOf(config.devices[Number(b.dataset.rn)]);
@@ -1143,7 +1207,8 @@
         return;
       }
       const key = keyOf(config.devices[Number(b.dataset.rm)]);
-      await change(() => { config.devices = config.devices.filter((x) => keyOf(x) !== key); });
+      await change(() => { config.devices = config.devices.filter((x) => keyOf(x) !== key); }, false);
+      homebridge.toast.success(t('removedKept'));
     }));
     box.querySelectorAll('[data-en]').forEach((b) => b.addEventListener('change', async () => {
       const key = keyOf(config.devices[Number(b.dataset.en)]);
@@ -1323,6 +1388,7 @@
   });
 
   try { legacyNames = (await homebridge.request('/legacy-devices')).names; } catch { legacyNames = []; }
+  try { ({ remembered, legacyById } = await homebridge.request('/names')); } catch { remembered = {}; legacyById = {}; }
   await refreshStatus();
 })();
 </script>

@@ -8,6 +8,7 @@ import { pruneAppleRemote } from './appleRemote/bridge.js';
 import { keepPort } from './homekit/tvPort.js';
 import { describeDevice, familyOf, stableDeviceId } from './capabilities/index.js';
 import { DeviceLink } from './deviceLink.js';
+import { rememberNames } from './names.js';
 import { shortId } from './redact.js';
 import { HelperClient } from './runtime/helperClient.js';
 import { helperSpawn } from './runtime/engine.js';
@@ -126,6 +127,9 @@ export class SamsungLocalPlatform {
     this.#notePollFloor();
     ensureDir(this.paths.root);
     let entries = this.entries();
+    try {
+      rememberNames(this.paths.names, entries); // so an appliance removed later comes back with its name
+    } catch { /* remembered at the next start or save */ }
 
     // Known appliances come back immediately from the cache, before any
     // network or Python work, so a slow or offline start never removes them.

@@ -9,6 +9,7 @@ import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePyth
 import { modelYear, pointerSupport, TizenRemote, tvInfo, tvInfoForDiagnostics, tvInfoPage } from '../src/tv/tizenClient.js';
 import QRCode from 'qrcode-svg';
 import { scanNetwork, tidyName } from '../src/scan.js';
+import { rememberNames } from '../src/names.js';
 
 const OLD_PLUGIN = 'homebridge-smartthings-oauth';
 
@@ -28,6 +29,8 @@ class UiServer extends HomebridgePluginUiServer {
     this.onRequest('/tv-text', (payload) => this.tvText(payload));
     this.onRequest('/remove-runtime', () => this.removeRuntime());
     this.onRequest('/scan', () => this.scan());
+    this.onRequest('/names', () => this.names());
+    this.onRequest('/remember-names', (payload) => ({ ok: Boolean(rememberNames(this.paths.names, payload?.devices ?? [])) }));
     this.ready();
   }
 
@@ -394,14 +397,21 @@ class UiServer extends HomebridgePluginUiServer {
    * only. Strictly read-only: opens Homebridge's accessory cache for reading
    * and never writes to it or to the other plugin's files.
    */
+  /** Names to suggest when an appliance is added: the ones remembered here, and the previous plugin's by ID. */
+  names() {
+    const legacy = this.legacyDevices();
+    return { remembered: readJson(this.paths.names) ?? {}, legacyById: legacy.byId ?? {} };
+  }
+
   legacyDevices() {
     const dir = path.join(this.homebridgeStoragePath, 'accessories');
     const names = new Set();
+    const byId = {}; // the previous plugin's name of an appliance, under the ID it kept for it (read only)
     let files = [];
     try {
       files = fs.readdirSync(dir).filter((n) => n.startsWith('cachedAccessories'));
     } catch {
-      return { names: [] };
+      return { names: [], byId };
     }
     for (const file of files) {
       try {
@@ -409,11 +419,15 @@ class UiServer extends HomebridgePluginUiServer {
         for (const acc of Array.isArray(list) ? list : []) {
           if (acc?.plugin === OLD_PLUGIN && typeof acc.displayName === 'string') {
             names.add(acc.displayName);
+            const ctx = acc.context ?? {};
+            for (const id of [ctx.device?.deviceId, ctx.deviceId, ctx.device?.id, ctx.id]) {
+              if (typeof id === 'string' && id) { byId[id.toLowerCase()] = acc.displayName; }
+            }
           }
         }
       } catch { /* unreadable cache file: skip */ }
     }
-    return { names: [...names].sort() };
+    return { names: [...names].sort(), byId };
   }
 
   wipe({ confirm, keepRuntime } = {}) {

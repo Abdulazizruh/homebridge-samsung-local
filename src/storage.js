@@ -23,6 +23,8 @@ export function pluginPaths(homebridgeStoragePath) {
     appleRemote: path.join(root, 'apple-remote.json'),
     // Connection losses counted for the daily line in the log.
     stability: path.join(root, 'stability.json'),
+    // The last name given to each appliance in the settings, kept after it is removed.
+    names: path.join(root, 'names.json'),
   };
 }
 
@@ -103,7 +105,7 @@ export function wipePluginData(homebridgeStoragePath, { keepRuntime = false } = 
     throw new Error('Refusing to wipe: unexpected storage path.');
   }
   const removed = [];
-  const targets = keepRuntime ? [paths.credentials, paths.state] : [paths.root];
+  const targets = keepRuntime ? [paths.credentials, paths.state, paths.names] : [paths.root];
   for (const target of targets) {
     if (fs.existsSync(target)) {
       fs.rmSync(target, { recursive: true, force: true });

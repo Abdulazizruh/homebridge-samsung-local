@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.7.0
+
+Appliances come with names. Your settings, pairings and accessories are kept as they are.
+
+- **A name for every appliance found, with where it comes from.** Air conditioners and washers do not keep their SmartThings name (it lives in Samsung's cloud) and send only their model, so one added without a name used to be called by its model code, the same for every unit. Now each one gets a name to start from, shown with its source: "its earlier name here", "from homebridge-smartthings-oauth" (when that plugin kept the same ID; read only), "from the appliance" (TVs), or a suggested name such as "Air conditioner 1" or "Washer". Numbering takes the smallest number not used by the appliances there now, so it starts again at 1 when the earlier ones were given names of their own.
+- **The network scan names every appliance before adding.** Each one found has its own name field, and what it is doing now (on, mode, set temperature) to tell which unit is in which room: switch one on and see which line changes.
+- **The last name is remembered after removal.** Only a name given is kept: a suggested name left as it was (numbered, or a TV's own) is used but not remembered, and the name typed later replaces it. The name given in the settings is kept in the plugin's own folder under the appliance's stable ID (its MAC address too), so an appliance removed and added again comes back with its latest name. "Delete this plugin's data" removes the remembered names too. Names changed in the Home app stay in the Home app, as before.
+
+**بالعربية**
+
+الأجهزة تأتي بأسمائها. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **اسم لكل جهاز يُعثر عليه، ومعه مصدره.** المكيفات والغسالات لا تحتفظ باسمها في SmartThings (فهو محفوظ في سحابة Samsung) وترسل الموديل فقط، فكان الجهاز المضاف دون اسم يُسمّى برمز موديله، وهو الرمز نفسه لكل الوحدات. صار كل جهاز يأتي باسم تبدأ منه، ومعه مصدره: «اسمه السابق في هذه الإضافة»، أو «من homebridge-smartthings-oauth» (إن حفظت تلك الإضافة المعرّف نفسه؛ للقراءة فقط)، أو «من بيانات الجهاز» (التلفزيونات)، أو «اسم مقترح» مثل «مكيف 1» و«غسالة». والترقيم يأخذ أصغر رقم غير مستعمل بين أسماء الأجهزة الموجودة الآن، فيبدأ من 1 من جديد إذا كانت الأسماء السابقة مكتوبة بيدك.
+- **البحث في الشبكة يسمّي كل جهاز قبل الإضافة.** لكل جهاز يُعثر عليه خانة اسم خاصة به، ومعها ما يفعله الآن (يعمل، الوضع، الحرارة المضبوطة) لتعرف أي وحدة في أي غرفة: شغّل واحدًا وانظر أي سطر تغيّر.
+- **آخر اسم يبقى محفوظًا بعد الحذف.** يُحفظ الاسم الذي تكتبه فقط: الاسم المقترح الذي يبقى كما هو (المرقّم، أو اسم التلفزيون نفسه) يُستعمل ولا يُحفظ، والاسم الذي تكتبه بعده يحل محله. والاسم الذي تكتبه في الإعدادات يُحفظ في مجلد الإضافة بمعرّف الجهاز الثابت (وعنوان MAC أيضًا)، فالجهاز المحذوف إذا أُضيف مرة أخرى يعود بآخر اسم له. و«حذف بيانات الإضافة» يمسح الأسماء المحفوظة أيضًا. والأسماء التي تغيّرها من تطبيق Home تبقى في تطبيق Home كما من قبل.
+
 ## 1.6.7
 
 The plugin page says first what matters most. Nothing changes in what the plugin does; your settings, pairings and accessories are kept as they are.
