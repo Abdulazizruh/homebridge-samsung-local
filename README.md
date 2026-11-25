@@ -147,7 +147,7 @@ It is a separate bar in "Add an appliance", closed until you open it:
 2. Tick the read permissions only: **List all devices** and **See all devices**, and for room and place names **See all locations** (optional).
 3. Paste the token and press **Import and scan**.
 
-The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import. Pasting it starts the import by itself.
+The token is used once for these reads and then forgotten: it is not saved in a file and does not appear in the log. It ends by itself after 24 hours, and you can delete it on the same page after the import.
 
 <p><img src="assets/screenshots/smartthings-import.png" alt="Names from SmartThings, optional: its goal, three steps, the token field and how the token is handled" width="360"></p>
 
