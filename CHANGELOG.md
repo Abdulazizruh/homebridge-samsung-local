@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.9
+
+The SmartThings button opens a normal tab. Your settings, pairings and accessories are kept as they are.
+
+- **One tap opens the tokens page in a normal tab.** The settings page runs in a sandboxed frame inside Homebridge; a tab opened from inside it inherits the frame's limits, and so does every tab opened from that one, which is why Samsung's sign-in ended in its error page (403) even through SmartThings' own guide. The tap is now passed to a link in the Homebridge page itself, which has no such limits.
+- The button goes straight to the tokens page again, the same on every device. The help under it keeps the address as a link, with a copy button, and shows how the page was last opened.
+
+**بالعربية**
+
+زر SmartThings يفتح تبويبًا عاديًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **ضغطة واحدة تفتح صفحة الرموز في تبويب عادي.** صفحة الإعدادات تعمل داخل إطار مقيّد في Homebridge، والتبويب الذي يُفتح من داخله يرث قيوده، وكذلك كل تبويب يُفتح منه بعد ذلك. لهذا انتهت صفحة الدخول في Samsung بصفحة الخطأ (403) حتى عن طريق شرح SmartThings نفسه. الآن تُمرَّر الضغطة إلى رابط في صفحة Homebridge نفسها، وهي بلا تلك القيود.
+- الزر يذهب مباشرة إلى صفحة الرموز من جديد، وهو نفسه على كل الأجهزة. والمساعدة تحته تُبقي العنوان رابطًا ومعه زر نسخ، وتعرض كيف فُتحت الصفحة آخر مرة.
+
 ## 1.8.8
 
 The way to the SmartThings tokens page that works on an iPhone. Your settings, pairings and accessories are kept as they are.
