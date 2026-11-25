@@ -471,6 +471,7 @@ test('iPhone remote: a press while the TV is shown as off asks the TV at once, a
   handler.phone.emit('key', 'KEY_DOWN', from);
   await waitFor(() => from.notes.length === 1);
   assert.deepEqual(from.notes, ['button:sent']);
+  await waitFor(() => tv.keys.length === 1); // "sent" is noted when the key leaves; the TV reads it a moment later
   assert.deepEqual(tv.keys, ['KEY_DOWN']);
   assert.equal(handler.on, true, 'the fresh answer is shown too');
 
