@@ -15,9 +15,10 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 |---|---|
 | **No SmartThings API** | **No SmartThings account sign-in, token, API or subscription.** Not built on SmartThings OAuth: the plugin never signs in to Samsung, so it works even where the SmartThings API is not offered. No Home Assistant, no HACS, no MQTT |
 | **At home** | **Works from the first minute** on your home network: Apple Home → Homebridge → the appliance, directly |
+| **Optional: names from SmartThings** | **Not needed, and the plugin never depends on it.** If you have many appliances, a SmartThings token you create yourself can be used **once** to bring their names and rooms over automatically, instead of typing them. Nothing is controlled through it. See [Names from SmartThings](#names-from-smartthings-optional) |
 | **Away from home** | **From the first day** with an Apple home hub at home: **Apple TV, HomePod or HomeView**. Control and notifications, like any Apple Home accessory |
 
-<sub>Air conditioners and washers only need to be on your Wi-Fi, which Samsung sets up once with its SmartThings app when the appliance is installed. TVs need nothing: choose "Allow" on the TV once. An optional one-time import can bring your names over from SmartThings with a token you create yourself ([Names from SmartThings](#names-from-smartthings-optional)); the plugin never needs it.</sub>
+<sub>Air conditioners and washers only need to be on your Wi-Fi, which Samsung sets up once with its SmartThings app when the appliance is installed. TVs need nothing: choose "Allow" on the TV once.</sub>
 
 [العربية](README.ar.md)
 
