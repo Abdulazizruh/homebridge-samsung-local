@@ -63,6 +63,7 @@
   .sl-pick option { color: #0b57b0; background: #fff; }
   .sl-off { opacity: .45; cursor: not-allowed; filter: grayscale(1); }
   .sl-alert-warn { padding: 8px 10px; border-radius: 8px; background: #fff3cd; color: #7a5200; border: 1px solid #f1c75a; font-weight: 600; }
+  .sl-link { display: inline-flex; align-items: center; gap: 4px; } .sl-link svg { width: 14px; height: 14px; flex: none; }
   .sl-plus { display: none; } .sl-wrap:has(#sl-tv-tile:checked) .sl-plus { display: inline; }
   .sl-sw { display: flex; align-items: center; gap: 8px; padding: 6px 2px; margin: 0; border-bottom: 1px solid rgba(128,128,128,.15); cursor: pointer; }
   .sl-swbox:not(:has(#sl-tv-switches-on:checked)) .sl-swlist { display: none; }
@@ -488,6 +489,9 @@
     download: svg('<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>'),
     trash: svg('<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>'),
     check: svg('<path d="M5 12l5 5L20 7"/>'),
+    // Plain drawings of our own for the two links of a TV: a bridge for Homebridge, a house for HomeKit.
+    bridgeLink: svg('<path d="M2 17h20"/><path d="M4 17v-3a8 8 0 0 1 16 0v3"/><path d="M8 17v-4M12 17v-6M16 17v-4"/>'),
+    homeLink: svg('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>'),
     close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
     down: svg('<path d="M6 9l6 6 6-6"/>'),
     up: svg('<path d="M6 15l6-6 6 6"/>'),
@@ -670,7 +674,7 @@
       // Whether the TV tile is in Apple Home now, as Homebridge itself tracks it (added, or removed there).
       const setup = existing ? status.tvSetup?.[existing.id] : null;
       const homeState = !tile || !existing ? '' : !setup ? `<span class="sl-pill">${t('homeLater')}</span>`
-        : setup.paired ? `<span class="sl-pill sl-ok">${t('tvCodePaired')}</span>` : `<span class="sl-pill sl-warn">${t('homeNotYet')}</span>`;
+        : setup.paired ? `<span class="sl-pill sl-link sl-ok">${ICON.homeLink}${t('tvCodePaired')}</span>` : `<span class="sl-pill sl-link sl-warn">${ICON.homeLink}${t('homeNotYet')}</span>`;
       const sw = (key, once) => `<label class="sl-sw"><input type="checkbox" name="sl-tv-switch" value="${key}" ${chosen.includes(key) ? 'checked' : ''}>
           <span>${t('sw_' + key)}</span>${once ? `<span class="sl-muted">${t('swOnce')}</span>` : ''}</label>`;
       const pairing = p.tv.configured
@@ -1042,7 +1046,7 @@
       const snap = status.devices.find((s) => s.deviceId && s.deviceId === dev.id) || status.devices.find((s) => s.host === dev.host);
       // A TV: whether it allows this plugin (its answer to "Allow"), the base of everything else, beside its name.
       const allowed = dev.type === 'tv' ? status.tvAllowed?.[dev.id] : undefined;
-      const state = dev.type === 'tv' ? `<span class="sl-pill ${allowed === true ? 'sl-ok' : allowed === false ? 'sl-bad' : ''}">${allowed === true ? t('tvAllows') : allowed === false ? t('tvRefused') : esc(KINDS[lang].tv)}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
+      const state = dev.type === 'tv' ? `<span class="sl-pill sl-link ${allowed === true ? 'sl-ok' : allowed === false ? 'sl-bad' : ''}">${allowed === null || allowed === undefined ? '' : ICON.bridgeLink}${allowed === true ? t('tvAllows') : allowed === false ? t('tvRefused') : esc(KINDS[lang].tv)}</span>` : !snap ? `<span class="sl-pill">${t('unknownState')}</span>` : snap.online ? `<span class="sl-pill sl-ok">${t('online')}</span>` : `<span class="sl-pill sl-bad">${t('offline')}</span>`;
       const energy = snap?.described?.features?.filter((r) => ['powerWatts', 'energyKWh'].includes(r.id) && r.device === true)
         .map((r) => `${esc(T[lang].f[r.id])}: <span dir="ltr">${esc(r.value ?? '—')}</span>`).join(' · ') ?? '';
       const moved = snap?.deviceId && snap.deviceId === dev.id && snap.host && snap.host !== dev.host;
