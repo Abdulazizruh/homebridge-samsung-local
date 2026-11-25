@@ -58,6 +58,9 @@
   .sl-touch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
   .sl-touch-grid .sl-choice { margin-bottom: 0; text-align: center; }
   .sl-touch-ico svg { width: 30px; height: 30px; margin: 4px 0; color: #6f42c1; }
+  /* A choice to make stands out from the notes around it. */
+  .sl-pick, .sl-pick:focus { background-color: #fff8db !important; color: #0b57b0 !important; font-weight: 600; border: 2px solid #f1c75a !important; border-radius: 8px; }
+  .sl-pick option { color: #0b57b0; background: #fff; }
   .sl-off { opacity: .45; cursor: not-allowed; filter: grayscale(1); }
   .sl-alert-warn { padding: 8px 10px; border-radius: 8px; background: #fff3cd; color: #7a5200; border: 1px solid #f1c75a; font-weight: 600; }
   .sl-plus { display: none; } .sl-wrap:has(#sl-tv-tile:checked) .sl-plus { display: inline; }
@@ -89,7 +92,7 @@
   <div class="sl-card" id="sl-steps"></div>
   <div class="sl-card" id="sl-engine-card">
     <h6 data-t="engine"></h6>
-    <select class="form-control" id="sl-engine">
+    <select class="form-control sl-pick" id="sl-engine">
       <option value="" data-t="engineChoose"></option>
       <option value="python" data-t="enginePython"></option>
       <option value="javascript" data-t="engineJs"></option>
@@ -733,7 +736,7 @@
           <div class="sl-muted">${t('nameNote')}</div></div>
         <div class="mt-2"><strong>${t('showInHome')}</strong><div class="sl-grid">${boxes}</div></div>
         <div class="mt-2"><strong>${t('cycleStyle')}</strong>
-          <select class="form-control" id="sl-cycle-style">${['valve', 'sensor'].map((v) =>
+          <select class="form-control sl-pick" id="sl-cycle-style">${['valve', 'sensor'].map((v) =>
             `<option value="${v}" ${(existing?.cycleStyle === 'sensor' ? 'sensor' : 'valve') === v ? 'selected' : ''}>${t('cycleStyle_' + v)}</option>`).join('')}</select>
           <div class="sl-muted">${t('cycleStyleNote')}</div></div>
         <button class="btn btn-success mt-2" id="sl-add">${existing ? t('update') : t('add')}</button>`;

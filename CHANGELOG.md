@@ -9,6 +9,7 @@ Simpler settings for TVs, and the pointer offered only where the TV supports it;
 - **Three ticks in place of four choices.** The TV options are now three ticks that do not exclude one another: the remote like Apple TV, the TV tile with the Home remote, and switches for automations. Tick all of them, some or none; "Both together" and "No remote" are gone, since the ticks say the same.
 - **Each setting sits under the option it belongs to.** Under the remote like Apple TV: its pairing code, changed right there, and the touch area (arrows or pointer). Under the TV tile: its code for the Home app. The switches need no code: they come with the plugin's bridge. The tile and the switches are grouped as "In the Home app".
 - **The name is edited in the card's head, for every appliance.** A pencil beside the name turns it into a field in place; the separate Rename button and the name field inside the TV options are gone.
+- **A choice to make stands out.** The connection engine and the washer's cycle-tile style sit in a yellow box with blue text, so they no longer read as part of the notes around them.
 - **Pairing with the TV is one short line** at the top of the options, with "Pair with the TV again" beside it.
 - **The pointer only where the TV supports it.** Older Samsung TVs take only arrows from a remote. Each TV's info page says whether it has a touch pad (newer models list it; older ones give no such list). Where it does not, the pointer choice is greyed out with a clear note, and a pointer chosen before is replaced by arrows. Until a TV has answered while on, a note says that older models do not support it.
 
@@ -19,6 +20,7 @@ Simpler settings for TVs, and the pointer offered only where the TV supports it;
 - **ثلاث علامات بدل أربعة اختيارات.** صارت خيارات التلفزيون ثلاث علامات لا يمنع أحدها الآخر: الريموت الذي مثل Apple TV، وبطاقة التلفزيون مع ريموت Home، ومفاتيح الأتمتة. تختارها كلها أو بعضها أو لا شيء منها. وحُذف «الاثنان معًا» و«دون ريموت» لأن العلامات تؤدي المعنى نفسه.
 - **كل إعداد تحت خياره.** تحت الريموت الذي مثل Apple TV: رمز اقترانه وتعدّله في مكانه، ومساحة اللمس (أسهم أو مؤشر). وتحت بطاقة التلفزيون: رمزها لتطبيق Home. والمفاتيح دون رمز لأنها تأتي مع جسر الإضافة. والبطاقة والمفاتيح مجموعتان تحت «في تطبيق Home».
 - **الاسم يُعدّل من رأس البطاقة، في كل الأجهزة.** قلم بجانب الاسم يحوّله إلى خانة في مكانه. وحُذف زر «تغيير الاسم» وخانة الاسم داخل خيارات التلفزيون.
+- **الاختيار المطلوب يبرز.** محرك الاتصال وطريقة بطاقة دورة الغسالة صارا في مربع أصفر بكتابة زرقاء، فلا يبدوان جزءًا من الشرح حولهما.
 - **الاقتران بالتلفزيون سطر قصير** أعلى الخيارات، وبجانبه «اقتران مع التلفزيون من جديد».
 - **المؤشر فقط حيث يدعمه التلفزيون.** تلفزيونات Samsung القديمة تقبل الأسهم فقط من الريموت. وصفحة معلومات كل تلفزيون تقول هل فيه لوحة لمس (الموديلات الحديثة تذكرها، والقديمة ليس فيها هذه القائمة). وحيث لا يدعمه، يظهر خيار المؤشر باهتًا مع تنبيه واضح، ويُستبدل بالأسهم إن كان مختارًا من قبل. وإلى أن يجيب التلفزيون وهو مشغَّل، يذكر تنبيه أن الموديلات القديمة لا تدعمه.
 
