@@ -7,7 +7,10 @@ import { SamsungLocalPlatform } from '../src/platform.js';
 import { HelperClient } from '../src/runtime/helperClient.js';
 import { PLATFORM_NAME, PLUGIN_NAME, STORAGE_DIR_NAME, UUID_NAMESPACE } from '../src/settings.js';
 import { listSnapshots, pluginPaths, wipePluginData } from '../src/storage.js';
-import { failureText } from '../src/deviceLink.js';
+import { DeviceLink, failureText, writeApplied } from '../src/deviceLink.js';
+
+// The engines read the appliance 4 s after a write; the tests need not wait that long.
+DeviceLink.refusedTiming = { freshAfterMs: 0, giveUpMs: 300 };
 import { fixture, fixturePath, here, makeApi, pidAlive, quietLog, tmpDir, waitFor } from './support.js';
 
 const V = 'x.com.samsung.da.';
@@ -117,6 +120,44 @@ test('a 4.00 answer to a correct command is asked once more and then succeeds', 
   await waitFor(() => retried.length === 1, 4000);
   assert.deepEqual(retried, [['power/vs/0', true]]);
   await waitFor(() => handler.model.state.power === !wasOn, 4000);
+});
+
+test('a 4.00 answer to a command the appliance carried out is not sent again (one beep, not two)', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler, link } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  const retried = [];
+  const confirmed = [];
+  link.on('retried', (path) => retried.push(path));
+  link.on('confirmed', (path) => confirmed.push(path));
+  const before = (await platform.helper.request('sim', { key: DI, action: 'writes' })).writes;
+  await platform.helper.request('sim', { key: DI, action: 'refuse', value: 'once-done' });
+  const wasOn = handler.model.state.power;
+  const fan = handler.services.get('fan').getCharacteristic(C.Active);
+  const target = handler.services.get('thermostat').getCharacteristic(C.TargetHeatingCoolingState);
+  await (wasOn ? target.handleSetRequest(C.TargetHeatingCoolingState.OFF) : fan.handleSetRequest(1));
+  await waitFor(() => confirmed.length === 1, 4000);
+  await waitFor(() => handler.model.state.power === !wasOn, 4000);
+  await new Promise((r) => setTimeout(r, 500));
+  assert.deepEqual(confirmed, ['power/vs/0']);
+  assert.deepEqual(retried, []);
+  const powerWrites = (await platform.helper.request('sim', { key: DI, action: 'writes' })).writes - before;
+  assert.equal(powerWrites, 1);
+});
+
+test('whether a write shows in the state: plain values, lists and unknown shapes', () => {
+  const w = (body) => ({ path: ['mode', 'vs', '0'], body });
+  const res = { '/mode/vs/0': { modes: ['Cool'], options: ['Comode_Off', 'Sleep_0'], n: 22 } };
+  assert.equal(writeApplied(res, w({ n: '22' })), true);
+  assert.equal(writeApplied(res, w({ n: 23 })), false);
+  assert.equal(writeApplied(res, w({ options: ['Sleep_0'] })), true);
+  assert.equal(writeApplied(res, w({ options: ['Sleep_1'] })), false);
+  assert.equal(writeApplied(res, w({ other: 1 })), false);
+  assert.equal(writeApplied(res, w({})), false);
+  assert.equal(writeApplied(null, w({ n: 22 })), false);
+  assert.equal(writeApplied(res, { path: ['power', 'vs', '0'], body: { n: 22 } }), false);
 });
 
 test('a late refusal puts the tile back to the real state', async (t) => {

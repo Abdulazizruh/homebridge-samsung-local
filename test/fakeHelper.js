@@ -94,6 +94,13 @@ function handle(req) {
       if (!dev || !dev.reachable) { throw Object.assign(new Error('offline'), { code: 'offline' }); }
       const answer = () => {
         record({ path: req.path, body: req.body });
+        dev.writes = (dev.writes ?? 0) + 1;
+        if (dev.refuse === 'once-done') {
+          // Answers 4.00 and carries the command out all the same, as a real unit was heard to do.
+          dev.refuse = false; applyWrite(dev, req.path, req.body);
+          setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
+          return { code: '4.00', accepted: false, detail: null };
+        }
         if (dev.refuse === 'once') { dev.refuse = false; dev.refusedOnce = (dev.refusedOnce ?? 0) + 1; return { code: '4.00', accepted: false, detail: null }; }
         if (dev.refuse) { return { code: '4.05', accepted: false, detail: 'Control fail' }; }
         if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
@@ -106,9 +113,10 @@ function handle(req) {
     case 'sim': {
       const host = req.host ?? open.get(req.key)?.host;
       const dev = devices.get(host);
+      if (req.action === 'writes') { return { writes: dev.writes ?? 0 }; }
       if (req.action === 'offline') { dev.reachable = false; }
       if (req.action === 'online') { dev.reachable = true; }
-      if (req.action === 'refuse') { dev.refuse = req.value === 'once' ? 'once' : Boolean(req.value); }
+      if (req.action === 'refuse') { dev.refuse = ['once', 'once-done'].includes(req.value) ? req.value : Boolean(req.value); }
       if (req.action === 'ignore') { dev.ignore = Boolean(req.value); }
       if (req.action === 'delay') { dev.delay = Number(req.value) || 0; }
       if (req.action === 'remote') { applyWrite(dev, req.path, req.body); }

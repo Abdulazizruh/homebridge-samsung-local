@@ -500,6 +500,9 @@ export class SamsungLocalPlatform {
     link.on('retried', (path, accepted) => {
       this.log.info(`[${name}] the appliance answered 4.00 to "${path}"; asked again: ${accepted ? 'accepted' : 'refused again'}.`);
     });
+    link.on('confirmed', (path) => {
+      this.log.info(`[${name}] the appliance answered 4.00 to "${path}", but its state shows the command was carried out; not sent again.`);
+    });
     link.on('update', (resources) => {
       this.#saveSnapshot(deviceId, () => this.#snapshot(entry, deviceId, { identity: link.identity, resources }, true), resources);
     });

@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.12
+
+An air conditioner no longer beeps twice for one command. Your settings, pairings and accessories are kept as they are.
+
+- **A command the appliance answers with 4.00 is no longer sent again at once.** On a real air conditioner a correct power command was now and then answered 4.00 and repeated 0.6 s later, and the unit was heard to beep twice. The plugin now waits for the reading both engines already make 4 s after any command; when that reading shows the command was carried out, nothing more is sent, and the log says so. That the unit carries the command out despite its 4.00 answer is inferred from the two beeps, not measured.
+- **The command is sent once more only when that reading does not show it**, or when no reading arrives within 7 s. In that rare case the second attempt comes about 4 s later than before; every other command is as fast as it was.
+- No extra question goes to the appliance, and the quiet time after a command is unchanged. Both engines behave the same.
+
+**بالعربية**
+
+المكيف لا يصفّر مرتين لأمر واحد. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **الأمر الذي يردّ عليه الجهاز بـ 4.00 لا يُعاد إرساله فورًا.** على مكيف حقيقي كان أمر التشغيل الصحيح يُجاب أحيانًا بـ 4.00 فيُعاد بعد 0.6 ثانية، وسُمع المكيف يصفّر مرتين. الإضافة الآن تنتظر القراءة التي يجريها المحركان أصلًا بعد 4 ثوانٍ من أي أمر؛ فإذا أظهرت أن الأمر نُفّذ لا يُرسل شيء آخر، ويُكتب ذلك في السجل. تنفيذ المكيف للأمر مع ردّه بـ 4.00 مستنتج من الصوتين، وليس مقيسًا.
+- **يُعاد الأمر مرة واحدة فقط إذا لم تُظهره تلك القراءة**، أو لم تصل قراءة خلال 7 ثوانٍ. في هذه الحالة النادرة تأتي المحاولة الثانية أبطأ بنحو 4 ثوانٍ من السابق، وبقية الأوامر بسرعتها كما كانت.
+- لا يُرسل للجهاز أي سؤال إضافي، وفترة الهدوء بعد الأمر باقية كما هي. المحركان يتصرفان بالطريقة نفسها.
+
 ## 1.8.11
 
 The SmartThings button on iPhone and iPad hands the address to Safari. Your settings, pairings and accessories are kept as they are.

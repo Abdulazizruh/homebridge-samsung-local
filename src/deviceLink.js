@@ -4,6 +4,30 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const RETRY_REFUSED_MS = 600;
 
+/** Has the appliance's state taken what this write asked for? Unknown shapes count as "no". */
+export function writeApplied(resources, write) {
+  const rep = resources?.[`/${write.path.join('/')}`];
+  const body = write.body;
+  if (!rep || typeof rep !== 'object' || !body || typeof body !== 'object') {
+    return false;
+  }
+  const keys = Object.keys(body);
+  return keys.length > 0 && keys.every((k) => {
+    const want = body[k];
+    const have = rep[k];
+    if (have === undefined || have === null) {
+      return false;
+    }
+    if (Array.isArray(want)) {
+      return Array.isArray(have) && want.every((x) => have.some((y) => String(y) === String(x)));
+    }
+    if (typeof want === 'object' && want !== null) {
+      return JSON.stringify(want) === JSON.stringify(have);
+    }
+    return String(have) === String(want);
+  });
+}
+
 /** Raised when a command could not be delivered or was refused. */
 export class CommandError extends Error {
   constructor(code, message) {
@@ -20,6 +44,9 @@ export class CommandError extends Error {
  * Events: 'update' (resources), 'availability' (online, error?)
  */
 export class DeviceLink extends EventEmitter {
+  /** Both engines read the appliance 4 s after a write; that reading is the one waited for. */
+  static refusedTiming = { freshAfterMs: 3800, giveUpMs: 7000 };
+
   constructor({ helper, key, host, port = null, mac = null, expectedDi = null, pollInterval = 5, push = true, follow = true, log }) {
     super();
     this.follow = follow;
@@ -167,6 +194,34 @@ export class DeviceLink extends EventEmitter {
     this.emit('timing', this.commandMs);
   }
 
+  /**
+   * After a 4.00 answer: true once a reading shows the command was carried out.
+   * False when the reading made after the write does not show it, or none came in time.
+   */
+  #carriedOut(write) {
+    const { freshAfterMs, giveUpMs } = DeviceLink.refusedTiming;
+    if (writeApplied(this.resources, write)) {
+      return Promise.resolve(true);
+    }
+    const since = Date.now();
+    return new Promise((resolve) => {
+      const done = (value) => {
+        clearTimeout(timer);
+        this.off('update', onUpdate);
+        resolve(value);
+      };
+      const onUpdate = (resources) => {
+        if (writeApplied(resources, write)) {
+          done(true);
+        } else if (Date.now() - since >= freshAfterMs) {
+          done(false); // read after the write, and the change is not there
+        }
+      };
+      const timer = setTimeout(() => done(false), giveUpMs);
+      this.on('update', onUpdate);
+    });
+  }
+
   send(writes) {
     if (!writes?.length) {
       return Promise.resolve();
@@ -186,10 +241,19 @@ export class DeviceLink extends EventEmitter {
           result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
           if (!result.accepted && result.code === '4.00') {
             // Seen on a real air conditioner with both engines: a correct
-            // command is now and then answered 4.00. It is asked once more.
-            await sleep(RETRY_REFUSED_MS);
-            result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
-            this.emit('retried', write.path.join('/'), result.accepted);
+            // command is now and then answered 4.00, and the unit may have
+            // carried it out all the same (it beeps). Sending it again at once
+            // made it beep twice, so the engine's own reading after a write is
+            // awaited first; the command is sent once more only when that
+            // reading does not show it. No extra question goes to the appliance.
+            if (await this.#carriedOut(write)) {
+              result = { ...result, accepted: true };
+              this.emit('confirmed', write.path.join('/'));
+            } else {
+              await sleep(RETRY_REFUSED_MS);
+              result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
+              this.emit('retried', write.path.join('/'), result.accepted);
+            }
           }
           this.#timed(Date.now() - started);
         } catch (err) {
