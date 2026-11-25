@@ -1,9 +1,13 @@
-# Run by hand, from the Actions tab: tidies the trial versions of a finished line.
+# Run by hand, from the Actions tab: tidies the trial versions of finished lines.
 #
-# - GitHub: removes the release pages of 1.4.0-beta.N, keeping the newest three. Tags are kept,
-#   so every version stays in the history; only the long list on the Releases page gets shorter.
-# - npm: the 1.1.0 and 1.4.0 trial versions are marked as superseded, with a pointer to the
+# - GitHub: removes the release pages of a finished trial line, keeping its newest three. The
+#   lines are 1.4.0-beta.N (finished by 1.5.0) and 1.5.1-beta.N with 1.6.0-beta.N, taken as one
+#   line (finished by 1.6.0). Tags are kept, so every version stays in the history; only the
+#   long list on the Releases page gets shorter.
+# - npm: the trial versions of finished lines are marked as superseded, with a pointer to the
 #   full release. Nothing is removed: npm asks the owner's one-time code for that.
+# - The first versions of the project (0.x, including 0.0.0-stage, 0.1.0-beta.2 and
+#   0.1.0-beta.3) are never touched: they are its foundation.
 #
 # "preview" only lists what would be done. "apply" does it; removed release pages do not come back.
 # Requires the repository secret NPM_TOKEN, as the Release workflow does.
@@ -17,7 +21,7 @@ on:
         options: [preview, apply]
         default: preview
       keep:
-        description: 'How many of the newest 1.4.0 trial release pages to keep'
+        description: 'How many of the newest trial release pages to keep in each finished line'
         default: '3'
 jobs:
   tidy:
@@ -33,17 +37,19 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - name: Release pages of the finished trial line
+      - name: Release pages of the finished trial lines
         run: |
           case "$KEEP" in ''|*[!0-9]*) echo "keep must be a number" >&2; exit 1 ;; esac
           gh api --paginate "repos/$GITHUB_REPOSITORY/releases" \
-            --jq '.[] | select(.prerelease) | .tag_name' \
-            | grep -E '^v1\.4\.0-beta\.[0-9]+$' \
-            | sort -t. -k4 -n -r > all.txt || true
-          echo "Trial release pages found: $(wc -l < all.txt)"
-          head -n "$KEEP" all.txt > keep.txt
-          tail -n +"$((KEEP + 1))" all.txt > remove.txt
-          echo "Kept:"; cat keep.txt
+            --jq '.[] | select(.prerelease) | .tag_name' > pre.txt
+          : > remove.txt
+          for line in '^v1\.4\.0-beta\.[0-9]+$' '^v1\.(5\.1|6\.0)-beta\.[0-9]+$'; do
+            grep -E "$line" pre.txt | sort -V -r > all.txt || true
+            echo "Line $line: $(wc -l < all.txt) trial release pages"
+            echo "  Kept:"; head -n "$KEEP" all.txt | sed 's/^/    /'
+            tail -n +"$((KEEP + 1))" all.txt >> remove.txt
+          done
+          grep -E '^v0\.' remove.txt && { echo "a 0.x version is never removed" >&2; exit 1; }
           echo "To remove ($(wc -l < remove.txt)):"; cat remove.txt
           if [ "$MODE" != "apply" ]; then echo "Preview only: nothing was removed."; exit 0; fi
           while read -r tag; do
@@ -57,13 +63,19 @@ jobs:
         run: |
           # Removing a version from npm needs the owner's one-time code, which a workflow never
           # has. The owner can remove them by hand; here they are marked, with a pointer.
-          note='Trial version of a finished line. Use the full release (1.5.0 or later).'
-          for range in '>=1.1.0-beta.1 <1.1.0' '>=1.4.0-beta.1 <1.4.0'; do
+          mark() {   # range, note
+            range=$1; note=$2
             newest=$(npm view "homebridge-samsung-local@$range" version --json | node -e 'const v=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log([].concat(v).pop())')
             if [ "$(npm view "homebridge-samsung-local@$newest" deprecated)" = "$note" ]; then
-              echo "$range: already marked."; continue   # npm refuses to set the same note twice
+              echo "$range: already marked."; return   # npm refuses to set the same note twice
             fi
-            if [ "$MODE" != "apply" ]; then echo "Preview only: would mark $range"; continue; fi
+            if [ "$MODE" != "apply" ]; then echo "Preview only: would mark $range"; return; fi
             npm deprecate "homebridge-samsung-local@$range" "$note"
             echo "$range: marked."
-          done
+          }
+          old='Trial version of a finished line. Use the full release (1.5.0 or later).'
+          mark '>=1.1.0-beta.1 <1.1.0' "$old"
+          mark '>=1.4.0-beta.1 <1.4.0' "$old"
+          new='Trial version of a finished line. Use the full release (1.6.0 or later).'
+          mark '>=1.5.1-beta.1 <1.5.1' "$new"
+          mark '>=1.6.0-beta.1 <1.6.0' "$new"
