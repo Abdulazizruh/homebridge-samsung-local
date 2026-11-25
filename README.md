@@ -21,7 +21,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.8.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.8.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -138,7 +138,11 @@ Running as a child bridge gives this plugin its own HomeKit pairing, its own QR 
 
 Only to name your appliances and match them with what the scan finds, once. If you already named many appliances in SmartThings, their names and rooms come over and you need not type them again. Nothing is controlled through SmartThings, and the plugin does not connect to it again after the import. You do not need it to use the plugin.
 
-1. Open the tokens page of SmartThings (the button in the settings), sign in with your Samsung account and press **Generate new token**.
+It is a separate bar in "Add an appliance", closed until you open it:
+
+<p><img src="assets/screenshots/smartthings-closed.png" alt="The closed bar: Your appliance names from SmartThings, optional" width="360"></p>
+
+1. Press **Open the SmartThings page**: it opens the Samsung account sign-in, then the tokens page of SmartThings. Press **Generate new token**.
 2. Tick the read permissions only: **List all devices** and **See all devices**, and for room names **See all locations** (optional).
 3. Paste the token and press **Import and scan**.
 
@@ -148,8 +152,9 @@ The token is used once for these reads and then forgotten: it is not saved in a 
 
 The scan then runs and puts the two lists side by side:
 
-- **In SmartThings and on the network:** the name and room from SmartThings, with how they were matched: by the appliance's own ID, or by model when only one of that model is left on each side.
+- **In SmartThings and on the network:** the name and room from SmartThings, with how they were matched: by the appliance's own ID, or by model when only one of that model is left on each side. Tested in a real home: five air conditioners and a washer were matched by their own ID.
 - **On the network only:** pick its name from the SmartThings names left over, or keep a suggested name.
+- **Already in your list, not answering now:** an appliance you added before that is off at the moment (a TV in standby), matched by ID or by its name; nothing to do.
 - **In SmartThings only:** it did not answer on the network, with what to check (power, the same home Wi-Fi, a TV in standby, connected in the SmartThings app) and **Scan the network again**. Appliances that work through the cloud only (sensors, hubs) are folded into one line.
 
 <p><img src="assets/screenshots/smartthings-match.png" alt="Result of the import: appliances in both lists with their SmartThings names, one picked by hand, and one that did not answer" width="360"></p>

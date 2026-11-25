@@ -135,8 +135,9 @@ export async function readSmartThings(token, { fetchImpl = globalThis.fetch, tim
 /**
  * Match the SmartThings list to the appliances found on the network: first by
  * the appliance's own ID, then by model when only one of that model is left
- * on each side, and by the owner's own pick when given.
- * locals: [{ deviceId, model, pick }] where pick is an index into stDevices.
+ * on each side, by the owner's own pick when given, and last by the same name
+ * for an appliance already in the list.
+ * locals: [{ deviceId, model, name, pick }] where pick is an index into stDevices.
  * Returns, per local, { st, how } (st is an index or null) and the indexes
  * of SmartThings appliances found on no line.
  */
@@ -166,6 +167,14 @@ export function matchDevices(stDevices, locals) {
     if (out[li].st !== null || !model) { return; }
     const st = left(model);
     if (st.length === 1 && localLeft(model).length === 1) { out[li] = { st: st[0].i, how: 'model' }; used.add(st[0].i); }
+  });
+  // 4. The same name, for an appliance already in the list (its name was given by the owner).
+  const nameKey = (n) => String(n ?? '').trim().toLowerCase();
+  locals.forEach((l, li) => {
+    const key = nameKey(l.name);
+    if (out[li].st !== null || !key) { return; }
+    const hit = candidates.filter(({ d, i }) => !used.has(i) && nameKey(d.name) === key);
+    if (hit.length === 1) { out[li] = { st: hit[0].i, how: 'name' }; used.add(hit[0].i); }
   });
   const stOnly = candidates.filter(({ i }) => !used.has(i)).map(({ i }) => i);
   return { locals: out, stOnly };

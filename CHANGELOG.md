@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.8.1
+
+Names from SmartThings, after a first run in a real home. Your settings, pairings and accessories are kept as they are.
+
+- **Tested in a real home:** five air conditioners and a washer were matched to their SmartThings names by their own ID.
+- **An appliance already in your list that is off now** (a TV in standby) is no longer offered as "did not answer, add it by address": it is listed as already in your list, matched by ID or by its name.
+- **The SmartThings button opens the Samsung account sign-in, then the tokens page.** The earlier address could stop at the SmartThings home page.
+- **The import is a clear bar of its own**, closed until opened, with its title, one line on its goal and the "optional" label.
+- **Every push checks that the outside links on the settings page still open.**
+
+**بالعربية**
+
+الأسماء من SmartThings بعد أول تجربة في بيت حقيقي. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **جُرّب في بيت حقيقي:** تطابقت خمسة مكيفات وغسالة مع أسمائها في SmartThings بمعرّفها.
+- **الجهاز الموجود في قائمتك والمطفأ الآن** (تلفزيون في وضع الاستعداد) لم يعد يُعرض بأنه «لم يرد، أضفه بالعنوان»: يظهر أنه في قائمتك، طابق بالمعرّف أو باسمه.
+- **زر SmartThings يفتح صفحة الدخول إلى حساب Samsung، ثم صفحة الرموز.** العنوان السابق قد يتوقف عند الصفحة الرئيسية لـ SmartThings.
+- **الاستيراد شريط واضح مستقل**، مطوي حتى تفتحه، فيه عنوانه وسطر عن هدفه وعلامة «اختياري».
+- **كل رفع للتعديلات يتحقق أن الروابط الخارجية في صفحة الإعدادات ما زالت تعمل.**
+
 ## 1.8.0
 
 Names from SmartThings, optional and once. Your settings, pairings and accessories are kept as they are.

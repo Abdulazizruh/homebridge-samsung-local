@@ -84,4 +84,7 @@ test('SmartThings matching: by ID first, then by the only one of its model, then
   m = matchDevices(st, locals.map((l, i) => (i === 3 ? { ...l, pick: 2 } : l)));
   assert.deepEqual(m.locals[3], { st: 2, how: 'pick' });
   assert.deepEqual(m.stOnly, [1]);
+  // An appliance already in the list that is off now: found by its name.
+  m = matchDevices(st, [{ deviceId: 'tv-other', model: null, name: ' office ' }]);
+  assert.deepEqual(m.locals[0], { st: 1, how: 'name' });
 });
