@@ -2,18 +2,30 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.6.6
+
+The TV's permission beside its name. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.
+
+- **The TV's permission for this plugin is shown beside its name.** It is the TV's answer to "Allow", the base of everything else: "TV · allowed" in green, or "TV · turned away" in red. It follows what the TV last answered, when paired from the settings and with every press. "Ask the TV again" stays at the top of the options. The Apple Home pairing of the TV tile stays beside the tile, as in 1.6.5.
+
+**بالعربية**
+
+إذن التلفزيون بجانب اسمه. لا يتغير شيء فيما يفعله التلفزيون، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **إذن التلفزيون لهذه الإضافة يظهر بجانب اسمه.** هو جواب التلفزيون على «Allow»، وأساس كل شيء: «تلفزيون · مسموح» بالأخضر، أو «تلفزيون · مرفوض» بالأحمر. ويتبع آخر جواب من التلفزيون، عند الاقتران من الإعدادات ومع كل ضغطة. و«اطلب الإذن من التلفزيون من جديد» باقٍ أعلى الخيارات. أما اقتران بطاقة التلفزيون مع Apple Home فيبقى بجانب البطاقة كما في 1.6.5.
+
 ## 1.6.5
 
 Clearer TV settings. Nothing changes in what the TV does; your settings, pairings and accessories are kept as they are.
 
-- **Two different pairings, each said for what it is.** The TV's own permission for this plugin (its answer to "Allow") is the base of everything else, so it now sits beside the TV's name: "TV · allowed" in green, or "TV · turned away" in red. It follows what the TV last answered, when paired from the settings and with every press. "Ask the TV again" stays at the top of the options. The line "Paired with the TV" had sat in the "In the Home app" group and read like a pairing with Apple Home.
+- **Two different pairings, each said for what it is.** The line "Paired with the TV" sat in the "In the Home app" group and read like a pairing with Apple Home, though it is the TV's own permission for this plugin. It is back at the top as "Permission from the TV for this plugin: allowed", with "Ask the TV again".
 - **Whether the TV tile is in Apple Home is shown beside its name:** "Added to Apple Home", or "not in Apple Home" with its code under it. It follows Apple Home itself: a tile removed there shows as not added.
 
 **بالعربية**
 
 إعدادات تلفزيون أوضح. لا يتغير شيء فيما يفعله التلفزيون، وإعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **اقترانان مختلفان، وكل واحد باسمه.** إذن التلفزيون نفسه لهذه الإضافة (جوابه على «Allow») هو أساس كل شيء، فصار يظهر بجانب اسم التلفزيون: «تلفزيون · مسموح» بالأخضر، أو «تلفزيون · مرفوض» بالأحمر. ويتبع آخر جواب من التلفزيون، عند الاقتران من الإعدادات ومع كل ضغطة. و«اطلب الإذن من التلفزيون من جديد» باقٍ أعلى الخيارات. وكان سطر «تم الاقتران مع التلفزيون» داخل مجموعة «في تطبيق Home» فبدا كأنه اقتران مع Apple Home.
+- **اقترانان مختلفان، وكل واحد باسمه.** سطر «تم الاقتران مع التلفزيون» كان داخل مجموعة «في تطبيق Home»، فبدا كأنه اقتران مع Apple Home، وهو في الحقيقة إذن التلفزيون نفسه لهذه الإضافة. عاد إلى الأعلى باسم «إذن التلفزيون لهذه الإضافة: مسموح»، ومعه «اطلب الإذن من التلفزيون من جديد».
 - **هل بطاقة التلفزيون مضافة إلى Apple Home يظهر بجانب اسمها:** «مضاف إلى Apple Home»، أو «غير مضاف إلى Apple Home» ورمزها تحتها. وهي تتبع Apple Home نفسه: البطاقة المحذوفة منه تظهر غير مضافة.
 
 ## 1.6.4

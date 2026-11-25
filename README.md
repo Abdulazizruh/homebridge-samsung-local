@@ -16,7 +16,7 @@ No SmartThings API subscription, no Home Assistant, no HACS, no MQTT.
 
 [العربية](README.ar.md)
 
-> **Status: 1.6.5. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.6.6. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
