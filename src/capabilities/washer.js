@@ -260,10 +260,13 @@ export function washerControls(resources = {}) {
   if (res['/kidslock/vs/0'] || res['/kidslock/0']) {
     out.ctlKidsLock = {
       kind: 'lock', reads: 'kidsLock', current: () => kidsLock(res) === true,
-      shown: () => String(res['/kidslock/0']?.value ?? res['/kidslock/vs/0']?.[`${V}kidsLock`] ?? ''),
+      // Both forms are shown: a real washer kept the plain one at "false" while its tile read locked.
+      shown: () => [res['/kidslock/0']?.value, res['/kidslock/vs/0']?.[`${V}kidsLock`]].filter((x) => x !== undefined).map(String).join('/'),
       writes: (on) => [
         ...(res['/kidslock/0'] ? [{ path: ['kidslock', '0'], body: { value: Boolean(on) } }] : []),
         ...(res['/kidslock/vs/0'] ? [{ path: ['kidslock', 'vs', '0'], body: { [`${V}kidsLock`]: on ? 'On' : 'Off' } }] : []),
+        // "Ready" is what an unlocked top loader reports in the vendor form.
+        ...(res['/kidslock/vs/0'] && !on ? [{ path: ['kidslock', 'vs', '0'], body: { [`${V}kidsLock`]: 'Ready' } }] : []),
       ],
     };
   }

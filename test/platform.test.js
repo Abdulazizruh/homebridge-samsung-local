@@ -656,6 +656,21 @@ test('washer control trial: only ticked controls appear; a level is a slider tha
   await handler.controlJob;
   assert.equal(await writes() - courseFrom, 1);
   assert.equal(link.resources['/st/washercourse/vs/0'][`${V}st.washerMode`], 'Table_02_Course_02');
+  // A washer that says "accepted" and does nothing: the next form is tried, and that one locks it.
+  await platform.helper.request('sim', { key: W, action: 'refuse', value: 'ignore-once' });
+  const lockFrom = await writes();
+  await handler.services.get('kidsLock').getCharacteristic(C.LockTargetState).handleSetRequest(C.LockTargetState.SECURED);
+  await handler.controlJob;
+  assert.equal(await writes() - lockFrom, 2);
+  assert.equal(link.resources['/kidslock/vs/0'][`${V}kidsLock`], 'On');
+  await waitFor(() => handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value === C.LockCurrentState.SECURED);
+  assert.equal(handler.context.controlTrials.ctlKidsLock.after, 'false/On');
+  // Unlock again, so the rest starts from an open lock.
+  await new Promise((r) => setTimeout(r, 1100));
+  await handler.services.get('kidsLock').getCharacteristic(C.LockTargetState).handleSetRequest(C.LockTargetState.UNSECURED);
+  await handler.controlJob;
+  await waitFor(() => handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value === C.LockCurrentState.UNSECURED);
+  await new Promise((r) => setTimeout(r, 1100));
   // A washer that refuses: every candidate is tried once, and the trial says "not accepted".
   await platform.helper.request('sim', { key: W, action: 'refuse', value: true });
   const mid = await writes();

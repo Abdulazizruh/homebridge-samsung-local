@@ -389,24 +389,43 @@ export class WasherAccessory {
       }
       const before = control.shown();
       let accepted = false;
-      for (const write of writes) {
-        try {
-          await this.link.send([write]);
-          say(`sent ${words(write)}: accepted.`);
-          accepted = true;
-          break;
-        } catch (err) {
-          say(`sent ${words(write)}: not accepted (${err.message}).`);
-        }
-      }
       // The washer's own next report is the proof, whatever it answered.
-      await new Promise((resolve) => {
+      const report = () => new Promise((resolve) => {
         const timer = setTimeout(done, WasherAccessory.controlWaitMs);
         timer.unref?.();
         const link = this.link;
         function done() { clearTimeout(timer); link.off('update', done); resolve(); }
         link.once('update', done);
       });
+      // Did the washer do it? A switch, a lock and a level say so themselves; a press cannot.
+      const carriedOut = () => {
+        const now = washerControls(this.link.resources ?? {})[id];
+        if (!now || kind === 'press') {
+          return true;
+        }
+        return kind === 'level' ? String(now.shown()) === String(value) : Boolean(now.current()) === Boolean(value);
+      };
+      let waited = false;
+      for (const [n, write] of writes.entries()) {
+        try {
+          await this.link.send([write]);
+          accepted = true;
+        } catch (err) {
+          say(`sent ${words(write)}: not accepted (${err.message}).`);
+          continue;
+        }
+        await report();
+        waited = true;
+        if (carriedOut() || n === writes.length - 1) {
+          say(`sent ${words(write)}: accepted.`);
+          break;
+        }
+        // Seen on a real washer: a child lock command answered "accepted" and nothing changed.
+        say(`sent ${words(write)}: accepted, but the washer's report did not change. Trying the next form.`);
+      }
+      if (!waited) {
+        await report();
+      }
       if (asked[id]?.n === mine) {
         delete asked[id]; // no newer press: the washer's own report is the base again
       }

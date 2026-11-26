@@ -95,6 +95,12 @@ function handle(req) {
       const answer = () => {
         record({ path: req.path, body: req.body });
         dev.writes = (dev.writes ?? 0) + 1;
+        if (dev.refuse === 'ignore-once') {
+          // Answers "accepted" and changes nothing, as a real washer did for its child lock.
+          dev.refuse = false;
+          setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
+          return { code: '2.04', accepted: true, detail: null };
+        }
         if (dev.refuse === 'once-done') {
           // Answers 4.00 and carries the command out all the same, as a real unit was heard to do.
           dev.refuse = false; applyWrite(dev, req.path, req.body);
@@ -116,7 +122,7 @@ function handle(req) {
       if (req.action === 'writes') { return { writes: dev.writes ?? 0 }; }
       if (req.action === 'offline') { dev.reachable = false; }
       if (req.action === 'online') { dev.reachable = true; }
-      if (req.action === 'refuse') { dev.refuse = ['once', 'once-done'].includes(req.value) ? req.value : Boolean(req.value); }
+      if (req.action === 'refuse') { dev.refuse = ['once', 'once-done', 'ignore-once'].includes(req.value) ? req.value : Boolean(req.value); }
       if (req.action === 'ignore') { dev.ignore = Boolean(req.value); }
       if (req.action === 'delay') { dev.delay = Number(req.value) || 0; }
       if (req.action === 'remote') { applyWrite(dev, req.path, req.body); }
