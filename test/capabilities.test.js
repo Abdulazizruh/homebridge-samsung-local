@@ -238,21 +238,20 @@ test('washer model: tolerant state words, idle placeholders ignored', async () =
   assert.deepEqual([washerToggles(base).SuperSpeed, washerToggles(base).BubbleSoak, washerToggles(base).BubbleStorm], [false, false, false]);
   assert.deepEqual(controls.ctlSuperSpeed.writes(true), [{ path: ['course', 'vs', '0'], body: { 'x.com.samsung.da.options': ['SuperSpeed_On'] } }]);
   assert.equal(controls.ctlSuperSpeed.current(), false);
-  assert.equal(controls.ctlSmartControl.current(), false);
-  assert.deepEqual(controls.ctlSmartControl.writes(true).map((w) => w.path.join('/')), ['remotectrl/vs/0', 'remotectrl/0']);
+  assert.equal(controls.ctlSmartControl, undefined); // set at the panel only: both forms changed nothing on a real washer
   // Courses: the washer's own list, in its own order; a course is set in two forms, tried in order.
   const { washerCourses, courseName } = await import('../src/capabilities/washer.js');
   assert.deepEqual(washerCourses(base), ['01', '2B', '04', 'B1', '90', '06', '91', '08', '82', '87', '4D']);
   assert.deepEqual([courseName(base, '08'), courseName(base, '2b'), courseName(base, '87'), courseName(base, 'FF')], ['Rinse + Spin', 'AI Wash', 'Downloaded', null]);
   assert.equal(controls.ctlCourse.kind, 'choice');
   assert.deepEqual(controls.ctlCourse.writes('08'), [
-    { path: ['st', 'washercourse', 'vs', '0'], body: { 'x.com.samsung.da.st.washerMode': 'Table_02_Course_08' } },
-    { path: ['course', 'vs', '0'], body: { 'x.com.samsung.da.options': ['Course_08'] } }]);
+    { path: ['course', 'vs', '0'], body: { 'x.com.samsung.da.options': ['Course_08'] } },
+    { path: ['st', 'washercourse', 'vs', '0'], body: { 'x.com.samsung.da.st.washerMode': 'Table_02_Course_08' } }]);
   // A washer without a readable list keeps the "next" press.
   const noList = structuredClone(base);
   delete noList['/course/vs/0']['x.com.samsung.da.supportedOptions'];
   assert.equal(washerControls(noList).ctlCourse.kind, 'press');
-  assert.equal(washerControls(noList).ctlCourse.writes(true)[0].body['x.com.samsung.da.st.washerMode'], 'Table_02_Course_02');
+  assert.deepEqual(washerControls(noList).ctlCourse.writes(true)[0].body['x.com.samsung.da.options'], ['Course_02']);
   // Child lock: the plain value decides; the vendor word only where there is no plain value.
   assert.equal(kidsLock({ '/kidslock/0': { value: false }, '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'On' } }), false);
   assert.equal(kidsLock({ '/kidslock/0': { value: true }, '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'Ready' } }), true);

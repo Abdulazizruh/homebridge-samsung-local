@@ -691,10 +691,9 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   const courseFrom = await writes();
   await course('08').handleSetRequest(true);
   await handler.controlJob;
-  assert.equal(await writes() - courseFrom, 2); // the first form changed nothing here, so the second was tried
+  assert.equal(await writes() - courseFrom, 1); // the form a real washer takes goes first
   assert.equal(handler.context.controlTrials.ctlCourse.after, '08');
   await waitFor(() => course('08').value === true && course('01').value === false);
-  // The form that worked is remembered and goes first next time: one command, not two.
   assert.equal(handler.context.controlForms.ctlCourse, 'course/vs/0');
   await new Promise((r) => setTimeout(r, 50));
   const againFrom = await writes();
@@ -748,6 +747,20 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   assert.equal(second.platform.api.unregistered.length, 0);
   assert.equal(second.platform.devices.get(W).handler.services.get('ctlRinse:1').getCharacteristic(second.platform.api.hap.Characteristic.On).value, true);
   await second.platform.stop();
+  // The panel's extra buttons sit together on an accessory of their own, named as on the panel.
+  const fourth = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true, ctlSuperSpeed: true, ctlBubbleStorm: true }), cached });
+  await online(fourth.platform, W);
+  const C4 = fourth.platform.api.hap.Characteristic;
+  const optionsGroup = fourth.platform.api.registered.map((r) => r.accessory).find((a) => a.displayName === 'Washer Options');
+  assert.deepEqual(optionsGroup.services.filter((x) => x.subtype).map((x) => x.getCharacteristic(C4.ConfiguredName).value), ['Super Speed', 'Eco Bubble']);
+  assert.equal(fourth.platform.devices.get(W).accessory.services.some((x) => String(x.subtype ?? '').startsWith('ctlSuperSpeed')), false);
+  const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
+  WasherAccessory.controlWaitMs = 200;
+  const h4 = fourth.platform.devices.get(W).handler;
+  await h4.services.get('ctlSuperSpeed').getCharacteristic(C4.On).handleSetRequest(true);
+  await h4.controlJob;
+  assert.deepEqual({ ...h4.context.controlTrials.ctlSuperSpeed, at: 0 }, { at: 0, accepted: true, before: 'Off', after: 'On' });
+  await fourth.platform.stop();
   // Unticked: the group leaves, the washer stays.
   const third = await boot({ storage: first.storage, devices, config: entry({}), cached });
   t.after(() => third.platform.stop());

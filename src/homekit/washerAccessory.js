@@ -9,11 +9,13 @@ const LABELS = {
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
   ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
   ctlWaterTemp: 'Water Temp', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
-  ctlSuperSpeed: 'Super Speed', ctlBubbleSoak: 'Bubble Soak', ctlBubbleStorm: 'Bubble Storm', ctlSmartControl: 'Smart Control',
+  ctlSuperSpeed: 'Super Speed', ctlBubbleSoak: 'Bubble Soak', ctlBubbleStorm: 'Eco Bubble',
 };
 /** A choice gets one switch per value, named with this word and the washer's own name for the value. */
 const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course' };
 /** "ExtraHigh" reads as "Extra High" on a tile; what is sent stays the washer's own word. */
+/** The panel's extra buttons sit together on an accessory of their own: one group in Apple Home. */
+const OPTION_IDS = ['ctlSuperSpeed', 'ctlBubbleStorm', 'ctlBubbleSoak'];
 /** A name Apple Home accepts: letters, numbers, spaces and plain punctuation ("Rinse + Spin" is refused). */
 const homeName = (text) => String(text).replace(/\s*[+&]\s*/g, ' and ').replace(/[^\p{L}\p{N} '.,-]/gu, '').replace(/\s+/g, ' ').trim();
 const spaced = (value) => String(value).replace(/([a-z])([A-Z])/g, '$1 $2');
@@ -112,8 +114,11 @@ export class WasherAccessory {
     const current = service.getCharacteristic(Characteristic.ConfiguredName).value;
     if (!current || current === applied[key]) {
       service.updateCharacteristic(Characteristic.ConfiguredName, name);
-      service.updateCharacteristic(Characteristic.Name, name);
       applied[key] = name;
+    }
+    // The plain name is always ours: one Apple Home refuses (a "+" in it) must not stay because the tile was renamed.
+    if (service.getCharacteristic(Characteristic.Name).value !== name) {
+      service.updateCharacteristic(Characteristic.Name, name);
     }
   }
 
@@ -245,6 +250,9 @@ export class WasherAccessory {
         this.services.delete(`${id}/slider`);
       }
       this.groups?.drop(id);
+      if (OPTION_IDS.includes(id)) {
+        continue; // built together below
+      }
       if (this.features[id] && controls[id]) {
         drop(Service.Fan, id);
         const sw = this.#service(id, Service.Switch, id);
@@ -254,6 +262,34 @@ export class WasherAccessory {
         drop(Service.Fan, id);
         this.services.delete(id);
       }
+    }
+    // The panel's extra buttons: together on an accessory of their own where the platform offers one.
+    const options = OPTION_IDS.filter((id) => this.features[id] && controls[id]);
+    const optionsHome = options.length ? (this.groups?.get('options', `${this.displayName} Options`) ?? this.accessory) : null;
+    for (const id of OPTION_IDS) {
+      for (const acc of new Set([this.accessory, optionsHome])) {
+        const old = acc?.getServiceById(Service.Switch, id);
+        if (old && (acc !== optionsHome || !options.includes(id))) {
+          acc.removeService(old); // unticked, or left on the washer's own accessory by 1.9.0-beta.7
+        }
+      }
+      this.services.delete(id);
+      if (options.includes(id)) {
+        const name = optionsHome === this.accessory ? this.#label(id) : LABELS[id];
+        const sw = optionsHome.getServiceById(Service.Switch, id) ?? optionsHome.addService(Service.Switch, name, id);
+        this.#applyName(id, sw, name);
+        this.services.set(id, sw);
+        sw.getCharacteristic(Characteristic.On).onSet((value) => { this.#tap(id, Boolean(value), 'switch'); });
+      }
+    }
+    if (options.length) {
+      if (optionsHome !== this.accessory) {
+        optionsHome.getService(Service.AccessoryInformation)?.setCharacteristic(Characteristic.Manufacturer, 'Samsung')
+          .setCharacteristic(Characteristic.Model, String(this.context.model ?? 'Laundry appliance').slice(0, 64));
+      }
+      this.groups?.publish('options');
+    } else {
+      this.groups?.drop('options');
     }
     // One sensor per stage the washer itself lists, detected only during that stage: for automations
     // such as "tell me when the spin starts". The Home app shows no free text, so a sensor it is.
@@ -371,8 +407,16 @@ export class WasherAccessory {
     }
     this.#control(id, value).finally(() => {
       mine.busy = false;
-      if (this.switchHold?.[id]?.value === value && this.taps[id] === mine) {
-        delete this.switchHold[id];
+      const held = this.switchHold?.[id];
+      if (held?.value === value && this.taps[id] === mine) {
+        const now = washerControls(this.link.resources ?? {})[id];
+        if (kind === 'press' || !now?.current || Boolean(now.current()) === Boolean(value)) {
+          delete this.switchHold[id];
+        } else {
+          // Seen on a real washer: an extra it had switched on showed in its report 15 s later. The
+          // switch stays where it was put for the rest of its time, then shows what the washer says.
+          setTimeout(() => this.#push(), Math.max(0, held.until - Date.now()) + 50).unref?.();
+        }
         this.#push();
       }
     });
@@ -433,11 +477,6 @@ export class WasherAccessory {
     const asked = (this.asked ??= {});
     const control = washerControls(this.link.resources ?? {})[id];
     let writes = control ? control.writes(value, asked[id]?.value) : [];
-    // The form this washer carried out last time goes first: a form it refuses costs seconds each time.
-    const proven = kind === 'press' ? null : this.context.controlForms?.[id];
-    if (proven && writes.some((w) => w.path.join('/') === proven)) {
-      writes = [...writes.filter((w) => w.path.join('/') === proven), ...writes.filter((w) => w.path.join('/') !== proven)];
-    }
     const mine = (asked[id]?.n ?? 0) + 1;
     if (kind === 'press' && writes.length > 0) {
       asked[id] = { n: mine, value: Object.values(writes[0].body)[0] };
@@ -455,6 +494,12 @@ export class WasherAccessory {
           delete asked[id];
         }
         return;
+      }
+      // The form this washer carried out last time goes first: a form it refuses costs seconds each
+      // time. Looked up now, not at the press, so a press that waited its turn uses what was just learnt.
+      const proven = kind === 'press' ? null : this.context.controlForms?.[id];
+      if (proven && writes.some((w) => w.path.join('/') === proven)) {
+        writes = [...writes.filter((w) => w.path.join('/') === proven), ...writes.filter((w) => w.path.join('/') !== proven)];
       }
       const before = (washerControls(this.link.resources ?? {})[id] ?? control).shown();
       let accepted = false;

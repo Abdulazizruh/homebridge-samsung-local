@@ -2,6 +2,28 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.9
+
+Trial version on the "beta" channel. Corrections after 1.9.0-beta.8 was tried on a real washer. Your settings, pairings and accessories are kept as they are.
+
+- **A course is set at once.** The form a real washer takes now goes first, and a choice that waited its turn uses what the one before it learnt. Until now each change began with a form the washer refuses, which cost about eight seconds every time.
+- **The panel's extra buttons are a group of their own**, "... Options", apart from the washer's main tile: "Super Speed", "Eco Bubble" and "Bubble Soak". It first appears in the bridge's room.
+- **"Bubble Storm" is now called "Eco Bubble"**, as on the panel: confirmed on a WA80F16B9CYL top loader, together with "Super Speed". "Bubble Soak" is accepted and reported by that washer, but has no light on its panel.
+- **"Smart Control" is no longer offered.** On that washer both of its forms were answered "accepted" and changed nothing: remote control is set at the panel. Its switch leaves on update.
+- **A switch stays where it was put a little longer** when the washer's report is late, as the groups already did. Seen on that washer: "Eco Bubble" showed in its report 15 seconds after the command.
+- **Fixed: the warning about the name "Rinse + Spin" stayed** after 1.9.0-beta.8 where its tile had been renamed. The plain name is now always corrected.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». تصحيحات بعد تجربة 1.9.0-beta.8 على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **البرنامج يُضبط فورًا.** الصيغة التي تقبلها الغسالة الحقيقية تُرسل أولًا، والاختيار الذي انتظر دوره يستعمل ما تعلّمه الذي قبله. كان كل تغيير يبدأ بصيغة ترفضها الغسالة، فيضيع نحو ثماني ثوانٍ في كل مرة.
+- **أزرار اللوحة الإضافية مجموعة مستقلة**، «... Options»، بعيدًا عن بلاطة الغسالة الرئيسية: «Super Speed» و«Eco Bubble» و«Bubble Soak». تظهر أولًا في غرفة الجسر.
+- **«Bubble Storm» صار اسمه «Eco Bubble»** كما في اللوحة: تأكد على الغسالة WA80F16B9CYL، ومعه «Super Speed». و«Bubble Soak» تقبله تلك الغسالة وتعلنه، لكن ليست له إشارة في لوحتها.
+- **«Smart Control» لم يعد معروضًا.** على تلك الغسالة أُجيبت صيغتاه بـ«accepted» ولم يتغير شيء: التحكم عن بعد يُضبط من اللوحة. مفتاحه يختفي عند التحديث.
+- **المفتاح يبقى في مكانه مدة أطول قليلًا** إذا تأخر إعلان الغسالة، كما تفعل المجموعات. شوهد على تلك الغسالة: «Eco Bubble» ظهر في إعلانها بعد الأمر بخمس عشرة ثانية.
+- **إصلاح: تحذير الاسم «Rinse + Spin» بقي** بعد 1.9.0-beta.8 إذا كانت بلاطته أُعيدت تسميتها. الاسم البسيط يُصحَّح الآن دائمًا.
+
 ## 1.9.0-beta.8
 
 Trial version on the "beta" channel. Corrections after 1.9.0-beta.7 was tried on a real washer. Your settings, pairings and accessories are kept as they are.

@@ -270,12 +270,7 @@
                   "default": false
                 },
                 "ctlBubbleStorm": {
-                  "title": "Laundry control (trial, models differ): Bubble Storm switch",
-                  "type": "boolean",
-                  "default": false
-                },
-                "ctlSmartControl": {
-                  "title": "Laundry control (trial, models differ): Smart Control switch",
+                  "title": "Laundry control (trial, models differ): Eco Bubble switch",
                   "type": "boolean",
                   "default": false
                 }

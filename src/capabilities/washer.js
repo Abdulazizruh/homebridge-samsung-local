@@ -272,7 +272,10 @@ export function courseName(resources, code) {
   return COURSE_NAMES[model]?.[String(code).toUpperCase()] ?? null;
 }
 
-/** Extras a washer reports as "Name_On" or "Name_Off" among its course options, each tried as a switch. */
+/**
+ * Extras a washer reports as "Name_On" or "Name_Off" among its course options, each a switch. On a
+ * WA80F16B9CYL "BubbleStorm" is the panel's "Eco Bubble" button; "BubbleSoak" has no light on its panel.
+ */
 const OPTION_SWITCHES = { ctlSuperSpeed: 'SuperSpeed', ctlBubbleSoak: 'BubbleSoak', ctlBubbleStorm: 'BubbleStorm' };
 
 /** The extras a washer reports as on or off, by their own names: { SuperSpeed: true, BubbleSoak: false }. */
@@ -359,10 +362,10 @@ export function washerControls(resources = {}) {
   }
   const mode = res['/st/washercourse/vs/0']?.[`${V}st.washerMode`];
   const m = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(mode ?? ''));
-  // Seen on a real washer: the first form was refused. The course is also one of the course options.
+  // Seen on a real washer: the course is set as one of the course options; the other form was refused every time.
   const courseWrites = (prefix, code) => [
-    ...(prefix ? [{ path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${prefix}${code}` } }] : []),
     ...(res['/course/vs/0'] ? [{ path: ['course', 'vs', '0'], body: { [`${V}options`]: [`Course_${code}`] } }] : []),
+    ...(prefix ? [{ path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${prefix}${code}` } }] : []),
   ];
   const courses = washerCourses(res);
   if (courses.length > 1) {
@@ -391,17 +394,7 @@ export function washerControls(resources = {}) {
       };
     }
   }
-  // Smart control: whether the washer takes commands from outside. Many washers let only the panel set it.
-  if (res['/remotectrl/vs/0'] || res['/remotectrl/0']) {
-    const enabled = () => (typeof res['/remotectrl/0']?.value === 'boolean' ? res['/remotectrl/0'].value
-      : lower(String(res['/remotectrl/vs/0']?.[`${V}remoteControlEnabled`] ?? '')) === 'true');
-    out.ctlSmartControl = {
-      kind: 'switch', reads: 'remoteControlEnabled', current: enabled, shown: () => String(enabled()),
-      writes: (on) => [
-        ...(res['/remotectrl/vs/0'] ? [{ path: ['remotectrl', 'vs', '0'], body: { [`${V}remoteControlEnabled`]: on ? 'true' : 'false' } }] : []),
-        ...(res['/remotectrl/0'] ? [{ path: ['remotectrl', '0'], body: { value: Boolean(on) } }] : []),
-      ],
-    };
-  }
+  // Smart control (remote control) is not offered: seen on a real washer, both of its forms were
+  // answered "accepted" and changed nothing. It is set at the panel.
   return out;
 }
