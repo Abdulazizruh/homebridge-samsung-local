@@ -198,6 +198,61 @@
                   "title": "Laundry: alert sensor (appliance faults)",
                   "type": "boolean",
                   "default": false
+                },
+                "ctlPower": {
+                  "title": "Laundry control (trial, models differ): power switch (on/off)",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlRun": {
+                  "title": "Laundry control (trial, models differ): run switch (start or resume, pause)",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlStop": {
+                  "title": "Laundry control (trial, models differ): stop the cycle",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlKidsLock": {
+                  "title": "Laundry control (trial, models differ): child lock that can be set",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlBuzzer": {
+                  "title": "Laundry control (trial, models differ): sound switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlSpin": {
+                  "title": "Laundry control (trial, models differ): spin level, next value",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlRinse": {
+                  "title": "Laundry control (trial, models differ): rinse count, next value",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlWaterTemp": {
+                  "title": "Laundry control (trial, models differ): water temperature, next value",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlWaterLevel": {
+                  "title": "Laundry control (trial, models differ): water level, next value",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlWashTime": {
+                  "title": "Laundry control (trial, models differ): wash time, next value",
+                  "type": "boolean",
+                  "default": false
+                },
+                "ctlCourse": {
+                  "title": "Laundry control (trial, models differ): course, next number",
+                  "type": "boolean",
+                  "default": false
                 }
               }
             },

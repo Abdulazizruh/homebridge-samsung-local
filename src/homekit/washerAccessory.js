@@ -1,5 +1,5 @@
 import { failureText } from '../deviceLink.js';
-import { alarmText, buildWasherModel, WASHER_STAGES } from '../capabilities/washer.js';
+import { alarmText, buildWasherModel, WASHER_CONTROLS, WASHER_STAGES, washerControls } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 import { markPrimary } from './primary.js';
 
@@ -7,6 +7,8 @@ const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = {
   cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
+  ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin Next', ctlRinse: 'Rinse Next',
+  ctlWaterTemp: 'Water Temp Next', ctlWaterLevel: 'Water Level Next', ctlWashTime: 'Wash Time Next', ctlCourse: 'Course Next',
 };
 const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];
@@ -16,6 +18,8 @@ export const WASHER_FEATURES = {
   stageSensors: true, drumCleanSensor: true,
   // Extras, off until the owner asks for them.
   progressTile: false, kidsLockSensor: false, alertSensor: false,
+  // Control trial, off until the owner ticks each one: what a washer accepts differs by model.
+  ...Object.fromEntries(WASHER_CONTROLS.map((id) => [id, false])),
 };
 
 /**
@@ -23,9 +27,13 @@ export const WASHER_FEATURES = {
  *  - a Valve tile that shows the cycle running and the time remaining
  *  - an occupancy sensor that turns on when a cycle ends (for notifications)
  *  - Eve power and energy readings
- * Nothing is written to the appliance.
+ * Nothing is written to the appliance, unless the owner switches on a control trial:
+ * then that control's command is sent when its switch is used, and its answer is logged.
  */
 export class WasherAccessory {
+  /** How long a control trial waits for the washer's next report: both engines read it 4 s after a command. */
+  static controlWaitMs = 9000;
+
   constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'valve', finishedHoldMs = FINISHED_HOLD_MS }) {
     // 'valve':  a valve tile with the countdown; a tap is undone at once
     // 'sensor': a running sensor; never accepts a tap, has no countdown
@@ -138,13 +146,33 @@ export class WasherAccessory {
       drop(Service.HumiditySensor, 'progress');
       this.services.delete('progress');
     }
-    if (this.features.kidsLockSensor && supports.kidsLock !== false) {
+    const controls = washerControls(this.link.resources ?? this.context.resources ?? {});
+    if ((this.features.kidsLockSensor || (this.features.ctlKidsLock && controls.ctlKidsLock)) && supports.kidsLock !== false) {
       const lock = this.#service('kidsLock', Service.LockMechanism, 'kidsLock');
-      // Read-only: the lock is set on the appliance. Show the truth again.
-      lock.getCharacteristic(Characteristic.LockTargetState).onSet(() => { setTimeout(() => this.#push(), 300).unref?.(); });
+      lock.getCharacteristic(Characteristic.LockTargetState).onSet((value) => {
+        if (this.features.ctlKidsLock && controls.ctlKidsLock) {
+          this.#control('ctlKidsLock', value === Characteristic.LockTargetState.SECURED);
+        } else {
+          // Read-only: the lock is set on the appliance. Show the truth again.
+          setTimeout(() => this.#push(), 300).unref?.();
+        }
+      });
     } else {
       drop(Service.LockMechanism, 'kidsLock');
       this.services.delete('kidsLock');
+    }
+    // Control trial: one switch per control the owner ticked and the washer has the resource for.
+    for (const id of WASHER_CONTROLS) {
+      if (id === 'ctlKidsLock') {
+        continue; // rides on the lock above
+      }
+      if (this.features[id] && controls[id]) {
+        const sw = this.#service(id, Service.Switch, id);
+        sw.getCharacteristic(Characteristic.On).onSet((value) => { this.#control(id, Boolean(value)); });
+      } else {
+        drop(Service.Switch, id);
+        this.services.delete(id);
+      }
     }
     // One sensor per stage the washer itself lists, detected only during that stage: for automations
     // such as "tell me when the spin starts". The Home app shows no free text, so a sensor it is.
@@ -225,6 +253,48 @@ export class WasherAccessory {
     }
     this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished, poweredOn: st.inCycle ? (seen?.poweredOn || !st.poweredOff) : false };
     this.#push();
+  }
+
+  /**
+   * Control trial: send what the control lists, one candidate at a time, and say in the log what
+   * was sent, what the washer answered and what it reports afterwards. HomeKit is answered at once.
+   */
+  #control(id, value) {
+    const label = LABELS[id] ?? 'Kids Lock';
+    const say = (text) => this.log.info(`[${this.displayName}] control trial "${label}": ${text}`);
+    const words = (w) => `${Object.entries(w.body).map(([k, v]) => `${k.replace('x.com.samsung.da.', '')}=${v}`).join(', ')} to "${w.path.join('/')}"`;
+    const job = (async () => {
+      const control = washerControls(this.link.resources ?? {})[id];
+      if (!control || !this.link.online) {
+        say('not sent: the washer is not reachable.');
+        return;
+      }
+      const before = control.shown();
+      let accepted = false;
+      for (const write of control.writes(value)) {
+        try {
+          await this.link.send([write]);
+          say(`sent ${words(write)}: accepted.`);
+          accepted = true;
+          break;
+        } catch (err) {
+          say(`sent ${words(write)}: not accepted (${err.message}).`);
+        }
+      }
+      // The washer's own next report is the proof, whatever it answered.
+      await new Promise((resolve) => {
+        const timer = setTimeout(done, WasherAccessory.controlWaitMs);
+        timer.unref?.();
+        const link = this.link;
+        function done() { clearTimeout(timer); link.off('update', done); resolve(); }
+        link.once('update', done);
+      });
+      const after = washerControls(this.link.resources ?? {})[id]?.shown() ?? '';
+      say(`the washer reported ${control.reads}=${before} before and ${control.reads}=${after} now.`);
+      (this.context.controlTrials ??= {})[id] = { at: Date.now(), accepted, before, after };
+    })();
+    this.controlJob = job.catch((err) => { say(`failed: ${err.message}`); }).finally(() => { this.#push(); });
+    return this.controlJob;
   }
 
   /** The course when a cycle starts, and each new stage: words and a course number only. */
@@ -315,6 +385,14 @@ export class WasherAccessory {
       this.services.get(stage)?.updateCharacteristic(Characteristic.OccupancyDetected, st.inCycle && st.stage === stage ? 1 : 0);
     }
     this.services.get('drumClean')?.updateCharacteristic(Characteristic.OccupancyDetected, st.drumClean ? 1 : 0);
+    const controls = washerControls(this.link.resources ?? {});
+    for (const id of WASHER_CONTROLS) {
+      const sw = id === 'ctlKidsLock' ? null : this.services.get(id);
+      if (sw) {
+        // A switch shows what the washer reports; a "next" or "stop" press springs back.
+        sw.updateCharacteristic(Characteristic.On, controls[id]?.kind === 'switch' ? Boolean(controls[id].current()) : false);
+      }
+    }
     const lock = this.services.get('kidsLock');
     if (lock) {
       const value = st.kidsLock ? Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;

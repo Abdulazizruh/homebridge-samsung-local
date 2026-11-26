@@ -199,3 +199,96 @@ export function washerFeatureRows(model) {
     row('energyKWh', s.energyKWh, 'eve', st.energyKWh, 'kWh'),
   ];
 }
+
+/**
+ * Control trial. Nothing here is confirmed on a real washer yet: each control lists the writes
+ * worth trying, in order, built only from what the washer itself reports (its resources, its own
+ * lists of supported values). The accessory sends them one at a time and logs each answer.
+ */
+export const WASHER_CONTROLS = ['ctlPower', 'ctlRun', 'ctlStop', 'ctlKidsLock', 'ctlBuzzer', 'ctlSpin', 'ctlRinse', 'ctlWaterTemp', 'ctlWaterLevel', 'ctlWashTime', 'ctlCourse'];
+const STEPS = {
+  ctlSpin: ['spinLevel', 'supportedSpinLevel'], ctlRinse: ['rinseCycles', 'supportedRinseCycles'],
+  ctlWaterTemp: ['waterValve', 'supportedWaterValve'], ctlWaterLevel: ['waterHeight', 'supportedWaterHeight'],
+  ctlWashTime: ['washTime', 'supportedWashTime'],
+};
+const NOT_A_CHOICE = new Set(['none', 'nodisplay', '']);
+
+export function washerControls(resources = {}) {
+  const res = resources ?? {};
+  const out = {};
+  const power = res['/power/vs/0'];
+  if (power) {
+    out.ctlPower = {
+      kind: 'switch', reads: 'power', current: () => lower(res['/power/vs/0']?.[`${V}power`]) === 'on',
+      shown: () => String(res['/power/vs/0']?.[`${V}power`] ?? ''),
+      writes: (on) => [
+        { path: ['power', 'vs', '0'], body: { [`${V}power`]: on ? 'On' : 'Off' } },
+        ...(res['/power/0'] ? [{ path: ['power', '0'], body: { value: Boolean(on) } }] : []),
+      ],
+    };
+  }
+  const op = res['/operational/state/vs/0'];
+  if (op) {
+    const std = res['/operational/state/0'] ? ['operational', 'state', '0'] : null;
+    const state = () => String(res['/operational/state/vs/0']?.[`${V}state`] ?? '');
+    out.ctlRun = {
+      kind: 'switch', reads: 'state', current: () => ['run', 'running', 'active'].includes(lower(state())), shown: state,
+      writes: (on) => [
+        { path: ['operational', 'state', 'vs', '0'], body: { [`${V}state`]: on ? 'Run' : 'Pause' } },
+        ...(std ? [{ path: std, body: { currentMachineState: on ? 'Running' : 'Paused' } }] : []),
+      ],
+    };
+    out.ctlStop = {
+      kind: 'press', reads: 'state', shown: state,
+      writes: () => [
+        { path: ['operational', 'state', 'vs', '0'], body: { [`${V}state`]: 'Ready' } },
+        { path: ['operational', 'state', 'vs', '0'], body: { [`${V}state`]: 'Stop' } },
+        ...(std ? [{ path: std, body: { currentMachineState: 'Ready' } }] : []),
+      ],
+    };
+  }
+  if (res['/kidslock/vs/0'] || res['/kidslock/0']) {
+    out.ctlKidsLock = {
+      kind: 'lock', reads: 'kidsLock', current: () => kidsLock(res) === true,
+      shown: () => String(res['/kidslock/0']?.value ?? res['/kidslock/vs/0']?.[`${V}kidsLock`] ?? ''),
+      writes: (on) => [
+        ...(res['/kidslock/0'] ? [{ path: ['kidslock', '0'], body: { value: Boolean(on) } }] : []),
+        ...(res['/kidslock/vs/0'] ? [{ path: ['kidslock', 'vs', '0'], body: { [`${V}kidsLock`]: on ? 'On' : 'Off' } }] : []),
+      ],
+    };
+  }
+  const buzzer = res['/buzzersound/vs/0'];
+  if (buzzer && 'setBuzzerSound' in buzzer) {
+    out.ctlBuzzer = {
+      kind: 'switch', reads: 'setBuzzerSound', current: () => lower(res['/buzzersound/vs/0']?.setBuzzerSound) === 'on',
+      shown: () => String(res['/buzzersound/vs/0']?.setBuzzerSound ?? ''),
+      writes: (on) => [{ path: ['buzzersound', 'vs', '0'], body: { setBuzzerSound: on ? 'On' : 'Off' } }],
+    };
+  }
+  const washer = res['/washer/vs/0'];
+  for (const [id, [key, listKey]] of Object.entries(STEPS)) {
+    const list = (Array.isArray(washer?.[`${V}${listKey}`]) ? washer[`${V}${listKey}`] : []).map(String).filter((x) => !NOT_A_CHOICE.has(lower(x)));
+    if (washer && `${V}${key}` in washer && list.length > 1) {
+      const now = () => String(res['/washer/vs/0']?.[`${V}${key}`] ?? '');
+      out[id] = {
+        kind: 'press', reads: key, shown: now,
+        // The next value in the washer's own list, back to the first after the last.
+        writes: () => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: list[(list.indexOf(now()) + 1) % list.length] } }],
+      };
+    }
+  }
+  const mode = res['/st/washercourse/vs/0']?.[`${V}st.washerMode`];
+  const m = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(mode ?? ''));
+  if (m) {
+    out.ctlCourse = {
+      kind: 'press', reads: 'washerMode', shown: () => String(res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? ''),
+      // The washer lists no courses locally: the next course number is tried, and its answer says whether it exists.
+      writes: () => {
+        const cur = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? '')) ?? m;
+        const next = ((parseInt(cur[2], 16) + 1) % 256).toString(16).toUpperCase().padStart(2, '0');
+        return [{ path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${cur[1]}${next}` } }];
+      },
+    };
+  }
+  return out;
+}

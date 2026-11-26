@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0
+
+A control trial for washers, off by default. Your settings, pairings and accessories are kept as they are.
+
+- **New, trial: washer controls you can tick one by one.** Power, run (start, resume, pause), stop, child lock, sound, and a "next value" press for spin level, rinse count, water temperature, water level, wash time and course. Each ticked control appears in Apple Home as a switch (the child lock as a settable lock).
+- **Not yet confirmed on any washer.** The commands are built from what the washer itself reports; none has been sent to a real one before this version. The trial exists to find out what a washer accepts over the local network.
+- **The log shows each attempt**: what was sent, what the washer answered, and what it reported before and after, in lines that start with `control trial`.
+- Nothing is sent unless a control is ticked and its switch is used. Models differ: untick a control that does nothing on yours. The run switch can start a cycle.
+
+**بالعربية**
+
+تحكم تجريبي بالغسالات، مطفأ افتراضيًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **جديد وتجريبي: تحكمات للغسالة تختارها واحدًا واحدًا.** التشغيل والإطفاء، الدورة (بدء وإكمال وإيقاف مؤقت)، الإيقاف، قفل الأطفال، الصوت، وضغطة «القيمة التالية» لقوة العصر وعدد الشطف وحرارة الماء ومستوى الماء ومدة الغسل والبرنامج. كل تحكم تختاره يظهر في Apple Home كمفتاح (وقفل الأطفال كقفل قابل للضبط).
+- **لم يتأكد بعد على أي غسالة.** الأوامر مبنية مما تعلنه الغسالة نفسها، ولم يُرسل أي منها إلى غسالة حقيقية قبل هذا الإصدار. الغرض معرفة ما تقبله الغسالة عبر الشبكة المحلية.
+- **السجل يعرض كل محاولة**: ما أُرسل، وبماذا ردّت الغسالة، وما أعلنته قبل وبعد، في سطور تبدأ بـ `control trial`.
+- لا يُرسل شيء إلا إذا اخترت التحكم واستعملت مفتاحه. الموديلات تختلف: أزل علامة التحكم الذي لا يعمل معك. مفتاح الدورة قد يبدأ دورة غسيل.
+
 ## 1.8.12
 
 An air conditioner no longer beeps twice for one command. Your settings, pairings and accessories are kept as they are.

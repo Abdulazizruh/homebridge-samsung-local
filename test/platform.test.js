@@ -593,6 +593,42 @@ test('washer extras: progress, child lock and alert appear only when asked for, 
   await waitFor(() => progress.value === 68 && lock.value === C.LockCurrentState.SECURED && alert.value === 1);
 });
 
+test('washer control trial: only ticked controls appear; a press sends the next value the washer lists, and a refusal is recorded', async (t) => {
+  const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
+  WasherAccessory.controlWaitMs = 200;
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true } }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler, link } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  // Not ticked: no switch, so nothing can be sent by mistake.
+  assert.equal(handler.services.has('ctlRun'), false);
+  assert.equal(handler.services.has('ctlBuzzer'), false);
+  assert.equal(handler.services.get('ctlSpin').getCharacteristic(C.ConfiguredName).value, 'Washer Spin Next');
+  const writes = async () => (await platform.helper.request('sim', { key: W, action: 'writes' })).writes;
+  const before = await writes();
+  await handler.services.get('ctlSpin').getCharacteristic(C.On).handleSetRequest(true);
+  await handler.controlJob;
+  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'High'); // Medium -> the next in its own list
+  assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'Medium', after: 'High' });
+  assert.equal(await writes() - before, 1);
+  assert.equal(handler.services.get('ctlSpin').getCharacteristic(C.On).value, false); // a press springs back
+  // Power: the switch follows what the washer reports.
+  await handler.services.get('ctlPower').getCharacteristic(C.On).handleSetRequest(true);
+  await handler.controlJob;
+  await waitFor(() => handler.services.get('ctlPower').getCharacteristic(C.On).value === true);
+  // A washer that refuses: every candidate is tried once, and the trial says "not accepted".
+  await platform.helper.request('sim', { key: W, action: 'refuse', value: true });
+  const mid = await writes();
+  await handler.services.get('kidsLock').getCharacteristic(C.LockTargetState).handleSetRequest(C.LockTargetState.SECURED);
+  await handler.controlJob;
+  assert.equal(handler.context.controlTrials.ctlKidsLock.accepted, false);
+  assert.equal(await writes() - mid, 2); // the plain lock, then the vendor word
+  assert.equal(handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value, C.LockCurrentState.UNSECURED);
+});
+
 test('washer: extras stay away by default, and the not-used list names only what is not read', async () => {
   const fx = fixture('washer_topload');
   const described = describeDevice(fx.identity, fx.resources);
