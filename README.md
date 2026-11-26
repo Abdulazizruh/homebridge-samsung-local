@@ -322,6 +322,10 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 
 <p><img src="assets/screenshots/washer-control.png" alt="Washer control trial in the plugin settings: fourteen controls, all unticked, with the cautions under them" width="320"></p>
 
+In Apple Home, on a real WA80F16B9CYL top loader: each setting is a group, and a group opens on one switch per value.
+
+<p><img src="assets/screenshots/washer-home-groups.png" alt="Apple Home with a washer: the washer tile, and one tile each for Course, Options, Rinse, Spin, Wash Time, Water Level and Water Temp" width="260"> <img src="assets/screenshots/washer-home-group-open.png" alt="The Wash Time group opened in Apple Home: one switch per value, with 18 switched on" width="260"></p>
+
 ### TV options
 
 The TV's options are three ticks that do not exclude one another: tick all of them, some or none. They sit in two groups.
