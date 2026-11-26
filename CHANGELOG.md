@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.7
+
+Trial version on the "beta" channel. Two additions to the washer control trial. Your settings, pairings and accessories are kept as they are.
+
+- **The log names each course chosen at the washer**: `course selected: 08`. Until now the course number was written only when a cycle started. With it, the names on a washer's panel can be matched to its numbers, one press at a time.
+- **Trial: the water level group also carries a slider** beside its switches. Both follow one value: a switch moves the slider, and the slider lights the matching switch. Only water level has it, because its position reads as the washer's own number (level 6 of 10 is 60%). What Apple Home prints on the group's tile with a slider in it is not yet known.
+- Seen on a real top loader: "Course Next" asked for course 02 and the washer refused it. Its courses are not numbered in a row (its tub clean is 82), so 02 may simply not exist there; whether a course can be changed from outside is still open.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». إضافتان للتحكم التجريبي بالغسالة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **السجل يذكر كل برنامج يُختار من الغسالة**: `course selected: 08`. كان رقم البرنامج يُكتب عند بدء الدورة فقط. بهذا السطر تُربط أسماء البرامج في لوحة الغسالة بأرقامها، ضغطة ضغطة.
+- **تجربة: مجموعة مستوى الماء فيها شريط منزلق** بجانب مفاتيحها. الاثنان يتبعان قيمة واحدة: المفتاح يحرّك الشريط، والشريط يضيء المفتاح المطابق. مستوى الماء وحده يأخذه، لأن موضعه يُقرأ كرقم الغسالة (المستوى 6 من 10 هو 60%). لم يُعرف بعد ماذا يكتب Apple Home على بلاطة المجموعة حين يكون فيها شريط.
+- شوهد على غسالة حقيقية: «Course Next» طلب البرنامج 02 فرفضته الغسالة. برامجها ليست مرقّمة بالتتابع (تنظيف الحوض فيها 82)، فقد يكون 02 غير موجود أصلًا، وما زال مفتوحًا هل يمكن تغيير البرنامج من الخارج.
+
 ## 1.9.0-beta.6
 
 Trial version on the "beta" channel. Corrections to the groups of switches after 1.9.0-beta.5 was tried on a real washer. Your settings, pairings and accessories are kept as they are.

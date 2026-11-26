@@ -727,6 +727,30 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   assert.equal(second.platform.api.unregistered.length, 0);
   assert.equal(second.platform.devices.get(W).handler.services.get('ctlRinse:1').getCharacteristic(second.platform.api.hap.Characteristic.On).value, true);
   await second.platform.stop();
+  // Water level: its group also carries a slider; the switches and the slider follow one value.
+  const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
+  WasherAccessory.sliderSettleMs = 20;
+  WasherAccessory.controlWaitMs = 200;
+  const fourth = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true, ctlWaterLevel: true }), cached });
+  await online(fourth.platform, W);
+  const C4 = fourth.platform.api.hap.Characteristic;
+  const h4 = fourth.platform.devices.get(W).handler;
+  const slider = h4.services.get('ctlWaterLevel/slider');
+  assert.equal(slider.UUID, fourth.platform.api.hap.Service.Fan.UUID);
+  assert.equal(slider.getCharacteristic(C4.ConfiguredName).value, 'Water Level');
+  assert.equal(slider.getCharacteristic(C4.RotationSpeed).props.minStep, 10);
+  assert.equal(h4.services.has('ctlRinse/slider'), false);
+  await slider.getCharacteristic(C4.RotationSpeed).handleSetRequest(40);
+  await slider.getCharacteristic(C4.RotationSpeed).handleSetRequest(60);
+  await new Promise((r) => setTimeout(r, 60));
+  await h4.controlJob;
+  assert.equal(fourth.platform.devices.get(W).link.resources['/washer/vs/0'][`${V}waterHeight`], '6');
+  await waitFor(() => h4.services.get('ctlWaterLevel:6').getCharacteristic(C4.On).value === true && slider.getCharacteristic(C4.RotationSpeed).value === 60);
+  await new Promise((r) => setTimeout(r, 1100));
+  await h4.services.get('ctlWaterLevel:3').getCharacteristic(C4.On).handleSetRequest(true);
+  await h4.controlJob;
+  await waitFor(() => slider.getCharacteristic(C4.RotationSpeed).value === 30 && h4.services.get('ctlWaterLevel:6').getCharacteristic(C4.On).value === false);
+  await fourth.platform.stop();
   // Unticked: the group leaves, the washer stays.
   const third = await boot({ storage: first.storage, devices, config: entry({}), cached });
   t.after(() => third.platform.stop());

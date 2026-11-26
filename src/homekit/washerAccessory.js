@@ -13,6 +13,11 @@ const LABELS = {
 /** A choice gets one switch per value, named with this word and the washer's own name for the value. */
 const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time' };
 /** "ExtraHigh" reads as "Extra High" on a tile; what is sent stays the washer's own word. */
+/**
+ * Trial: these groups also carry a slider beside their switches. Only where the position reads as the
+ * washer's own number (water level 6 of 10 is 60%), so the tile can show the value from outside.
+ */
+const SLIDER_TOO = new Set(['ctlWaterLevel']);
 const spaced = (value) => String(value).replace(/([a-z])([A-Z])/g, '$1 $2');
 const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];
@@ -37,6 +42,8 @@ export const WASHER_FEATURES = {
 export class WasherAccessory {
   /** How long a control trial waits for the washer's next report: both engines read it 4 s after a command. */
   static controlWaitMs = 9000;
+  /** How long a slider must rest before its value is chosen. */
+  static sliderSettleMs = 700;
   /** A reading that arrives this long after a command was taken after it. */
   static freshAfterMs = 3800;
   /** How soon a "next" or "stop" press shows off again. */
@@ -90,6 +97,9 @@ export class WasherAccessory {
   }
 
   #label(key) {
+    if (String(key).endsWith('/slider')) {
+      return CHOICE_WORDS[String(key).slice(0, -'/slider'.length)];
+    }
     const [id, value] = String(key).split(':');
     if (value !== undefined && CHOICE_WORDS[id]) {
       return `${CHOICE_WORDS[id]} ${spaced(value)}`;
@@ -220,8 +230,45 @@ export class WasherAccessory {
           this.services.set(key, sw);
           sw.getCharacteristic(Characteristic.On).onSet((on) => { this.#choose(id, value, Boolean(on)); });
         }
+        const sliderKey = `${id}/slider`;
+        if (SLIDER_TOO.has(id) && choice.length > 2) {
+          const fan = home.getServiceById(Service.Fan, sliderKey) ?? home.addService(Service.Fan, this.#label(sliderKey), sliderKey);
+          this.#applyName(sliderKey, fan, this.#label(sliderKey));
+          this.services.set(sliderKey, fan);
+          const steps = choice.length - 1;
+          const settle = (index) => {
+            // Dragging sends many values: only where the slider comes to rest is chosen.
+            clearTimeout(this.sliderTimers?.[id]);
+            (this.sliderTimers ??= {})[id] = setTimeout(() => { this.#choose(id, choice[Math.min(Math.max(index, 0), steps)], true); }, WasherAccessory.sliderSettleMs);
+            this.sliderTimers[id].unref?.();
+          };
+          fan.getCharacteristic(Characteristic.RotationSpeed).setProps({ minValue: 0, maxValue: 100, minStep: 100 / steps })
+            .onSet((value) => { settle(Math.round((Number(value) / 100) * steps)); });
+          fan.getCharacteristic(Characteristic.On).onSet((on) => {
+            if (!on) {
+              settle(0); // off is the lowest value; on alone changes nothing
+            } else {
+              setTimeout(() => this.#push(), 300).unref?.();
+            }
+          });
+        } else {
+          for (const acc of new Set([this.accessory, home])) {
+            const old = acc.getServiceById(Service.Fan, sliderKey);
+            if (old) {
+              acc.removeService(old);
+            }
+          }
+          this.services.delete(sliderKey);
+        }
         this.groups?.publish(id);
         continue;
+      }
+      {
+        const old = this.accessory.getServiceById(Service.Fan, `${id}/slider`);
+        if (old) {
+          this.accessory.removeService(old);
+        }
+        this.services.delete(`${id}/slider`);
       }
       this.groups?.drop(id);
       if (this.features[id] && controls[id]) {
@@ -488,6 +535,10 @@ export class WasherAccessory {
       const course = st.course ? (st.course.drumClean ? 'drum clean' : `course ${st.course.code}`) : 'a course';
       this.log.info(`[${this.displayName}] cycle started: ${course}.`);
     }
+    // A course chosen while the washer waits: its number, so the names on the panel can be matched to numbers.
+    if (!(st.inCycle && !was.inCycle) && st.course && was.course && st.course.code !== was.course.code) {
+      this.log.info(`[${this.displayName}] course selected: ${st.course.drumClean ? `${st.course.code} (drum clean)` : st.course.code}.`);
+    }
     if (st.inCycle && st.stage && st.stage !== was.stage) {
       this.log.info(`[${this.displayName}] stage: ${STAGE_WORDS[st.stage] ?? st.stage}.`);
     }
@@ -627,6 +678,12 @@ export class WasherAccessory {
         const chosen = this.#chosen(id);
         for (const value of controls[id].values) {
           this.services.get(`${id}:${value}`)?.updateCharacteristic(Characteristic.On, value === chosen);
+        }
+        const slider = this.services.get(`${id}/slider`);
+        if (slider) {
+          const index = Math.max(0, controls[id].values.indexOf(chosen));
+          slider.updateCharacteristic(Characteristic.On, index > 0);
+          slider.updateCharacteristic(Characteristic.RotationSpeed, (index / (controls[id].values.length - 1)) * 100);
         }
         continue;
       }
