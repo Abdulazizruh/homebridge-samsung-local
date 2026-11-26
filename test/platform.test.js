@@ -606,6 +606,7 @@ test('washer control trial: only ticked controls appear; a press sends the next 
   // Not ticked: no switch, so nothing can be sent by mistake.
   assert.equal(handler.services.has('ctlRun'), false);
   assert.equal(handler.services.has('ctlBuzzer'), false);
+  assert.equal(handler.services.has('unload'), false);
   assert.equal(handler.services.get('ctlSpin').getCharacteristic(C.ConfiguredName).value, 'Washer Spin Next');
   const writes = async () => (await platform.helper.request('sim', { key: W, action: 'writes' })).writes;
   const before = await writes();
@@ -819,6 +820,33 @@ test('washer that keeps saying "Run" at the stage "Finish": the notice comes the
   await state({ [`${V}state`]: 'Ready', [`${V}progress`]: 'None' });
   await new Promise((r) => setTimeout(r, 150));
   assert.equal(handler.finished, true);
+});
+
+test('washer unload reminder: off unless asked for; it repeats while the washing stays inside and stops when the washer is switched off', async (t) => {
+  const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
+  const kept = [WasherAccessory.unloadEveryMs, WasherAccessory.unloadHoldMs];
+  [WasherAccessory.unloadEveryMs, WasherAccessory.unloadHoldMs] = [300, 100];
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
+    config: { devices: [{ host: '10.0.0.9', id: W, name: 'Washer', features: { unloadSensor: true } }] } });
+  t.after(() => { [WasherAccessory.unloadEveryMs, WasherAccessory.unloadHoldMs] = kept; return platform.stop(); });
+  await online(platform, W);
+  const { handler } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const unload = handler.services.get('unload').getCharacteristic(C.OccupancyDetected);
+  assert.equal(handler.services.get('unload').getCharacteristic(C.ConfiguredName).value, 'Washer Unload');
+  const state = (body) => platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body });
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Spin', [`${V}remainingTime`]: '00:05:00' });
+  await new Promise((r) => setTimeout(r, 450));
+  assert.equal(unload.value, 0); // nothing while a cycle runs
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Finish', [`${V}remainingTime`]: '00:00:00' });
+  await waitFor(() => unload.value === 1, 2000);
+  await waitFor(() => unload.value === 0, 2000);
+  await waitFor(() => unload.value === 1, 2000); // and again
+  await state({ [`${V}state`]: 'Ready', [`${V}progress`]: 'None' });
+  await waitFor(() => unload.value === 0, 2000);
+  await new Promise((r) => setTimeout(r, 700));
+  assert.equal(unload.value, 0); // switched off: no more reminders
 });
 
 test('washer switched off in the middle of a cycle: stopped, not finished, no notice; on again, a new cycle', async (t) => {

@@ -174,6 +174,11 @@
                   "type": "boolean",
                   "default": true
                 },
+                "unloadSensor": {
+                  "title": "Laundry: unload reminder, every half hour while the washing stays inside",
+                  "type": "boolean",
+                  "default": false
+                },
                 "stageSensors": {
                   "title": "Laundry (trial): a sensor for each stage the washer names (washing, rinsing, spinning)",
                   "type": "boolean",

@@ -5,7 +5,7 @@ import { markPrimary } from './primary.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = {
-  cycle: '', finished: 'Finished', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
+  cycle: '', finished: 'Finished', unload: 'Unload', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
   ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin Next', ctlRinse: 'Rinse Next',
   ctlWaterTemp: 'Water Temp Next', ctlWaterLevel: 'Water Level Next', ctlWashTime: 'Wash Time Next', ctlCourse: 'Course Next',
@@ -17,7 +17,7 @@ export const WASHER_FEATURES = {
   // Trials, on until the owner switches them off: a sensor for each stage the washer names, and drum clean.
   stageSensors: true, drumCleanSensor: true,
   // Extras, off until the owner asks for them.
-  progressTile: false, kidsLockSensor: false, alertSensor: false,
+  progressTile: false, kidsLockSensor: false, alertSensor: false, unloadSensor: false,
   // Control trial, off until the owner ticks each one: what a washer accepts differs by model.
   ...Object.fromEntries(WASHER_CONTROLS.map((id) => [id, false])),
 };
@@ -33,6 +33,10 @@ export const WASHER_FEATURES = {
 export class WasherAccessory {
   /** How long a control trial waits for the washer's next report: both engines read it 4 s after a command. */
   static controlWaitMs = 9000;
+
+  /** "Unload" reminder: how often it comes while the washing stays inside, and how long each one shows. */
+  static unloadEveryMs = 30 * 60 * 1000;
+  static unloadHoldMs = 5 * 60 * 1000;
 
   constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'valve', finishedHoldMs = FINISHED_HOLD_MS }) {
     // 'valve':  a valve tile with the countdown; a tap is undone at once
@@ -136,6 +140,12 @@ export class WasherAccessory {
       this.#service('finished', Service.OccupancySensor, 'finished');
     } else {
       drop(Service.OccupancySensor, 'finished');
+    }
+    if (this.features.unloadSensor) {
+      this.#service('unload', Service.OccupancySensor, 'unload');
+    } else {
+      drop(Service.OccupancySensor, 'unload');
+      this.services.delete('unload');
     }
     const supports = this.model?.supports ?? {};
     // A percentage is the only number the Home app prints on a tile, so the
@@ -251,6 +261,7 @@ export class WasherAccessory {
         this.#markFinished();
       }
     }
+    this.#unloadWatch(st, switchedOff);
     this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished, poweredOn: st.inCycle ? (seen?.poweredOn || !st.poweredOff) : false };
     this.#push();
   }
@@ -309,6 +320,50 @@ export class WasherAccessory {
     if (st.inCycle && st.stage && st.stage !== was.stage) {
       this.log.info(`[${this.displayName}] stage: ${STAGE_WORDS[st.stage] ?? st.stage}.`);
     }
+  }
+
+  /**
+   * "Unload" reminder: while the washer stays at the end of a cycle (not switched off, no new
+   * cycle), the sensor turns on for a while every half hour, counted from the end of the cycle.
+   * The clock is kept with the accessory, so a restart of the bridge does not move it.
+   */
+  #unloadWatch(st, switchedOff) {
+    // Switched off after the end: on when the cycle ended, off now. A change, not a reading alone,
+    // since some washers report "off" all along.
+    const offSince = Boolean(this.context.washerEndedOn && st.poweredOff);
+    const waiting = Boolean(this.features.unloadSensor && st.finished && !offSince && !switchedOff);
+    if (!waiting) {
+      clearTimeout(this.unloadTimer); clearTimeout(this.unloadHold);
+      this.unloadTimer = null; this.unloading = false;
+      if (!st.finished) {
+        delete this.context.washerEndedAt;
+        delete this.context.washerEndedOn;
+      }
+      return;
+    }
+    if (this.context.washerEndedAt === undefined) {
+      this.context.washerEndedAt = Date.now();
+      this.context.washerEndedOn = !st.poweredOff;
+    }
+    if (this.unloadTimer) {
+      return;
+    }
+    const every = WasherAccessory.unloadEveryMs;
+    const arm = () => {
+      const since = Math.max(0, Date.now() - this.context.washerEndedAt);
+      this.unloadTimer = setTimeout(() => {
+        this.unloadTimer = null;
+        this.unloading = true;
+        this.log.info(`[${this.displayName}] the washing is still inside ${Math.round((Date.now() - this.context.washerEndedAt) / 60000)} min after the cycle ended.`);
+        this.#push();
+        clearTimeout(this.unloadHold);
+        this.unloadHold = setTimeout(() => { this.unloading = false; this.#push(); }, Math.min(WasherAccessory.unloadHoldMs, every / 2));
+        this.unloadHold.unref?.();
+        arm();
+      }, every - (since % every));
+      this.unloadTimer.unref?.();
+    };
+    arm();
   }
 
   #markFinished() {
@@ -380,6 +435,7 @@ export class WasherAccessory {
       }
     }
     this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected, this.finished ? 1 : 0);
+    this.services.get('unload')?.updateCharacteristic(Characteristic.OccupancyDetected, this.unloading ? 1 : 0);
     this.services.get('progress')?.updateCharacteristic(Characteristic.CurrentRelativeHumidity, st.percent ?? 0);
     for (const stage of WASHER_STAGES) {
       this.services.get(stage)?.updateCharacteristic(Characteristic.OccupancyDetected, st.inCycle && st.stage === stage ? 1 : 0);

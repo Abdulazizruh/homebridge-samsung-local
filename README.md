@@ -45,7 +45,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | Appliance | Level | Notes |
 |---|---|---|
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
-| Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert. The cycle is started at the appliance; nothing is sent to it unless you tick a [control trial](#washer-control-trial), which is off by default and not yet confirmed on any washer |
+| Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert, and an unload reminder every half hour while the washing stays inside. The cycle is started at the appliance; nothing is sent to it unless you tick a [control trial](#washer-control-trial), which is off by default and not yet confirmed on any washer |
 | Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
 | Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
@@ -289,7 +289,7 @@ Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter,
 
 ### Washer options
 
-Cycle tile with time remaining, cycle finished sensor, progress, child lock status, fault alert, and how the cycle tile behaves when tapped.
+Cycle tile with time remaining, cycle finished sensor, progress, child lock status, fault alert, unload reminder, and how the cycle tile behaves when tapped.
 
 <p><img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings" width="320"></p>
 
