@@ -35,6 +35,8 @@ export class WasherAccessory {
   static controlWaitMs = 9000;
   /** How soon a "next" or "stop" press shows off again. */
   static pressBackMs = 800;
+  /** Writes for the same control closer together than this count as one use. */
+  static tapGapMs = 1000;
   /** How long a slider must rest before its value is sent. */
   static levelSettleMs = 700;
 
@@ -50,6 +52,7 @@ export class WasherAccessory {
     this.cycleStyle = CYCLE_STYLES.includes(cycleStyle) ? cycleStyle : 'valve';
     this.features = { ...WASHER_FEATURES, ...features };
     this.api = api;
+    link.setMaxListeners?.(50); // several control trials may wait for the same report
     this.hap = api.hap;
     this.log = log;
     this.accessory = accessory;
@@ -165,7 +168,7 @@ export class WasherAccessory {
       const lock = this.#service('kidsLock', Service.LockMechanism, 'kidsLock');
       lock.getCharacteristic(Characteristic.LockTargetState).onSet((value) => {
         if (this.features.ctlKidsLock && controls.ctlKidsLock) {
-          this.#control('ctlKidsLock', value === Characteristic.LockTargetState.SECURED);
+          this.#tap('ctlKidsLock', value === Characteristic.LockTargetState.SECURED, 'switch');
         } else {
           // Read-only: the lock is set on the appliance. Show the truth again.
           setTimeout(() => this.#push(), 300).unref?.();
@@ -200,7 +203,7 @@ export class WasherAccessory {
       } else if (this.features[id] && controls[id]) {
         drop(Service.Fan, id);
         const sw = this.#service(id, Service.Switch, id);
-        sw.getCharacteristic(Characteristic.On).onSet((value) => { this.#control(id, Boolean(value)); });
+        sw.getCharacteristic(Characteristic.On).onSet((value) => { this.#tap(id, Boolean(value), controls[id].kind); });
       } else {
         drop(Service.Switch, id);
         drop(Service.Fan, id);
@@ -291,6 +294,25 @@ export class WasherAccessory {
     this.#unloadWatch(st, switchedOff);
     this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished, poweredOn: st.inCycle ? (seen?.poweredOn || !st.poweredOff) : false };
     this.#push();
+  }
+
+  /**
+   * A switch was used. Seen on a real washer: one use of a tile in Apple Home arrived as a dozen
+   * writes within a second, and each went to the washer. So a press counts once a second, its "off"
+   * is never a command, and a switch asked for the value it is already being set to is left alone.
+   */
+  #tap(id, value, kind) {
+    const last = (this.taps ??= {})[id];
+    const now = Date.now();
+    if (kind === 'press') {
+      if (!value || (last && now - last.at < WasherAccessory.tapGapMs)) {
+        return;
+      }
+    } else if (last && last.value === value && (last.busy || now - last.at < WasherAccessory.tapGapMs)) {
+      return;
+    }
+    const mine = (this.taps[id] = { at: now, value, busy: true });
+    this.#control(id, value).finally(() => { mine.busy = false; });
   }
 
   /** Where a level stands in the washer's list: what was just asked for, else what it reports. */

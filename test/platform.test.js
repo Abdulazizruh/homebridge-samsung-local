@@ -598,7 +598,7 @@ test('washer control trial: only ticked controls appear; a level is a slider tha
   WasherAccessory.controlWaitMs = 200;
   const W = fixture('washer_topload').identity.di;
   const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
-    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true } }] } });
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true, ctlCourse: true } }] } });
   t.after(() => platform.stop());
   await online(platform, W);
   const { handler, link } = platform.devices.get(W);
@@ -638,6 +638,24 @@ test('washer control trial: only ticked controls appear; a level is a slider tha
   await handler.services.get('ctlPower').getCharacteristic(C.On).handleSetRequest(true);
   await handler.controlJob;
   await waitFor(() => handler.services.get('ctlPower').getCharacteristic(C.On).value === true);
+  // Seen on a real washer: one use of a tile arrived as a dozen writes within a second. One command goes out.
+  const burstFrom = await writes();
+  const power = handler.services.get('ctlPower').getCharacteristic(C.On);
+  for (let i = 0; i < 12; i += 1) {
+    await power.handleSetRequest(false);
+  }
+  await handler.controlJob;
+  assert.equal(await writes() - burstFrom, 1);
+  // A press: on and off in a flurry is one press, and its "off" is never a command.
+  const course = handler.services.get('ctlCourse').getCharacteristic(C.On);
+  const courseFrom = await writes();
+  for (let i = 0; i < 6; i += 1) {
+    await course.handleSetRequest(true);
+    await course.handleSetRequest(false);
+  }
+  await handler.controlJob;
+  assert.equal(await writes() - courseFrom, 1);
+  assert.equal(link.resources['/st/washercourse/vs/0'][`${V}st.washerMode`], 'Table_02_Course_02');
   // A washer that refuses: every candidate is tried once, and the trial says "not accepted".
   await platform.helper.request('sim', { key: W, action: 'refuse', value: true });
   const mid = await writes();
