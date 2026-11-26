@@ -39,8 +39,13 @@ export function kidsLock(resources) {
  * What an alarm code means, only where it was confirmed on a real appliance. Any other code is
  * shown as the appliance sends it, without a guess.
  * DC: confirmed by the owner of a WA80F top-loader, who opened the lid during a drum clean.
+ * CL: seen on the same washer, once, when its child lock was switched on.
  */
-export const ALARM_MEANINGS = { ErrorCode_DC: 'the lid was opened during a cycle' };
+export const ALARM_MEANINGS = {
+  ErrorCode_DC: 'the lid was opened during a cycle',
+  // CL: the same top loader reported it at the moment its child lock was switched on from the plugin.
+  ErrorCode_CL: 'the child lock is on',
+};
 export const alarmText = (code) => (ALARM_MEANINGS[code] ? `${code} (${ALARM_MEANINGS[code]})` : code);
 
 /** Active alarm codes; rows ending in _OFF are placeholders. */

@@ -312,7 +312,18 @@ export class WasherAccessory {
       return;
     }
     const mine = (this.taps[id] = { at: now, value, busy: true });
-    this.#control(id, value).finally(() => { mine.busy = false; });
+    if (kind !== 'press') {
+      // The tile stays where it was put until the washer reports: an older reading that arrives
+      // in between must not flip it back for a moment.
+      (this.switchHold ??= {})[id] = { value, until: now + WasherAccessory.controlWaitMs + 6000 };
+    }
+    this.#control(id, value).finally(() => {
+      mine.busy = false;
+      if (this.switchHold?.[id]?.value === value && this.taps[id] === mine) {
+        delete this.switchHold[id];
+        this.#push();
+      }
+    });
   }
 
   /** Where a level stands in the washer's list: what was just asked for, else what it reports. */
@@ -587,14 +598,19 @@ export class WasherAccessory {
         sw.updateCharacteristic(Characteristic.RotationSpeed, (index / (controls[id].values.length - 1)) * 100);
       } else if (sw) {
         // A switch shows what the washer reports; a "next" or "stop" press springs back.
-        sw.updateCharacteristic(Characteristic.On, controls[id]?.kind === 'switch' ? Boolean(controls[id].current()) : false);
+        const held = this.switchHold?.[id];
+        const on = held && held.until > Date.now() ? held.value : Boolean(controls[id]?.current?.());
+        sw.updateCharacteristic(Characteristic.On, controls[id]?.kind === 'switch' ? on : false);
       }
     }
     const lock = this.services.get('kidsLock');
     if (lock) {
       const value = st.kidsLock ? Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;
+      const held = this.switchHold?.ctlKidsLock;
       lock.updateCharacteristic(Characteristic.LockCurrentState, value);
-      lock.updateCharacteristic(Characteristic.LockTargetState, value);
+      // While a lock command is under way the tile keeps saying "locking" or "unlocking".
+      lock.updateCharacteristic(Characteristic.LockTargetState, held && held.until > Date.now()
+        ? (held.value ? Characteristic.LockTargetState.SECURED : Characteristic.LockTargetState.UNSECURED) : value);
     }
     const alarms = st.alarms ?? [];
     if (alarms.length && !this.alarmed) {
