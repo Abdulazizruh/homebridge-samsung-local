@@ -283,7 +283,9 @@ export function washerControls(resources = {}) {
       out[id] = {
         kind: 'press', reads: key, shown: now,
         // The next value in the washer's own list, back to the first after the last.
-        writes: () => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: list[(list.indexOf(now()) + 1) % list.length] } }],
+        // `from`: the value a press just asked for and the washer has not reported yet, so that
+        // quick presses walk on through the list and do not ask for the same value twice.
+        writes: (_on, from) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: list[(list.indexOf(String(from ?? now())) + 1) % list.length] } }],
       };
     }
   }
@@ -293,8 +295,8 @@ export function washerControls(resources = {}) {
     out.ctlCourse = {
       kind: 'press', reads: 'washerMode', shown: () => String(res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? ''),
       // The washer lists no courses locally: the next course number is tried, and its answer says whether it exists.
-      writes: () => {
-        const cur = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? '')) ?? m;
+      writes: (_on, from) => {
+        const cur = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(from ?? res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? '')) ?? m;
         const next = ((parseInt(cur[2], 16) + 1) % 256).toString(16).toUpperCase().padStart(2, '0');
         return [{ path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${cur[1]}${next}` } }];
       },

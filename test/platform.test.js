@@ -616,6 +616,17 @@ test('washer control trial: only ticked controls appear; a press sends the next 
   assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'Medium', after: 'High' });
   assert.equal(await writes() - before, 1);
   assert.equal(handler.services.get('ctlSpin').getCharacteristic(C.On).value, false); // a press springs back
+  // Two quick presses: the switch is off again well before the washer reports, and the second
+  // press asks for the value after the first one's, not the same value twice.
+  WasherAccessory.pressBackMs = 20;
+  const spin = handler.services.get('ctlSpin').getCharacteristic(C.On);
+  await spin.handleSetRequest(true);
+  const first = handler.controlJob;
+  await spin.handleSetRequest(true);
+  await new Promise((r) => setTimeout(r, 60));
+  assert.equal(spin.value, false);
+  await Promise.all([first, handler.controlJob]);
+  await waitFor(() => link.resources['/washer/vs/0'][`${V}spinLevel`] === 'RinseHold'); // High -> ExtraHigh -> back to the first
   // Power: the switch follows what the washer reports.
   await handler.services.get('ctlPower').getCharacteristic(C.On).handleSetRequest(true);
   await handler.controlJob;

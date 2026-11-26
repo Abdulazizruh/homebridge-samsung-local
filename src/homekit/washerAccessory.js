@@ -33,6 +33,8 @@ export const WASHER_FEATURES = {
 export class WasherAccessory {
   /** How long a control trial waits for the washer's next report: both engines read it 4 s after a command. */
   static controlWaitMs = 9000;
+  /** How soon a "next" or "stop" press shows off again. */
+  static pressBackMs = 800;
 
   /** "Unload" reminder: how often it comes while the washing stays inside, and how long each one shows. */
   static unloadEveryMs = 30 * 60 * 1000;
@@ -278,15 +280,34 @@ export class WasherAccessory {
     const label = LABELS[id] ?? 'Kids Lock';
     const say = (text) => this.log.info(`[${this.displayName}] control trial "${label}": ${text}`);
     const words = (w) => `${Object.entries(w.body).map(([k, v]) => `${k.replace('x.com.samsung.da.', '')}=${v}`).join(', ')} to "${w.path.join('/')}"`;
+    const kind = washerControls(this.link.resources ?? {})[id]?.kind;
+    if (kind === 'press') {
+      // A press springs back at once; the command goes on behind it.
+      const back = setTimeout(() => {
+        this.services.get(id)?.updateCharacteristic(this.api.hap.Characteristic.On, false);
+      }, WasherAccessory.pressBackMs);
+      back.unref?.();
+    }
+    // What to send is settled now, at the press: a second quick press then steps on from the value
+    // the first one asked for, not from a report the washer has not made yet.
+    const asked = (this.asked ??= {});
+    const control = washerControls(this.link.resources ?? {})[id];
+    const writes = control ? control.writes(value, asked[id]?.value) : [];
+    const mine = (asked[id]?.n ?? 0) + 1;
+    if (kind === 'press' && writes.length > 0) {
+      asked[id] = { n: mine, value: Object.values(writes[0].body)[0] };
+    }
     const job = (async () => {
-      const control = washerControls(this.link.resources ?? {})[id];
       if (!control || !this.link.online) {
         say('not sent: the washer is not reachable.');
+        if (asked[id]?.n === mine) {
+          delete asked[id];
+        }
         return;
       }
       const before = control.shown();
       let accepted = false;
-      for (const write of control.writes(value)) {
+      for (const write of writes) {
         try {
           await this.link.send([write]);
           say(`sent ${words(write)}: accepted.`);
@@ -304,6 +325,9 @@ export class WasherAccessory {
         function done() { clearTimeout(timer); link.off('update', done); resolve(); }
         link.once('update', done);
       });
+      if (asked[id]?.n === mine) {
+        delete asked[id]; // no newer press: the washer's own report is the base again
+      }
       const after = washerControls(this.link.resources ?? {})[id]?.shown() ?? '';
       say(`the washer reported ${control.reads}=${before} before and ${control.reads}=${after} now.`);
       (this.context.controlTrials ??= {})[id] = { at: Date.now(), accepted, before, after };

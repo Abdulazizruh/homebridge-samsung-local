@@ -9,6 +9,7 @@ Trial version on the "beta" channel. Everything in 1.9.0-beta.2, plus what each 
 - **The log says what each cycle used.** At the end of a cycle: `cycle finished; it used 0.5 kWh and 107 L of water`, taken from the washer's own meters at the start and the end of the cycle.
 - **The washer's water meter is now read**, and shown in the plugin settings as "Water used so far". The washer does not state the unit; millilitres is inferred from one real top loader and not yet confirmed against another source.
 - Apple Home has no tile for energy or water, so these stay in the log and the settings; the total energy remains in the Eve app as before.
+- **Control trial: a "next" or "stop" press springs back in under a second**, instead of staying on for about ten seconds until the washer reported. Quick presses in a row now step on through the list, one value each. The spin level press was seen to work on one real top loader with remote control off at its panel.
 
 **بالعربية**
 
@@ -17,6 +18,7 @@ Trial version on the "beta" channel. Everything in 1.9.0-beta.2, plus what each 
 - **السجل يذكر استهلاك كل دورة.** عند نهاية الدورة: `cycle finished; it used 0.5 kWh and 107 L of water`، مأخوذة من عدادات الغسالة نفسها في بداية الدورة ونهايتها.
 - **عداد الماء في الغسالة يُقرأ الآن**، ويظهر في إعدادات الإضافة باسم «الماء المستهلك حتى الآن». الغسالة لا تذكر الوحدة، والمليلتر مستنتج من غسالة حقيقية واحدة ولم يتأكد بعد من مصدر آخر.
 - Apple Home ليس فيه بطاقة للطاقة أو الماء، فتبقى هذه في السجل والإعدادات، وإجمالي الطاقة يبقى في تطبيق Eve كما كان.
+- **التحكم التجريبي: ضغطة «التالي» أو «الإيقاف» ترجع في أقل من ثانية**، بدل أن تبقى مشغّلة نحو عشر ثوانٍ حتى تعلن الغسالة. الضغطات المتتالية السريعة تتقدم الآن في القائمة، قيمة لكل ضغطة. ضغطة قوة العصر شوهدت تعمل على غسالة حقيقية واحدة والتحكم عن بعد مطفأ من لوحتها.
 
 ## 1.9.0-beta.2
 
