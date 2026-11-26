@@ -14,7 +14,7 @@ export const LAUNDRY_KINDS = new Set(['washer', 'dryer', 'dishwasher']);
 /** Resources this model reads; anything else is listed as not used yet. */
 export const LAUNDRY_CONSUMED = new Set([
   '/operational/state/vs/0', '/operational/state/0', '/energy/consumption/vs/0', '/information/vs/0',
-  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/course/vs/0', '/st/washercourse/vs/0', '/power/vs/0', '/power/0',
+  '/kidslock/vs/0', '/kidslock/0', '/alarms/vs/0', '/water/consumption/vs/0', '/course/vs/0', '/st/washercourse/vs/0', '/power/vs/0', '/power/0',
 ]);
 /** The stages a washer names, each shown as its own sensor. */
 export const WASHER_STAGES = ['wash', 'rinse', 'spin'];
@@ -127,6 +127,9 @@ export function buildWasherModel(resources = {}) {
   const alarms = alarmCodes(resources);
   const percent = number(vs[`${V}progressPercentage`] ?? std.progressPercentage);
   const washCount = optionNumber(resources, 'WashingTimes');
+  // Water used since the washer was new. The unit is not stated; millilitres is inferred from a
+  // real top loader (289,513,000 after 1,957 washes is about 148 L a wash), not confirmed.
+  const water = number(resources['/water/consumption/vs/0']?.[`${V}cumulativeWater`]);
   const listed = [...(vs[`${V}supportedProgress`] ?? []), ...(std.jobStates ?? [])].map(lower);
   const stages = WASHER_STAGES.filter((x) => listed.includes(x));
   const course = washerCourse(resources);
@@ -151,6 +154,7 @@ export function buildWasherModel(resources = {}) {
       progress: percent !== null,
       alarms: '/alarms/vs/0' in resources,
       washCount: washCount !== null,
+      waterLitres: water !== null,
       stages,
       drumClean: cleanKnown,
       course: course !== null,
@@ -167,6 +171,7 @@ export function buildWasherModel(resources = {}) {
       kidsLock: locked === true,
       alarms,
       washCount,
+      waterLitres: water === null ? null : Math.round(water / 1000),
       // The stage of a running cycle, as one of WASHER_STAGES, "drumcleaning" or another word; null outside one.
       stage: inCycle && progress && progress !== 'none' ? progress : null,
       drumClean: inCycle && (progress === 'drumcleaning' || Boolean(course?.drumClean)),
@@ -201,6 +206,7 @@ export function washerFeatureRows(model) {
     row('lastDrumClean', s.lastDrumClean, 'plugin-ui', st.lastDrumClean),
     row('powerWatts', s.powerWatts, 'eve', st.powerWatts, 'W'),
     row('energyKWh', s.energyKWh, 'eve', st.energyKWh, 'kWh'),
+    row('waterLitres', s.waterLitres, 'plugin-ui', st.waterLitres, 'L'),
   ];
 }
 

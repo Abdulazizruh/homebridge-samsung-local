@@ -813,9 +813,13 @@ test('washer that keeps saying "Run" at the stage "Finish": the notice comes the
   await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Spin', [`${V}remainingTime`]: '00:05:00' });
   await waitFor(() => tile.value === 1);
   assert.equal(done.value, 0);
+  // The washer's meters move during the cycle: 0.5 kWh and 107 L.
+  await platform.helper.request('sim', { key: W, action: 'remote', path: ['energy', 'consumption', 'vs', '0'], body: { [`${V}cumulativePower`]: '1190900' } });
+  await platform.helper.request('sim', { key: W, action: 'remote', path: ['water', 'consumption', 'vs', '0'], body: { [`${V}cumulativeWater`]: '289620000' } });
   await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Finish', [`${V}remainingTime`]: '00:00:00' });
   await waitFor(() => done.value === 1);
   assert.equal(tile.value, 0);
+  assert.deepEqual({ ...handler.context.washerLastCycle, at: 0 }, { at: 0, kWh: 0.5, litres: 107 });
   // Switched off at the wall later: nothing more is said.
   await state({ [`${V}state`]: 'Ready', [`${V}progress`]: 'None' });
   await new Promise((r) => setTimeout(r, 150));

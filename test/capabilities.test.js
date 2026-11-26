@@ -214,6 +214,7 @@ test('washer model: tolerant state words, idle placeholders ignored', async () =
   const base = fixture('washer_topload').resources;
   const idle = buildWasherModel(base).state;
   assert.deepEqual([idle.inCycle, idle.remainingSeconds, idle.powerWatts, idle.energyKWh], [false, 0, 0, 1190.4]);
+  assert.equal(idle.waterLitres, 289513); // the washer's water meter, read as millilitres
   const with_ = (vs, std = {}) => buildWasherModel({ ...base,
     '/operational/state/vs/0': { ...base['/operational/state/vs/0'], ...vs },
     '/operational/state/0': { ...base['/operational/state/0'], ...std } }).state;

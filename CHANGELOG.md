@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.3
+
+Trial version on the "beta" channel. Everything in 1.9.0-beta.2, plus what each wash used. Your settings, pairings and accessories are kept as they are.
+
+- **The log says what each cycle used.** At the end of a cycle: `cycle finished; it used 0.5 kWh and 107 L of water`, taken from the washer's own meters at the start and the end of the cycle.
+- **The washer's water meter is now read**, and shown in the plugin settings as "Water used so far". The washer does not state the unit; millilitres is inferred from one real top loader and not yet confirmed against another source.
+- Apple Home has no tile for energy or water, so these stay in the log and the settings; the total energy remains in the Eve app as before.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». كل ما في 1.9.0-beta.2، ومعه استهلاك كل غسلة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **السجل يذكر استهلاك كل دورة.** عند نهاية الدورة: `cycle finished; it used 0.5 kWh and 107 L of water`، مأخوذة من عدادات الغسالة نفسها في بداية الدورة ونهايتها.
+- **عداد الماء في الغسالة يُقرأ الآن**، ويظهر في إعدادات الإضافة باسم «الماء المستهلك حتى الآن». الغسالة لا تذكر الوحدة، والمليلتر مستنتج من غسالة حقيقية واحدة ولم يتأكد بعد من مصدر آخر.
+- Apple Home ليس فيه بطاقة للطاقة أو الماء، فتبقى هذه في السجل والإعدادات، وإجمالي الطاقة يبقى في تطبيق Eve كما كان.
+
 ## 1.9.0-beta.2
 
 Trial version on the "beta" channel. Everything in 1.9.0-beta.1, plus the "finished" notice on a washer that keeps saying it runs, and an unload reminder. Your settings, pairings and accessories are kept as they are.

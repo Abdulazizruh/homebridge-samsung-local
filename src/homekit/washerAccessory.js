@@ -261,6 +261,10 @@ export class WasherAccessory {
         this.#markFinished();
       }
     }
+    if (st.inCycle && !seen?.inCycle) {
+      // The meters at the start of the cycle, to say at its end what it used.
+      this.context.washerCycleStart = { kWh: st.energyKWh ?? null, litres: st.waterLitres ?? null };
+    }
     this.#unloadWatch(st, switchedOff);
     this.context.washerSeen = { inCycle: st.inCycle, finished: st.finished, poweredOn: st.inCycle ? (seen?.poweredOn || !st.poweredOff) : false };
     this.#push();
@@ -368,7 +372,15 @@ export class WasherAccessory {
 
   #markFinished() {
     this.finished = true;
-    this.log.info(`[${this.displayName}] cycle finished.`);
+    // What the cycle used: the washer's own meters now, less what they said when it started.
+    const start = this.context.washerCycleStart ?? null;
+    const st = this.model?.state ?? {};
+    const kWh = start?.kWh != null && st.energyKWh != null ? Math.round((st.energyKWh - start.kWh) * 100) / 100 : null;
+    const litres = start?.litres != null && st.waterLitres != null ? st.waterLitres - start.litres : null;
+    const used = [kWh !== null && kWh >= 0 ? `${kWh} kWh` : null, litres !== null && litres >= 0 ? `${litres} L of water` : null].filter(Boolean);
+    delete this.context.washerCycleStart;
+    this.context.washerLastCycle = { at: Date.now(), kWh, litres };
+    this.log.info(`[${this.displayName}] cycle finished${used.length ? `; it used ${used.join(' and ')}` : ''}.`);
     clearTimeout(this.finishTimer);
     this.finishTimer = setTimeout(() => { this.#clearFinished(); this.#push(); }, this.finishedHoldMs);
     this.finishTimer.unref?.();
