@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.4
+
+Trial version on the "beta" channel. Two corrections to the washer control trial after 1.9.0-beta.3 was tried on a real washer. Your settings, pairings and accessories are kept as they are.
+
+- **Water temperature is a press again.** As a slider its lowest value, cold, showed as "off", and the press that had been seen to work was gone. Its values are names (cold, warm, hot), not steps, so a press moves to the next one and round again. Spin level, rinse count, water level and wash time stay sliders.
+- **Fixed: the child lock tile could read "Locked" on an open washer.** The washer reports its lock in two forms; on a real top loader the plain one follows the lock both ways, while the other can read as locked when it is not. The plain value now decides wherever the washer gives one.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». تصحيحان للتحكم التجريبي بالغسالة بعد تجربة 1.9.0-beta.3 على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **حرارة الماء رجعت ضغطة.** كشريط منزلق كانت أقل قيمة، البارد، تظهر «مطفأ»، واختفت الضغطة التي شوهدت تعمل. قيمها أسماء (بارد ودافئ وحار) وليست درجات، فالضغطة تنتقل إلى التالي ثم تدور. قوة العصر وعدد الشطف ومستوى الماء ومدة الغسل تبقى أشرطة منزلقة.
+- **إصلاح: بلاطة قفل الأطفال كانت قد تقول «Locked» والغسالة مفتوحة.** الغسالة تعلن قفلها بصيغتين، وعلى غسالة حقيقية تتبع الصيغة البسيطة القفل في الاتجاهين، والأخرى قد تُقرأ مقفلة وهي ليست كذلك. الآن تحسم الصيغة البسيطة حيثما تعطيها الغسالة.
+
 ## 1.9.0-beta.3
 
 Trial version on the "beta" channel. Everything in 1.9.0-beta.2, plus what each wash used. Your settings, pairings and accessories are kept as they are.

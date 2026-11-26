@@ -32,7 +32,12 @@ export function kidsLock(resources) {
   if (typeof plain !== 'boolean' && word === undefined) {
     return null;
   }
-  return plain === true || (word !== undefined && !UNLOCKED.has(lower(String(word))));
+  // Seen on a real top loader: the plain value follows the lock both ways, while the vendor word
+  // can read as locked when it is not. So the plain value decides wherever the washer gives one.
+  if (typeof plain === 'boolean') {
+    return plain;
+  }
+  return !UNLOCKED.has(lower(String(word)));
 }
 
 /**
@@ -227,6 +232,7 @@ const STEPS = {
   ctlWashTime: ['washTime', 'supportedWashTime'],
 };
 const NOT_A_CHOICE = new Set(['none', 'nodisplay', '']);
+const NAMED = new Set(['ctlWaterTemp']);
 
 export function washerControls(resources = {}) {
   const res = resources ?? {};
@@ -288,7 +294,12 @@ export function washerControls(resources = {}) {
     const list = (Array.isArray(washer?.[`${V}${listKey}`]) ? washer[`${V}${listKey}`] : []).map(String).filter((x) => !NOT_A_CHOICE.has(lower(x)));
     if (washer && `${V}${key}` in washer && list.length > 1) {
       const now = () => String(res['/washer/vs/0']?.[`${V}${key}`] ?? '');
-      out[id] = {
+      out[id] = NAMED.has(id) ? {
+        // Names, not steps (cold, warm, hot): a press moves to the next one and round again.
+        // `from`: what a press just asked for and the washer has not reported yet.
+        kind: 'press', reads: key, shown: now,
+        writes: (_on, from) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: list[(list.indexOf(String(from ?? now())) + 1) % list.length] } }],
+      } : {
         // A level: the washer's own list, lowest first, set directly (a slider in Apple Home).
         kind: 'level', reads: key, shown: now, values: list,
         writes: (target) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: String(target) } }],

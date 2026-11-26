@@ -656,16 +656,21 @@ test('washer control trial: only ticked controls appear; a level is a slider tha
   await handler.controlJob;
   assert.equal(await writes() - courseFrom, 1);
   assert.equal(link.resources['/st/washercourse/vs/0'][`${V}st.washerMode`], 'Table_02_Course_02');
-  // A washer that says "accepted" and does nothing: the next form is tried, and that one locks it.
+  // A washer that says "accepted" and does nothing: the next form is tried too. The plain value
+  // is what says whether it is locked, so the vendor word alone does not make the tile read locked.
   await platform.helper.request('sim', { key: W, action: 'refuse', value: 'ignore-once' });
   const lockFrom = await writes();
   await handler.services.get('kidsLock').getCharacteristic(C.LockTargetState).handleSetRequest(C.LockTargetState.SECURED);
   await handler.controlJob;
   assert.equal(await writes() - lockFrom, 2);
   assert.equal(link.resources['/kidslock/vs/0'][`${V}kidsLock`], 'On');
-  await waitFor(() => handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value === C.LockCurrentState.SECURED);
   assert.equal(handler.context.controlTrials.ctlKidsLock.after, 'false/On');
-  // Unlock again, so the rest starts from an open lock.
+  await waitFor(() => handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value === C.LockCurrentState.UNSECURED);
+  // Locked for real (the plain value), then opened again.
+  await new Promise((r) => setTimeout(r, 1100));
+  await handler.services.get('kidsLock').getCharacteristic(C.LockTargetState).handleSetRequest(C.LockTargetState.SECURED);
+  await handler.controlJob;
+  await waitFor(() => handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value === C.LockCurrentState.SECURED);
   await new Promise((r) => setTimeout(r, 1100));
   await handler.services.get('kidsLock').getCharacteristic(C.LockTargetState).handleSetRequest(C.LockTargetState.UNSECURED);
   await handler.controlJob;

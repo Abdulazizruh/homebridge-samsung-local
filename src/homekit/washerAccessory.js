@@ -8,7 +8,7 @@ const LABELS = {
   cycle: '', finished: 'Finished', unload: 'Unload', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
   ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
-  ctlWaterTemp: 'Water Temp', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
+  ctlWaterTemp: 'Water Temp Next', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
 };
 const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];

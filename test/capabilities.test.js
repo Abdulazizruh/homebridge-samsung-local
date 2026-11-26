@@ -227,6 +227,16 @@ test('washer model: tolerant state words, idle placeholders ignored', async () =
   assert.deepEqual([end.running, end.inCycle, end.finished], [false, false, true]);
   const spin = with_({ 'x.com.samsung.da.state': 'Run', 'x.com.samsung.da.progress': 'Spin' });
   assert.deepEqual([spin.running, spin.finished], [true, false]);
+  // Controls: levels are sliders over the washer's own list; water temperature is names, so a press.
+  const { washerControls, kidsLock } = await import('../src/capabilities/washer.js');
+  const controls = washerControls(base);
+  assert.deepEqual([controls.ctlSpin.kind, controls.ctlWaterLevel.kind, controls.ctlWaterTemp.kind], ['level', 'level', 'press']);
+  assert.equal(controls.ctlWaterTemp.writes(true)[0].body['x.com.samsung.da.waterValve'], 'Warm'); // after Cold
+  assert.equal(controls.ctlWaterTemp.writes(true, 'Hot')[0].body['x.com.samsung.da.waterValve'], 'Cold'); // round again
+  // Child lock: the plain value decides; the vendor word only where there is no plain value.
+  assert.equal(kidsLock({ '/kidslock/0': { value: false }, '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'On' } }), false);
+  assert.equal(kidsLock({ '/kidslock/0': { value: true }, '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'Ready' } }), true);
+  assert.equal(kidsLock({ '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'On' } }), true);
   assert.equal(parseDuration('01:07:00'), 4020);
   assert.equal(parseDuration('soon'), null);
 });

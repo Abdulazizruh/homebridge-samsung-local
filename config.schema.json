@@ -240,7 +240,7 @@
                   "default": false
                 },
                 "ctlWaterTemp": {
-                  "title": "Laundry control (trial, models differ): water temperature, a slider",
+                  "title": "Laundry control (trial, models differ): water temperature, next value",
                   "type": "boolean",
                   "default": false
                 },
