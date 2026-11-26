@@ -225,12 +225,28 @@ export function washerFeatureRows(model) {
  * worth trying, in order, built only from what the washer itself reports (its resources, its own
  * lists of supported values). The accessory sends them one at a time and logs each answer.
  */
-export const WASHER_CONTROLS = ['ctlPower', 'ctlRun', 'ctlStop', 'ctlKidsLock', 'ctlBuzzer', 'ctlSpin', 'ctlRinse', 'ctlWaterTemp', 'ctlWaterLevel', 'ctlWashTime', 'ctlCourse'];
+export const WASHER_CONTROLS = ['ctlPower', 'ctlRun', 'ctlStop', 'ctlKidsLock', 'ctlBuzzer', 'ctlSpin', 'ctlRinse', 'ctlWaterTemp', 'ctlWaterLevel', 'ctlWashTime', 'ctlCourse',
+  'ctlSuperSpeed', 'ctlBubbleSoak', 'ctlBubbleStorm', 'ctlSmartControl'];
 const STEPS = {
   ctlSpin: ['spinLevel', 'supportedSpinLevel'], ctlRinse: ['rinseCycles', 'supportedRinseCycles'],
   ctlWaterTemp: ['waterValve', 'supportedWaterValve'], ctlWaterLevel: ['waterHeight', 'supportedWaterHeight'],
   ctlWashTime: ['washTime', 'supportedWashTime'],
 };
+/** Extras a washer reports as "Name_On" or "Name_Off" among its course options, each tried as a switch. */
+const OPTION_SWITCHES = { ctlSuperSpeed: 'SuperSpeed', ctlBubbleSoak: 'BubbleSoak', ctlBubbleStorm: 'BubbleStorm' };
+
+/** The extras a washer reports as on or off, by their own names: { SuperSpeed: true, BubbleSoak: false }. */
+export function washerToggles(resources) {
+  const options = resources?.['/course/vs/0']?.[`${V}options`];
+  const out = {};
+  for (const token of Array.isArray(options) ? options : []) {
+    const m = typeof token === 'string' ? /^([A-Za-z]+)_(On|Off)$/.exec(token) : null;
+    if (m) {
+      out[m[1]] = m[2] === 'On';
+    }
+  }
+  return out;
+}
 const NOT_A_CHOICE = new Set(['none', 'nodisplay', '']);
 
 export function washerControls(resources = {}) {
@@ -310,8 +326,34 @@ export function washerControls(resources = {}) {
       writes: (_on, from) => {
         const cur = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(from ?? res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? '')) ?? m;
         const next = ((parseInt(cur[2], 16) + 1) % 256).toString(16).toUpperCase().padStart(2, '0');
-        return [{ path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${cur[1]}${next}` } }];
+        return [
+          { path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${cur[1]}${next}` } },
+          // Seen on a real washer: the first form was refused. The course is also one of the course options.
+          ...(res['/course/vs/0'] ? [{ path: ['course', 'vs', '0'], body: { [`${V}options`]: [`Course_${next}`] } }] : []),
+        ];
       },
+    };
+  }
+  // The extra buttons of the panel (super speed, bubble): on or off among the course options.
+  for (const [id, name] of Object.entries(OPTION_SWITCHES)) {
+    if (name in washerToggles(res)) {
+      out[id] = {
+        kind: 'switch', reads: name, current: () => washerToggles(res)[name] === true,
+        shown: () => (washerToggles(res)[name] === undefined ? '' : (washerToggles(res)[name] ? 'On' : 'Off')),
+        writes: (on) => [{ path: ['course', 'vs', '0'], body: { [`${V}options`]: [`${name}_${on ? 'On' : 'Off'}`] } }],
+      };
+    }
+  }
+  // Smart control: whether the washer takes commands from outside. Many washers let only the panel set it.
+  if (res['/remotectrl/vs/0'] || res['/remotectrl/0']) {
+    const enabled = () => (typeof res['/remotectrl/0']?.value === 'boolean' ? res['/remotectrl/0'].value
+      : lower(String(res['/remotectrl/vs/0']?.[`${V}remoteControlEnabled`] ?? '')) === 'true');
+    out.ctlSmartControl = {
+      kind: 'switch', reads: 'remoteControlEnabled', current: enabled, shown: () => String(enabled()),
+      writes: (on) => [
+        ...(res['/remotectrl/vs/0'] ? [{ path: ['remotectrl', 'vs', '0'], body: { [`${V}remoteControlEnabled`]: on ? 'true' : 'false' } }] : []),
+        ...(res['/remotectrl/0'] ? [{ path: ['remotectrl', '0'], body: { value: Boolean(on) } }] : []),
+      ],
     };
   }
   return out;

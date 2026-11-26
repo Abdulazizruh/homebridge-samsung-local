@@ -233,6 +233,15 @@ test('washer model: tolerant state words, idle placeholders ignored', async () =
   assert.deepEqual([controls.ctlSpin.kind, controls.ctlWaterLevel.kind, controls.ctlWaterTemp.kind], ['choice', 'choice', 'choice']);
   assert.deepEqual(controls.ctlWaterTemp.values, ['Cold', 'Warm', 'Hot']); // "None" is not a choice
   assert.equal(controls.ctlWaterTemp.writes('Hot')[0].body['x.com.samsung.da.waterValve'], 'Hot');
+  // The panel's extras: on or off among the course options, each a switch; smart control is the remote-control flag.
+  const { washerToggles } = await import('../src/capabilities/washer.js');
+  assert.deepEqual([washerToggles(base).SuperSpeed, washerToggles(base).BubbleSoak, washerToggles(base).BubbleStorm], [false, false, false]);
+  assert.deepEqual(controls.ctlSuperSpeed.writes(true), [{ path: ['course', 'vs', '0'], body: { 'x.com.samsung.da.options': ['SuperSpeed_On'] } }]);
+  assert.equal(controls.ctlSuperSpeed.current(), false);
+  assert.equal(controls.ctlSmartControl.current(), false);
+  assert.deepEqual(controls.ctlSmartControl.writes(true).map((w) => w.path.join('/')), ['remotectrl/vs/0', 'remotectrl/0']);
+  assert.deepEqual(controls.ctlCourse.writes(true).map((w) => w.path.join('/')), ['st/washercourse/vs/0', 'course/vs/0']);
+  assert.deepEqual(controls.ctlCourse.writes(true)[1].body['x.com.samsung.da.options'], ['Course_02']);
   // Child lock: the plain value decides; the vendor word only where there is no plain value.
   assert.equal(kidsLock({ '/kidslock/0': { value: false }, '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'On' } }), false);
   assert.equal(kidsLock({ '/kidslock/0': { value: true }, '/kidslock/vs/0': { 'x.com.samsung.da.kidsLock': 'Ready' } }), true);

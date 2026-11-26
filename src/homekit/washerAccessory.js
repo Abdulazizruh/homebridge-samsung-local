@@ -1,5 +1,5 @@
 import { failureText } from '../deviceLink.js';
-import { alarmText, buildWasherModel, WASHER_CONTROLS, WASHER_STAGES, washerControls } from '../capabilities/washer.js';
+import { alarmText, buildWasherModel, WASHER_CONTROLS, WASHER_STAGES, washerControls, washerToggles } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 import { markPrimary } from './primary.js';
 
@@ -9,15 +9,16 @@ const LABELS = {
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
   ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
   ctlWaterTemp: 'Water Temp', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
+  ctlSuperSpeed: 'Super Speed', ctlBubbleSoak: 'Bubble Soak', ctlBubbleStorm: 'Bubble Storm', ctlSmartControl: 'Smart Control',
 };
 /** A choice gets one switch per value, named with this word and the washer's own name for the value. */
 const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time' };
 /** "ExtraHigh" reads as "Extra High" on a tile; what is sent stays the washer's own word. */
 /**
- * Trial: these groups also carry a slider beside their switches. Only where the position reads as the
- * washer's own number (water level 6 of 10 is 60%), so the tile can show the value from outside.
+ * Each group also carries a slider that shows where the washer stands, so the group's tile can
+ * show it from outside. It only shows: choosing is done with the switches, and a drag is undone.
  */
-const SLIDER_TOO = new Set(['ctlWaterLevel']);
+const SLIDER_TOO = new Set(['ctlSpin', 'ctlRinse', 'ctlWaterTemp', 'ctlWaterLevel', 'ctlWashTime']);
 const spaced = (value) => String(value).replace(/([a-z])([A-Z])/g, '$1 $2');
 const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];
@@ -42,8 +43,6 @@ export const WASHER_FEATURES = {
 export class WasherAccessory {
   /** How long a control trial waits for the washer's next report: both engines read it 4 s after a command. */
   static controlWaitMs = 9000;
-  /** How long a slider must rest before its value is chosen. */
-  static sliderSettleMs = 700;
   /** A reading that arrives this long after a command was taken after it. */
   static freshAfterMs = 3800;
   /** How soon a "next" or "stop" press shows off again. */
@@ -231,26 +230,15 @@ export class WasherAccessory {
           sw.getCharacteristic(Characteristic.On).onSet((on) => { this.#choose(id, value, Boolean(on)); });
         }
         const sliderKey = `${id}/slider`;
-        if (SLIDER_TOO.has(id) && choice.length > 2) {
+        if (SLIDER_TOO.has(id) && choice.length > 1) {
           const fan = home.getServiceById(Service.Fan, sliderKey) ?? home.addService(Service.Fan, this.#label(sliderKey), sliderKey);
           this.#applyName(sliderKey, fan, this.#label(sliderKey));
           this.services.set(sliderKey, fan);
           const steps = choice.length - 1;
-          const settle = (index) => {
-            // Dragging sends many values: only where the slider comes to rest is chosen.
-            clearTimeout(this.sliderTimers?.[id]);
-            (this.sliderTimers ??= {})[id] = setTimeout(() => { this.#choose(id, choice[Math.min(Math.max(index, 0), steps)], true); }, WasherAccessory.sliderSettleMs);
-            this.sliderTimers[id].unref?.();
-          };
-          fan.getCharacteristic(Characteristic.RotationSpeed).setProps({ minValue: 0, maxValue: 100, minStep: 100 / steps })
-            .onSet((value) => { settle(Math.round((Number(value) / 100) * steps)); });
-          fan.getCharacteristic(Characteristic.On).onSet((on) => {
-            if (!on) {
-              settle(0); // off is the lowest value; on alone changes nothing
-            } else {
-              setTimeout(() => this.#push(), 300).unref?.();
-            }
-          });
+          // Shows only: whatever is set on it is put back to where the washer stands.
+          const undo = () => { setTimeout(() => this.#push(), 300).unref?.(); };
+          fan.getCharacteristic(Characteristic.RotationSpeed).setProps({ minValue: 0, maxValue: 100, minStep: 100 / steps }).onSet(undo);
+          fan.getCharacteristic(Characteristic.On).onSet(undo);
         } else {
           for (const acc of new Set([this.accessory, home])) {
             const old = acc.getServiceById(Service.Fan, sliderKey);
@@ -321,6 +309,13 @@ export class WasherAccessory {
 
   #onUpdate(resources) {
     const before = this.model;
+    // An extra switched at the washer (super speed, bubble): its own name, so a panel button can be matched to it.
+    const had = this.context.resources ? washerToggles(this.context.resources) : null;
+    for (const [name, on] of Object.entries(had ? washerToggles(resources) : {})) {
+      if (name in had && had[name] !== on) {
+        this.log.info(`[${this.displayName}] option changed: ${name} ${on ? 'On' : 'Off'}.`);
+      }
+    }
     this.model = buildWasherModel(resources);
     this.context.resources = resources;
     const st = this.model.state;

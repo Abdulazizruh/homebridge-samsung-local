@@ -4,19 +4,23 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 ## 1.9.0-beta.7
 
-Trial version on the "beta" channel. Two additions to the washer control trial. Your settings, pairings and accessories are kept as they are.
+Trial version on the "beta" channel. More of the washer's panel in the control trial. Your settings, pairings and accessories are kept as they are.
 
-- **The log names each course chosen at the washer**: `course selected: 08`. Until now the course number was written only when a cycle started. With it, the names on a washer's panel can be matched to its numbers, one press at a time.
-- **Trial: the water level group also carries a slider** beside its switches. Both follow one value: a switch moves the slider, and the slider lights the matching switch. Only water level has it, because its position reads as the washer's own number (level 6 of 10 is 60%). What Apple Home prints on the group's tile with a slider in it is not yet known.
-- Seen on a real top loader: "Course Next" asked for course 02 and the washer refused it. Its courses are not numbered in a row (its tub clean is 82), so 02 may simply not exist there; whether a course can be changed from outside is still open.
+- **Each group also carries a slider that shows the current value**, so the group's tile can show it from outside. It only shows: choosing is done with the switches, and a drag on the slider sends nothing and is put back. For water level the position reads as the washer's own number (level 6 of 10 is 60%); for the other groups it is only a position in the list.
+- **New trial switches for the panel's extra buttons**: "Super Speed", "Bubble Soak" and "Bubble Storm", where the washer reports them, and "Smart Control" (remote control; many washers let only the panel set it). None of them has been tried on a washer yet.
+- **The log names what is chosen at the washer**: `course selected: 08` for a course, and `option changed: SuperSpeed On` for an extra. With these lines the buttons of a panel can be matched to the washer's own names and numbers, one press at a time.
+- **"Course Next" tries a second form** when the first is refused. Seen on a real top loader: the washer refused course 02 in the first form. Its courses are not numbered in a row (its tub clean is 82), so 02 may not exist there; whether a course can be changed from outside is still open.
+- Confirmed on that washer with 1.9.0-beta.6: spin level, rinse count, water level and wash time are set from their switches, up and down, each with one command.
 
 **بالعربية**
 
-إصدار تجريبي على قناة «beta». إضافتان للتحكم التجريبي بالغسالة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+إصدار تجريبي على قناة «beta». المزيد من لوحة الغسالة في التحكم التجريبي. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **السجل يذكر كل برنامج يُختار من الغسالة**: `course selected: 08`. كان رقم البرنامج يُكتب عند بدء الدورة فقط. بهذا السطر تُربط أسماء البرامج في لوحة الغسالة بأرقامها، ضغطة ضغطة.
-- **تجربة: مجموعة مستوى الماء فيها شريط منزلق** بجانب مفاتيحها. الاثنان يتبعان قيمة واحدة: المفتاح يحرّك الشريط، والشريط يضيء المفتاح المطابق. مستوى الماء وحده يأخذه، لأن موضعه يُقرأ كرقم الغسالة (المستوى 6 من 10 هو 60%). لم يُعرف بعد ماذا يكتب Apple Home على بلاطة المجموعة حين يكون فيها شريط.
-- شوهد على غسالة حقيقية: «Course Next» طلب البرنامج 02 فرفضته الغسالة. برامجها ليست مرقّمة بالتتابع (تنظيف الحوض فيها 82)، فقد يكون 02 غير موجود أصلًا، وما زال مفتوحًا هل يمكن تغيير البرنامج من الخارج.
+- **كل مجموعة فيها شريط يعرض القيمة الحالية**، لتظهر على بلاطة المجموعة من الخارج. هو للعرض فقط: الاختيار يكون بالمفاتيح، وسحب الشريط لا يرسل شيئًا ويعود إلى مكانه. في مستوى الماء يُقرأ الموضع كرقم الغسالة (المستوى 6 من 10 هو 60%)، وفي بقية المجموعات هو موضع في القائمة فقط.
+- **مفاتيح تجريبية جديدة لأزرار اللوحة الإضافية**: «Super Speed» و«Bubble Soak» و«Bubble Storm» حيث تعلنها الغسالة، و«Smart Control» (التحكم عن بعد، وكثير من الغسالات تسمح بضبطه من اللوحة فقط). لم يُجرَّب أيٌّ منها على غسالة بعد.
+- **السجل يذكر ما يُختار من الغسالة**: `course selected: 08` للبرنامج، و`option changed: SuperSpeed On` للإضافة. بهذه السطور تُربط أزرار اللوحة بأسماء الغسالة وأرقامها، ضغطة ضغطة.
+- **«Course Next» يجرّب صيغة ثانية** إذا رُفضت الأولى. شوهد على غسالة حقيقية: رفضت الغسالة البرنامج 02 بالصيغة الأولى. برامجها ليست مرقّمة بالتتابع (تنظيف الحوض فيها 82)، فقد يكون 02 غير موجود، وما زال مفتوحًا هل يمكن تغيير البرنامج من الخارج.
+- تأكد على تلك الغسالة مع 1.9.0-beta.6: قوة العصر وعدد الشطف ومستوى الماء ومدة الغسل تُضبط من مفاتيحها صعودًا ونزولًا، بأمر واحد لكل اختيار.
 
 ## 1.9.0-beta.6
 

@@ -306,6 +306,8 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 | Sound | a switch | the washer's sounds on or off |
 | Water temperature, spin level, rinse count, water level, wash time | a group of switches each, one per value of the washer's own list ("Water Hot", "Water Level 6", "Rinse 2"); the one that is on is the current value | the value of the switch you turn on; the others go off |
 | Course | a press | the next course number |
+| Super Speed, Bubble Soak, Bubble Storm | a switch each, where the washer reports it | that extra on or off |
+| Smart Control | a switch | remote control on or off; many washers let only the panel set it |
 
 - Each group is an accessory of its own, so "Show as Single Tile" in Apple Home keeps its switches together in one tile, and each group can be given its own room.
 - Using a control sends its command; where a washer may take it in more than one form, each form is tried once, in order.
@@ -314,7 +316,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 - A washer may refuse commands until remote control is switched on at its panel.
 - The run switch can start a cycle: tick it only when that is what you want.
 
-<p><img src="assets/screenshots/washer-control.png" alt="Washer control trial in the plugin settings: eleven controls, all unticked, with the cautions under them" width="320"></p>
+<p><img src="assets/screenshots/washer-control.png" alt="Washer control trial in the plugin settings: fifteen controls, all unticked, with the cautions under them" width="320"></p>
 
 ### TV options
 

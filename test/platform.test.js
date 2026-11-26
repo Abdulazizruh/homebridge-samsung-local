@@ -613,7 +613,7 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   assert.equal(handler.services.has('ctlSpin'), false);
   const spinGroup = platform.api.registered.map((r) => r.accessory).find((a) => a.displayName === 'Washer Spin');
   assert.equal(spinGroup.context.groupOf, W);
-  assert.deepEqual(spinGroup.services.filter((x) => x.subtype).map((x) => x.getCharacteristic(C.ConfiguredName).value),
+  assert.deepEqual(spinGroup.services.filter((x) => String(x.subtype ?? '').includes(':')).map((x) => x.getCharacteristic(C.ConfiguredName).value),
     ['Spin Rinse Hold', 'Spin Extra Low', 'Spin Low', 'Spin Medium', 'Spin High', 'Spin Extra High']);
   assert.equal(platform.devices.get(W).accessory.services.some((x) => String(x.subtype ?? '').startsWith('ctlSpin')), false);
   await waitFor(() => spin('Medium').value === true && spin('High').value === false);
@@ -727,9 +727,8 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   assert.equal(second.platform.api.unregistered.length, 0);
   assert.equal(second.platform.devices.get(W).handler.services.get('ctlRinse:1').getCharacteristic(second.platform.api.hap.Characteristic.On).value, true);
   await second.platform.stop();
-  // Water level: its group also carries a slider; the switches and the slider follow one value.
+  // Each group also carries a slider that only shows where the washer stands: a drag sends nothing and is undone.
   const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
-  WasherAccessory.sliderSettleMs = 20;
   WasherAccessory.controlWaitMs = 200;
   const fourth = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true, ctlWaterLevel: true }), cached });
   await online(fourth.platform, W);
@@ -739,17 +738,16 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   assert.equal(slider.UUID, fourth.platform.api.hap.Service.Fan.UUID);
   assert.equal(slider.getCharacteristic(C4.ConfiguredName).value, 'Water Level');
   assert.equal(slider.getCharacteristic(C4.RotationSpeed).props.minStep, 10);
-  assert.equal(h4.services.has('ctlRinse/slider'), false);
-  await slider.getCharacteristic(C4.RotationSpeed).handleSetRequest(40);
+  assert.equal(h4.services.get('ctlRinse/slider').getCharacteristic(C4.RotationSpeed).props.minStep, 20);
+  const sent = async () => (await fourth.platform.helper.request('sim', { key: W, action: 'writes' })).writes;
+  const from = await sent();
   await slider.getCharacteristic(C4.RotationSpeed).handleSetRequest(60);
-  await new Promise((r) => setTimeout(r, 60));
-  await h4.controlJob;
-  assert.equal(fourth.platform.devices.get(W).link.resources['/washer/vs/0'][`${V}waterHeight`], '6');
-  await waitFor(() => h4.services.get('ctlWaterLevel:6').getCharacteristic(C4.On).value === true && slider.getCharacteristic(C4.RotationSpeed).value === 60);
-  await new Promise((r) => setTimeout(r, 1100));
+  await waitFor(() => slider.getCharacteristic(C4.RotationSpeed).value === 0); // the fixture stands at level 0
+  assert.equal(await sent(), from);
   await h4.services.get('ctlWaterLevel:3').getCharacteristic(C4.On).handleSetRequest(true);
   await h4.controlJob;
-  await waitFor(() => slider.getCharacteristic(C4.RotationSpeed).value === 30 && h4.services.get('ctlWaterLevel:6').getCharacteristic(C4.On).value === false);
+  await waitFor(() => slider.getCharacteristic(C4.RotationSpeed).value === 30 && slider.getCharacteristic(C4.On).value === true);
+  assert.equal(await sent() - from, 1);
   await fourth.platform.stop();
   // Unticked: the group leaves, the washer stays.
   const third = await boot({ storage: first.storage, devices, config: entry({}), cached });
