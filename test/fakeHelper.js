@@ -20,6 +20,7 @@ for (const spec of JSON.parse(process.env.FAKE_DEVICES ?? '[]')) {
 }
 const open = new Map(); // key -> {host, timer}
 const log = process.env.FAKE_LOG;
+const QUIET_MS = Number(process.env.FAKE_QUIET_MS ?? 0);
 const out = (obj) => process.stdout.write(`${JSON.stringify(obj)}\n`);
 const record = (entry) => { if (log) { fs.appendFileSync(log, `${JSON.stringify(entry)}\n`); } };
 
@@ -63,7 +64,9 @@ function connect(key) {
   }
   out({ ev: 'status', key, online: true, port: 49154, identity: dev.identity, host: session.host, mac: session.mac ?? null });
   out({ ev: 'state', key, resources: dev.resources });
-  session.timer = setInterval(() => out({ ev: 'state', key, resources: dev.resources }), Number(process.env.FAKE_POLL_MS ?? 200));
+  session.timer = setInterval(() => {
+    if (Date.now() >= (dev.quietUntil ?? 0)) { out({ ev: 'state', key, resources: dev.resources }); }
+  }, Number(process.env.FAKE_POLL_MS ?? 200));
 }
 
 function handle(req) {
@@ -110,6 +113,13 @@ function handle(req) {
         if (dev.refuse === 'once') { dev.refuse = false; dev.refusedOnce = (dev.refusedOnce ?? 0) + 1; return { code: '4.00', accepted: false, detail: null }; }
         if (dev.refuse) { return { code: '4.05', accepted: false, detail: 'Control fail' }; }
         if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
+        if (QUIET_MS) {
+          // As both real engines do: no reading for a while after a write, then one; a newer write starts the wait again.
+          dev.quietUntil = Date.now() + QUIET_MS;
+          clearTimeout(dev.afterWrite);
+          dev.afterWrite = setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), QUIET_MS);
+          return { code: '2.04', accepted: true, detail: null };
+        }
         setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
         return { code: '2.04', accepted: true, detail: null };
       };

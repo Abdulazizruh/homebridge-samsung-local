@@ -49,6 +49,9 @@ export class WasherAccessory {
   /** Writes for the same control closer together than this count as one use. */
   static tapGapMs = 1000;
 
+  /** The pause between one command the washer has answered and the next one. */
+  static sendGapMs = 500;
+
   /** "Unload" reminder: how often it comes while the washing stays inside, and how long each one shows. */
   static unloadEveryMs = 30 * 60 * 1000;
   static unloadHoldMs = 5 * 60 * 1000;
@@ -493,7 +496,7 @@ export class WasherAccessory {
     // One command at a time for the whole washer (seen on a real one: commands sent on top of each
     // other closed its session), and the newest wish for a control wins over one still waiting.
     const turn = ((this.turns ??= {})[id] = (this.turns[id] ?? 0) + 1);
-    const run = async () => {
+    const run = async (only) => {
       if (kind !== 'press' && this.turns[id] !== turn) {
         return; // a newer choice for this control came in while this one waited
       }
@@ -507,9 +510,14 @@ export class WasherAccessory {
       // The form this washer carried out last time goes first: a form it refuses costs seconds each
       // time. Looked up now, not at the press, so a press that waited its turn uses what was just learnt.
       const proven = kind === 'press' ? null : this.context.controlForms?.[id];
-      if (proven && writes.some((w) => w.path.join('/') === proven)) {
+      if (only) {
+        writes = only;
+      } else if (proven && writes.some((w) => w.path.join('/') === proven)) {
         writes = [...writes.filter((w) => w.path.join('/') === proven), ...writes.filter((w) => w.path.join('/') !== proven)];
       }
+      // A form this washer has carried out before needs no wait in the queue: once the washer has
+      // answered, the next command may go, and this one's report is checked on the side.
+      const quick = !only && Boolean(proven) && writes[0]?.path.join('/') === proven;
       const before = (washerControls(this.link.resources ?? {})[id] ?? control).shown();
       let accepted = false;
       // Did the washer do it? A switch, a lock and a choice say so themselves; a press cannot.
@@ -529,16 +537,69 @@ export class WasherAccessory {
       const report = () => new Promise((resolve) => {
         const sentAt = Date.now();
         const link = this.link;
-        const timer = setTimeout(done, WasherAccessory.controlWaitMs);
-        timer.unref?.();
+        // Both engines read 4 s after the last write, so a command that followed this one moves
+        // the reading that counts, and the time allowed with it (to three times at most).
+        const last = () => Math.max(sentAt, this.lastSentAt ?? 0);
+        let timer;
+        const arm = () => {
+          const left = Math.min(last() + WasherAccessory.controlWaitMs, sentAt + 3 * WasherAccessory.controlWaitMs) - Date.now();
+          if (left <= 0) {
+            return done();
+          }
+          timer = setTimeout(arm, left);
+          timer.unref?.();
+        };
         function done() { clearTimeout(timer); link.off('update', seen); resolve(); }
         function seen() {
-          if (shows() || Date.now() - sentAt >= WasherAccessory.freshAfterMs) {
+          if (shows() || Date.now() - last() >= WasherAccessory.freshAfterMs) {
             done();
           }
         }
         link.on('update', seen);
+        arm();
       });
+      const finish = () => {
+        if (asked[id]?.n === mine) {
+          delete asked[id]; // no newer press: the washer's own report is the base again
+        }
+        const after = washerControls(this.link.resources ?? {})[id]?.shown() ?? '';
+        say(`the washer reported ${control.reads}=${before} before and ${control.reads}=${after} now.`);
+        (this.context.controlTrials ??= {})[id] = { at: Date.now(), accepted, before, after };
+      };
+      if (quick) {
+        const [write, ...rest] = writes;
+        let answered = false;
+        try {
+          await this.link.send([write]);
+          answered = true;
+        } catch (err) {
+          say(`sent ${words(write)}: not accepted (${err.message}).`);
+          writes = rest;
+        } finally {
+          this.lastSentAt = Date.now();
+        }
+        if (answered) {
+          accepted = true;
+          const check = (async () => {
+            await report();
+            if (this.turns[id] !== turn) {
+              say(`sent ${words(write)}: accepted; a newer choice followed it.`);
+              return;
+            }
+            if (carriedOut() || rest.length === 0) {
+              say(`sent ${words(write)}: accepted${carriedOut() ? '' : ", but the washer's report did not change"}.`);
+              finish();
+              return;
+            }
+            say(`sent ${words(write)}: accepted, but the washer's report did not change. Trying the next form.`);
+            const again = (this.controlQueue ?? Promise.resolve()).then(() => run(rest));
+            this.controlQueue = again.catch(() => {});
+            await again;
+          })();
+          await new Promise((r) => { setTimeout(r, WasherAccessory.sendGapMs).unref?.(); });
+          return { check };
+        }
+      }
       for (const [n, write] of writes.entries()) {
         try {
           await this.link.send([write]);
@@ -546,6 +607,8 @@ export class WasherAccessory {
         } catch (err) {
           say(`sent ${words(write)}: not accepted (${err.message}).`);
           continue;
+        } finally {
+          this.lastSentAt = Date.now();
         }
         await report();
         if (carriedOut()) {
@@ -562,16 +625,13 @@ export class WasherAccessory {
         // Seen on a real washer: a child lock command answered "accepted" and nothing changed.
         say(`sent ${words(write)}: accepted, but the washer's report did not change. Trying the next form.`);
       }
-      if (asked[id]?.n === mine) {
-        delete asked[id]; // no newer press: the washer's own report is the base again
-      }
-      const after = washerControls(this.link.resources ?? {})[id]?.shown() ?? '';
-      say(`the washer reported ${control.reads}=${before} before and ${control.reads}=${after} now.`);
-      (this.context.controlTrials ??= {})[id] = { at: Date.now(), accepted, before, after };
+      finish();
     };
-    const job = (this.controlQueue ?? Promise.resolve()).then(run).catch((err) => { say(`failed: ${err.message}`); })
+    // The queue moves on when the washer has answered; the job ends when its report was checked.
+    const step = (this.controlQueue ?? Promise.resolve()).then(() => run());
+    this.controlQueue = step.catch(() => {});
+    const job = step.then((quick) => quick?.check).catch((err) => { say(`failed: ${err.message}`); })
       .finally(() => { this.#push(); });
-    this.controlQueue = job;
     this.controlJob = job;
     return job;
   }

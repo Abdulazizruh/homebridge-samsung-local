@@ -1026,3 +1026,55 @@ test('washer switched off in the middle of a cycle: stopped, not finished, no no
   await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Drumcleaning', [`${V}remainingTime`]: '01:40:00' });
   await waitFor(() => lines.some((m) => /cycle started/.test(m)));
 });
+
+test('washer control, a form the washer has carried out before: the next command goes once the washer has answered, and each report is still checked', async (t) => {
+  const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
+  WasherAccessory.controlWaitMs = 1500;
+  WasherAccessory.sendGapMs = 50;
+  const W = fixture('washer_topload').identity.di;
+  // As both engines do: no reading for a while after a write, and a newer write starts that wait again.
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlRinse: true, ctlCourse: true } }] },
+    overrides: { createHelper: helperFactory([{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], { FAKE_QUIET_MS: '600', FAKE_POLL_MS: '5000' }) } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler, link } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const on = (key) => handler.services.get(key).getCharacteristic(C.On);
+  const writes = async () => (await platform.helper.request('sim', { key: W, action: 'writes' })).writes;
+  const free = (id) => [...handler.services.keys()].filter((k) => k.startsWith(`${id}:`)).filter((k) => on(k).value !== true);
+  // First use: the form is not known yet, so the command waits for the washer's report.
+  for (const id of ['ctlSpin', 'ctlRinse', 'ctlCourse']) {
+    await on(free(id)[0]).handleSetRequest(true);
+    await handler.controlJob;
+  }
+  assert.deepEqual(Object.keys(handler.context.controlForms).sort(), ['ctlCourse', 'ctlRinse', 'ctlSpin']);
+  // Known forms: three settings in a hurry reach the washer before its first reading comes.
+  const from = await writes();
+  let readings = 0;
+  const count = () => { readings += 1; };
+  link.on('update', count);
+  const picks = ['ctlSpin', 'ctlRinse', 'ctlCourse'].map((id) => free(id)[0]);
+  const jobs = [];
+  for (const key of picks) {
+    await on(key).handleSetRequest(true);
+    jobs.push(handler.controlJob);
+  }
+  await waitFor(async () => (await writes()) - from === 3);
+  assert.equal(readings, 0);
+  await Promise.all(jobs);
+  link.off('update', count);
+  for (const key of picks) {
+    assert.equal(on(key).value, true);
+    assert.equal(handler.context.controlTrials[key.split(':')[0]].accepted, true);
+  }
+  assert.equal(await writes() - from, 3);
+  // The known form answered "accepted" and nothing changed: the next form is tried, in its turn.
+  await new Promise((r) => setTimeout(r, 1100));
+  await platform.helper.request('sim', { key: W, action: 'refuse', value: 'ignore-once' });
+  const again = await writes();
+  const course = free('ctlCourse')[0];
+  await on(course).handleSetRequest(true);
+  await handler.controlJob;
+  assert.equal(await writes() - again, 2);
+});
