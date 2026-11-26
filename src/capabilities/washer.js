@@ -232,6 +232,46 @@ const STEPS = {
   ctlWaterTemp: ['waterValve', 'supportedWaterValve'], ctlWaterLevel: ['waterHeight', 'supportedWaterHeight'],
   ctlWashTime: ['washTime', 'supportedWashTime'],
 };
+/**
+ * Course names by model, as printed on the panel. A washer reports course numbers only; the names
+ * live in Samsung's app. WA80F16B9CYL: 01, 08 and 82 seen in its own log; 2B is "AI Wash" on other
+ * Table_02 models too (LocalThings, MIT); the rest follow the order of its own course list.
+ */
+const COURSE_NAMES = {
+  WA80F16B9CYL: { '01': 'Normal', '2B': 'AI Wash', '04': 'Quick Wash', B1: 'Delicates', 90: 'Hygiene Steam', '06': 'Bedding', 91: 'Energy Saving', '08': 'Rinse + Spin', 82: 'Tub Clean' },
+};
+
+/**
+ * The courses a washer lists itself, in its own order: "supportedOptions" holds one record per
+ * course that starts with the course number. The record length differs by model, so the split
+ * that contains the selected course is the one taken.
+ */
+export function washerCourses(resources) {
+  const text = resources?.['/course/vs/0']?.[`${V}supportedOptions`]?.[0];
+  const current = washerCourse(resources ?? {})?.code;
+  if (typeof text !== 'string' || !/^[0-9A-Fa-f]+$/.test(text) || !current) {
+    return [];
+  }
+  for (const [skip, width] of [[1, 22], [0, 22], [0, 20], [1, 20]]) {
+    if ((text.length - skip) % width === 0) {
+      const codes = [];
+      for (let i = skip; i < text.length; i += width) {
+        codes.push(text.slice(i, i + 2).toUpperCase());
+      }
+      if (codes.includes(current) && new Set(codes).size === codes.length) {
+        return codes;
+      }
+    }
+  }
+  return [];
+}
+
+/** The panel name of a course where the model's names are known, else null. */
+export function courseName(resources, code) {
+  const model = /\(([A-Z0-9]+)\)/.exec(String(resources?.['/wm/setinfo/vs/0']?.[`${V}modelCode`] ?? ''))?.[1];
+  return COURSE_NAMES[model]?.[String(code).toUpperCase()] ?? null;
+}
+
 /** Extras a washer reports as "Name_On" or "Name_Off" among its course options, each tried as a switch. */
 const OPTION_SWITCHES = { ctlSuperSpeed: 'SuperSpeed', ctlBubbleSoak: 'BubbleSoak', ctlBubbleStorm: 'BubbleStorm' };
 
@@ -319,18 +359,25 @@ export function washerControls(resources = {}) {
   }
   const mode = res['/st/washercourse/vs/0']?.[`${V}st.washerMode`];
   const m = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(mode ?? ''));
-  if (m) {
+  // Seen on a real washer: the first form was refused. The course is also one of the course options.
+  const courseWrites = (prefix, code) => [
+    ...(prefix ? [{ path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${prefix}${code}` } }] : []),
+    ...(res['/course/vs/0'] ? [{ path: ['course', 'vs', '0'], body: { [`${V}options`]: [`Course_${code}`] } }] : []),
+  ];
+  const courses = washerCourses(res);
+  if (courses.length > 1) {
+    // The washer lists its courses: one switch per course, the one that is on is the selected course.
+    out.ctlCourse = {
+      kind: 'choice', reads: 'course', values: courses, shown: () => String(washerCourse(res)?.code ?? ''),
+      writes: (target) => courseWrites(m?.[1] ?? null, String(target)),
+    };
+  } else if (m) {
     out.ctlCourse = {
       kind: 'press', reads: 'washerMode', shown: () => String(res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? ''),
-      // The washer lists no courses locally: the next course number is tried, and its answer says whether it exists.
+      // No course list: the next course number is tried, and the washer's answer says whether it exists.
       writes: (_on, from) => {
         const cur = /^(.*_Course_)([0-9A-F]{2})$/i.exec(String(from ?? res['/st/washercourse/vs/0']?.[`${V}st.washerMode`] ?? '')) ?? m;
-        const next = ((parseInt(cur[2], 16) + 1) % 256).toString(16).toUpperCase().padStart(2, '0');
-        return [
-          { path: ['st', 'washercourse', 'vs', '0'], body: { [`${V}st.washerMode`]: `${cur[1]}${next}` } },
-          // Seen on a real washer: the first form was refused. The course is also one of the course options.
-          ...(res['/course/vs/0'] ? [{ path: ['course', 'vs', '0'], body: { [`${V}options`]: [`Course_${next}`] } }] : []),
-        ];
+        return courseWrites(cur[1], ((parseInt(cur[2], 16) + 1) % 256).toString(16).toUpperCase().padStart(2, '0'));
       },
     };
   }

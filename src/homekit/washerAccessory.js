@@ -1,5 +1,5 @@
 import { failureText } from '../deviceLink.js';
-import { alarmText, buildWasherModel, WASHER_CONTROLS, WASHER_STAGES, washerControls, washerToggles } from '../capabilities/washer.js';
+import { alarmText, buildWasherModel, courseName, WASHER_CONTROLS, WASHER_STAGES, washerControls, washerToggles } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 import { markPrimary } from './primary.js';
 
@@ -12,7 +12,7 @@ const LABELS = {
   ctlSuperSpeed: 'Super Speed', ctlBubbleSoak: 'Bubble Soak', ctlBubbleStorm: 'Bubble Storm', ctlSmartControl: 'Smart Control',
 };
 /** A choice gets one switch per value, named with this word and the washer's own name for the value. */
-const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time' };
+const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course' };
 /** "ExtraHigh" reads as "Extra High" on a tile; what is sent stays the washer's own word. */
 /**
  * Each group also carries a slider that shows where the washer stands, so the group's tile can
@@ -101,7 +101,9 @@ export class WasherAccessory {
     }
     const [id, value] = String(key).split(':');
     if (value !== undefined && CHOICE_WORDS[id]) {
-      return `${CHOICE_WORDS[id]} ${spaced(value)}`;
+      // A course carries its panel name where the model's names are known, else its number.
+      const word = id === 'ctlCourse' ? (courseName(this.link.resources ?? this.context.resources ?? {}, value) ?? value) : spaced(value);
+      return `${CHOICE_WORDS[id]} ${word}`;
     }
     return LABELS[key] ? `${this.displayName} ${LABELS[key]}` : this.displayName;
   }
@@ -204,7 +206,7 @@ export class WasherAccessory {
       }
       const choice = this.features[id] && controls[id]?.kind === 'choice' ? controls[id].values : [];
       // Each choice sits on an accessory of its own where the platform offers one: a group in Apple Home.
-      const home = choice.length ? (this.groups?.get(id, `${this.displayName} ${LABELS[id]}`) ?? this.accessory) : this.accessory;
+      const home = choice.length ? (this.groups?.get(id, `${this.displayName} ${id === 'ctlCourse' ? CHOICE_WORDS[id] : LABELS[id]}`) ?? this.accessory) : this.accessory;
       // Switches of a choice that is off, moved, or of a value the washer no longer lists, are removed.
       for (const acc of new Set([this.accessory, home])) {
         for (const old of acc.services.filter((s) => String(s.subtype ?? '').startsWith(`${id}:`))) {
@@ -424,7 +426,7 @@ export class WasherAccessory {
    * was sent, what the washer answered and what it reports afterwards. HomeKit is answered at once.
    */
   #control(id, value) {
-    const label = LABELS[id] ?? 'Kids Lock';
+    const label = (id === 'ctlCourse' && washerControls(this.link.resources ?? {})[id]?.kind === 'choice' ? 'Course' : LABELS[id]) ?? 'Kids Lock';
     const say = (text) => this.log.info(`[${this.displayName}] control trial "${label}": ${text}`);
     const words = (w) => `${Object.entries(w.body).map(([k, v]) => `${k.replace('x.com.samsung.da.', '')}=${v}`).join(', ')} to "${w.path.join('/')}"`;
     const kind = washerControls(this.link.resources ?? {})[id]?.kind;
@@ -527,12 +529,14 @@ export class WasherAccessory {
       return;
     }
     if (st.inCycle && !was.inCycle) {
-      const course = st.course ? (st.course.drumClean ? 'drum clean' : `course ${st.course.code}`) : 'a course';
+      const named = (c) => { const name = courseName(this.context.resources ?? {}, c.code); return name ? `${c.code} (${name})` : c.code; };
+      const course = st.course ? (st.course.drumClean ? 'drum clean' : `course ${named(st.course)}`) : 'a course';
       this.log.info(`[${this.displayName}] cycle started: ${course}.`);
     }
     // A course chosen while the washer waits: its number, so the names on the panel can be matched to numbers.
     if (!(st.inCycle && !was.inCycle) && st.course && was.course && st.course.code !== was.course.code) {
-      this.log.info(`[${this.displayName}] course selected: ${st.course.drumClean ? `${st.course.code} (drum clean)` : st.course.code}.`);
+      const name = courseName(this.context.resources ?? {}, st.course.code) ?? (st.course.drumClean ? 'drum clean' : null);
+      this.log.info(`[${this.displayName}] course selected: ${st.course.code}${name ? ` (${name})` : ''}.`);
     }
     if (st.inCycle && st.stage && st.stage !== was.stage) {
       this.log.info(`[${this.displayName}] stage: ${STAGE_WORDS[st.stage] ?? st.stage}.`);

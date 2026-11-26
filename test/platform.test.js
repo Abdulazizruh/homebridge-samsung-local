@@ -598,7 +598,7 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   WasherAccessory.controlWaitMs = 200;
   const W = fixture('washer_topload').identity.di;
   const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
-    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true, ctlCourse: true, ctlWaterTemp: true } }] } });
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true, ctlCourse: true, ctlWaterTemp: true, ctlStop: true } }] } });
   t.after(() => platform.stop());
   await online(platform, W);
   const { handler, link } = platform.devices.get(W);
@@ -672,15 +672,28 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   await handler.controlJob;
   assert.equal(await writes() - burstFrom, 1);
   // A press: on and off in a flurry is one press, and its "off" is never a command.
-  const course = handler.services.get('ctlCourse').getCharacteristic(C.On);
-  const courseFrom = await writes();
+  const stop = handler.services.get('ctlStop').getCharacteristic(C.On);
+  const stopFrom = await writes();
   for (let i = 0; i < 6; i += 1) {
-    await course.handleSetRequest(true);
-    await course.handleSetRequest(false);
+    await stop.handleSetRequest(true);
+    await stop.handleSetRequest(false);
   }
   await handler.controlJob;
-  assert.equal(await writes() - courseFrom, 1);
-  assert.equal(link.resources['/st/washercourse/vs/0'][`${V}st.washerMode`], 'Table_02_Course_02');
+  assert.equal(await writes() - stopFrom, 1);
+  // Courses: the washer lists its own, so they are a group, named as on the panel where the model is known.
+  assert.equal(handler.services.has('ctlCourse'), false);
+  const courseGroup = platform.api.registered.map((r) => r.accessory).find((x) => x.displayName === 'Washer Course');
+  assert.deepEqual(courseGroup.services.filter((x) => String(x.subtype ?? '').includes(':')).map((x) => x.getCharacteristic(C.ConfiguredName).value),
+    ['Course Normal', 'Course AI Wash', 'Course Quick Wash', 'Course Delicates', 'Course Hygiene Steam', 'Course Bedding',
+      'Course Energy Saving', 'Course Rinse + Spin', 'Course Tub Clean', 'Course 87', 'Course 4D']);
+  const course = (code) => handler.services.get(`ctlCourse:${code}`).getCharacteristic(C.On);
+  await waitFor(() => course('01').value === true && course('08').value === false);
+  const courseFrom = await writes();
+  await course('08').handleSetRequest(true);
+  await handler.controlJob;
+  assert.equal(await writes() - courseFrom, 2); // the first form changed nothing here, so the second was tried
+  assert.equal(handler.context.controlTrials.ctlCourse.after, '08');
+  await waitFor(() => course('08').value === true && course('01').value === false);
   // A washer that says "accepted" and does nothing: the next form is tried too. The plain value
   // is what says whether it is locked, so the vendor word alone does not make the tile read locked.
   await platform.helper.request('sim', { key: W, action: 'refuse', value: 'ignore-once' });

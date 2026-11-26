@@ -305,7 +305,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 | Child lock | the lock becomes settable | lock or unlock |
 | Sound | a switch | the washer's sounds on or off |
 | Water temperature, spin level, rinse count, water level, wash time | a group of switches each, one per value of the washer's own list ("Water Hot", "Water Level 6", "Rinse 2"); the one that is on is the current value | the value of the switch you turn on; the others go off |
-| Course | a press | the next course number |
+| Course | a group of switches, one per course the washer lists, named as on the panel where the model's names are known, else by number; a press for the next number where the washer lists none | the course of the switch you turn on |
 | Super Speed, Bubble Soak, Bubble Storm | a switch each, where the washer reports it | that extra on or off |
 | Smart Control | a switch | remote control on or off; many washers let only the panel set it |
 
