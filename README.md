@@ -322,6 +322,8 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 
 <p><img src="assets/screenshots/washer-control.png" alt="Washer control trial in the plugin settings: fourteen controls, all unticked, with the cautions under them" width="320"></p>
 
+As far as we know, this is the first Homebridge plugin that sets a Samsung washer's course, spin, rinse, water temperature, water level, wash time and extras over the local network, without the cloud. If you know another, open an issue and this line will be corrected.
+
 In Apple Home, on a real WA80F16B9CYL top loader: each setting is a group, and a group opens on one switch per value.
 
 <p><img src="assets/screenshots/washer-home-groups.png" alt="Apple Home with a washer: the washer tile, and one tile each for Course, Options, Rinse, Spin, Wash Time, Water Level and Water Temp" width="260"> <img src="assets/screenshots/washer-home-group-open.png" alt="The Wash Time group opened in Apple Home: one switch per value, with 18 switched on" width="260"></p>

@@ -328,6 +328,8 @@ npm install --save homebridge-samsung-local
 
 <p><img src="assets/screenshots/washer-control-ar.png" alt="التحكم التجريبي بالغسالة في إعدادات الإضافة: أربعة عشر تحكمًا غير مختارة وتحتها التنبيهات" width="320"></p>
 
+على حد علمنا، هذه أول إضافة لـ Homebridge تضبط برنامج غسالة Samsung وعصرها وشطفها وحرارة مائها ومستواه ومدة الغسل والإضافات عبر الشبكة المحلية، دون السحابة. إذا عرفت إضافة أخرى فافتح بلاغًا ونصحح هذا السطر.
+
 في Apple Home، على غسالة حقيقية علوية من موديل WA80F16B9CYL: كل إعداد مجموعة، والمجموعة تفتح على مفتاح لكل قيمة.
 
 <p><img src="assets/screenshots/washer-home-groups.png" alt="تطبيق Apple Home وفيه غسالة: بلاطة الغسالة، وبلاطة لكل من Course وOptions وRinse وSpin وWash Time وWater Level وWater Temp" width="260"> <img src="assets/screenshots/washer-home-group-open.png" alt="مجموعة Wash Time مفتوحة في Apple Home: مفتاح لكل قيمة، والمفعّل منها 18" width="260"></p>
