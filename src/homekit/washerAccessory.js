@@ -8,8 +8,12 @@ const LABELS = {
   cycle: '', finished: 'Finished', unload: 'Unload', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
   ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
-  ctlWaterTemp: 'Water Temp Next', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
+  ctlWaterTemp: 'Water Temp', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
 };
+/** A choice gets one switch per value, named with this word and the washer's own name for the value. */
+const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time' };
+/** "ExtraHigh" reads as "Extra High" on a tile; what is sent stays the washer's own word. */
+const spaced = (value) => String(value).replace(/([a-z])([A-Z])/g, '$1 $2');
 const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];
 export const WASHER_FEATURES = {
@@ -37,14 +41,12 @@ export class WasherAccessory {
   static pressBackMs = 800;
   /** Writes for the same control closer together than this count as one use. */
   static tapGapMs = 1000;
-  /** How long a slider must rest before its value is sent. */
-  static levelSettleMs = 700;
 
   /** "Unload" reminder: how often it comes while the washing stays inside, and how long each one shows. */
   static unloadEveryMs = 30 * 60 * 1000;
   static unloadHoldMs = 5 * 60 * 1000;
 
-  constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'valve', finishedHoldMs = FINISHED_HOLD_MS }) {
+  constructor({ api, log, accessory, link, displayName, features = {}, cycleStyle = 'valve', finishedHoldMs = FINISHED_HOLD_MS, groups = null }) {
     // 'valve':  a valve tile with the countdown; a tap is undone at once
     // 'sensor': a running sensor; never accepts a tap, has no countdown
     // (A valve without write permission was tried: the Home app still sends the
@@ -56,6 +58,8 @@ export class WasherAccessory {
     this.hap = api.hap;
     this.log = log;
     this.accessory = accessory;
+    // Gives each choice (spin, rinse, ...) an accessory of its own, so Apple Home shows it as one group.
+    this.groups = groups;
     this.link = link;
     this.displayName = displayName;
     this.context = accessory.context;
@@ -84,6 +88,10 @@ export class WasherAccessory {
   }
 
   #label(key) {
+    const [id, value] = String(key).split(':');
+    if (value !== undefined && CHOICE_WORDS[id]) {
+      return `${CHOICE_WORDS[id]} ${spaced(value)}`;
+    }
     return LABELS[key] ? `${this.displayName} ${LABELS[key]}` : this.displayName;
   }
 
@@ -183,24 +191,38 @@ export class WasherAccessory {
       if (id === 'ctlKidsLock') {
         continue; // rides on the lock above
       }
-      const level = controls[id]?.kind === 'level';
-      if (this.features[id] && controls[id] && level) {
-        // A level is a slider: the lowest value at the bottom (shown as off), the highest at 100%.
-        drop(Service.Switch, id);
-        const fan = this.#service(id, Service.Fan, id);
-        const steps = controls[id].values.length - 1;
-        fan.getCharacteristic(Characteristic.RotationSpeed).setProps({ minValue: 0, maxValue: 100, minStep: 100 / steps })
-          .onSet((value) => { this.#level(id, Math.round((Number(value) / 100) * steps)); });
-        fan.getCharacteristic(Characteristic.On).onSet((value) => {
-          // Off is the lowest value. On alone (a tap on the tile) is the next one up, if at the bottom.
-          const now = this.#levelIndex(id);
-          if (!value) {
-            this.#level(id, 0);
-          } else if (now === 0) {
-            this.#level(id, 1);
+      const choice = this.features[id] && controls[id]?.kind === 'choice' ? controls[id].values : [];
+      // Each choice sits on an accessory of its own where the platform offers one: a group in Apple Home.
+      const home = choice.length ? (this.groups?.get(id, `${this.displayName} ${LABELS[id]}`) ?? this.accessory) : this.accessory;
+      // Switches of a choice that is off, moved, or of a value the washer no longer lists, are removed.
+      for (const acc of new Set([this.accessory, home])) {
+        for (const old of acc.services.filter((s) => String(s.subtype ?? '').startsWith(`${id}:`))) {
+          if (acc !== home || !choice.includes(old.subtype.slice(id.length + 1))) {
+            this.services.delete(old.subtype);
+            acc.removeService(old);
           }
-        });
-      } else if (this.features[id] && controls[id]) {
+        }
+      }
+      if (choice.length) {
+        drop(Service.Switch, id);
+        drop(Service.Fan, id); // the slider of 1.9.0-beta.3
+        this.services.delete(id);
+        if (home !== this.accessory) {
+          home.getService(Service.AccessoryInformation)?.setCharacteristic(Characteristic.Manufacturer, 'Samsung')
+            .setCharacteristic(Characteristic.Model, String(this.context.model ?? 'Laundry appliance').slice(0, 64));
+        }
+        for (const value of choice) {
+          const key = `${id}:${value}`;
+          const sw = home.getServiceById(Service.Switch, key) ?? home.addService(Service.Switch, this.#label(key), key);
+          this.#applyName(key, sw, this.#label(key));
+          this.services.set(key, sw);
+          sw.getCharacteristic(Characteristic.On).onSet((on) => { this.#choose(id, value, Boolean(on)); });
+        }
+        this.groups?.publish(id);
+        continue;
+      }
+      this.groups?.drop(id);
+      if (this.features[id] && controls[id]) {
         drop(Service.Fan, id);
         const sw = this.#service(id, Service.Switch, id);
         sw.getCharacteristic(Characteristic.On).onSet((value) => { this.#tap(id, Boolean(value), controls[id].kind); });
@@ -326,43 +348,31 @@ export class WasherAccessory {
     });
   }
 
-  /** Where a level stands in the washer's list: what was just asked for, else what it reports. */
-  #levelIndex(id) {
-    const control = washerControls(this.link.resources ?? {})[id];
-    if (!control?.values) {
-      return 0;
-    }
+  /** What a choice stands at: what was just chosen, else what the washer reports. */
+  #chosen(id) {
     const held = this.levelHold?.[id];
-    const value = held && held.until > Date.now() ? held.value : control.shown();
-    return Math.max(0, control.values.indexOf(String(value)));
+    return String(held && held.until > Date.now() ? held.value : washerControls(this.link.resources ?? {})[id]?.shown() ?? '');
   }
 
   /**
-   * A slider moved. Dragging sends many values, so only the last one within a short moment goes to
-   * the washer; the slider then stays where it was put until the washer reports.
+   * One switch of a choice was used. Switching one on chooses it and the others go off at once;
+   * switching the chosen one off is not a command, so it comes back on. A flurry of the same
+   * write (seen on a real washer) finds the value already chosen and sends nothing more.
    */
-  #level(id, index) {
+  #choose(id, target, on) {
     const control = washerControls(this.link.resources ?? {})[id];
-    const target = control?.values?.[Math.min(Math.max(index, 0), (control?.values?.length ?? 1) - 1)];
-    if (target === undefined) {
+    if (!control || !on || this.#chosen(id) === String(target)) {
+      setTimeout(() => this.#push(), 300).unref?.();
       return;
     }
     (this.levelHold ??= {})[id] = { value: target, until: Date.now() + WasherAccessory.controlWaitMs + 6000 };
-    clearTimeout(this.levelTimers?.[id]);
-    (this.levelTimers ??= {})[id] = setTimeout(() => {
-      if (String(control.shown()) === String(target)) {
-        delete this.levelHold[id]; // back where the washer already is: nothing to send
-        this.#push();
-        return;
+    setImmediate(() => this.#push());
+    this.#control(id, target).finally(() => {
+      if (this.levelHold?.[id]?.value === target) {
+        delete this.levelHold[id];
       }
-      this.#control(id, target).finally(() => {
-        if (this.levelHold?.[id]?.value === target) {
-          delete this.levelHold[id];
-        }
-        this.#push();
-      });
-    }, WasherAccessory.levelSettleMs);
-    this.levelTimers[id].unref?.();
+      this.#push();
+    });
   }
 
   /**
@@ -414,7 +424,7 @@ export class WasherAccessory {
         if (!now || kind === 'press') {
           return true;
         }
-        return kind === 'level' ? String(now.shown()) === String(value) : Boolean(now.current()) === Boolean(value);
+        return kind === 'choice' ? String(now.shown()) === String(value) : Boolean(now.current()) === Boolean(value);
       };
       let waited = false;
       for (const [n, write] of writes.entries()) {
@@ -592,11 +602,14 @@ export class WasherAccessory {
     const controls = washerControls(this.link.resources ?? {});
     for (const id of WASHER_CONTROLS) {
       const sw = id === 'ctlKidsLock' ? null : this.services.get(id);
-      if (sw && controls[id]?.kind === 'level') {
-        const index = this.#levelIndex(id);
-        sw.updateCharacteristic(Characteristic.On, index > 0);
-        sw.updateCharacteristic(Characteristic.RotationSpeed, (index / (controls[id].values.length - 1)) * 100);
-      } else if (sw) {
+      if (controls[id]?.kind === 'choice') {
+        const chosen = this.#chosen(id);
+        for (const value of controls[id].values) {
+          this.services.get(`${id}:${value}`)?.updateCharacteristic(Characteristic.On, value === chosen);
+        }
+        continue;
+      }
+      if (sw) {
         // A switch shows what the washer reports; a "next" or "stop" press springs back.
         const held = this.switchHold?.[id];
         const on = held && held.until > Date.now() ? held.value : Boolean(controls[id]?.current?.());

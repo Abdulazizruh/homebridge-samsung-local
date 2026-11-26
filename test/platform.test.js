@@ -593,12 +593,12 @@ test('washer extras: progress, child lock and alert appear only when asked for, 
   await waitFor(() => progress.value === 68 && lock.value === C.LockCurrentState.SECURED && alert.value === 1);
 });
 
-test('washer control trial: only ticked controls appear; a level is a slider that sends where it came to rest, and a refusal is recorded', async (t) => {
+test('washer control trial: only ticked controls appear; a choice is a group of switches with one on, and a refusal is recorded', async (t) => {
   const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
   WasherAccessory.controlWaitMs = 200;
   const W = fixture('washer_topload').identity.di;
   const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
-    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true, ctlCourse: true } }] } });
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSpin: true, ctlPower: true, ctlKidsLock: true, ctlCourse: true, ctlWaterTemp: true } }] } });
   t.after(() => platform.stop());
   await online(platform, W);
   const { handler, link } = platform.devices.get(W);
@@ -607,33 +607,41 @@ test('washer control trial: only ticked controls appear; a level is a slider tha
   assert.equal(handler.services.has('ctlRun'), false);
   assert.equal(handler.services.has('ctlBuzzer'), false);
   assert.equal(handler.services.has('unload'), false);
-  // A level is a slider (a fan in HomeKit): six spin values, so steps of 20%.
-  WasherAccessory.levelSettleMs = 20;
-  const spinFan = handler.services.get('ctlSpin');
-  assert.equal(spinFan.UUID, platform.api.hap.Service.Fan.UUID);
-  assert.equal(spinFan.getCharacteristic(C.ConfiguredName).value, 'Washer Spin');
-  const speed = spinFan.getCharacteristic(C.RotationSpeed);
-  assert.equal(speed.props.minStep, 20);
-  await waitFor(() => speed.value === 60 && spinFan.getCharacteristic(C.On).value === true); // Medium, the fourth of six
+  // A choice is a group of switches on an accessory of its own, one per value of the washer's own list.
   const writes = async () => (await platform.helper.request('sim', { key: W, action: 'writes' })).writes;
-  const settled = async () => { await new Promise((r) => setTimeout(r, 60)); await handler.controlJob; };
+  const spin = (v) => handler.services.get(`ctlSpin:${v}`).getCharacteristic(C.On);
+  assert.equal(handler.services.has('ctlSpin'), false);
+  const spinGroup = platform.api.registered.map((r) => r.accessory).find((a) => a.displayName === 'Washer Spin');
+  assert.equal(spinGroup.context.groupOf, W);
+  assert.deepEqual(spinGroup.services.filter((x) => x.subtype).map((x) => x.getCharacteristic(C.ConfiguredName).value),
+    ['Spin Rinse Hold', 'Spin Extra Low', 'Spin Low', 'Spin Medium', 'Spin High', 'Spin Extra High']);
+  assert.equal(platform.devices.get(W).accessory.services.some((x) => String(x.subtype ?? '').startsWith('ctlSpin')), false);
+  await waitFor(() => spin('Medium').value === true && spin('High').value === false);
   const before = await writes();
-  // Dragged down through 40% to 20%: only where it came to rest is sent.
-  await speed.handleSetRequest(40);
-  await speed.handleSetRequest(20);
-  await settled();
+  await spin('ExtraLow').handleSetRequest(true);
+  await waitFor(() => spin('Medium').value === false && spin('ExtraLow').value === true);
+  await handler.controlJob;
   assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'ExtraLow');
   assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'Medium', after: 'ExtraLow' });
   assert.equal(await writes() - before, 1);
-  await waitFor(() => speed.value === 20);
-  // Up to the top, then off: off is the lowest value in the washer's list.
-  await speed.handleSetRequest(100);
-  await settled();
-  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'ExtraHigh');
-  await spinFan.getCharacteristic(C.On).handleSetRequest(false);
-  await settled();
-  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'RinseHold');
-  await waitFor(() => speed.value === 0 && spinFan.getCharacteristic(C.On).value === false);
+  // Water temperature: one switch per name, like a power strip with one socket on.
+  const temp = (v) => handler.services.get(`ctlWaterTemp:${v}`).getCharacteristic(C.On);
+  assert.equal(handler.services.has('ctlWaterTemp'), false);
+  assert.equal(handler.services.get('ctlWaterTemp:Hot').getCharacteristic(C.ConfiguredName).value, 'Water Hot');
+  await waitFor(() => temp('Cold').value === true && temp('Warm').value === false && temp('Hot').value === false);
+  const tempFrom = await writes();
+  for (let i = 0; i < 12; i += 1) {
+    await temp('Hot').handleSetRequest(true); // a flurry is one command
+  }
+  await waitFor(() => temp('Cold').value === false && temp('Hot').value === true); // the other goes off at once
+  await handler.controlJob;
+  assert.equal(link.resources['/washer/vs/0'][`${V}waterValve`], 'Hot');
+  assert.equal(await writes() - tempFrom, 1);
+  assert.deepEqual({ ...handler.context.controlTrials.ctlWaterTemp, at: 0 }, { at: 0, accepted: true, before: 'Cold', after: 'Hot' });
+  // Switching the chosen one off is not a command: it comes back on.
+  await temp('Hot').handleSetRequest(false);
+  await waitFor(() => temp('Hot').value === true);
+  assert.equal(await writes() - tempFrom, 1);
   // Power: the switch follows what the washer reports.
   await handler.services.get('ctlPower').getCharacteristic(C.On).handleSetRequest(true);
   await handler.controlJob;
@@ -684,6 +692,29 @@ test('washer control trial: only ticked controls appear; a level is a slider tha
   assert.equal(handler.context.controlTrials.ctlKidsLock.accepted, false);
   assert.equal(await writes() - mid, 2); // the plain lock, then the vendor word
   assert.equal(handler.services.get('kidsLock').getCharacteristic(C.LockCurrentState).value, C.LockCurrentState.UNSECURED);
+});
+
+test('washer choice groups: kept across a restart with the option on, removed when it is unticked or the washer leaves', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const devices = [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }];
+  const entry = (features) => ({ devices: [{ host: '10.0.0.9', id: W, name: 'Washer', features }] });
+  const first = await boot({ devices, config: entry({ ctlRinse: true }) });
+  await online(first.platform, W);
+  const cached = first.platform.api.registered.map((r) => r.accessory);
+  assert.deepEqual(cached.map((a) => a.displayName).sort(), ['Washer', 'Washer Rinse']);
+  await first.platform.stop();
+  // Restart, same settings: nothing is added again and nothing is removed.
+  const second = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true }), cached });
+  await online(second.platform, W);
+  assert.equal(second.platform.api.registered.length, 0);
+  assert.equal(second.platform.api.unregistered.length, 0);
+  assert.equal(second.platform.devices.get(W).handler.services.get('ctlRinse:1').getCharacteristic(second.platform.api.hap.Characteristic.On).value, true);
+  await second.platform.stop();
+  // Unticked: the group leaves, the washer stays.
+  const third = await boot({ storage: first.storage, devices, config: entry({}), cached });
+  t.after(() => third.platform.stop());
+  await online(third.platform, W);
+  assert.deepEqual(third.platform.api.unregistered.map((a) => a.displayName), ['Washer Rinse']);
 });
 
 test('washer: extras stay away by default, and the not-used list names only what is not read', async () => {

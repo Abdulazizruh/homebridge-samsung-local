@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.5
+
+Trial version on the "beta" channel. The washer's settings with several values are now groups of switches. Your settings, pairings and accessories are kept as they are.
+
+- **Control trial: a group of switches for each setting.** Water temperature, spin level, rinse count, water level and wash time each appear as switches named after the washer's own values ("Water Hot", "Water Level 6", "Rinse 2", "Spin High"). The one that is on is the current value; switching another on chooses it and the rest go off at once. Switching the current one off is not a command, so it comes back on.
+- **Each group is an accessory of its own**, named after the washer and the setting ("... Water Level"). In Apple Home, "Show as Single Tile" keeps a group's switches together in one tile, like a power strip; new groups first appear in the bridge's room.
+- **This replaces the sliders of 1.9.0-beta.3 and the "next" press for water temperature**: a slider printed a percentage where the washer shows a number or a name. Their tiles are removed on update.
+- A choice is sent the moment its switch is used, without the short wait a slider needed, and several writes of the same choice arriving together are one command.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». إعدادات الغسالة ذات القيم المتعددة صارت مجموعات مفاتيح. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **التحكم التجريبي: مجموعة مفاتيح لكل إعداد.** حرارة الماء وقوة العصر وعدد الشطف ومستوى الماء ومدة الغسل يظهر كل منها مفاتيح بأسماء قيم الغسالة نفسها («Water Hot»، «Water Level 6»، «Rinse 2»، «Spin High»). المفعّل منها هو القيمة الحالية، وتشغيل غيره يختاره وتنطفئ البقية فورًا. إطفاء المفعّل ليس أمرًا، فيعود مفعّلًا.
+- **كل مجموعة جهاز مستقل**، اسمه اسم الغسالة مع الإعداد («... Water Level»). خيار «Show as Single Tile» في Apple Home يجمع مفاتيح المجموعة في بلاطة واحدة مثل التوصيلة، والمجموعات الجديدة تظهر أولًا في غرفة الجسر.
+- **هذا يحل محل الأشرطة المنزلقة في 1.9.0-beta.3 وضغطة «التالي» لحرارة الماء**: الشريط كان يكتب نسبة مئوية حيث تعرض الغسالة رقمًا أو اسمًا. بلاطاتها تُزال عند التحديث.
+- الاختيار يُرسل لحظة استعمال مفتاحه، دون الانتظار القصير الذي كان يحتاجه الشريط، وعدة كتابات للاختيار نفسه تصل معًا تُعد أمرًا واحدًا.
+
 ## 1.9.0-beta.4
 
 Trial version on the "beta" channel. Two corrections to the washer control trial after 1.9.0-beta.3 was tried on a real washer. Your settings, pairings and accessories are kept as they are.

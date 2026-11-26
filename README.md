@@ -304,10 +304,10 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 | Stop | a press | end the cycle |
 | Child lock | the lock becomes settable | lock or unlock |
 | Sound | a switch | the washer's sounds on or off |
-| Water temperature | a press | the next of cold, warm, hot |
-| Spin level, rinse count, water level, wash time | a slider each (shown as a fan) | the value where the slider comes to rest, from the washer's own list: the bottom is the lowest, the top the highest |
+| Water temperature, spin level, rinse count, water level, wash time | a group of switches each, one per value of the washer's own list ("Water Hot", "Water Level 6", "Rinse 2"); the one that is on is the current value | the value of the switch you turn on; the others go off |
 | Course | a press | the next course number |
 
+- Each group is an accessory of its own, so "Show as Single Tile" in Apple Home keeps its switches together in one tile, and each group can be given its own room.
 - Using a control sends its command; where a washer may take it in more than one form, each form is tried once, in order.
 - The log shows what was sent, what the washer answered and what it reports afterwards, in lines that start with `control trial`.
 - Models differ. If a control does nothing on yours after you tick it, go back to the settings and untick it.

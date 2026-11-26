@@ -441,6 +441,47 @@ export class SamsungLocalPlatform {
     this.tvs.push(handler);
   }
 
+  /**
+   * Accessories that belong to an appliance: one per group of switches (a washer's spin levels, say),
+   * so Apple Home shows each group as one tile. They come and go with the option that asks for them.
+   */
+  #groups(deviceId) {
+    const uuidOf = (id) => this.api.hap.uuid.generate(`${UUID_NAMESPACE}${deviceId}:${id}`);
+    const fresh = new Set();
+    return {
+      get: (id, name) => {
+        const uuid = uuidOf(id);
+        let accessory = this.cached.get(uuid);
+        if (!accessory) {
+          accessory = new this.api.platformAccessory(accessoryName(name), uuid, this.api.hap.Categories.SWITCH);
+          this.cached.set(uuid, accessory);
+          fresh.add(uuid);
+        }
+        accessory.context.groupOf = deviceId;
+        return accessory;
+      },
+      publish: (id) => {
+        const uuid = uuidOf(id);
+        const accessory = this.cached.get(uuid);
+        if (accessory && fresh.delete(uuid)) {
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        } else if (accessory) {
+          this.api.updatePlatformAccessories([accessory]);
+        }
+      },
+      drop: (id) => {
+        const uuid = uuidOf(id);
+        const accessory = this.cached.get(uuid);
+        if (accessory) {
+          this.cached.delete(uuid);
+          if (!fresh.delete(uuid)) {
+            this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+          }
+        }
+      },
+    };
+  }
+
   /** Create (or reuse) the accessory and link for one appliance. */
   #attach(entry, deviceId, probe) {
     const uuid = this.api.hap.uuid.generate(UUID_NAMESPACE + deviceId);
@@ -495,7 +536,7 @@ export class SamsungLocalPlatform {
     const handler = family === 'appliance'
       ? new ApplianceAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features, kind })
       : laundry
-      ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features, cycleStyle: entry.cycleStyle })
+      ? new WasherAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features, cycleStyle: entry.cycleStyle, groups: this.#groups(deviceId) })
       : new AcAccessory({ api: this.api, log: this.log, accessory, link, displayName: name, features: entry.features });
     link.on('retried', (path, accepted) => {
       this.log.info(`[${name}] the appliance answered 4.00 to "${path}"; asked again: ${accepted ? 'accepted' : 'refused again'}.`);
@@ -575,7 +616,9 @@ export class SamsungLocalPlatform {
     }
     const wanted = new Set(entries.filter((e) => e.id).map((e) => this.api.hap.uuid.generate(UUID_NAMESPACE + e.id)));
     for (const [uuid, accessory] of this.cached) {
-      if (!wanted.has(uuid)) {
+      // A group of switches stays as long as the appliance it belongs to stays.
+      const owner = accessory.context?.groupOf;
+      if (!wanted.has(owner ? this.api.hap.uuid.generate(UUID_NAMESPACE + owner) : uuid)) {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         this.cached.delete(uuid);
         this.log.info(`Removed "${accessory.displayName}" because it is no longer in the plugin settings.`);

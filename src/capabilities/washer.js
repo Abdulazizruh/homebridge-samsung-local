@@ -232,7 +232,6 @@ const STEPS = {
   ctlWashTime: ['washTime', 'supportedWashTime'],
 };
 const NOT_A_CHOICE = new Set(['none', 'nodisplay', '']);
-const NAMED = new Set(['ctlWaterTemp']);
 
 export function washerControls(resources = {}) {
   const res = resources ?? {};
@@ -294,14 +293,10 @@ export function washerControls(resources = {}) {
     const list = (Array.isArray(washer?.[`${V}${listKey}`]) ? washer[`${V}${listKey}`] : []).map(String).filter((x) => !NOT_A_CHOICE.has(lower(x)));
     if (washer && `${V}${key}` in washer && list.length > 1) {
       const now = () => String(res['/washer/vs/0']?.[`${V}${key}`] ?? '');
-      out[id] = NAMED.has(id) ? {
-        // Names, not steps (cold, warm, hot): a press moves to the next one and round again.
-        // `from`: what a press just asked for and the washer has not reported yet.
-        kind: 'press', reads: key, shown: now,
-        writes: (_on, from) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: list[(list.indexOf(String(from ?? now())) + 1) % list.length] } }],
-      } : {
-        // A level: the washer's own list, lowest first, set directly (a slider in Apple Home).
-        kind: 'level', reads: key, shown: now, values: list,
+      // One switch per value of the washer's own list, like a power strip where only one socket
+      // is on: the one that is on is what the washer reports, and switching another on sets it.
+      out[id] = {
+        kind: 'choice', reads: key, shown: now, values: list,
         writes: (target) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: String(target) } }],
       };
     }
