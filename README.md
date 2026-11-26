@@ -27,7 +27,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.9.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.9.1. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer (`WA80F16B9CYL`) and four TVs (`UA55KU7000`, `QA50Q60D`, `QA65QN70F`, `QA75QN85D`), with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -349,7 +349,7 @@ With a remote like Apple TV chosen, the touch area of that remote can be swipe l
 |---|---|
 | Unit and simulation tests (159 JavaScript, 25 Python): discovery, state and command translation, units, Auto/Turbo, comfort-mode exclusivity, external changes, reconnect, restart while offline, IP change, independence from the existing plugin, wipe and reinstall | **Pass** |
 | Real Homebridge 2.5 run as a child bridge on x86-64: runtime preparation, helper start and stop, retry with backoff, own pairing and cache files, other plugins' files untouched | **Pass** |
-| Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs) |
+| Samsung TVs as a TV tile, on four different TVs, newer and older, one of which does not work with SmartThings: pairing on the TV screen, adding to the Home app, the Control Centre remote (arrows, back, mute, volume with the device's side buttons, inputs) | **Pass** (four TVs: `UA55KU7000`, `QA50Q60D`, `QA65QN70F`, `QA75QN85D`) |
 | The remote like Apple TV (trial), on one TV with an iPhone, an iPad and an Apple Watch: pairing with the four-digit code, buttons, the touch area, typing, deleting and accepting suggestions in the TV's own text fields | **Works, with a known limit**: about one opening in three is delayed by one to five seconds, and the phone may show "Can't Connect" for a moment first |
 | Adding an appliance by its MAC address instead of its IP address, on a real home network: the plugin found the address itself | **Pass** |
 | ARM64 package availability for the pinned Python packages (Python 3.11 and 3.12) | **Checked** |
@@ -357,7 +357,7 @@ With a remote like Apple TV chosen, the touch area of that remote can be swipe l
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
 | Control from Apple Home (power, temperature, fan, modes) | **Confirmed on all five units** |
 | Reconnect on real hardware | **Pass**: short drops recover within seconds |
-| A washer (`DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage, time remaining and the cycle-finished notice |
+| A washer (`WA80F16B9CYL`, type `DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage, time remaining and the cycle-finished notice |
 | Both engines on the same six appliances (five air conditioners and the washer) | **Pass**: both connect to all six and receive push updates. In a start-up comparison Python connected about one second sooner |
 | A command refused with 4.00 and asked once more | **Confirmed on a real air conditioner**: accepted on the second ask |
 
