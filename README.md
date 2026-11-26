@@ -27,7 +27,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.8.12. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.9.0. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer and four TVs, with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -50,7 +50,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | Appliance | Level | Notes |
 |---|---|---|
 | Air conditioners (incl. WindFree; `ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) | **Tested on real units** | Full HomeKit accessory, mapped from LocalThings' data |
-| Washers | **Tested on one washer**, read only | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert, and an unload reminder every half hour while the washing stays inside. The cycle is started at the appliance; nothing is sent to it unless you tick a [control trial](#washer-control-trial), which is off by default and not yet confirmed on any washer |
+| Washers | **Tested on one washer**; control is a trial | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert, and an unload reminder every half hour while the washing stays inside. The cycle is started at the appliance; nothing is sent to it unless you tick a [control trial](#washer-control-trial), which is off by default and was tried on one top loader |
 | Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
 | Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
@@ -300,7 +300,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 
 #### Washer control (trial)
 
-**Not yet confirmed on any washer.** It exists to find out what a washer accepts over the local network, which may differ from what Samsung's cloud allows. Every control is off until you tick it.
+**Tried on one washer, a WA80F16B9CYL top loader.** There, with "Smart Control" off at its panel: power, cancel, child lock, sound, course, spin level, rinse count, water temperature, water level, wash time, Super Speed and Eco Bubble were set from Apple Home. Start and pause worked only with "Smart Control" on at the panel. Other models may differ, which is why it stays a trial. Every control is off until you tick it.
 
 | Control | In Apple Home | What is sent |
 |---|---|---|

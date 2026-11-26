@@ -2,21 +2,33 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## 1.9.0-beta.10
+## 1.9.0
 
-Trial version on the "beta" channel. What starting a cycle needs, found on a real washer. Your settings, pairings and accessories are kept as they are.
+Washers can be controlled from Apple Home, as a trial that is off by default. Your settings, pairings and accessories are kept as they are.
 
-- **Starting and pausing a cycle work on the WA80F16B9CYL top loader while "Smart Control" is on at its panel.** With it off, the washer answers "accepted" to both and does nothing; with it on, the run switch started a cycle and paused it. The settings now say so under the run switch. The switch shows the cycle's state either way.
-- **The run switch is now named "Start Pause"**, as on a washer's panel: on starts or resumes, off pauses, and the cycle keeps its place. **"Stop" is now named "Cancel Cycle"**: it ends the cycle and clears it, and on that washer it works with Smart Control off too. The two names now say what differs.
-- **New option: a "Smart Control" sensor**, detected while Smart Control is on at the panel. It can only be set there, so it is a sensor and not a switch; an automation can use it. Those who ticked its switch in 1.9.0-beta.7 get the sensor in its place.
+- **New, trial: washer controls you tick one by one** in the washer's options. Nothing is sent to a washer unless a control is ticked and used.
+- **Groups of switches for the settings with several values**: course, spin level, rinse count, water temperature, water level and wash time. Each group is an accessory of its own with one switch per value of the washer's own list ("Water Level 6", "Spin High"); the one that is on is the current value, and switching another on chooses it. "Show as Single Tile" in Apple Home keeps a group in one tile.
+- **Courses carry their panel names on the WA80F16B9CYL top loader** ("Course Normal", "Course Quick Wash", ...), each checked at its panel. Other models show the course number until their names are known.
+- **Switches**: "Power", "Start Pause", "Sound", and a group "Options" with "Super Speed", "Eco Bubble" and "Bubble Soak" where the washer reports them. "Cancel Cycle" is a press that ends the cycle and clears it; the child lock becomes settable.
+- **Tried on one washer, that top loader.** With "Smart Control" off at its panel, everything above was set from Apple Home except starting and pausing a cycle, which the washer took only with "Smart Control" on at the panel. Other models may differ: untick a control that does nothing on yours.
+- **New options, off by default**: a "Smart Control" sensor, detected while it is on at the panel, and an unload reminder every half hour while the washing stays inside.
+- **The log shows each command**, what the washer answered and what it reported before and after, in lines that start with `control trial`; it also names a course or an extra chosen at the washer, and says what each cycle used: `cycle finished; it used 0.5 kWh and 107 L of water`. The water unit is inferred from one washer.
+- **The "finished" notice comes at the minute the washer ends**, also on a washer that keeps reporting "Run" at the end of its cycle. The codes `ErrorCode_DC` (lid opened) and `ErrorCode_CL` (child lock on) are named in the log.
+- New since 1.9.0-beta.9: the run switch is named "Start Pause" and "Stop" is named "Cancel Cycle", so the two say what differs; the settings say that starting may need Smart Control on at the panel; the Smart Control sensor.
 
 **بالعربية**
 
-إصدار تجريبي على قناة «beta». ما يحتاجه بدء الدورة، كما تبيّن على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+الغسالات يمكن التحكم بها من Apple Home، كتجربة مطفأة افتراضيًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **بدء الدورة وإيقافها مؤقتًا يعملان على الغسالة WA80F16B9CYL ما دام «Smart Control» مفعّلًا من لوحتها.** وهو مطفأ تجيب الغسالة بـ«accepted» ولا تفعل شيئًا، وهو مفعّل بدأ مفتاح الدورة دورةً وأوقفها مؤقتًا. الإعدادات تذكر ذلك الآن تحت مفتاح الدورة، والمفتاح يعرض حالة الدورة في الحالتين.
-- **مفتاح الدورة صار اسمه «Start Pause»** كما في لوحة الغسالة: التشغيل يبدأ أو يكمل، والإطفاء يوقف مؤقتًا والدورة تحفظ مكانها. **و«Stop» صار اسمه «Cancel Cycle»**: ينهي الدورة ويصفّرها، ويعمل على تلك الغسالة و«Smart Control» مطفأ أيضًا. الاسمان يبيّنان الفرق الآن.
-- **خيار جديد: حساس «Smart Control»**، يُكتشف ما دام «Smart Control» مفعّلًا من اللوحة. يُضبط من هناك فقط، فهو حساس وليس مفتاحًا، ويصلح لأتمتة. ومن اختار مفتاحه في 1.9.0-beta.7 يحصل على الحساس مكانه.
+- **جديد وتجريبي: تحكمات للغسالة تختارها واحدًا واحدًا** من خيارات الغسالة. لا يُرسل شيء إلى الغسالة إلا إذا اخترت التحكم واستعملته.
+- **مجموعات مفاتيح للإعدادات ذات القيم المتعددة**: البرنامج وقوة العصر وعدد الشطف وحرارة الماء ومستوى الماء ومدة الغسل. كل مجموعة جهاز مستقل فيه مفتاح لكل قيمة من قائمة الغسالة نفسها («Water Level 6»، «Spin High»)، والمفعّل منها هو القيمة الحالية، وتشغيل غيره يختاره. خيار «Show as Single Tile» في Apple Home يجمع المجموعة في بلاطة واحدة.
+- **البرامج تحمل أسماء اللوحة على الغسالة العلوية WA80F16B9CYL** («Course Normal»، «Course Quick Wash»، ...)، وكل اسم طُوبق على لوحتها. بقية الموديلات تعرض رقم البرنامج حتى تُعرف أسماؤها.
+- **المفاتيح**: «Power» و«Start Pause» و«Sound»، ومجموعة «Options» فيها «Super Speed» و«Eco Bubble» و«Bubble Soak» حيث تعلنها الغسالة. «Cancel Cycle» ضغطة تنهي الدورة وتصفّرها، وقفل الأطفال يصبح قابلًا للضبط.
+- **جُرِّب على غسالة واحدة، تلك العلوية.** و«Smart Control» مطفأ من لوحتها ضُبط كل ما سبق من Apple Home، ما عدا بدء الدورة وإيقافها مؤقتًا، فقبلتهما الغسالة فقط و«Smart Control» مفعّل من اللوحة. قد تختلف الموديلات الأخرى: أزل علامة التحكم الذي لا يعمل معك.
+- **خيارات جديدة، مطفأة افتراضيًا**: حساس «Smart Control» يُكتشف ما دام مفعّلًا من اللوحة، وتذكير إخراج الغسيل كل نصف ساعة ما دام في الداخل.
+- **السجل يعرض كل أمر**، وبماذا ردّت الغسالة، وما أعلنته قبل وبعد، في سطور تبدأ بـ `control trial`، ويسمّي البرنامج أو الإضافة التي تُختار من الغسالة، ويذكر استهلاك كل دورة: `cycle finished; it used 0.5 kWh and 107 L of water`. وحدة الماء مستنتجة من غسالة واحدة.
+- **إشعار «انتهت» يصل في دقيقة انتهاء الغسالة**، حتى في غسالة تبقى تعلن «Run» عند نهاية دورتها. والرمزان `ErrorCode_DC` (فُتح الغطاء) و`ErrorCode_CL` (قفل الأطفال مفعّل) مسمَّيان في السجل.
+- الجديد بعد 1.9.0-beta.9: مفتاح الدورة اسمه «Start Pause» و«Stop» اسمه «Cancel Cycle»، ليبيّن الاسمان الفرق، والإعدادات تذكر أن البدء قد يحتاج «Smart Control» من اللوحة، وحساس «Smart Control».
 
 ## 1.9.0-beta.9
 
