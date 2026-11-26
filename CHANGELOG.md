@@ -2,9 +2,9 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
-## 1.9.0
+## 1.9.0-beta.1
 
-A control trial for washers, off by default. Your settings, pairings and accessories are kept as they are.
+Trial version on the "beta" channel. A control trial for washers, off by default. Your settings, pairings and accessories are kept as they are.
 
 - **New, trial: washer controls you can tick one by one.** Power, run (start, resume, pause), stop, child lock, sound, and a "next value" press for spin level, rinse count, water temperature, water level, wash time and course. Each ticked control appears in Apple Home as a switch (the child lock as a settable lock).
 - **Not yet confirmed on any washer.** The commands are built from what the washer itself reports; none has been sent to a real one before this version. The trial exists to find out what a washer accepts over the local network.
@@ -13,7 +13,7 @@ A control trial for washers, off by default. Your settings, pairings and accesso
 
 **بالعربية**
 
-تحكم تجريبي بالغسالات، مطفأ افتراضيًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+إصدار تجريبي على قناة «beta». تحكم تجريبي بالغسالات، مطفأ افتراضيًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **جديد وتجريبي: تحكمات للغسالة تختارها واحدًا واحدًا.** التشغيل والإطفاء، الدورة (بدء وإكمال وإيقاف مؤقت)، الإيقاف، قفل الأطفال، الصوت، وضغطة «القيمة التالية» لقوة العصر وعدد الشطف وحرارة الماء ومستوى الماء ومدة الغسل والبرنامج. كل تحكم تختاره يظهر في Apple Home كمفتاح (وقفل الأطفال كقفل قابل للضبط).
 - **لم يتأكد بعد على أي غسالة.** الأوامر مبنية مما تعلنه الغسالة نفسها، ولم يُرسل أي منها إلى غسالة حقيقية قبل هذا الإصدار. الغرض معرفة ما تقبله الغسالة عبر الشبكة المحلية.
