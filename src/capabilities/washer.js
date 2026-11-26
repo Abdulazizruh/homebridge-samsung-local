@@ -110,9 +110,13 @@ export function buildWasherModel(resources = {}) {
 
   const states = [lower(vs[`${V}state`]), lower(std.currentMachineState)].filter(Boolean);
   const progress = lower(vs[`${V}progress`]) || lower(std.currentJobState);
-  const running = states.some((s) => RUNNING.has(s));
-  const paused = !running && states.some((s) => PAUSED.has(s));
-  const finished = !running && !paused && (states.some((s) => FINISHED.has(s)) || FINISHED.has(progress));
+  // Seen on a real top loader over seven cycles: at the end it keeps saying "Run" with the stage
+  // "Finish" (100%), for minutes or hours, until someone switches it off. The work is over at that
+  // stage, so it counts as finished there and not as running.
+  const atEnd = FINISHED.has(progress);
+  const running = !atEnd && states.some((s) => RUNNING.has(s));
+  const paused = !running && !atEnd && states.some((s) => PAUSED.has(s));
+  const finished = !running && !paused && (atEnd || states.some((s) => FINISHED.has(s)));
   const remaining = parseDuration(vs[`${V}remainingTime`] ?? std.remainingTime);
 
   const watts = number(energy[`${V}instantaneousPower`]);

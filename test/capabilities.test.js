@@ -221,6 +221,11 @@ test('washer model: tolerant state words, idle placeholders ignored', async () =
   assert.equal(with_({ 'x.com.samsung.da.state': 'Pause' }).paused, true);
   assert.equal(with_({}, { currentMachineState: 'Running' }).running, true);
   assert.equal(with_({ 'x.com.samsung.da.state': 'Finish' }).finished, true);
+  // A real top loader at the end of a cycle: still "Run", stage "Finish", 100%. SmartThings says "Cycle complete" then.
+  const end = with_({ 'x.com.samsung.da.state': 'Run', 'x.com.samsung.da.progress': 'Finish', 'x.com.samsung.da.progressPercentage': '100' });
+  assert.deepEqual([end.running, end.inCycle, end.finished], [false, false, true]);
+  const spin = with_({ 'x.com.samsung.da.state': 'Run', 'x.com.samsung.da.progress': 'Spin' });
+  assert.deepEqual([spin.running, spin.finished], [true, false]);
   assert.equal(parseDuration('01:07:00'), 4020);
   assert.equal(parseDuration('soon'), null);
 });

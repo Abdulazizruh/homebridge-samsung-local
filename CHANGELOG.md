@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.2
+
+Trial version on the "beta" channel. Everything in 1.9.0-beta.1, plus the "finished" notice on a washer that keeps saying it runs. Your settings, pairings and accessories are kept as they are.
+
+- **The cycle now ends where the washer's work ends.** A real top loader keeps reporting "Run" with the stage "Finish" (100%) after a cycle, for minutes or hours, until it is switched off. The cycle tile stayed on all that time and the "finished" sensor never turned on. That stage now counts as finished: the tile stops and the sensor turns on once. Checked against the SmartThings app, which says "Cycle complete" at the same minute over two cycles.
+- The washer control trial is unchanged and still not confirmed on any washer.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». كل ما في 1.9.0-beta.1، ومعه إشعار «انتهت» في الغسالة التي تبقى تقول إنها تعمل. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **الدورة تنتهي الآن حيث ينتهي عمل الغسالة.** غسالة حقيقية بتحميل علوي تبقى تعلن «Run» مع المرحلة «Finish» (100%) بعد الدورة، دقائق أو ساعات، حتى تُطفأ. كانت بطاقة الدورة تبقى تعمل طوال ذلك وحساس «انتهت» لا يتفعّل أبدًا. هذه المرحلة تُحسب الآن انتهاءً: البطاقة تتوقف والحساس يتفعّل مرة واحدة. طُوبق ذلك مع تطبيق SmartThings الذي يقول «Cycle complete» في الدقيقة نفسها في دورتين.
+- التحكم التجريبي بالغسالة لم يتغير، ولم يتأكد بعد على أي غسالة.
+
 ## 1.9.0-beta.1
 
 Trial version on the "beta" channel. A control trial for washers, off by default. Your settings, pairings and accessories are kept as they are.

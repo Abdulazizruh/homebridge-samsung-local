@@ -799,6 +799,28 @@ test('washer alarm: a code confirmed on a real washer is explained; any other is
   assert.equal(washerFeatureRows(buildWasherModel(res)).find((r) => r.id === 'alarms').value, 'ErrorCode_DC / ErrorCode_XX');
 });
 
+test('washer that keeps saying "Run" at the stage "Finish": the notice comes there, once, and the tile stops', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', id: W, name: 'Washer' }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  const done = handler.services.get('finished').getCharacteristic(C.OccupancyDetected);
+  const tile = handler.services.get('cycle').getCharacteristic(C.InUse);
+  const state = (body) => platform.helper.request('sim', { key: W, action: 'remote', path: ['operational', 'state', 'vs', '0'], body });
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Spin', [`${V}remainingTime`]: '00:05:00' });
+  await waitFor(() => tile.value === 1);
+  assert.equal(done.value, 0);
+  await state({ [`${V}state`]: 'Run', [`${V}progress`]: 'Finish', [`${V}remainingTime`]: '00:00:00' });
+  await waitFor(() => done.value === 1);
+  assert.equal(tile.value, 0);
+  // Switched off at the wall later: nothing more is said.
+  await state({ [`${V}state`]: 'Ready', [`${V}progress`]: 'None' });
+  await new Promise((r) => setTimeout(r, 150));
+  assert.equal(handler.finished, true);
+});
+
 test('washer switched off in the middle of a cycle: stopped, not finished, no notice; on again, a new cycle', async (t) => {
   const W = fixture('washer_topload').identity.di;
   const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }], config: { devices: [{ host: '10.0.0.9', name: 'Washer' }] } });
