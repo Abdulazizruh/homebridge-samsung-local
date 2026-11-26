@@ -6,6 +6,11 @@
 [![npm](https://badgen.net/npm/v/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
 [![downloads](https://badgen.net/npm/dm/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
 [![total downloads](https://badgen.net/npm/dt/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
+[![release](https://badgen.net/github/release/Abdulazizruh/homebridge-samsung-local/stable)](https://github.com/Abdulazizruh/homebridge-samsung-local/releases)
+[![stars](https://badgen.net/github/stars/Abdulazizruh/homebridge-samsung-local)](https://github.com/Abdulazizruh/homebridge-samsung-local/stargazers)
+[![issues](https://badgen.net/github/open-issues/Abdulazizruh/homebridge-samsung-local)](https://github.com/Abdulazizruh/homebridge-samsung-local/issues)
+[![last commit](https://badgen.net/github/last-commit/Abdulazizruh/homebridge-samsung-local)](https://github.com/Abdulazizruh/homebridge-samsung-local/commits/main)
+[![node](https://badgen.net/npm/node/homebridge-samsung-local)](https://nodejs.org)
 [![tests](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml)
 [![license](https://badgen.net/npm/license/homebridge-samsung-local)](LICENSE)
 
