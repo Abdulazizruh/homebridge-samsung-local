@@ -243,7 +243,7 @@ test('washer model: tolerant state words, idle placeholders ignored', async () =
   // Courses: the washer's own list, in its own order; a course is set in two forms, tried in order.
   const { washerCourses, courseName } = await import('../src/capabilities/washer.js');
   assert.deepEqual(washerCourses(base), ['01', '2B', '04', 'B1', '90', '06', '91', '08', '82', '87', '4D']);
-  assert.deepEqual([courseName(base, '08'), courseName(base, '2b'), courseName(base, '87')], ['Rinse + Spin', 'AI Wash', null]);
+  assert.deepEqual([courseName(base, '08'), courseName(base, '2b'), courseName(base, '87'), courseName(base, 'FF')], ['Rinse + Spin', 'AI Wash', 'Downloaded', null]);
   assert.equal(controls.ctlCourse.kind, 'choice');
   assert.deepEqual(controls.ctlCourse.writes('08'), [
     { path: ['st', 'washercourse', 'vs', '0'], body: { 'x.com.samsung.da.st.washerMode': 'Table_02_Course_08' } },

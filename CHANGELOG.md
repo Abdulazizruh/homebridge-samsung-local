@@ -2,6 +2,28 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.8
+
+Trial version on the "beta" channel. Corrections after 1.9.0-beta.7 was tried on a real washer. Your settings, pairings and accessories are kept as they are.
+
+- **Fixed: the settings page opened with no text.** Since 1.9.0-beta.5 one apostrophe inside a text of the page ended its script, so the page showed its boxes and nothing else, on every device. The page's script is now checked on every change.
+- **The sliders of 1.9.0-beta.7 are gone.** Apple Home counted a slider as one more thing that is "on" and showed no value on the group's tile, so it did not do what it was added for. The groups are switches only again; the sliders leave on update.
+- **Courses can be set from Apple Home on the WA80F16B9CYL top loader**, with remote control off at its panel. The washer refuses the first form and takes the second; the form a washer carried out is now remembered and goes first, so a course is set with one command instead of a refusal and a wait of several seconds.
+- **All its course names are now checked at the panel**, course by course: Normal, AI Wash, Quick Wash, Delicates, Hygiene Steam, Bedding, Energy Saving, Rinse and Spin, Tub Clean, Downloaded (87). Course 4D showed "Tub Clean" there as 82 does, so it is named "Tub Clean 4D".
+- **Fixed: a name with "+" was refused by Apple Home** ("Rinse + Spin", with a warning in the log). Names are now written with letters, numbers and plain punctuation only.
+- **A chosen switch stays where it was put a little longer** when the washer's report is late. Seen on that washer: a course it had taken showed in its report up to 15 seconds after the command, and the switch jumped back meanwhile.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». تصحيحات بعد تجربة 1.9.0-beta.7 على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **إصلاح: صفحة الإعدادات كانت تفتح بلا نص.** منذ 1.9.0-beta.5 أنهت فاصلة عليا واحدة داخل نص في الصفحة برنامجها، فظهرت الصفحة بمربعاتها فقط على كل الأجهزة. برنامج الصفحة يُفحص الآن مع كل تغيير.
+- **أشرطة 1.9.0-beta.7 أُزيلت.** Apple Home عدّ الشريط شيئًا إضافيًا «يعمل» ولم يعرض قيمة على بلاطة المجموعة، فلم يؤدِّ ما أُضيف لأجله. المجموعات مفاتيح فقط كما كانت، والأشرطة تختفي عند التحديث.
+- **البرامج تُضبط من Apple Home على الغسالة WA80F16B9CYL**، والتحكم عن بعد مطفأ من لوحتها. الغسالة ترفض الصيغة الأولى وتقبل الثانية، والصيغة التي نفذتها الغسالة تُحفظ الآن وتُرسل أولًا، فيُضبط البرنامج بأمر واحد بدل رفض وانتظار ثوانٍ.
+- **كل أسماء برامجها طُوبقت على اللوحة**، برنامجًا برنامجًا: Normal وAI Wash وQuick Wash وDelicates وHygiene Steam وBedding وEnergy Saving وRinse and Spin وTub Clean وDownloaded (87). البرنامج 4D أظهر «Tub Clean» هناك مثل 82، فسُمّي «Tub Clean 4D».
+- **إصلاح: الاسم الذي فيه «+» كان يرفضه Apple Home** («Rinse + Spin»، مع تحذير في السجل). الأسماء تُكتب الآن بحروف وأرقام وعلامات بسيطة فقط.
+- **المفتاح المختار يبقى في مكانه مدة أطول قليلًا** إذا تأخر إعلان الغسالة. شوهد على تلك الغسالة: برنامج قبلته ظهر في إعلانها بعد الأمر بمدة وصلت إلى 15 ثانية، وكان المفتاح يرجع في الأثناء.
+
 ## 1.9.0-beta.7
 
 Trial version on the "beta" channel. More of the washer's panel in the control trial. Your settings, pairings and accessories are kept as they are.

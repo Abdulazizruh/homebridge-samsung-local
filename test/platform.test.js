@@ -685,7 +685,7 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   const courseGroup = platform.api.registered.map((r) => r.accessory).find((x) => x.displayName === 'Washer Course');
   assert.deepEqual(courseGroup.services.filter((x) => String(x.subtype ?? '').includes(':')).map((x) => x.getCharacteristic(C.ConfiguredName).value),
     ['Course Normal', 'Course AI Wash', 'Course Quick Wash', 'Course Delicates', 'Course Hygiene Steam', 'Course Bedding',
-      'Course Energy Saving', 'Course Rinse + Spin', 'Course Tub Clean', 'Course 87', 'Course 4D']);
+      'Course Energy Saving', 'Course Rinse and Spin', 'Course Tub Clean', 'Course Downloaded', 'Course Tub Clean 4D']);
   const course = (code) => handler.services.get(`ctlCourse:${code}`).getCharacteristic(C.On);
   await waitFor(() => course('01').value === true && course('08').value === false);
   const courseFrom = await writes();
@@ -694,6 +694,14 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   assert.equal(await writes() - courseFrom, 2); // the first form changed nothing here, so the second was tried
   assert.equal(handler.context.controlTrials.ctlCourse.after, '08');
   await waitFor(() => course('08').value === true && course('01').value === false);
+  // The form that worked is remembered and goes first next time: one command, not two.
+  assert.equal(handler.context.controlForms.ctlCourse, 'course/vs/0');
+  await new Promise((r) => setTimeout(r, 50));
+  const againFrom = await writes();
+  await course('2B').handleSetRequest(true);
+  await handler.controlJob;
+  assert.equal(await writes() - againFrom, 1);
+  assert.equal(handler.context.controlTrials.ctlCourse.after, '2B');
   // A washer that says "accepted" and does nothing: the next form is tried too. The plain value
   // is what says whether it is locked, so the vendor word alone does not make the tile read locked.
   await platform.helper.request('sim', { key: W, action: 'refuse', value: 'ignore-once' });
@@ -740,28 +748,6 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   assert.equal(second.platform.api.unregistered.length, 0);
   assert.equal(second.platform.devices.get(W).handler.services.get('ctlRinse:1').getCharacteristic(second.platform.api.hap.Characteristic.On).value, true);
   await second.platform.stop();
-  // Each group also carries a slider that only shows where the washer stands: a drag sends nothing and is undone.
-  const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
-  WasherAccessory.controlWaitMs = 200;
-  const fourth = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true, ctlWaterLevel: true }), cached });
-  await online(fourth.platform, W);
-  const C4 = fourth.platform.api.hap.Characteristic;
-  const h4 = fourth.platform.devices.get(W).handler;
-  const slider = h4.services.get('ctlWaterLevel/slider');
-  assert.equal(slider.UUID, fourth.platform.api.hap.Service.Fan.UUID);
-  assert.equal(slider.getCharacteristic(C4.ConfiguredName).value, 'Water Level');
-  assert.equal(slider.getCharacteristic(C4.RotationSpeed).props.minStep, 10);
-  assert.equal(h4.services.get('ctlRinse/slider').getCharacteristic(C4.RotationSpeed).props.minStep, 20);
-  const sent = async () => (await fourth.platform.helper.request('sim', { key: W, action: 'writes' })).writes;
-  const from = await sent();
-  await slider.getCharacteristic(C4.RotationSpeed).handleSetRequest(60);
-  await waitFor(() => slider.getCharacteristic(C4.RotationSpeed).value === 0); // the fixture stands at level 0
-  assert.equal(await sent(), from);
-  await h4.services.get('ctlWaterLevel:3').getCharacteristic(C4.On).handleSetRequest(true);
-  await h4.controlJob;
-  await waitFor(() => slider.getCharacteristic(C4.RotationSpeed).value === 30 && slider.getCharacteristic(C4.On).value === true);
-  assert.equal(await sent() - from, 1);
-  await fourth.platform.stop();
   // Unticked: the group leaves, the washer stays.
   const third = await boot({ storage: first.storage, devices, config: entry({}), cached });
   t.after(() => third.platform.stop());

@@ -1,7 +1,7 @@
 {
   "name": "homebridge-samsung-local",
   "displayName": "Samsung Local",
-  "version": "1.9.0-beta.7",
+  "version": "1.9.0-beta.8",
   "description": "No SmartThings account sign-in, API or token. Samsung air conditioners, TVs, washers and other SmartThings appliances in Apple Home, controlled locally over your home network; away from home through an Apple TV, HomePod or HomeView. An automatic network scan finds your appliances. SmartThings is only an option, used once, to bring their names and rooms over automatically.",
   "type": "module",
   "main": "index.js",

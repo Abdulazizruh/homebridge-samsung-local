@@ -234,11 +234,11 @@ const STEPS = {
 };
 /**
  * Course names by model, as printed on the panel. A washer reports course numbers only; the names
- * live in Samsung's app. WA80F16B9CYL: 01, 08 and 82 seen in its own log; 2B is "AI Wash" on other
- * Table_02 models too (LocalThings, MIT); the rest follow the order of its own course list.
+ * live in Samsung's app. WA80F16B9CYL: each name was checked by its owner at the panel, course by
+ * course. 4D showed "Tub Clean" there as 82 does, so it carries its number to tell the two apart.
  */
 const COURSE_NAMES = {
-  WA80F16B9CYL: { '01': 'Normal', '2B': 'AI Wash', '04': 'Quick Wash', B1: 'Delicates', 90: 'Hygiene Steam', '06': 'Bedding', 91: 'Energy Saving', '08': 'Rinse + Spin', 82: 'Tub Clean' },
+  WA80F16B9CYL: { '01': 'Normal', '2B': 'AI Wash', '04': 'Quick Wash', B1: 'Delicates', 90: 'Hygiene Steam', '06': 'Bedding', 91: 'Energy Saving', '08': 'Rinse + Spin', 82: 'Tub Clean', 87: 'Downloaded', '4D': 'Tub Clean 4D' },
 };
 
 /**

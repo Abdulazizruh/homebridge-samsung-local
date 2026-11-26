@@ -14,11 +14,8 @@ const LABELS = {
 /** A choice gets one switch per value, named with this word and the washer's own name for the value. */
 const CHOICE_WORDS = { ctlSpin: 'Spin', ctlRinse: 'Rinse', ctlWaterTemp: 'Water', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course' };
 /** "ExtraHigh" reads as "Extra High" on a tile; what is sent stays the washer's own word. */
-/**
- * Each group also carries a slider that shows where the washer stands, so the group's tile can
- * show it from outside. It only shows: choosing is done with the switches, and a drag is undone.
- */
-const SLIDER_TOO = new Set(['ctlSpin', 'ctlRinse', 'ctlWaterTemp', 'ctlWaterLevel', 'ctlWashTime']);
+/** A name Apple Home accepts: letters, numbers, spaces and plain punctuation ("Rinse + Spin" is refused). */
+const homeName = (text) => String(text).replace(/\s*[+&]\s*/g, ' and ').replace(/[^\p{L}\p{N} '.,-]/gu, '').replace(/\s+/g, ' ').trim();
 const spaced = (value) => String(value).replace(/([a-z])([A-Z])/g, '$1 $2');
 const STAGE_WORDS = { wash: 'washing', rinse: 'rinsing', spin: 'spinning', drumcleaning: 'drum cleaning', weightsensing: 'weighing the load' };
 export const CYCLE_STYLES = ['valve', 'sensor'];
@@ -96,14 +93,11 @@ export class WasherAccessory {
   }
 
   #label(key) {
-    if (String(key).endsWith('/slider')) {
-      return CHOICE_WORDS[String(key).slice(0, -'/slider'.length)];
-    }
     const [id, value] = String(key).split(':');
     if (value !== undefined && CHOICE_WORDS[id]) {
       // A course carries its panel name where the model's names are known, else its number.
       const word = id === 'ctlCourse' ? (courseName(this.link.resources ?? this.context.resources ?? {}, value) ?? value) : spaced(value);
-      return `${CHOICE_WORDS[id]} ${word}`;
+      return homeName(`${CHOICE_WORDS[id]} ${word}`);
     }
     return LABELS[key] ? `${this.displayName} ${LABELS[key]}` : this.displayName;
   }
@@ -231,25 +225,15 @@ export class WasherAccessory {
           this.services.set(key, sw);
           sw.getCharacteristic(Characteristic.On).onSet((on) => { this.#choose(id, value, Boolean(on)); });
         }
-        const sliderKey = `${id}/slider`;
-        if (SLIDER_TOO.has(id) && choice.length > 1) {
-          const fan = home.getServiceById(Service.Fan, sliderKey) ?? home.addService(Service.Fan, this.#label(sliderKey), sliderKey);
-          this.#applyName(sliderKey, fan, this.#label(sliderKey));
-          this.services.set(sliderKey, fan);
-          const steps = choice.length - 1;
-          // Shows only: whatever is set on it is put back to where the washer stands.
-          const undo = () => { setTimeout(() => this.#push(), 300).unref?.(); };
-          fan.getCharacteristic(Characteristic.RotationSpeed).setProps({ minValue: 0, maxValue: 100, minStep: 100 / steps }).onSet(undo);
-          fan.getCharacteristic(Characteristic.On).onSet(undo);
-        } else {
-          for (const acc of new Set([this.accessory, home])) {
-            const old = acc.getServiceById(Service.Fan, sliderKey);
-            if (old) {
-              acc.removeService(old);
-            }
+        // The slider of 1.9.0-beta.7 is gone: Apple Home counted it as one more thing that is "on" and
+        // showed no value on the group's tile.
+        for (const acc of new Set([this.accessory, home])) {
+          const old = acc.getServiceById(Service.Fan, `${id}/slider`);
+          if (old) {
+            acc.removeService(old);
           }
-          this.services.delete(sliderKey);
         }
+        this.services.delete(`${id}/slider`);
         this.groups?.publish(id);
         continue;
       }
@@ -414,8 +398,15 @@ export class WasherAccessory {
     (this.levelHold ??= {})[id] = { value: target, until: Date.now() + WasherAccessory.controlWaitMs + 6000 };
     setImmediate(() => this.#push());
     this.#control(id, target).finally(() => {
-      if (this.levelHold?.[id]?.value === target) {
-        delete this.levelHold[id];
+      const held = this.levelHold?.[id];
+      if (held?.value === target) {
+        if (String(washerControls(this.link.resources ?? {})[id]?.shown()) === String(target)) {
+          delete this.levelHold[id];
+        } else {
+          // Seen on a real washer: a course it had taken showed in its report some seconds after the
+          // reading that follows a command. The switch stays where it was put for the rest of its time.
+          setTimeout(() => this.#push(), Math.max(0, held.until - Date.now()) + 50).unref?.();
+        }
       }
       this.#push();
     });
@@ -441,7 +432,12 @@ export class WasherAccessory {
     // the first one asked for, not from a report the washer has not made yet.
     const asked = (this.asked ??= {});
     const control = washerControls(this.link.resources ?? {})[id];
-    const writes = control ? control.writes(value, asked[id]?.value) : [];
+    let writes = control ? control.writes(value, asked[id]?.value) : [];
+    // The form this washer carried out last time goes first: a form it refuses costs seconds each time.
+    const proven = kind === 'press' ? null : this.context.controlForms?.[id];
+    if (proven && writes.some((w) => w.path.join('/') === proven)) {
+      writes = [...writes.filter((w) => w.path.join('/') === proven), ...writes.filter((w) => w.path.join('/') !== proven)];
+    }
     const mine = (asked[id]?.n ?? 0) + 1;
     if (kind === 'press' && writes.length > 0) {
       asked[id] = { n: mine, value: Object.values(writes[0].body)[0] };
@@ -500,6 +496,9 @@ export class WasherAccessory {
         await report();
         if (carriedOut()) {
           say(`sent ${words(write)}: accepted.`);
+          if (kind !== 'press') {
+            (this.context.controlForms ??= {})[id] = write.path.join('/');
+          }
           break;
         }
         if (n === writes.length - 1) {
@@ -677,12 +676,6 @@ export class WasherAccessory {
         const chosen = this.#chosen(id);
         for (const value of controls[id].values) {
           this.services.get(`${id}:${value}`)?.updateCharacteristic(Characteristic.On, value === chosen);
-        }
-        const slider = this.services.get(`${id}/slider`);
-        if (slider) {
-          const index = Math.max(0, controls[id].values.indexOf(chosen));
-          slider.updateCharacteristic(Characteristic.On, index > 0);
-          slider.updateCharacteristic(Characteristic.RotationSpeed, (index / (controls[id].values.length - 1)) * 100);
         }
         continue;
       }
