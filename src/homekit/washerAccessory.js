@@ -7,7 +7,7 @@ const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = {
   cycle: '', finished: 'Finished', unload: 'Unload', smartControl: 'Smart Control', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
-  ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
+  ctlPower: 'Power', ctlRun: 'Start Pause', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
   ctlWaterTemp: 'Water Temp', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
   ctlSuperSpeed: 'Super Speed', ctlBubbleSoak: 'Bubble Soak', ctlBubbleStorm: 'Eco Bubble',
 };
