@@ -624,6 +624,23 @@ test('washer control trial: only ticked controls appear; a choice is a group of 
   assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'ExtraLow');
   assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'Medium', after: 'ExtraLow' });
   assert.equal(await writes() - before, 1);
+  // Seen on a real washer: a routine reading arrived between the command and the washer's own
+  // report, and was read as "nothing changed". Such a reading no longer ends the wait.
+  await new Promise((r) => setTimeout(r, 1100));
+  const staleFrom = await writes();
+  await spin('High').handleSetRequest(true);
+  link.emit('update', link.resources);
+  await handler.controlJob;
+  assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'ExtraLow', after: 'High' });
+  assert.equal(spin('High').value, true);
+  // Three choices in a hurry: one command at a time, and of those waiting only the newest is sent.
+  await spin('Low').handleSetRequest(true);
+  await spin('Medium').handleSetRequest(true);
+  await spin('ExtraHigh').handleSetRequest(true);
+  await handler.controlJob;
+  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'ExtraHigh');
+  assert.equal(await writes() - staleFrom, 3); // High, Low, ExtraHigh: Medium was overtaken while waiting
+  await waitFor(() => spin('ExtraHigh').value === true && spin('Low').value === false && spin('High').value === false);
   // Water temperature: one switch per name, like a power strip with one socket on.
   const temp = (v) => handler.services.get(`ctlWaterTemp:${v}`).getCharacteristic(C.On);
   assert.equal(handler.services.has('ctlWaterTemp'), false);

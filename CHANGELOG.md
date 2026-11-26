@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.6
+
+Trial version on the "beta" channel. Corrections to the groups of switches after 1.9.0-beta.5 was tried on a real washer. Your settings, pairings and accessories are kept as they are.
+
+- **Fixed: a chosen switch could jump back for some seconds, then settle.** A routine reading of the washer that arrived between the command and the washer's own report was taken as "nothing changed": the old value lit up again until the next reading. The plugin now waits for a report that shows the change, or for a reading taken after the command, before it decides; the chosen switch stays on meanwhile and the others stay off.
+- **One command at a time.** Commands sent on top of each other made the washer close its connection for about a minute. They now go out one after another, and of several choices for the same setting made in a hurry only the newest is sent.
+- **The log says so when a command was accepted and nothing changed**: `accepted, but the washer's report did not change`.
+- Seen on that washer during the rinse stage: the rinse count was accepted, reported as changed, and was back at its old value a few minutes later. Whether it holds when set before a cycle starts is not yet known.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». تصحيحات لمجموعات المفاتيح بعد تجربة 1.9.0-beta.5 على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **إصلاح: المفتاح المختار كان قد يرجع لثوانٍ ثم يستقر.** قراءة دورية للغسالة تصل بين الأمر وإعلان الغسالة كانت تُفهم «لم يتغير شيء»، فتضيء القيمة القديمة حتى القراءة التالية. الآن تنتظر الإضافة إعلانًا يُظهر التغيير، أو قراءة أُخذت بعد الأمر، قبل أن تحكم، ويبقى المفتاح المختار مفعّلًا والبقية مطفأة في الأثناء.
+- **أمر واحد في كل مرة.** الأوامر المرسلة فوق بعضها جعلت الغسالة تغلق اتصالها نحو دقيقة. الآن تخرج واحدًا بعد الآخر، ومن عدة اختيارات سريعة للإعداد نفسه يُرسل الأحدث فقط.
+- **السجل يذكر متى قُبل الأمر ولم يتغير شيء**: `accepted, but the washer's report did not change`.
+- شوهد على تلك الغسالة في مرحلة الشطف: عدد الشطف قُبل وأُعلن متغيرًا، ثم عاد إلى قيمته القديمة بعد دقائق. لم يُعرف بعد هل يثبت إذا ضُبط قبل بدء الدورة.
+
 ## 1.9.0-beta.5
 
 Trial version on the "beta" channel. The washer's settings with several values are now groups of switches. Your settings, pairings and accessories are kept as they are.

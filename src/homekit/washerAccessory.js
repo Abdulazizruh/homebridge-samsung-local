@@ -37,6 +37,8 @@ export const WASHER_FEATURES = {
 export class WasherAccessory {
   /** How long a control trial waits for the washer's next report: both engines read it 4 s after a command. */
   static controlWaitMs = 9000;
+  /** A reading that arrives this long after a command was taken after it. */
+  static freshAfterMs = 3800;
   /** How soon a "next" or "stop" press shows off again. */
   static pressBackMs = 800;
   /** Writes for the same control closer together than this count as one use. */
@@ -400,7 +402,13 @@ export class WasherAccessory {
     if (kind === 'press' && writes.length > 0) {
       asked[id] = { n: mine, value: Object.values(writes[0].body)[0] };
     }
-    const job = (async () => {
+    // One command at a time for the whole washer (seen on a real one: commands sent on top of each
+    // other closed its session), and the newest wish for a control wins over one still waiting.
+    const turn = ((this.turns ??= {})[id] = (this.turns[id] ?? 0) + 1);
+    const run = async () => {
+      if (kind !== 'press' && this.turns[id] !== turn) {
+        return; // a newer choice for this control came in while this one waited
+      }
       if (!control || !this.link.online) {
         say('not sent: the washer is not reachable.');
         if (asked[id]?.n === mine) {
@@ -408,17 +416,9 @@ export class WasherAccessory {
         }
         return;
       }
-      const before = control.shown();
+      const before = (washerControls(this.link.resources ?? {})[id] ?? control).shown();
       let accepted = false;
-      // The washer's own next report is the proof, whatever it answered.
-      const report = () => new Promise((resolve) => {
-        const timer = setTimeout(done, WasherAccessory.controlWaitMs);
-        timer.unref?.();
-        const link = this.link;
-        function done() { clearTimeout(timer); link.off('update', done); resolve(); }
-        link.once('update', done);
-      });
-      // Did the washer do it? A switch, a lock and a level say so themselves; a press cannot.
+      // Did the washer do it? A switch, a lock and a choice say so themselves; a press cannot.
       const carriedOut = () => {
         const now = washerControls(this.link.resources ?? {})[id];
         if (!now || kind === 'press') {
@@ -426,7 +426,25 @@ export class WasherAccessory {
         }
         return kind === 'choice' ? String(now.shown()) === String(value) : Boolean(now.current()) === Boolean(value);
       };
-      let waited = false;
+      const shows = () => (kind === 'press'
+        ? String(washerControls(this.link.resources ?? {})[id]?.shown() ?? '') !== String(before) : carriedOut());
+      // The washer's own report is the proof, whatever it answered. Seen on a real washer: a routine
+      // reading taken before the command arrived in between and was read as "nothing changed". So
+      // the wait ends when the report shows the change, or with a reading taken after the command
+      // (both engines read 4 s after a write), or when the time is up.
+      const report = () => new Promise((resolve) => {
+        const sentAt = Date.now();
+        const link = this.link;
+        const timer = setTimeout(done, WasherAccessory.controlWaitMs);
+        timer.unref?.();
+        function done() { clearTimeout(timer); link.off('update', seen); resolve(); }
+        function seen() {
+          if (shows() || Date.now() - sentAt >= WasherAccessory.freshAfterMs) {
+            done();
+          }
+        }
+        link.on('update', seen);
+      });
       for (const [n, write] of writes.entries()) {
         try {
           await this.link.send([write]);
@@ -436,16 +454,16 @@ export class WasherAccessory {
           continue;
         }
         await report();
-        waited = true;
-        if (carriedOut() || n === writes.length - 1) {
+        if (carriedOut()) {
           say(`sent ${words(write)}: accepted.`);
+          break;
+        }
+        if (n === writes.length - 1) {
+          say(`sent ${words(write)}: accepted, but the washer's report did not change.`);
           break;
         }
         // Seen on a real washer: a child lock command answered "accepted" and nothing changed.
         say(`sent ${words(write)}: accepted, but the washer's report did not change. Trying the next form.`);
-      }
-      if (!waited) {
-        await report();
       }
       if (asked[id]?.n === mine) {
         delete asked[id]; // no newer press: the washer's own report is the base again
@@ -453,9 +471,12 @@ export class WasherAccessory {
       const after = washerControls(this.link.resources ?? {})[id]?.shown() ?? '';
       say(`the washer reported ${control.reads}=${before} before and ${control.reads}=${after} now.`);
       (this.context.controlTrials ??= {})[id] = { at: Date.now(), accepted, before, after };
-    })();
-    this.controlJob = job.catch((err) => { say(`failed: ${err.message}`); }).finally(() => { this.#push(); });
-    return this.controlJob;
+    };
+    const job = (this.controlQueue ?? Promise.resolve()).then(run).catch((err) => { say(`failed: ${err.message}`); })
+      .finally(() => { this.#push(); });
+    this.controlQueue = job;
+    this.controlJob = job;
+    return job;
   }
 
   /** The course when a cycle starts, and each new stage: words and a course number only. */
