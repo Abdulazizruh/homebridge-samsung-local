@@ -215,7 +215,16 @@ export class WasherAccessory {
       if (id === 'ctlKidsLock') {
         continue; // rides on the lock above
       }
-      const choice = this.features[id] && controls[id]?.kind === 'choice' ? controls[id].values : [];
+      // Seen on a real washer: in one course it listed no extras, their group left Apple Home and came
+      // back as a new accessory outside its room. So what the washer has listed once is kept: a group
+      // leaves only when its control is unticked, never because the washer does not list it right now.
+      const known = (this.context.controlLists ??= {});
+      if (controls[id]?.kind === 'choice' && controls[id].values.length) {
+        known[id] = controls[id].values;
+      } else if (controls[id] || !this.features[id]) {
+        delete known[id]; // offered as a plain press now, or unticked
+      }
+      const choice = this.features[id] ? (known[id] ?? []) : [];
       // Each choice sits on an accessory of its own where the platform offers one: a group in Apple Home.
       const home = choice.length ? (this.groups?.get(id, `${this.displayName} ${id === 'ctlCourse' ? CHOICE_WORDS[id] : LABELS[id]}`) ?? this.accessory) : this.accessory;
       // Switches of a choice that is off, moved, or of a value the washer no longer lists, are removed.
@@ -276,7 +285,15 @@ export class WasherAccessory {
       }
     }
     // The panel's extra buttons: together on an accessory of their own where the platform offers one.
-    const options = OPTION_IDS.filter((id) => this.features[id] && controls[id]);
+    const seen = (this.context.controlLists ??= {});
+    for (const id of OPTION_IDS) {
+      if (!this.features[id]) {
+        delete seen[id];
+      } else if (controls[id]) {
+        seen[id] = true;
+      }
+    }
+    const options = OPTION_IDS.filter((id) => this.features[id] && (controls[id] || seen[id]));
     const optionsHome = options.length ? (this.groups?.get('options', `${this.displayName} Options`) ?? this.accessory) : null;
     for (const id of OPTION_IDS) {
       for (const acc of new Set([this.accessory, optionsHome])) {
@@ -501,7 +518,7 @@ export class WasherAccessory {
         return; // a newer choice for this control came in while this one waited
       }
       if (!control || !this.link.online) {
-        say('not sent: the washer is not reachable.');
+        say(this.link.online ? 'not sent: the washer does not offer this right now.' : 'not sent: the washer is not reachable.');
         if (asked[id]?.n === mine) {
           delete asked[id];
         }
@@ -787,7 +804,12 @@ export class WasherAccessory {
     const controls = washerControls(this.link.resources ?? {});
     for (const id of WASHER_CONTROLS) {
       const sw = id === 'ctlKidsLock' ? null : this.services.get(id);
-      if (controls[id]?.kind === 'choice') {
+      const listed = this.context.controlLists?.[id];
+      if (controls[id]?.kind !== 'choice' && Array.isArray(listed)) {
+        for (const value of listed) { // kept while the washer does not list it: nothing is chosen
+          this.services.get(`${id}:${value}`)?.updateCharacteristic(Characteristic.On, false);
+        }
+      } else if (controls[id]?.kind === 'choice') {
         const chosen = this.#chosen(id);
         for (const value of controls[id].values) {
           this.services.get(`${id}:${value}`)?.updateCharacteristic(Characteristic.On, value === chosen);

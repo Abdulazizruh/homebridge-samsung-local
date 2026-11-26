@@ -1078,3 +1078,27 @@ test('washer control, a form the washer has carried out before: the next command
   await handler.controlJob;
   assert.equal(await writes() - again, 2);
 });
+
+test('washer groups stay while the washer does not list them: a group leaves only when it is unticked', async (t) => {
+  const W = fixture('washer_topload').identity.di;
+  const { platform } = await boot({ devices: [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }],
+    config: { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlSuperSpeed: true, ctlBubbleStorm: true, ctlSpin: true } }] } });
+  t.after(() => platform.stop());
+  await online(platform, W);
+  const { handler } = platform.devices.get(W);
+  const C = platform.api.hap.Characteristic;
+  assert.deepEqual(platform.api.registered.map((r) => r.accessory.displayName).sort(), ['Washer', 'Washer Options', 'Washer Spin']);
+  // Seen on a real washer: for a while it listed no extras. Their group left Apple Home and came back
+  // as a new accessory, outside the room it had been given.
+  await platform.helper.request('sim', { key: W, action: 'remote', path: ['course', 'vs', '0'], body: { [`${V}options`]: [] } });
+  await waitFor(() => handler.model.supports.course === false);
+  assert.deepEqual(platform.api.unregistered, []);
+  assert.equal(handler.services.has('ctlSuperSpeed'), true);
+  assert.equal(handler.services.get('ctlSuperSpeed').getCharacteristic(C.On).value, false);
+  // Used meanwhile: nothing is sent, and the switch goes back.
+  const from = (await platform.helper.request('sim', { key: W, action: 'writes' })).writes;
+  await handler.services.get('ctlSuperSpeed').getCharacteristic(C.On).handleSetRequest(true);
+  await handler.controlJob;
+  assert.equal((await platform.helper.request('sim', { key: W, action: 'writes' })).writes, from);
+  await waitFor(() => handler.services.get('ctlSuperSpeed').getCharacteristic(C.On).value === false);
+});

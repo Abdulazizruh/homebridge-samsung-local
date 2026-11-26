@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.2
+
+A washer group no longer leaves its room in Apple Home. Your settings, pairings and accessories are kept as they are.
+
+- **Fixed: a washer group that left Apple Home and came back outside its room.** Seen on a real washer with the "Options" group: for a while the washer did not list its extras, the group was removed, and when the extras were listed again it came back as a new accessory in the bridge's default room. A group now leaves only when its control is unticked. While the washer does not list a setting, its switches stay, show off, and send nothing.
+- If a group of yours has already moved, put it back in its room once in Apple Home; it stays there from now on.
+- The log says `not sent: the washer does not offer this right now` for a switch used during such a time.
+
+**بالعربية**
+
+مجموعة الغسالة لم تعد تخرج من غرفتها في Apple Home. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **إصلاح: مجموعة للغسالة خرجت من Apple Home ثم عادت خارج غرفتها.** شوهد على غسالة حقيقية مع مجموعة «Options»: لفترة لم تعلن الغسالة إضافاتها فأُزيلت المجموعة، ولما أعلنتها من جديد عادت كجهاز جديد في الغرفة الافتراضية للجسر. المجموعة الآن تخرج فقط عند إزالة علامة تحكمها. وما دامت الغسالة لا تعلن إعدادًا فمفاتيحه تبقى، وتظهر مطفأة، ولا ترسل شيئًا.
+- إذا كانت مجموعة عندك قد انتقلت فأعدها إلى غرفتها مرة واحدة من Apple Home، وتبقى فيها بعد ذلك.
+- السجل يكتب `not sent: the washer does not offer this right now` لمفتاح استُعمل في مثل هذا الوقت.
+
 ## 1.9.1
 
 Washer settings follow each other faster. Your settings, pairings and accessories are kept as they are.
