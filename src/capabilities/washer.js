@@ -241,6 +241,16 @@ const COURSE_NAMES = {
   WA80F16B9CYL: { '01': 'Normal', '2B': 'AI Wash', '04': 'Quick Wash', B1: 'Delicates', 90: 'Hygiene Steam', '06': 'Bedding', 91: 'Energy Saving', '08': 'Rinse + Spin', 82: 'Tub Clean', 87: 'Downloaded', '4D': 'Tub Clean 4D' },
 };
 
+/** Whether the washer takes a start from outside ("Smart Control" on its panel): true, false, or null when it does not say. */
+export function remoteControlEnabled(resources) {
+  const plain = resources?.['/remotectrl/0']?.value;
+  if (typeof plain === 'boolean') {
+    return plain;
+  }
+  const word = resources?.['/remotectrl/vs/0']?.[`${V}remoteControlEnabled`];
+  return word === undefined ? null : lower(String(word)) === 'true';
+}
+
 /**
  * The courses a washer lists itself, in its own order: "supportedOptions" holds one record per
  * course that starts with the course number. The record length differs by model, so the split

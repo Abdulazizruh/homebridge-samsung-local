@@ -179,6 +179,11 @@
                   "type": "boolean",
                   "default": false
                 },
+                "smartControlSensor": {
+                  "title": "Laundry: Smart Control sensor (detected while it is on at the panel)",
+                  "type": "boolean",
+                  "default": false
+                },
                 "stageSensors": {
                   "title": "Laundry (trial): a sensor for each stage the washer names (washing, rinsing, spinning)",
                   "type": "boolean",

@@ -748,7 +748,7 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   assert.equal(second.platform.devices.get(W).handler.services.get('ctlRinse:1').getCharacteristic(second.platform.api.hap.Characteristic.On).value, true);
   await second.platform.stop();
   // The panel's extra buttons sit together on an accessory of their own, named as on the panel.
-  const fourth = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true, ctlSuperSpeed: true, ctlBubbleStorm: true }), cached });
+  const fourth = await boot({ storage: first.storage, devices, config: entry({ ctlRinse: true, ctlSuperSpeed: true, ctlBubbleStorm: true, smartControlSensor: true }), cached });
   await online(fourth.platform, W);
   const C4 = fourth.platform.api.hap.Characteristic;
   const optionsGroup = fourth.platform.api.registered.map((r) => r.accessory).find((a) => a.displayName === 'Washer Options');
@@ -760,6 +760,11 @@ test('washer choice groups: kept across a restart with the option on, removed wh
   await h4.services.get('ctlSuperSpeed').getCharacteristic(C4.On).handleSetRequest(true);
   await h4.controlJob;
   assert.deepEqual({ ...h4.context.controlTrials.ctlSuperSpeed, at: 0 }, { at: 0, accepted: true, before: 'Off', after: 'On' });
+  // Smart Control is set at the panel only: a sensor, detected while it is on.
+  const smart = h4.services.get('smartControl');
+  assert.equal(smart.UUID, fourth.platform.api.hap.Service.OccupancySensor.UUID);
+  assert.equal(smart.getCharacteristic(C4.OccupancyDetected).value, 0);
+  await fourth.platform.helper.request('write', { key: W, path: ['remotectrl', '0'], body: { value: true } }).catch(() => {});
   await fourth.platform.stop();
   // Unticked: the group leaves, the washer stays.
   const third = await boot({ storage: first.storage, devices, config: entry({}), cached });

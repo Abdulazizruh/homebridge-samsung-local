@@ -1,11 +1,11 @@
 import { failureText } from '../deviceLink.js';
-import { alarmText, buildWasherModel, courseName, WASHER_CONTROLS, WASHER_STAGES, washerControls, washerToggles } from '../capabilities/washer.js';
+import { alarmText, buildWasherModel, courseName, remoteControlEnabled, WASHER_CONTROLS, WASHER_STAGES, washerControls, washerToggles } from '../capabilities/washer.js';
 import { eveCharacteristics } from './eve.js';
 import { markPrimary } from './primary.js';
 
 const FINISHED_HOLD_MS = 10 * 60 * 1000; // how long "Finished" stays detected
 const LABELS = {
-  cycle: '', finished: 'Finished', unload: 'Unload', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
+  cycle: '', finished: 'Finished', unload: 'Unload', smartControl: 'Smart Control', progress: 'Progress', kidsLock: 'Kids Lock', alert: 'Alert',
   wash: 'Washing', rinse: 'Rinsing', spin: 'Spinning', drumClean: 'Drum Clean',
   ctlPower: 'Power', ctlRun: 'Run', ctlStop: 'Stop', ctlBuzzer: 'Sound', ctlSpin: 'Spin', ctlRinse: 'Rinse',
   ctlWaterTemp: 'Water Temp', ctlWaterLevel: 'Water Level', ctlWashTime: 'Wash Time', ctlCourse: 'Course Next',
@@ -26,7 +26,7 @@ export const WASHER_FEATURES = {
   // Trials, on until the owner switches them off: a sensor for each stage the washer names, and drum clean.
   stageSensors: true, drumCleanSensor: true,
   // Extras, off until the owner asks for them.
-  progressTile: false, kidsLockSensor: false, alertSensor: false, unloadSensor: false,
+  progressTile: false, kidsLockSensor: false, alertSensor: false, unloadSensor: false, smartControlSensor: false,
   // Control trial, off until the owner ticks each one: what a washer accepts differs by model.
   ...Object.fromEntries(WASHER_CONTROLS.map((id) => [id, false])),
 };
@@ -173,6 +173,15 @@ export class WasherAccessory {
     } else {
       drop(Service.OccupancySensor, 'unload');
       this.services.delete('unload');
+    }
+    // Smart Control is set at the panel only, so it is a sensor: detected while the washer takes a
+    // start from outside. Also shown to those who ticked its switch in 1.9.0-beta.7.
+    if ((this.features.smartControlSensor || this.features.ctlSmartControl)
+      && remoteControlEnabled(this.link.resources ?? this.context.resources ?? {}) !== null) {
+      this.#service('smartControl', Service.OccupancySensor, 'smartControl');
+    } else {
+      drop(Service.OccupancySensor, 'smartControl');
+      this.services.delete('smartControl');
     }
     const supports = this.model?.supports ?? {};
     // A percentage is the only number the Home app prints on a tile, so the
@@ -709,6 +718,7 @@ export class WasherAccessory {
     }
     this.services.get('finished')?.updateCharacteristic(Characteristic.OccupancyDetected, this.finished ? 1 : 0);
     this.services.get('unload')?.updateCharacteristic(Characteristic.OccupancyDetected, this.unloading ? 1 : 0);
+    this.services.get('smartControl')?.updateCharacteristic(Characteristic.OccupancyDetected, remoteControlEnabled(this.link.resources ?? {}) ? 1 : 0);
     this.services.get('progress')?.updateCharacteristic(Characteristic.CurrentRelativeHumidity, st.percent ?? 0);
     for (const stage of WASHER_STAGES) {
       this.services.get(stage)?.updateCharacteristic(Characteristic.OccupancyDetected, st.inCycle && st.stage === stage ? 1 : 0);

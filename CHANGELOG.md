@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.0-beta.10
+
+Trial version on the "beta" channel. What starting a cycle needs, found on a real washer. Your settings, pairings and accessories are kept as they are.
+
+- **Starting and pausing a cycle work on the WA80F16B9CYL top loader while "Smart Control" is on at its panel.** With it off, the washer answers "accepted" to both and does nothing; with it on, the run switch started a cycle and paused it. The settings now say so under the run switch. The switch shows the cycle's state either way.
+- **New option: a "Smart Control" sensor**, detected while Smart Control is on at the panel. It can only be set there, so it is a sensor and not a switch; an automation can use it. Those who ticked its switch in 1.9.0-beta.7 get the sensor in its place.
+
+**بالعربية**
+
+إصدار تجريبي على قناة «beta». ما يحتاجه بدء الدورة، كما تبيّن على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **بدء الدورة وإيقافها مؤقتًا يعملان على الغسالة WA80F16B9CYL ما دام «Smart Control» مفعّلًا من لوحتها.** وهو مطفأ تجيب الغسالة بـ«accepted» ولا تفعل شيئًا، وهو مفعّل بدأ مفتاح الدورة دورةً وأوقفها مؤقتًا. الإعدادات تذكر ذلك الآن تحت مفتاح الدورة، والمفتاح يعرض حالة الدورة في الحالتين.
+- **خيار جديد: حساس «Smart Control»**، يُكتشف ما دام «Smart Control» مفعّلًا من اللوحة. يُضبط من هناك فقط، فهو حساس وليس مفتاحًا، ويصلح لأتمتة. ومن اختار مفتاحه في 1.9.0-beta.7 يحصل على الحساس مكانه.
+
 ## 1.9.0-beta.9
 
 Trial version on the "beta" channel. Corrections after 1.9.0-beta.8 was tried on a real washer. Your settings, pairings and accessories are kept as they are.

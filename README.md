@@ -305,7 +305,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 | Control | In Apple Home | What is sent |
 |---|---|---|
 | Power | a switch | on or off |
-| Run | a switch | on: start or resume; off: pause |
+| Run | a switch | on: start or resume; off: pause. A washer may take these only while "Smart Control" is on at its panel; the switch shows the cycle's state either way |
 | Stop | a press | end the cycle |
 | Child lock | the lock becomes settable | lock or unlock |
 | Sound | a switch | the washer's sounds on or off |
