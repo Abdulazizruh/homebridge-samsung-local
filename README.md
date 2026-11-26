@@ -304,7 +304,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 | Stop | a press | end the cycle |
 | Child lock | the lock becomes settable | lock or unlock |
 | Sound | a switch | the washer's sounds on or off |
-| Spin level, rinse count, water temperature, water level, wash time | a press each | the next value in the washer's own list |
+| Spin level, rinse count, water temperature, water level, wash time | a slider each (shown as a fan) | the value where the slider comes to rest, from the washer's own list: the bottom is the lowest, the top the highest |
 | Course | a press | the next course number |
 
 - Using a control sends its command; where a washer may take it in more than one form, each form is tried once, in order.

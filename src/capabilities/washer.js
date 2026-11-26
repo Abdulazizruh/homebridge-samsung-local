@@ -281,11 +281,9 @@ export function washerControls(resources = {}) {
     if (washer && `${V}${key}` in washer && list.length > 1) {
       const now = () => String(res['/washer/vs/0']?.[`${V}${key}`] ?? '');
       out[id] = {
-        kind: 'press', reads: key, shown: now,
-        // The next value in the washer's own list, back to the first after the last.
-        // `from`: the value a press just asked for and the washer has not reported yet, so that
-        // quick presses walk on through the list and do not ask for the same value twice.
-        writes: (_on, from) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: list[(list.indexOf(String(from ?? now())) + 1) % list.length] } }],
+        // A level: the washer's own list, lowest first, set directly (a slider in Apple Home).
+        kind: 'level', reads: key, shown: now, values: list,
+        writes: (target) => [{ path: ['washer', 'vs', '0'], body: { [`${V}${key}`]: String(target) } }],
       };
     }
   }

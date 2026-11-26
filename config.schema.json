@@ -230,27 +230,27 @@
                   "default": false
                 },
                 "ctlSpin": {
-                  "title": "Laundry control (trial, models differ): spin level, next value",
+                  "title": "Laundry control (trial, models differ): spin level, a slider",
                   "type": "boolean",
                   "default": false
                 },
                 "ctlRinse": {
-                  "title": "Laundry control (trial, models differ): rinse count, next value",
+                  "title": "Laundry control (trial, models differ): rinse count, a slider",
                   "type": "boolean",
                   "default": false
                 },
                 "ctlWaterTemp": {
-                  "title": "Laundry control (trial, models differ): water temperature, next value",
+                  "title": "Laundry control (trial, models differ): water temperature, a slider",
                   "type": "boolean",
                   "default": false
                 },
                 "ctlWaterLevel": {
-                  "title": "Laundry control (trial, models differ): water level, next value",
+                  "title": "Laundry control (trial, models differ): water level, a slider",
                   "type": "boolean",
                   "default": false
                 },
                 "ctlWashTime": {
-                  "title": "Laundry control (trial, models differ): wash time, next value",
+                  "title": "Laundry control (trial, models differ): wash time, a slider",
                   "type": "boolean",
                   "default": false
                 },

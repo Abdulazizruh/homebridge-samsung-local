@@ -593,7 +593,7 @@ test('washer extras: progress, child lock and alert appear only when asked for, 
   await waitFor(() => progress.value === 68 && lock.value === C.LockCurrentState.SECURED && alert.value === 1);
 });
 
-test('washer control trial: only ticked controls appear; a press sends the next value the washer lists, and a refusal is recorded', async (t) => {
+test('washer control trial: only ticked controls appear; a level is a slider that sends where it came to rest, and a refusal is recorded', async (t) => {
   const { WasherAccessory } = await import('../src/homekit/washerAccessory.js');
   WasherAccessory.controlWaitMs = 200;
   const W = fixture('washer_topload').identity.di;
@@ -607,26 +607,33 @@ test('washer control trial: only ticked controls appear; a press sends the next 
   assert.equal(handler.services.has('ctlRun'), false);
   assert.equal(handler.services.has('ctlBuzzer'), false);
   assert.equal(handler.services.has('unload'), false);
-  assert.equal(handler.services.get('ctlSpin').getCharacteristic(C.ConfiguredName).value, 'Washer Spin Next');
+  // A level is a slider (a fan in HomeKit): six spin values, so steps of 20%.
+  WasherAccessory.levelSettleMs = 20;
+  const spinFan = handler.services.get('ctlSpin');
+  assert.equal(spinFan.UUID, platform.api.hap.Service.Fan.UUID);
+  assert.equal(spinFan.getCharacteristic(C.ConfiguredName).value, 'Washer Spin');
+  const speed = spinFan.getCharacteristic(C.RotationSpeed);
+  assert.equal(speed.props.minStep, 20);
+  await waitFor(() => speed.value === 60 && spinFan.getCharacteristic(C.On).value === true); // Medium, the fourth of six
   const writes = async () => (await platform.helper.request('sim', { key: W, action: 'writes' })).writes;
+  const settled = async () => { await new Promise((r) => setTimeout(r, 60)); await handler.controlJob; };
   const before = await writes();
-  await handler.services.get('ctlSpin').getCharacteristic(C.On).handleSetRequest(true);
-  await handler.controlJob;
-  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'High'); // Medium -> the next in its own list
-  assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'Medium', after: 'High' });
+  // Dragged down through 40% to 20%: only where it came to rest is sent.
+  await speed.handleSetRequest(40);
+  await speed.handleSetRequest(20);
+  await settled();
+  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'ExtraLow');
+  assert.deepEqual({ ...handler.context.controlTrials.ctlSpin, at: 0 }, { at: 0, accepted: true, before: 'Medium', after: 'ExtraLow' });
   assert.equal(await writes() - before, 1);
-  assert.equal(handler.services.get('ctlSpin').getCharacteristic(C.On).value, false); // a press springs back
-  // Two quick presses: the switch is off again well before the washer reports, and the second
-  // press asks for the value after the first one's, not the same value twice.
-  WasherAccessory.pressBackMs = 20;
-  const spin = handler.services.get('ctlSpin').getCharacteristic(C.On);
-  await spin.handleSetRequest(true);
-  const first = handler.controlJob;
-  await spin.handleSetRequest(true);
-  await new Promise((r) => setTimeout(r, 60));
-  assert.equal(spin.value, false);
-  await Promise.all([first, handler.controlJob]);
-  await waitFor(() => link.resources['/washer/vs/0'][`${V}spinLevel`] === 'RinseHold'); // High -> ExtraHigh -> back to the first
+  await waitFor(() => speed.value === 20);
+  // Up to the top, then off: off is the lowest value in the washer's list.
+  await speed.handleSetRequest(100);
+  await settled();
+  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'ExtraHigh');
+  await spinFan.getCharacteristic(C.On).handleSetRequest(false);
+  await settled();
+  assert.equal(link.resources['/washer/vs/0'][`${V}spinLevel`], 'RinseHold');
+  await waitFor(() => speed.value === 0 && spinFan.getCharacteristic(C.On).value === false);
   // Power: the switch follows what the washer reports.
   await handler.services.get('ctlPower').getCharacteristic(C.On).handleSetRequest(true);
   await handler.controlJob;
