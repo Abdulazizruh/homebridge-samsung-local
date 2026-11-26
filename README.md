@@ -306,7 +306,7 @@ Cycle tile with time remaining, cycle finished sensor, progress, child lock stat
 |---|---|---|
 | Power | a switch | on or off |
 | Start Pause | a switch | on: start or resume; off: pause. A washer may take these only while "Smart Control" is on at its panel; the switch shows the cycle's state either way |
-| Stop | a press | end the cycle |
+| Cancel Cycle | a press | end the cycle and clear it; unlike a pause, it cannot be resumed |
 | Child lock | the lock becomes settable | lock or unlock |
 | Sound | a switch | the washer's sounds on or off |
 | Water temperature, spin level, rinse count, water level, wash time | a group of switches each, one per value of the washer's own list ("Water Hot", "Water Level 6", "Rinse 2"); the one that is on is the current value | the value of the switch you turn on; the others go off |

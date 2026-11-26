@@ -7,7 +7,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 Trial version on the "beta" channel. What starting a cycle needs, found on a real washer. Your settings, pairings and accessories are kept as they are.
 
 - **Starting and pausing a cycle work on the WA80F16B9CYL top loader while "Smart Control" is on at its panel.** With it off, the washer answers "accepted" to both and does nothing; with it on, the run switch started a cycle and paused it. The settings now say so under the run switch. The switch shows the cycle's state either way.
-- **The run switch is now named "Start Pause"**, as on a washer's panel: on starts or resumes, off pauses. "Stop" stays the press that ends the cycle.
+- **The run switch is now named "Start Pause"**, as on a washer's panel: on starts or resumes, off pauses, and the cycle keeps its place. **"Stop" is now named "Cancel Cycle"**: it ends the cycle and clears it, and on that washer it works with Smart Control off too. The two names now say what differs.
 - **New option: a "Smart Control" sensor**, detected while Smart Control is on at the panel. It can only be set there, so it is a sensor and not a switch; an automation can use it. Those who ticked its switch in 1.9.0-beta.7 get the sensor in its place.
 
 **بالعربية**
@@ -15,7 +15,7 @@ Trial version on the "beta" channel. What starting a cycle needs, found on a rea
 إصدار تجريبي على قناة «beta». ما يحتاجه بدء الدورة، كما تبيّن على غسالة حقيقية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **بدء الدورة وإيقافها مؤقتًا يعملان على الغسالة WA80F16B9CYL ما دام «Smart Control» مفعّلًا من لوحتها.** وهو مطفأ تجيب الغسالة بـ«accepted» ولا تفعل شيئًا، وهو مفعّل بدأ مفتاح الدورة دورةً وأوقفها مؤقتًا. الإعدادات تذكر ذلك الآن تحت مفتاح الدورة، والمفتاح يعرض حالة الدورة في الحالتين.
-- **مفتاح الدورة صار اسمه «Start Pause»** كما في لوحة الغسالة: التشغيل يبدأ أو يكمل، والإطفاء يوقف مؤقتًا. و«Stop» تبقى الضغطة التي تنهي الدورة.
+- **مفتاح الدورة صار اسمه «Start Pause»** كما في لوحة الغسالة: التشغيل يبدأ أو يكمل، والإطفاء يوقف مؤقتًا والدورة تحفظ مكانها. **و«Stop» صار اسمه «Cancel Cycle»**: ينهي الدورة ويصفّرها، ويعمل على تلك الغسالة و«Smart Control» مطفأ أيضًا. الاسمان يبيّنان الفرق الآن.
 - **خيار جديد: حساس «Smart Control»**، يُكتشف ما دام «Smart Control» مفعّلًا من اللوحة. يُضبط من هناك فقط، فهو حساس وليس مفتاحًا، ويصلح لأتمتة. ومن اختار مفتاحه في 1.9.0-beta.7 يحصل على الحساس مكانه.
 
 ## 1.9.0-beta.9
