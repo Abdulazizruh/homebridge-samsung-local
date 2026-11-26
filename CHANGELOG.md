@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.1
+
+Washer settings follow each other faster. Your settings, pairings and accessories are kept as they are.
+
+- **Faster: several washer settings in a row.** A setting sent in a form the washer has carried out before no longer holds the next one back until the washer's report arrives: the next command goes as soon as the washer has answered, after a short pause. In a simulation with the engines' real timing, the fourth of four settings reached the washer after about 4 s instead of about 12 s.
+- Each command is still checked against the washer's own report, and the next form is tried when the report does not change. No extra reading is taken, and commands still go one at a time.
+- Unchanged: the first use of each setting, and "Power", "Start Pause" and "Cancel Cycle".
+- Tried in simulation only; not yet tried on a real washer.
+
+**بالعربية**
+
+إعدادات الغسالة تتتابع أسرع. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **أسرع: عدة إعدادات للغسالة واحدًا بعد الآخر.** الإعداد المرسل بصيغة نفّذتها الغسالة من قبل لم يعد يؤخر ما بعده حتى يصل تقرير الغسالة: الأمر التالي يخرج فور رد الغسالة، بعد فاصل قصير. في محاكاة بتوقيت المحرّكين الحقيقي وصل رابع أربعة إعدادات إلى الغسالة بعد نحو 4 ثوانٍ بدل نحو 12 ثانية.
+- كل أمر ما زال يُطابق على تقرير الغسالة نفسها، وتُجرَّب الصيغة التالية إذا لم يتغير التقرير. لا تُضاف قراءات، والأوامر ما زالت تخرج واحدًا واحدًا.
+- بلا تغيير: أول استخدام لكل إعداد، و«Power» و«Start Pause» و«Cancel Cycle».
+- جُرِّب في المحاكاة فقط، ولم يُجرَّب بعد على غسالة حقيقية.
+
 ## 1.9.0
 
 Washers can be controlled from Apple Home, as a trial that is off by default. Your settings, pairings and accessories are kept as they are.
