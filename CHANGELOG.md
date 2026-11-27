@@ -2,6 +2,28 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.4-beta.1
+
+A trial for air conditioners: switch-on with mode and temperature in one message, so the unit beeps once, as with its own remote. Off unless you tick it. Your settings, pairings and accessories are kept as they are.
+
+- **Trial: "Switch-on with mode and temperature in one message".** A new tick in each air conditioner's options, off by default. Apple Home sends switch-on, mode and temperature as separate requests, and each message the unit receives makes it beep. With the tick, while the unit is off, these requests are gathered for 0.4 s and sent as one batch update, power last. While the unit is on, nothing changes: commands go at once, as before.
+- Each command is still checked against the unit's own report afterwards.
+- A unit that refuses the batch update gets the commands one by one, as before; the log says so once, and the unit is not asked again until the tick is cleared.
+- The log says `sent together, in one message: …` when it worked.
+- Both engines, Python and JavaScript.
+- If the trial is dropped later, the next version removes the tick and what it stored (the tick in the settings, and the note that a unit refused it), leaving nothing behind.
+
+**بالعربية**
+
+تجربة للمكيفات: التشغيل مع الوضع والحرارة في رسالة واحدة، فيصدر المكيف نغمة واحدة كما مع ريموته. لا تعمل إلا إذا وضعت علامتها. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **تجربة: «التشغيل مع الوضع والحرارة في رسالة واحدة».** علامة جديدة في خيارات كل مكيف، غير مفعّلة افتراضيًا. Apple Home يرسل التشغيل والوضع والحرارة طلبات منفصلة، وكل رسالة تصل المكيف تصدر نغمة. مع العلامة، والمكيف مطفأ، تُجمع هذه الطلبات 0.4 ثانية وتُرسل في رسالة مجمّعة واحدة، والتشغيل آخرها. والمكيف يعمل لا يتغير شيء: الأوامر تخرج فورًا كما كانت.
+- كل أمر ما زال يُطابَق بعدها على تقرير المكيف نفسه.
+- المكيف الذي يرفض الرسالة المجمّعة تصله الأوامر واحدًا واحدًا كما كانت، ويكتب السجل ذلك مرة واحدة، ولا يُسأل مرة أخرى حتى تُزال العلامة.
+- السجل يكتب `sent together, in one message: …` عند النجاح.
+- على المحرّكين: Python وJavaScript.
+- إذا أُلغيت التجربة لاحقًا، يزيل الإصدار التالي العلامة وما خزّنته (العلامة في الإعدادات، وملاحظة أن المكيف رفضها)، فلا يبقى منها شيء.
+
 ## 1.9.3
 
 The log names each command sent to an air conditioner. Your settings, pairings and accessories are kept as they are.

@@ -76,6 +76,22 @@ test('JavaScript engine: session events, a write that reaches the appliance, and
   assert.equal(fs.statSync(path.join(credDir, 'client.key')).mode & 0o077, 0);
 });
 
+test('JavaScript engine: a batch update goes to /device/0 with its query, in one message', async (t) => {
+  const { sim, di } = await appliance('ac_windfree');
+  const { helper, events } = engine();
+  t.after(async () => { await helper.stop(); await sim.close(); });
+  await helper.start();
+  await helper.request('open', { key: di, host: '127.0.0.1', port: sim.port, expectedDi: di, pollInterval: 2, push: false });
+  await waitFor(() => events.some((e) => e.ev === 'status' && e.online), 20_000);
+  const items = [{ href: '/mode/vs/0', rep: { [`${V}modes`]: ['Cool'] } }, { href: '/power/vs/0', rep: { [`${V}power`]: 'On' } }];
+  const answer = await helper.request('write', { key: di, path: ['device', '0'], query: ['if=oic.if.b'], body: items }, 20_000);
+  assert.equal(answer.accepted, true);
+  assert.equal(sim.writes.length, 1);
+  assert.equal(sim.writes[0].href, '/device/0');
+  assert.deepEqual(sim.writes[0].query, ['if=oic.if.b']);
+  assert.deepEqual(decodeCbor(sim.writes[0].payload), items);
+});
+
 test('JavaScript engine: a different appliance at a known address is refused', async (t) => {
   const { sim } = await appliance('ac_windfree');
   const { helper, events } = engine();

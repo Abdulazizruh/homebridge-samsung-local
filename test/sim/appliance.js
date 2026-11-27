@@ -117,7 +117,7 @@ class SimAppliance {
             return;
         }
         if (isPost) {
-            this.postLog.push({ href, payload: msg.payload ?? Buffer.alloc(0) });
+            this.postLog.push({ href, query, payload: msg.payload ?? Buffer.alloc(0) });
             // modelled write: merge CBOR into the stored rep so a readback reflects it
             this.send((0, message_1.encode)({ type: message_1.CoapType.ACK, code: C_CHANGED, messageId: msg.messageId, token: msg.token, options: [] }));
             return;

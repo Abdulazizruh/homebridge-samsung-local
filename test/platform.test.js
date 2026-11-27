@@ -1102,3 +1102,33 @@ test('washer groups stay while the washer does not list them: a group leaves onl
   assert.equal((await platform.helper.request('sim', { key: W, action: 'writes' })).writes, from);
   await waitFor(() => handler.services.get('ctlSuperSpeed').getCharacteristic(C.On).value === false);
 });
+
+test('send together (trial): switch-on, mode and temperature to a unit that is off go in one batch message, else one by one', async (t) => {
+  for (const refuses of [false, true]) {
+    const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', features: { together: true } }] } });
+    await online(platform);
+    const { handler } = platform.devices.get(DI);
+    const C = platform.api.hap.Characteristic;
+    const sim = (action, value) => platform.helper.request('sim', { key: DI, action, value });
+    if (refuses) { await sim('noBatch', true); }
+    assert.equal(handler.model.state.power, false); // the fixture unit is off, in Dry
+    const before = await sim('writes');
+    const thermostat = handler.services.get('thermostat');
+    // As Apple Home sends them for one tap on "Cool" at 23°: two requests at once.
+    await Promise.all([
+      thermostat.getCharacteristic(C.TargetHeatingCoolingState).handleSetRequest(C.TargetHeatingCoolingState.COOL),
+      thermostat.getCharacteristic(C.TargetTemperature).handleSetRequest(23),
+    ]);
+    await waitFor(() => handler.model.state.power === true && handler.model.state.mode === 'cool' && handler.model.state.targetTemperature === 23, 6000);
+    const after = await sim('writes');
+    if (refuses) {
+      assert.equal(after.batches - before.batches, 1); // asked once
+      assert.equal(after.writes - before.writes, 4); // the refused batch, then three one by one
+      assert.equal(handler.context.togetherRefused, true);
+    } else {
+      assert.equal(after.batches - before.batches, 1);
+      assert.equal(after.writes - before.writes, 1); // one message: one beep
+    }
+    await platform.stop();
+  }
+});

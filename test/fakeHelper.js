@@ -112,7 +112,13 @@ function handle(req) {
         }
         if (dev.refuse === 'once') { dev.refuse = false; dev.refusedOnce = (dev.refusedOnce ?? 0) + 1; return { code: '4.00', accepted: false, detail: null }; }
         if (dev.refuse) { return { code: '4.05', accepted: false, detail: 'Control fail' }; }
-        if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
+        const batch = req.path?.join('/') === 'device/0' && (req.query ?? []).includes('if=oic.if.b');
+        if (batch) {
+          // A batch update: several resources in one message, as an infrared remote sends a whole state.
+          dev.batches = (dev.batches ?? 0) + 1;
+          if (dev.noBatch) { return { code: '4.05', accepted: false, detail: null }; }
+          for (const item of req.body ?? []) { applyWrite(dev, String(item.href).replace(/^\//, '').split('/'), item.rep); }
+        } else if (!dev.ignore) { applyWrite(dev, req.path, req.body); }
         if (QUIET_MS) {
           // As both real engines do: no reading for a while after a write, then one; a newer write starts the wait again.
           dev.quietUntil = Date.now() + QUIET_MS;
@@ -129,7 +135,8 @@ function handle(req) {
     case 'sim': {
       const host = req.host ?? open.get(req.key)?.host;
       const dev = devices.get(host);
-      if (req.action === 'writes') { return { writes: dev.writes ?? 0 }; }
+      if (req.action === 'writes') { return { writes: dev.writes ?? 0, batches: dev.batches ?? 0 }; }
+      if (req.action === 'noBatch') { dev.noBatch = Boolean(req.value); }
       if (req.action === 'offline') { dev.reachable = false; }
       if (req.action === 'online') { dev.reachable = true; }
       if (req.action === 'refuse') { dev.refuse = ['once', 'once-done', 'ignore-once'].includes(req.value) ? req.value : Boolean(req.value); }

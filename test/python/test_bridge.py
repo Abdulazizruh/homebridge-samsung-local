@@ -262,6 +262,25 @@ class FollowAddress(unittest.TestCase):
         self.assertEqual(asked, [])
 
 
+
+class BatchWrite(unittest.TestCase):
+    def test_a_batch_update_carries_its_query_and_a_plain_command_none(self):
+        calls = []
+
+        class Link:
+            def post(self, path, body, query=None):
+                calls.append((path, body, query))
+                return 0x44, None
+
+        worker = bridge.DeviceWorker("k", "10.0.0.5", None, "/nonexistent", "device-1", 2, False)
+        worker._link = Link()
+        worker.request_refresh = lambda delay=0.0: None
+        self.assertTrue(worker.write(["power", "vs", "0"], {"p": "On"})["accepted"])
+        items = [{"href": "/mode/vs/0", "rep": {"m": ["Cool"]}}, {"href": "/power/vs/0", "rep": {"p": "On"}}]
+        self.assertTrue(worker.write(["device", "0"], items, ["if=oic.if.b"])["accepted"])
+        self.assertEqual(calls[0], (["power", "vs", "0"], {"p": "On"}, None))
+        self.assertEqual(calls[1], (["device", "0"], items, ("if=oic.if.b",)))
+
 if __name__ == "__main__":
     unittest.main()
 

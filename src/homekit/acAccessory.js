@@ -26,6 +26,7 @@ export const DEFAULT_FEATURES = Object.freeze({
   filter: true,
   outdoorTemperature: false,
   energyEve: true,
+  together: false,
 });
 
 const LABELS = {
@@ -70,6 +71,9 @@ export class AcAccessory {
     this.services = new Map();
     this.eve = eveCharacteristics(this.hap);
     this.context = accessory.context;
+    if (!this.features.together) {
+      delete this.context.togetherRefused; // unticked: a later trial asks the unit again
+    }
 
     // A snapshot from the last successful session lets the accessory keep its
     // services across a restart while the appliance is unreachable.
@@ -151,6 +155,64 @@ export class AcAccessory {
     return this.model.state;
   }
 
+  /** How long commands to a switched-off unit are gathered before they go together (trial). */
+  static togetherMs = 400;
+
+  /**
+   * The infrared remote sends the whole state in one signal, and the unit beeps once. With the
+   * trial "send together" ticked, commands to a switched-off unit (power on, mode, temperature,
+   * fan) are gathered for a moment and sent as one batch update of its /device/0 collection.
+   * A unit that refuses that gets them one by one, as before, and is not asked again.
+   */
+  #dispatch(writes, label) {
+    const off = !this.model.state.power;
+    if (!this.features.together || this.context.togetherRefused || (!off && !this.batch)) {
+      return this.link.send(writes);
+    }
+    if (!this.batch) {
+      const batch = { items: [], labels: [] };
+      batch.done = new Promise((resolve, reject) => { batch.resolve = resolve; batch.reject = reject; });
+      batch.done.catch(() => {});
+      batch.timer = setTimeout(() => { this.#flush(batch); }, AcAccessory.togetherMs);
+      this.batch = batch;
+    }
+    this.batch.items.push(...writes);
+    this.batch.labels.push(label);
+    return this.batch.done;
+  }
+
+  async #flush(batch) {
+    if (this.batch === batch) {
+      this.batch = null;
+    }
+    const { items, labels } = batch;
+    const hrefs = items.map((w) => w.path.join('/'));
+    try {
+      if (items.length < 2 || new Set(hrefs).size !== hrefs.length) {
+        await this.link.send(items);
+        batch.resolve();
+        return;
+      }
+      // Power last, so the unit starts in the mode and temperature it was given.
+      const ordered = [...items.filter((w) => w.path[0] !== 'power'), ...items.filter((w) => w.path[0] === 'power')];
+      const body = ordered.map((w) => ({ href: `/${w.path.join('/')}`, rep: w.body }));
+      try {
+        await this.link.send([{ path: ['device', '0'], query: ['if=oic.if.b'], body, once: true }]);
+        this.log.info(`[${this.displayName}] sent together, in one message: ${labels.join(', ')}.`);
+      } catch (err) {
+        if (err.code !== 'refused') {
+          throw err;
+        }
+        this.context.togetherRefused = true;
+        this.log.info(`[${this.displayName}] the appliance does not take commands together (${err.message}); sent one by one, as before, and not tried again.`);
+        await this.link.send(items);
+      }
+      batch.resolve();
+    } catch (err) {
+      batch.reject(err);
+    }
+  }
+
   /** Send one normalized command and wait for the appliance to acknowledge it. */
   async #command(kind, value, label = kind) {
     const { HapStatusError, HAPStatus } = this.hap;
@@ -209,7 +271,7 @@ export class AcAccessory {
     };
     let late = false;
     let timer;
-    const sent = this.link.send(writes).finally(() => {
+    const sent = this.#dispatch(writes, label).finally(() => {
       if (this.inflight.get(key) === same) { this.inflight.delete(key); }
     }).then(() => {
       hold();
@@ -617,6 +679,15 @@ export class AcAccessory {
 
   async #setMode(mode) {
     const st = this.#intended();
+    if (!st.power && this.features.together && !this.context.togetherRefused) {
+      // Trial: both go in one message (see #dispatch), so neither waits for the other.
+      const jobs = [this.#command('power', true, 'power on')];
+      if (st.mode !== mode) {
+        jobs.push(this.#command('mode', mode, `mode ${mode}`));
+      }
+      await Promise.all(jobs);
+      return;
+    }
     if (!st.power) {
       await this.#command('power', true, 'power on');
     }

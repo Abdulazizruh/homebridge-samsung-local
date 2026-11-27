@@ -144,6 +144,11 @@
                   "type": "boolean",
                   "default": false
                 },
+                "together": {
+                  "title": "Switch-on with mode and temperature in one message (trial)",
+                  "type": "boolean",
+                  "default": false
+                },
                 "humidity": {
                   "title": "Humidity sensor",
                   "type": "boolean",
