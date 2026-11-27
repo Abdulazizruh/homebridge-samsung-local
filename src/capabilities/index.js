@@ -169,7 +169,6 @@ export function acFeatureRows(model) {
   add('light', Boolean(s.light), 'home', true, st.light ?? null, s.light ? 'on-off-only' : null);
   add('beep', Boolean(s.beep), 'home', true, st.beep ?? null);
   add('autoClean', Boolean(s.autoClean), 'home', true, st.autoClean ?? null);
-  add('airPurify', Boolean(s.airPurify), 'home', true, st.airPurify ?? null);
   add('filter', Boolean(s.filter), 'eve', false, st.filterUsagePercent ?? null, st.filterStatus ?? null);
   add('alarms', Boolean(s.alarms), 'plugin-ui', false, (st.alarms ?? []).join(', ') || 'none');
   add('powerWatts', Boolean(s.powerWatts), 'eve', false, st.powerWatts ?? null, 'W');

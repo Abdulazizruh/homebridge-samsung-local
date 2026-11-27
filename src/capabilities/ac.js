@@ -25,7 +25,6 @@ export const HREF = {
   energy: '/energy/consumption/vs/0',
   filter: '/filter/airdustfilter/vs/0',
   autoClean: '/option/autoclean/vs/0',
-  airPurify: '/option/airpurify/vs/0',
   light: '/light/vs/0',
   windFree: '/modeoption/windfree/vs/0',
   alarms: '/alarms/vs/0',
@@ -287,13 +286,6 @@ export function buildAcModel(resources) {
     state.autoCleanRunning = autoClean[`${V}status`] === 'Start';
   }
 
-  // Air purify: an On/Off option of its own on some models (ARTIK051), off at the remote by default.
-  const airPurify = rep(resources, HREF.airPurify);
-  if (airPurify && list(airPurify[`${V}supportedModes`]).includes('On')) {
-    supports.airPurify = true;
-    state.airPurify = airPurify[`${V}modes`] === 'On';
-  }
-
   // Filter
   const filter = rep(resources, HREF.filter);
   if (filter && `${V}filterUsage` in filter) {
@@ -474,10 +466,6 @@ export function acCommand(model, kind, value) {
       return [optionWrite(`Volume_${value ? (previous && previous !== 'Mute' ? previous : '100') : 'Mute'}`)];
     }
 
-    case 'airPurify':
-      return supports.airPurify
-        ? [{ path: ['option', 'airpurify', 'vs', '0'], body: { [`${V}modes`]: value ? 'On' : 'Off' } }]
-        : [];
     case 'autoClean':
       return supports.autoClean
         ? [{ path: ['option', 'autoclean', 'vs', '0'], body: { [`${V}settingStatus`]: value ? 'On' : 'Off' } }]
@@ -498,7 +486,6 @@ export function expectedAfter(kind, value) {
     case 'light': return (s) => s.light === Boolean(value);
     case 'beep': return (s) => s.beep === Boolean(value);
     case 'autoClean': return (s) => s.autoClean === Boolean(value);
-    case 'airPurify': return (s) => s.airPurify === Boolean(value);
     case 'preset': return (s) => (value.on ? s.preset === value.name : s.preset !== value.name);
     case 'targetTemperature': return (s) => s.targetTemperature !== null && Math.abs(s.targetTemperature - value) <= 0.6;
     default: return () => true;
@@ -518,7 +505,7 @@ export function intendedState(model, unconfirmed) {
       case 'power': st.power = Boolean(value); break;
       case 'mode': st.mode = value; st.modeCode = model.supports.modes?.[value] ?? st.modeCode; break;
       case 'fan': case 'swing': case 'targetTemperature': st[kind] = value; break;
-      case 'light': case 'beep': case 'autoClean': case 'airPurify': case 'windFreeResource': st[kind] = Boolean(value); break;
+      case 'light': case 'beep': case 'autoClean': case 'windFreeResource': st[kind] = Boolean(value); break;
       case 'preset':
         if (value.on) {
           st.preset = value.name;

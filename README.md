@@ -224,7 +224,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Humidity | Humidity sensor | Apple Home | Hidden while the appliance reports 0 |
 | Filter | Filter maintenance | Eve and other HomeKit apps | Change indication and remaining life. Apple Home does not show this service type |
 | Filter alert (optional, off by default) | Occupancy sensor | Apple Home | On while the filter needs cleaning: a notification and an automation trigger. Off again once the filter is cleaned and its counter reset |
-| Beep, Auto Clean, Air Purify | Switches (off by default) | Apple Home | Air Purify only where the model has it (usually ion purification) |
+| Beep, Auto Clean | Switches (off by default) | Apple Home | |
 | Power now (W), energy total (kWh) | Eve characteristics on the thermostat | Eve-compatible apps and the plugin settings page | Apple Home has no power or energy type. No misleading sensor type is used |
 | Alarms / error codes | — | Plugin settings page and log | |
 | Voltage, current | — | — | Not reported by the air conditioners on record |
@@ -294,7 +294,7 @@ A name is changed in place with the pencil beside it. **Remove** asks to be pres
 
 ### Air conditioner options
 
-Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, Air Purify, humidity, filter alert, outdoor temperature, filter, power and energy.
+Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter alert, outdoor temperature, filter, power and energy.
 
 The filter, and power and energy, show in the free **Eve** app and other HomeKit apps, not in Apple Home: Apple Home has no tile for them. The settings keep them in their own card, "In the Eve app only", each marked Eve, so a part that does not show in Apple Home is not mistaken for a fault.
 

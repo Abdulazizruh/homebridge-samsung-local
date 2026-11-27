@@ -4,21 +4,19 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 
 ## 1.9.8
 
-Two new options for air conditioners: a filter alert that Apple Home shows, notifies about and can start an automation with, and an Air Purify switch. Your settings, pairings and accessories are kept as they are.
+A new option for air conditioners: a filter alert that Apple Home shows, notifies about and can start an automation with. Your settings, pairings and accessories are kept as they are.
 
 - **New, off by default: "Filter alert".** A sensor in Apple Home, in the Sensors card of each air conditioner's options. It turns on while the air conditioner reports that its filter needs cleaning, the same reading Eve shows as "change needed", and turns off once the filter is cleaned and its counter reset. Apple Home can send a notification for it and use it to start an automation.
 - The log says it once each way: `the filter needs cleaning.` and `the filter is clean again.`
 - The filter status in the Eve app stays as it is.
-- **New, off by default: "Air purify switch".** Some models (seen on `ARTIK051_PRAC_20K`) have an On/Off air purify option of their own, usually the ion purification. The tick is offered only where the air conditioner reports it, in the Operation card; the switch follows what the unit reports.
 
 **بالعربية**
 
-خياران جديدان للمكيفات: تنبيه تنظيف الفلتر، يظهر في Apple Home ويرسل إشعارًا ويصلح مشغّلًا للأتمتة، ومفتاح تنقية الهواء. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+خيار جديد للمكيفات: تنبيه تنظيف الفلتر، يظهر في Apple Home ويرسل إشعارًا ويصلح مشغّلًا للأتمتة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **جديد، غير مفعّل افتراضيًا: «تنبيه تنظيف الفلتر».** حساس في Apple Home، تجده في بطاقة «الحساسات» ضمن خيارات كل مكيف. يتفعّل ما دام المكيف يبلّغ أن الفلتر يحتاج تنظيفًا، وهي القراءة نفسها التي يعرضها Eve «مطلوب»، ويرجع بعد تنظيف الفلتر وتصفير عدّاده. يستطيع Apple Home أن يرسل إشعارًا به، وأن يبدأ به أتمتة.
 - يكتب السجل ذلك مرة في كل اتجاه: `the filter needs cleaning.` و`the filter is clean again.`
 - حالة الفلتر في تطبيق Eve تبقى كما هي.
-- **جديد، غير مفعّل افتراضيًا: «مفتاح تنقية الهواء».** بعض الموديلات (شوهد على `ARTIK051_PRAC_20K`) فيها خيار تشغيل وإيقاف خاص لتنقية الهواء، وهو غالبًا التنقية بالأيونات. لا تظهر علامته إلا إذا أعلنه المكيف، وتكون في بطاقة «التشغيل والضبط»، ويتبع المفتاح ما يبلّغ عنه المكيف.
 
 ## 1.9.7
 
