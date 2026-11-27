@@ -13,7 +13,8 @@ import { shortId } from './redact.js';
 import { HelperClient } from './runtime/helperClient.js';
 import { helperSpawn } from './runtime/engine.js';
 import { PLATFORM_NAME, PLUGIN_NAME, UUID_NAMESPACE } from './settings.js';
-import { ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './storage.js';
+import fs from 'node:fs';
+import { HEARTBEAT_MS, ensureDir, pluginPaths, readJson, snapshotFile, writeJson } from './storage.js';
 
 const RETRY_STEPS_MS = [15_000, 30_000, 60_000, 120_000, 300_000];
 const START_GAP_MS = 1000;
@@ -126,6 +127,12 @@ export class SamsungLocalPlatform {
   async start() {
     this.#notePollFloor();
     ensureDir(this.paths.root);
+    // A heartbeat, so the settings page can tell this bridge is running before it deletes the plugin's data.
+    const beat = () => { if (!this.stopping) { try { writeJson(this.paths.running, { at: Date.now(), pid: process.pid }); } catch { /* best effort */ } } };
+    beat();
+    const heart = setInterval(beat, HEARTBEAT_MS);
+    heart.unref?.();
+    this.retryTimers.add(heart);
     let entries = this.entries();
     try {
       rememberNames(this.paths.names, entries); // so an appliance removed later comes back with its name
@@ -647,6 +654,7 @@ export class SamsungLocalPlatform {
     if (helper) {
       await helper.stop();
     }
+    fs.rmSync(this.paths.running, { force: true });
   }
 }
 

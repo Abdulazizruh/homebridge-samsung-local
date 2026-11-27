@@ -1175,3 +1175,14 @@ test('filter alert: not there unless ticked', async (t) => {
   await online(platform);
   assert.equal(platform.devices.get(DI).handler.services.has('filterAlert'), false);
 });
+
+test('heartbeat: written while the bridge runs, gone when it stops, so the settings page will not delete data under it', async () => {
+  const { bridgeRunning } = await import('../src/storage.js');
+  const storage = tmpDir();
+  const { platform } = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  const paths = pluginPaths(storage);
+  assert.equal(bridgeRunning(paths), true);
+  assert.equal(bridgeRunning(paths, Date.now() + 10 * 60_000), false, 'a stale heartbeat does not count');
+  await platform.stop();
+  assert.equal(bridgeRunning(paths), false);
+});

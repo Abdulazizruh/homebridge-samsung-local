@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.11
+
+Deleting the plugin's data now waits until its bridge is off, and the filter alert says what kind of sensor it is. Your settings, pairings and accessories are kept as they are.
+
+- **"Delete data" refuses while this plugin's child bridge is running.** While it runs, the bridge writes readings and its certificate back, so the folder could come back half full after a delete. The bridge now leaves a small heartbeat file every half minute and removes it when it stops; the settings page checks it and asks you to switch the bridge off first (⋮ → Bridge Settings). The steps under the button say so too.
+- **The filter alert says it is an occupancy sensor.** Apple Home calls its state "detected" and may count it in the room's occupancy, though it has nothing to do with people. The tick reads "Filter alert (an occupancy sensor, for notifications and automations)", and the README advises leaving it out of automations meant to follow people.
+
+**بالعربية**
+
+حذف بيانات الإضافة ينتظر الآن إطفاء جسرها، وتنبيه الفلتر يذكر نوع الحساس. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **«حذف البيانات» يرفض ما دام الجسر الفرعي لهذه الإضافة يعمل.** الجسر يعيد كتابة القراءات وشهادته ما دام يعمل، فقد يرجع المجلد ناقصًا بعد الحذف. صار الجسر يكتب ملف نبض صغيرًا كل نصف دقيقة، ويحذفه حين يتوقف. وتفحصه صفحة الإعدادات، فتطلب إطفاء الجسر أولًا (⋮ ← إعدادات الجسر). وتذكر ذلك الخطوات تحت الزر أيضًا.
+- **تنبيه الفلتر يذكر أنه حساس وجود.** يسمّي Apple Home حالته «مُكتشف»، وقد يحسبه ضمن وجود أشخاص في الغرفة، وهو لا علاقة له بالأشخاص. صارت العلامة «تنبيه تنظيف الفلتر (حساس وجود، للإشعارات والأتمتة)»، وينصح الدليل بعدم وضعه في أتمتة مبنية على وجود الأشخاص.
+
 ## 1.9.10
 
 One label fixed in the Arabic settings. Your settings, pairings and accessories are kept as they are.

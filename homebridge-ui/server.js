@@ -5,7 +5,7 @@ import { describeDevice, diagnosticsDump, stableDeviceId } from '../src/capabili
 import { HelperClient } from '../src/runtime/helperClient.js';
 import { chosenEngine, DEFAULT_ENGINE, helperSpawn, VERSION as PLUGIN_VERSION } from '../src/runtime/engine.js';
 import { ensureRuntime, findPython, runtimeStatus } from '../src/runtime/pythonRuntime.js';
-import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePythonRuntime, wipePluginData, writeJson } from '../src/storage.js';
+import { ensureDir, folderSize, listSnapshots, pluginPaths, readJson, removePythonRuntime, wipePluginData, writeJson, bridgeRunning } from '../src/storage.js';
 import { modelYear, pointerSupport, TizenRemote, tvInfo, tvInfoForDiagnostics, tvInfoPage } from '../src/tv/tizenClient.js';
 import QRCode from 'qrcode-svg';
 import { scanNetwork, tidyName } from '../src/scan.js';
@@ -469,6 +469,10 @@ class UiServer extends HomebridgePluginUiServer {
   wipe({ confirm, keepRuntime } = {}) {
     if (confirm !== 'DELETE') {
       throw new RequestError('Confirmation text does not match.', { code: 'not_confirmed' });
+    }
+    // While the bridge runs it writes readings and its certificate back: the folder would come back half full.
+    if (bridgeRunning(this.paths)) {
+      throw new RequestError('This plugin\'s child bridge is running. Switch it off first, then delete.', { code: 'bridge_running' });
     }
     return { removed: wipePluginData(this.homebridgeStoragePath, { keepRuntime: Boolean(keepRuntime) }) };
   }

@@ -27,6 +27,8 @@ export function pluginPaths(homebridgeStoragePath) {
     names: path.join(root, 'names.json'),
     // The appliance list imported once from SmartThings (names, rooms, models, IDs; never the token).
     smartthings: path.join(root, 'smartthings.json'),
+    // Written every half minute while this plugin's bridge runs, removed when it stops.
+    running: path.join(root, 'running.json'),
   };
 }
 
@@ -83,6 +85,13 @@ export function writeJson(file, value) {
 
 export function snapshotFile(paths, deviceId) {
   return path.join(paths.state, `${deviceId.replace(/[^a-zA-Z0-9-]/g, '_')}.json`);
+}
+
+/** Whether this plugin's bridge is running now: its heartbeat is fresh. */
+export const HEARTBEAT_MS = 30_000;
+export function bridgeRunning(paths, now = Date.now()) {
+  const beat = readJson(paths.running);
+  return Boolean(beat && Number.isFinite(beat.at) && now - beat.at < HEARTBEAT_MS * 2.5);
 }
 
 export function listSnapshots(paths) {
