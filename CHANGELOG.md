@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.10
+
+One label fixed in the Arabic settings. Your settings, pairings and accessories are kept as they are.
+
+- **The Purify tick reads right in Arabic.** Its label ended with an English word, so on the right-to-left page its brackets came out reversed. It now reads «مفتاح Purify (اسمه في SmartThings، وهو المروحة فقط)». The English label is unchanged.
+- The README shows the air conditioner's options in English and, in the Arabic README, in Arabic.
+
+**بالعربية**
+
+تصحيح علامة واحدة في الإعدادات العربية. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **علامة Purify تُقرأ صحيحة بالعربية.** كانت تنتهي بكلمة إنجليزية، فتنقلب أقواسها في الصفحة العربية. صارت: «مفتاح Purify (اسمه في SmartThings، وهو المروحة فقط)». والعلامة الإنجليزية لم تتغير.
+- يعرض الدليل خيارات المكيف بالإنجليزية، وبالعربية في الدليل العربي.
+
 ## 1.9.9
 
 The air conditioner's fan only switch takes the name SmartThings gives the same mode. Your settings, pairings and accessories are kept as they are.
