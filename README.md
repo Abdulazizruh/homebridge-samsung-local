@@ -14,7 +14,7 @@
 [![tests](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml)
 [![license](https://badgen.net/npm/license/homebridge-samsung-local)](LICENSE)
 
-Local, cloud-free control of Samsung appliances from Apple Home: air conditioners, washer status with a cycle-finished notice, and TVs with the Control Centre remote.
+Local, cloud-free control of Samsung appliances from Apple Home: air conditioners, washers with their status, a cycle-finished notice and control of course and settings, and TVs with the Control Centre remote.
 
 | | |
 |---|---|
@@ -357,7 +357,7 @@ With a remote like Apple TV chosen, the touch area of that remote can be swipe l
 | Discovery, live readings and push updates on real air conditioners | **Pass** on five units across two model families (`ARTIK051_PRAC_20K`, `TP1X_DA-AC-RAC-01001`) |
 | Control from Apple Home (power, temperature, fan, modes) | **Confirmed on all five units** |
 | Reconnect on real hardware | **Pass**: short drops recover within seconds |
-| A washer (`WA80F16B9CYL`, type `DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage, time remaining and the cycle-finished notice |
+| A washer (`WA80F16B9CYL`, type `DA_WM_TP1_21_COMMON`) | **Confirmed on the real washer**: running state, wash stage, time remaining and the cycle-finished notice. Control tried on it: course, spin, rinse, water temperature, water level, wash time, Super Speed, Eco Bubble, start, pause and cancel |
 | Both engines on the same six appliances (five air conditioners and the washer) | **Pass**: both connect to all six and receive push updates. In a start-up comparison Python connected about one second sooner |
 | A command refused with 4.00 and asked once more | **Confirmed on a real air conditioner**: accepted on the second ask |
 
