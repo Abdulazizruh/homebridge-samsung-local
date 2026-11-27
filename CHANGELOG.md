@@ -9,7 +9,7 @@ A new option for air conditioners: a filter alert that Apple Home shows, notifie
 - **New, off by default: "Filter alert".** A sensor in Apple Home, in the Sensors card of each air conditioner's options. It turns on while the air conditioner reports that its filter needs cleaning, the same reading Eve shows as "change needed", and turns off once the filter is cleaned and its counter reset. Apple Home can send a notification for it and use it to start an automation.
 - The log says it once each way: `the filter needs cleaning.` and `the filter is clean again.`
 - The filter status in the Eve app stays as it is.
-- **"Fan Only switch" now says it is the mode SmartThings calls "Purify".** Seen on a real unit: choosing Purify in SmartThings sets the unit's own Wind mode, the one this switch sets, and nothing else.
+- **The "Fan Only" switch is now named "Purify", as SmartThings names it.** Seen on real units of both model families: SmartThings lists Auto, Cool, Dry, Purify and Heat, and choosing Purify sets the unit's own Wind (fan only) mode, the one this switch sets, and nothing else. A tile you renamed in the Home app keeps your name.
 
 **بالعربية**
 
@@ -18,7 +18,7 @@ A new option for air conditioners: a filter alert that Apple Home shows, notifie
 - **جديد، غير مفعّل افتراضيًا: «تنبيه تنظيف الفلتر».** حساس في Apple Home، تجده في بطاقة «الحساسات» ضمن خيارات كل مكيف. يتفعّل ما دام المكيف يبلّغ أن الفلتر يحتاج تنظيفًا، وهي القراءة نفسها التي يعرضها Eve «مطلوب»، ويرجع بعد تنظيف الفلتر وتصفير عدّاده. يستطيع Apple Home أن يرسل إشعارًا به، وأن يبدأ به أتمتة.
 - يكتب السجل ذلك مرة في كل اتجاه: `the filter needs cleaning.` و`the filter is clean again.`
 - حالة الفلتر في تطبيق Eve تبقى كما هي.
-- **«مفتاح مروحة فقط» يذكر الآن أنه الوضع الذي يسميه SmartThings «Purify».** شوهد على مكيف حقيقي: اختيار Purify في SmartThings يضبط وضع Wind في المكيف، وهو نفسه الذي يضبطه هذا المفتاح، ولا يغيّر شيئًا آخر.
+- **مفتاح «مروحة فقط» صار اسمه «Purify»، كما يسميه SmartThings.** شوهد على مكيفات حقيقية من فئتَي الموديلات: يعرض SmartThings الأوضاع Auto وCool وDry وPurify وHeat، واختيار Purify يضبط وضع Wind (مروحة فقط) في المكيف، وهو نفسه الذي يضبطه هذا المفتاح، ولا يغيّر شيئًا آخر. البطاقة التي غيّرت اسمها في تطبيق Home تحتفظ باسمك.
 
 ## 1.9.7
 

@@ -214,7 +214,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Function | HomeKit service | Shown in | Notes |
 |---|---|---|---|
 | Power, Cool / Heat / Auto, target and current temperature | Thermostat | Apple Home | Celsius. Range and step come from the appliance |
-| Dry, Fan Only | Two switches | Apple Home | HomeKit thermostats have no state for these modes |
+| Dry, Purify (fan only) | Two switches | Apple Home | HomeKit thermostats have no state for these modes. Purify is the unit's fan only mode, named as SmartThings names it |
 | Fan speed Low / Medium / High / Turbo | Fan slider (4 steps) | Apple Home | |
 | Fan **Auto** | A dedicated switch, the fan "Auto" control, and 0 % on the slider | Apple Home | The slider shows Auto as 0 % |
 | Fan **Turbo** | Dedicated switch (and the top slider step) | Apple Home | |

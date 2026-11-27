@@ -30,7 +30,7 @@ export const DEFAULT_FEATURES = Object.freeze({
 });
 
 const LABELS = {
-  fan: 'Fan', dry: 'Dry', fanOnly: 'Fan Only', fanAuto: 'Fan Auto', fanTurbo: 'Turbo',
+  fan: 'Fan', dry: 'Dry', fanOnly: 'Purify', // the unit's Wind (fan only) mode, named as SmartThings names it fanAuto: 'Fan Auto', fanTurbo: 'Turbo',
   fanLow: 'Fan Low', fanMedium: 'Fan Medium', fanHigh: 'Fan High',
   windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart', comfort: 'Comfort',
   twoStep: '2-Step', motionDirect: 'Wind Follows', motionIndirect: 'Wind Avoids',
