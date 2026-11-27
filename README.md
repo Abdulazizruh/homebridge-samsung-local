@@ -2,17 +2,22 @@
 
 # homebridge-samsung-local
 
-[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
-[![npm](https://badgen.net/npm/v/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
-[![downloads](https://badgen.net/npm/dm/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
-[![total downloads](https://badgen.net/npm/dt/homebridge-samsung-local)](https://www.npmjs.com/package/homebridge-samsung-local)
-[![release](https://badgen.net/github/release/Abdulazizruh/homebridge-samsung-local/stable)](https://github.com/Abdulazizruh/homebridge-samsung-local/releases)
-[![stars](https://badgen.net/github/stars/Abdulazizruh/homebridge-samsung-local)](https://github.com/Abdulazizruh/homebridge-samsung-local/stargazers)
-[![issues](https://badgen.net/github/open-issues/Abdulazizruh/homebridge-samsung-local)](https://github.com/Abdulazizruh/homebridge-samsung-local/issues)
-[![last commit](https://badgen.net/github/last-commit/Abdulazizruh/homebridge-samsung-local)](https://github.com/Abdulazizruh/homebridge-samsung-local/commits/main)
-[![node](https://badgen.net/npm/node/homebridge-samsung-local)](https://nodejs.org)
-[![tests](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml)
-[![license](https://badgen.net/npm/license/homebridge-samsung-local)](LICENSE)
+<p align="center">
+<a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img alt="verified by homebridge" src="https://badgen.net/badge/homebridge/verified/purple"></a>
+<a href="https://www.npmjs.com/package/homebridge-samsung-local"><img alt="npm version" src="https://badgen.net/npm/v/homebridge-samsung-local"></a>
+<a href="https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml"><img alt="tests" src="https://github.com/Abdulazizruh/homebridge-samsung-local/actions/workflows/ci.yml/badge.svg"></a>
+<br>
+<a href="https://www.npmjs.com/package/homebridge-samsung-local"><img alt="downloads a month" src="https://badgen.net/npm/dm/homebridge-samsung-local"></a>
+<a href="https://www.npmjs.com/package/homebridge-samsung-local"><img alt="total downloads" src="https://badgen.net/npm/dt/homebridge-samsung-local"></a>
+<br>
+<a href="https://github.com/Abdulazizruh/homebridge-samsung-local/stargazers"><img alt="stars" src="https://badgen.net/github/stars/Abdulazizruh/homebridge-samsung-local"></a>
+<a href="https://github.com/Abdulazizruh/homebridge-samsung-local/issues"><img alt="open issues" src="https://badgen.net/github/open-issues/Abdulazizruh/homebridge-samsung-local"></a>
+<a href="LICENSE"><img alt="license" src="https://badgen.net/npm/license/homebridge-samsung-local"></a>
+<br>
+<a href="https://github.com/Abdulazizruh/homebridge-samsung-local/commits/main"><img alt="last commit" src="https://badgen.net/github/last-commit/Abdulazizruh/homebridge-samsung-local"></a>
+<br>
+<a href="https://nodejs.org"><img alt="node" src="https://badgen.net/npm/node/homebridge-samsung-local"></a>
+</p>
 
 Local, cloud-free control of Samsung appliances from Apple Home: air conditioners, washers with their status, a cycle-finished notice and control of course and settings, and TVs with the Control Centre remote.
 
