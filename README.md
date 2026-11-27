@@ -222,7 +222,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | WindFree, Fast, Quiet (optional: Sleep, Smart, Comfort, 2-Step, wind follows / avoids people) | Switches | Apple Home | One comfort mode at a time, as on the appliance |
 | Light Display | Light | Apple Home | On/off only. Brightness is not available locally |
 | Humidity | Humidity sensor | Apple Home | Hidden while the appliance reports 0 |
-| Filter | Filter maintenance | Apple Home | Change indication and remaining life |
+| Filter | Filter maintenance | Eve and other HomeKit apps | Change indication and remaining life. Apple Home does not show this service type |
 | Beep, Auto Clean | Switches (off by default) | Apple Home | |
 | Power now (W), energy total (kWh) | Eve characteristics on the thermostat | Eve-compatible apps and the plugin settings page | Apple Home has no power or energy type. No misleading sensor type is used |
 | Alarms / error codes | — | Plugin settings page and log | |
