@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.4
+
+The "send together" trial is over, and this version leaves nothing of it behind. What it showed along the way stays. Your settings, pairings and accessories are kept as they are.
+
+- **The trial "send together" is removed.** On a real unit (`TP1X_DA-AC-RAC-01001` family) the batch message was accepted but not carried out: with power last the unit switched on and went back to its earlier settings; with power first it applied nothing, not even switching on. Commands go one by one, as in 1.9.3.
+- What it stored is removed too: the tick in each air conditioner's options, and the note that a unit refused it. The tick leaves your config the next time you save that air conditioner in the settings page; until then it has no effect.
+- The engines are back as in 1.9.3: the message format the trial needed is gone from both, Python and JavaScript.
+- Kept from the beta: when a unit accepts a command but does not apply it, the log says what the unit reports, for example `(it reports 22)`.
+- Kept from the beta: in Auto mode, an option the unit refuses (seen with WindFree) is not sent a second time, and the log says to choose Cool or another mode first.
+
+**بالعربية**
+
+انتهت تجربة «الإرسال معًا»، وهذه النسخة تُزيل كل ما أضافته. ويبقى ما ظهر خلالها من تحسينات. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **أُزيلت تجربة «الإرسال معًا».** على مكيف حقيقي (فئة `TP1X_DA-AC-RAC-01001`) قبِل المكيف الرسالة المجمّعة ولم ينفّذها: مع التشغيل آخرها اشتغل ثم رجع إلى إعداداته السابقة، ومع التشغيل أولها لم ينفّذ شيئًا، حتى التشغيل لم ينفّذه. تُرسل الأوامر واحدًا واحدًا كما في 1.9.3.
+- أُزيل أيضًا ما خزّنته: العلامة في خيارات كل مكيف، وملاحظة أن المكيف رفضها. تخرج العلامة من إعداداتك حين تحفظ ذلك المكيف في صفحة الإعدادات، وحتى ذلك الحين لا تؤثر في شيء.
+- المحرّكان كما كانا في 1.9.3: أُزيلت صيغة الرسالة التي احتاجتها التجربة من Python وJavaScript.
+- بقي من النسخة التجريبية: إذا قبِل المكيف أمرًا ولم يطبّقه، يكتب السجل ما يبلّغ عنه المكيف، مثل `(it reports 22)`.
+- بقي من النسخة التجريبية: في وضع Auto، الخيار الذي يرفضه المكيف (شوهد مع WindFree) لا يُرسل مرة ثانية، ويكتب السجل أن تختار Cool أو وضعًا آخر أولًا.
+
 ## 1.9.4-beta.2
 
 The "send together" trial, second try: power first. Your settings, pairings and accessories are kept as they are.

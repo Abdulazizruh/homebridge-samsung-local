@@ -252,11 +252,11 @@ class Link {
     return { code: res.code, body };
   }
 
-  async post(pathSegments, body, timeoutMs = WRITE_TIMEOUT_MS, query = []) {
+  async post(pathSegments, body, timeoutMs = WRITE_TIMEOUT_MS) {
     if (this.dead) {
       throw this.dead;
     }
-    const res = await this.session.post(pathSegments, encodeCbor(body), timeoutMs, query);
+    const res = await this.session.post(pathSegments, encodeCbor(body), timeoutMs);
     let text = null;
     if (res.payload?.length) {
       try {
@@ -536,7 +536,7 @@ class DeviceWorker {
     this.wake?.();
   }
 
-  async write(pathSegments, body, query = []) {
+  async write(pathSegments, body) {
     if (this.reconnecting && !this.link) {
       await Promise.race([new Promise((r) => { this.linkedWaiters.push(r); }), sleep(QUIET_RECONNECT_WAIT_MS)]);
     }
@@ -548,7 +548,7 @@ class DeviceWorker {
     this.quietUntil = Date.now() + AFTER_WRITE_QUIET_MS;
     let answer;
     try {
-      answer = await link.post(pathSegments, body, undefined, Array.isArray(query) ? query.map(String) : []);
+      answer = await link.post(pathSegments, body);
     } finally {
       this.quietUntil = Date.now() + AFTER_WRITE_QUIET_MS;
       this.requestRefresh(AFTER_WRITE_QUIET_MS);
@@ -773,7 +773,7 @@ class Helper {
           worker.requestRefresh(Number(req.delay ?? 0) * 1000);
           return { scheduled: true };
         }
-        return worker.write(req.path, req.body, req.query);
+        return worker.write(req.path, req.body);
       }
       default:
         throw new HelperError('bad_request', `unknown op ${JSON.stringify(req.op)}`);

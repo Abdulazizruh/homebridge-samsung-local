@@ -238,7 +238,7 @@ export class DeviceLink extends EventEmitter {
         let result;
         const started = Date.now();
         try {
-          result = await this.#request('write', { key: this.key, path: write.path, body: write.body, ...(write.query ? { query: write.query } : {}) }, 15_000);
+          result = await this.#request('write', { key: this.key, path: write.path, body: write.body }, 15_000);
           if (!result.accepted && result.code === '4.00' && !write.once) {
             // Seen on a real air conditioner with both engines: a correct
             // command is now and then answered 4.00, and the unit may have

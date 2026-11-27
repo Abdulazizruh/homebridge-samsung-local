@@ -356,15 +356,11 @@ class Link:
         with self._lock:
             return _decode(*self._session.get(list(path), query=tuple(query), timeout=timeout))
 
-    def post(self, path, body, timeout=WRITE_TIMEOUT_S, query=()):
+    def post(self, path, body, timeout=WRITE_TIMEOUT_S):
         import cbor2
 
         with self._lock:
-            if query:
-                code, payload = self._session.post(
-                    list(path), cbor2.dumps(body), timeout=timeout, query=tuple(query))
-            else:
-                code, payload = self._session.post(list(path), cbor2.dumps(body), timeout=timeout)
+            code, payload = self._session.post(list(path), cbor2.dumps(body), timeout=timeout)
         text = None
         if payload:
             try:
@@ -705,7 +701,7 @@ class DeviceWorker(threading.Thread):
         self._wake_at = time.monotonic() + delay
         self._wake.set()
 
-    def write(self, path, body, query=()):
+    def write(self, path, body):
         if self._reconnecting:
             # A session that just dropped is being reopened: wait for it
             # rather than failing the command.
@@ -716,9 +712,7 @@ class DeviceWorker(threading.Thread):
             raise HelperError("offline", "The appliance is not connected right now.")
         self._quiet_until = time.monotonic() + AFTER_WRITE_QUIET_S
         try:
-            query = tuple(str(q) for q in (query or ()))
-            # A query only for a batch update; plain commands go exactly as before.
-            code, text = link.post(path, body, query=query) if query else link.post(path, body)
+            code, text = link.post(path, body)
         finally:
             self._quiet_until = time.monotonic() + AFTER_WRITE_QUIET_S
             self.request_refresh(AFTER_WRITE_QUIET_S)
@@ -944,7 +938,7 @@ class Helper:
             if op == "refresh":
                 worker.request_refresh(float(req.get("delay", 0)))
                 return {"scheduled": True}
-            return worker.write(req["path"], req["body"], req.get("query") or ())
+            return worker.write(req["path"], req["body"])
         raise HelperError("bad_request", f"unknown op {op!r}")
 
     def hosts(self):

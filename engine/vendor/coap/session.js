@@ -79,11 +79,10 @@ class CoapSession {
         return this.track(token, path, query, datagram, true, timeoutMs);
     }
     /** POST (write) a CBOR payload to a resource href. Sent once (no retransmit). */
-    post(path, payload, timeoutMs = this.defaultTimeoutMs, query = []) {
+    post(path, payload, timeoutMs = this.defaultTimeoutMs) {
         const token = this.nextToken();
         const options = [
             ...(0, message_1.pathOptions)(path),
-            ...(0, message_1.queryOptions)(query),
             { number: message_1.Opt.CONTENT_FORMAT, value: CF_CBOR },
             // Sent as the Python engine sends it: some firmwares answer 4.00
             // to a command that does not say which reply format it accepts.
@@ -91,7 +90,7 @@ class CoapSession {
         ];
         const msg = { type: message_1.CoapType.CON, code: message_1.Code.POST, messageId: this.nextMid(), token, options, payload };
         const datagram = (0, message_1.encode)(msg);
-        return this.track(token, path, query, datagram, false, timeoutMs);
+        return this.track(token, path, [], datagram, false, timeoutMs);
     }
     /** Subscribe to CoAP Observe on a resource. Returns an unsubscribe fn. */
     async observe(path, handler, query = []) {
