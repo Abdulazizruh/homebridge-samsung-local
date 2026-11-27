@@ -1125,3 +1125,23 @@ test('in Auto mode a refused WindFree is not sent a second time, and the log say
   await waitFor(() => lines.some((m) => m.includes('Auto mode')), 6000);
   assert.equal((await sim('writes')).writes - from, 1);
 });
+
+test('a washer tile name with a "+" kept in the cache by an older version is put right at the next start', async () => {
+  const W = fixture('washer_topload').identity.di;
+  const storage = tmpDir();
+  const devices = [{ host: '10.0.0.9', fixture: fixturePath('washer_topload') }];
+  const config = { devices: [{ host: '10.0.0.9', name: 'Washer', features: { ctlCourse: true } }] };
+  const first = await boot({ storage, devices, config });
+  await online(first.platform, W);
+  const all = () => first.api.registered.map((r) => r.accessory);
+  await waitFor(() => all().some((a) => a.services.some((x) => x.subtype === 'ctlCourse:08')));
+  const cached = all();
+  const rinse = cached.flatMap((a) => a.services).find((x) => x.subtype === 'ctlCourse:08');
+  assert.equal(rinse.displayName, 'Course Rinse and Spin');
+  await first.platform.stop();
+  rinse.displayName = 'Course Rinse + Spin'; // as cached before 1.9.0-beta.8
+  const second = await boot({ storage, devices, config, cached });
+  await online(second.platform, W);
+  assert.equal(rinse.displayName, 'Course Rinse and Spin');
+  await second.platform.stop();
+});

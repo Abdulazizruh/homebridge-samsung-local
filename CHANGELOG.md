@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.5
+
+A washer tile name is put right in the cache, so Homebridge no longer warns about it at each start. Your settings, pairings and accessories are kept as they are.
+
+- **The warning about "Course Rinse + Spin" at each start is gone.** Apple Home does not accept a "+" in a name, so since 1.9.0-beta.8 the tile is shown as "Course Rinse and Spin". The old name still stayed in one place of the accessory cache, which Homebridge checks at each start; it is now replaced there too. Nothing changes in Apple Home: the tile, its room and any name you gave it stay.
+
+**بالعربية**
+
+يُصحَّح اسم بطاقة الغسالة في الذاكرة المحفوظة، فلا يعود Homebridge يحذّر منه عند كل تشغيل. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **اختفى التحذير من «Course Rinse + Spin» عند كل تشغيل.** Apple Home لا يقبل علامة «+» في الأسماء، لذلك تظهر البطاقة منذ 1.9.0-beta.8 باسم «Course Rinse and Spin». لكن الاسم القديم بقي في موضع واحد من الذاكرة المحفوظة للأجهزة، ويفحصه Homebridge عند كل تشغيل، والآن يُستبدل هناك أيضًا. لم يتغير شيء في Apple Home: البطاقة وغرفتها وأي اسم وضعته لها تبقى كما هي.
+
 ## 1.9.4
 
 The "send together" trial is over, and this version leaves nothing of it behind. What it showed along the way stays. Your settings, pairings and accessories are kept as they are.

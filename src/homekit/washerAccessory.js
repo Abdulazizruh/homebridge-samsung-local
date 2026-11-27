@@ -123,6 +123,11 @@ export class WasherAccessory {
     if (service.getCharacteristic(Characteristic.Name).value !== name) {
       service.updateCharacteristic(Characteristic.Name, name);
     }
+    // The cache keeps a tile's first name apart from its Name value, and Apple Home's checks read it
+    // at every start: a "+" stored there before 1.9.0-beta.8 was warned about on each restart.
+    if (service.displayName !== name) {
+      service.displayName = name;
+    }
   }
 
   #service(key, type, subtype) {
