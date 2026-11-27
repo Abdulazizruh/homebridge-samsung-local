@@ -282,8 +282,8 @@
       yes: 'yes', no: 'no', unconfirmed: 'reports 0', readOnly: 'read-only', control: 'control',
       whereHome: 'Apple Home', whereEve: 'Eve + this page', gCtl: 'Operation', gCtlSub: 'Power, modes and settings of the appliance in Apple Home', gSens: 'Sensors', gSensSub: 'Readings shown in Apple Home, usable in automations', gEve: 'In the Eve app only', gEveSub: 'Not shown in Apple Home, which has no tile for them. Open them in the free Eve app.', whereUi: 'this page', whereNone: '—',
       testNote: 'Tested on real air conditioners. Available features differ from one model to another.',
-      cycleStyle: 'How the cycle tile behaves', cycleStyle_valve: 'Tile with countdown (a tap is undone at once)', cycleStyle_sensor: 'Running sensor (no countdown, never reacts to a tap)',
-      cycleStyleNote: 'Apple Home sends an on/off command when a valve tile is tapped. The plugin undoes it at once; choose the sensor if you want nothing to happen at all.',
+      cycleStyle: 'How the cycle tile behaves', cycleStyle_valve: 'Tile with countdown', cycleStyle_sensor: 'Running sensor, no countdown',
+      cycleStyleNote: 'Tile with countdown: Apple Home sends an on/off command when the tile is tapped, and the plugin undoes it at once. Running sensor: no countdown, and a tap does nothing at all.',
       laundryNote: 'Shown for follow-up and notifications. A cycle is started at the appliance itself, not from Apple Home.',
       sec: { ac: 'Air conditioners', laundry: 'Laundry', tv: 'TVs', air: 'Air purifiers and dehumidifiers', fridge: 'Refrigerators', vacuum: 'Robot vacuums', cooking: 'Cooking', other: 'Other appliances' }, secCount: (n) => (n === 1 ? '1 device' : `${n} devices`), secAll: 'all connected', secOne: 'connected', secSome: (a, n) => `${a} of ${n} connected`, secFold: 'Show or hide this group',
       phTouch: 'Touch area of this remote', phTouchArrows: 'Arrows: a slide moves the selection step by step', phTouchPointer: 'Pointer (trial): the finger moves a pointer, like a mouse', phTouchNote: 'The pointer shows in the TV\'s browser and in some apps; elsewhere nothing moves. A tap right after moving clicks what is under the pointer. Buttons and keyboard are the same in both.',
@@ -429,8 +429,8 @@
       yes: 'نعم', no: 'لا يدعم', unconfirmed: 'يُرجع صفرًا', readOnly: 'قراءة فقط', control: 'تحكم',
       whereHome: 'Apple Home', whereEve: 'Eve وهذه الصفحة', gCtl: 'التشغيل والضبط', gCtlSub: 'تشغيل الجهاز وأوضاعه وإعداداته في Apple Home', gSens: 'الحساسات', gSensSub: 'قراءات تظهر في Apple Home وتصلح للأتمتة', gEve: 'في تطبيق Eve فقط', gEveSub: 'لا تظهر في Apple Home لأنه لا يملك بطاقة لها. افتحها في تطبيق Eve المجاني.', whereUi: 'هذه الصفحة', whereNone: '—',
       testNote: 'مجرَّب على مكيفات حقيقية. تختلف المزايا المتاحة من طراز إلى آخر.',
-      cycleStyle: 'سلوك بطاقة الدورة', cycleStyle_valve: 'بطاقة مع عدّاد (يُلغى الضغط فورًا)', cycleStyle_sensor: 'حساس تشغيل (دون عدّاد، لا يتأثر بالضغط)',
-      cycleStyleNote: 'تطبيق Apple Home يرسل أمر تشغيل أو إيقاف عند الضغط على بطاقة الصمام. تلغيه الإضافة فورًا، واختر الحساس إذا أردت ألا يحدث شيء إطلاقًا.',
+      cycleStyle: 'سلوك بطاقة الدورة', cycleStyle_valve: 'بطاقة مع عدّاد', cycleStyle_sensor: 'حساس تشغيل دون عدّاد',
+      cycleStyleNote: 'البطاقة مع العدّاد: يرسل Apple Home أمر تشغيل أو إيقاف عند الضغط عليها، وتلغيه الإضافة فورًا. حساس التشغيل: دون عدّاد، والضغط عليه لا يفعل شيئًا إطلاقًا.',
       laundryNote: 'تظهر للمتابعة والإشعار. تبدأ الدورة من الجهاز نفسه، وليس من Apple Home.',
       sec: { ac: 'المكيفات', laundry: 'الغسيل', tv: 'التلفزيونات', air: 'منقيات الهواء ومزيلات الرطوبة', fridge: 'الثلاجات', vacuum: 'المكانس الآلية', cooking: 'الطبخ', other: 'أجهزة أخرى' }, secCount: (n) => (n === 1 ? 'جهاز واحد' : n === 2 ? 'جهازان' : n <= 10 ? `${n} أجهزة` : `${n} جهازًا`), secAll: 'كلها متصلة', secOne: 'متصل', secSome: (a, n) => `${a} من ${n} متصلة`, secFold: 'إظهار هذه المجموعة أو إخفاؤها',
       phTouch: 'مساحة اللمس في هذا الريموت', phTouchArrows: 'أسهم: السحب يحرّك التحديد خطوة خطوة', phTouchPointer: 'مؤشر (تجريبي): الإصبع يحرّك مؤشرًا مثل الماوس', phTouchNote: 'المؤشر يظهر في متصفح التلفزيون وبعض التطبيقات، وفي غيرها لن يتحرك شيء. اللمسة بعد تحريك المؤشر تضغط ما تحته. الأزرار والكيبورد كما هي في الحالتين.',
@@ -778,11 +778,11 @@
     const src = { probe: t('sourceProbe'), 'running-plugin': t('sourceRunning'), snapshot: t('sourceSnapshot') }[p.source];
     let reports = '';
     let html = `<div class="sl-row">${inline ? '' : `<span class="sl-pill sl-ok">${t('found')}</span>`}
-      <strong>${esc(KINDS[lang][d.kind] ?? d.kind)}</strong> <span class="sl-muted" dir="ltr">${esc(d.model ?? '')}</span>
+      <strong>${esc(KINDS[lang][d.kind] ?? d.kind)}</strong> <span class="sl-muted" dir="ltr" style="overflow-wrap:anywhere">${esc(d.model ?? '')}</span>
       ${d.support === 'supported' ? '' : `<span class="sl-pill ${supportClass}">${t('support_' + d.support)}</span>`}</div>`;
     const identity = `<table class="sl-table mt-2"><tbody>
       <tr><th>${t('kind')}</th><td>${esc(KINDS[lang][d.kind] ?? d.kind)}</td></tr>
-      <tr><th>${t('model')}</th><td dir="ltr">${esc(d.model ?? '—')}</td></tr>
+      <tr><th>${t('model')}</th><td dir="ltr" style="overflow-wrap:anywhere">${esc(d.model ?? '—')}</td></tr>
       <tr><th>${t('id')}</th><td dir="ltr">…${esc(String(p.deviceId ?? '').slice(-8))}</td></tr>
       <tr><th>${t('support')}</th><td><span class="sl-pill ${supportClass}">${t('support_' + d.support)}</span></td></tr>
       <tr><th>${t('source')}</th><td>${src}</td></tr></tbody></table>`;

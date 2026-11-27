@@ -2,6 +2,20 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.7
+
+Two small fixes on the washer's options, seen on a phone. Your settings, pairings and accessories are kept as they are.
+
+- **"How the cycle tile behaves": the choices fit on a phone.** They were cut off ("Tile with countdown (a tap is undon"). They now read "Tile with countdown" and "Running sensor, no countdown", and the note under them says what each one does.
+- **A long model number stays inside its card.** A washer's model number ran past the card's edge on a phone; it now wraps.
+
+**بالعربية**
+
+إصلاحان صغيران في خيارات الغسالة، ظهرا على الجوال. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **«سلوك بطاقة الدورة»: الخيارات تظهر كاملة على الجوال.** كانت تُقص من آخرها. صارت «بطاقة مع عدّاد» و«حساس تشغيل دون عدّاد»، والملاحظة تحتها تشرح ما يفعله كل منهما.
+- **رقم الموديل الطويل يبقى داخل بطاقته.** كان رقم موديل الغسالة يخرج من حافة البطاقة على الجوال، والآن ينتقل إلى السطر التالي.
+
 ## 1.9.6
 
 The options of each appliance are now in three cards, and what shows only in the Eve app has a card of its own. Your settings, pairings and accessories are kept as they are.
