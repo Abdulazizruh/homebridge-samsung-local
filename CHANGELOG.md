@@ -2,6 +2,18 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.3
+
+The log names each command sent to an air conditioner. Your settings, pairings and accessories are kept as they are.
+
+- **New in the log: one short line per air conditioner command**, for example `sent: power on.`, `sent: mode cool.`, `sent: target 22°C.` Each command that reaches an air conditioner makes it beep, so when one switch-on is heard as several beeps, the log now shows which commands they were. Nothing else changes: the same commands are sent as before.
+
+**بالعربية**
+
+السجل يسمّي كل أمر يُرسل إلى المكيف. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **جديد في السجل: سطر قصير لكل أمر يُرسل إلى المكيف**، مثل `sent: power on.` و`sent: mode cool.` و`sent: target 22°C.` كل أمر يصل المكيف يصدر نغمة، فإذا سُمع تشغيل واحد بعدة نغمات يُظهر السجل الآن أي الأوامر كانت. لم يتغير شيء آخر: الأوامر المرسلة هي نفسها.
+
 ## 1.9.2
 
 A washer group no longer leaves its room in Apple Home. Your settings, pairings and accessories are kept as they are.

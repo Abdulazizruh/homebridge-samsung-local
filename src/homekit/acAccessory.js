@@ -213,7 +213,9 @@ export class AcAccessory {
       if (this.inflight.get(key) === same) { this.inflight.delete(key); }
     }).then(() => {
       hold();
-      this.log.debug(`[${this.displayName}] ${label} accepted by the appliance; waiting for it to report the change.`);
+      // One short line per command that reached the appliance: each one is a beep, and when a
+      // switch-on is heard as several beeps this shows which commands they were.
+      this.log.info(`[${this.displayName}] sent: ${label}.`);
     }, (err) => {
       this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}`);
       if (late) {
