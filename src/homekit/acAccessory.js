@@ -193,12 +193,15 @@ export class AcAccessory {
         batch.resolve();
         return;
       }
-      // Power last, so the unit starts in the mode and temperature it was given.
-      const ordered = [...items.filter((w) => w.path[0] !== 'power'), ...items.filter((w) => w.path[0] === 'power')];
+      // Power first. Seen on a real unit (beta.1, power last): it switched on but kept its old
+      // temperature, fan and display, as if a setting sent while it is still off is dropped.
+      const ordered = [...items.filter((w) => w.path[0] === 'power'), ...items.filter((w) => w.path[0] !== 'power')];
       const body = ordered.map((w) => ({ href: `/${w.path.join('/')}`, rep: w.body }));
       try {
         await this.link.send([{ path: ['device', '0'], query: ['if=oic.if.b'], body, once: true }]);
         this.log.info(`[${this.displayName}] sent together, in one message: ${labels.join(', ')}.`);
+        batch.resolve('together');
+        return;
       } catch (err) {
         if (err.code !== 'refused') {
           throw err;
@@ -271,15 +274,23 @@ export class AcAccessory {
     };
     let late = false;
     let timer;
-    const sent = this.#dispatch(writes, label).finally(() => {
+    // Seen on a real unit: in Auto mode WindFree is refused (4.00), and asking once more changes
+    // nothing. In Auto a refused option is not sent a second time, and the log says why.
+    const autoOption = kind === 'preset' && this.model.state.mode === 'auto';
+    const toSend = autoOption ? writes.map((w) => ({ ...w, once: true })) : writes;
+    const sent = this.#dispatch(toSend, label).finally(() => {
       if (this.inflight.get(key) === same) { this.inflight.delete(key); }
-    }).then(() => {
+    }).then((how) => {
       hold();
       // One short line per command that reached the appliance: each one is a beep, and when a
-      // switch-on is heard as several beeps this shows which commands they were.
-      this.log.info(`[${this.displayName}] sent: ${label}.`);
+      // switch-on is heard as several beeps this shows which commands they were. Commands sent
+      // together have their one line already.
+      if (how !== 'together') {
+        this.log.info(`[${this.displayName}] sent: ${label}.`);
+      }
     }, (err) => {
-      this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}`);
+      const hint = autoOption && err.code === 'refused' ? ' The unit is in Auto mode, where it may not take this option: choose Cool (or another mode) first.' : '';
+      this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}${hint}`);
       if (late) {
         // HomeKit was already told "done": put the real state back on screen,
         // unless a later value of this kind is already on its way.
@@ -343,7 +354,9 @@ export class AcAccessory {
         held.add(key.split(':')[0]);
       } else if (now >= p.confirmUntil) {
         this.pending.delete(key);
-        this.log.warn(`[${this.displayName}] the appliance accepted "${p.label}" but did not apply it. Showing its real state.`);
+        const shown = st[key.split(':')[0]];
+        const reports = shown === undefined || typeof shown === 'object' ? '' : ` (it reports ${shown})`;
+        this.log.warn(`[${this.displayName}] the appliance accepted "${p.label}" but did not apply it${reports}. Showing its real state.`);
       }
     }
     return held;

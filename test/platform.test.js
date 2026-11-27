@@ -1132,3 +1132,26 @@ test('send together (trial): switch-on, mode and temperature to a unit that is o
     await platform.stop();
   }
 });
+
+test('in Auto mode a refused WindFree is not sent a second time, and the log says why', async (t) => {
+  const lines = [];
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler } = platform.devices.get(DI);
+  const warn = platform.log.warn;
+  platform.log.warn = (m) => { lines.push(m); };
+  t.after(() => { platform.log.warn = warn; });
+  handler.log = platform.log;
+  const C = platform.api.hap.Characteristic;
+  const sim = (action, value, extra = {}) => platform.helper.request('sim', { key: DI, action, value, ...extra });
+  await sim('remote', undefined, { path: ['power', 'vs', '0'], body: { 'x.com.samsung.da.power': 'On' } });
+  await sim('remote', undefined, { path: ['mode', 'vs', '0'], body: { 'x.com.samsung.da.modes': ['Auto'] } });
+  await platform.helper.request('refresh', { key: DI });
+  await waitFor(() => handler.model.state.mode === 'auto' && handler.model.state.power, 6000);
+  const from = (await sim('writes')).writes;
+  await sim('refuse', 'once');
+  await handler.services.get('windFree').getCharacteristic(C.On).handleSetRequest(true).catch(() => {});
+  await waitFor(() => lines.some((m) => m.includes('Auto mode')), 6000);
+  assert.equal((await sim('writes')).writes - from, 1);
+});

@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.4-beta.2
+
+The "send together" trial, second try: power first. Your settings, pairings and accessories are kept as they are.
+
+- **Trial "send together": power now comes first in the message.** Seen on a real unit with beta.1 (power last): one beep, its display showed the new temperature, and then it went back to its earlier temperature and display as it switched on, as if switching on restores what the unit had before. With power first, the unit is on when the other settings reach it.
+- The log no longer repeats each command of a message that went together; the one `sent together` line lists them.
+- When a unit accepts a command but does not apply it, the log now says what it reports instead.
+- In Auto mode, an option the unit refuses (seen with WindFree) is not sent a second time, and the log says to choose Cool or another mode first.
+- If the trial is dropped later, the next version removes the tick and what it stored, leaving nothing behind.
+
+**بالعربية**
+
+تجربة «الإرسال معًا»، المحاولة الثانية: التشغيل أولًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **تجربة «الإرسال معًا»: التشغيل الآن أول الرسالة.** شوهد على مكيف حقيقي مع beta.1 (التشغيل آخرها): نغمة واحدة، وعرضت شاشته الحرارة الجديدة، ثم رجع إلى حرارته وشاشته السابقتين عند التشغيل، كأن التشغيل يعيد ما كان عليه المكيف. مع التشغيل أولًا يكون المكيف يعمل حين تصله بقية الإعدادات.
+- السجل لم يعد يكرر كل أمر من رسالة أُرسلت معًا، فسطر `sent together` يذكرها كلها.
+- إذا قبل المكيف أمرًا ولم يطبقه، يكتب السجل الآن ما يبلّغ عنه المكيف بدلًا منه.
+- في وضع Auto، الخيار الذي يرفضه المكيف (شوهد مع WindFree) لا يُرسل مرة ثانية، ويكتب السجل أن تختار Cool أو وضعًا آخر أولًا.
+- إذا أُلغيت التجربة لاحقًا، يزيل الإصدار التالي العلامة وما خزّنته، فلا يبقى منها شيء.
+
 ## 1.9.4-beta.1
 
 A trial for air conditioners: switch-on with mode and temperature in one message, so the unit beeps once, as with its own remote. Off unless you tick it. Your settings, pairings and accessories are kept as they are.
