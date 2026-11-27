@@ -363,7 +363,7 @@
         'fan.auto': 'Fan: Auto', 'fan.low': 'Fan: Low', 'fan.medium': 'Fan: Medium', 'fan.high': 'Fan: High', 'fan.turbo': 'Fan: Turbo',
         swing: 'Swing', 'preset.windFree': 'WindFree', 'preset.fast': 'Fast', 'preset.quiet': 'Quiet', 'preset.sleep': 'Sleep',
         'preset.smart': 'Smart', 'preset.comfort': 'Comfort', 'preset.twoStep': '2-Step', 'preset.motionDirect': 'Wind follows people',
-        'preset.motionIndirect': 'Wind avoids people', light: 'Light Display', beep: 'Beep', autoClean: 'Auto clean',
+        'preset.motionIndirect': 'Wind avoids people', light: 'Light Display', beep: 'Beep', autoClean: 'Auto clean', airPurify: 'Air purify',
         cycle: 'Cycle', remainingTime: 'Time remaining', cycleFinished: 'Cycle finished (sensor)', progress: 'Progress', kidsLock: 'Child lock', washCount: 'Washes so far', waterLitres: 'Water used so far', stages: 'Stage sensors (wash, rinse, spin)', drumClean: 'Drum clean running', course: 'Selected course', lastDrumClean: 'Last drum clean',
         filter: 'Filter usage (%)', alarms: 'Alarms', powerWatts: 'Power now (W)', energyKWh: 'Energy total (kWh)',
         voltage: 'Voltage (V)', current: 'Current (A)', outdoorTemperature: 'Outdoor temperature (°C)', occupancy: 'Motion / occupancy' },
@@ -374,7 +374,7 @@
       feat: { unloadSensor: 'Unload reminder: every half hour while the washing stays inside', smartControlSensor: 'Smart Control sensor: detected while it is on at the panel', ctlPower: 'Power switch (on/off)', ctlRun: 'Start/Pause switch: on starts or resumes, off pauses (the washer may need Smart Control on at its panel)', ctlStop: 'Cancel Cycle: ends the cycle and clears it (a press)', ctlKidsLock: 'Child lock that can be set', ctlBuzzer: 'Sound switch', ctlSpin: 'Spin level (a group of switches)', ctlRinse: 'Rinse count (a group of switches)', ctlWaterTemp: 'Water temperature: cold, warm, hot (a group of switches)', ctlWaterLevel: 'Water level (a group of switches)', ctlWashTime: 'Wash time (a group of switches)', ctlCourse: 'Course (a group of switches where the washer lists its courses, else a press for the next number)', ctlSuperSpeed: 'Super Speed switch', ctlBubbleSoak: 'Bubble Soak switch (no light on some panels)', ctlBubbleStorm: 'Eco Bubble switch', cycleTile: 'Cycle tile with time remaining', finishedSensor: 'Cycle finished sensor', progressTile: 'Progress tile (percent, shown with a humidity icon)', kidsLockSensor: 'Child lock status', alertSensor: 'Alert sensor (appliance faults)', stageSensors: 'Stage sensors: washing, rinsing, spinning (trial)', drumCleanSensor: 'Drum clean sensor (trial)', fan: 'Fan tile', fanAutoSwitch: 'Fan Auto switch', fanTurboSwitch: 'Turbo switch', fanSpeedSwitches: 'Low/Medium/High switches',
         drySwitch: 'Dry switch', fanOnlySwitch: 'Fan Only switch', windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart',
         comfort: 'Comfort', twoStep: '2-Step', motionDirect: 'Wind follows people', motionIndirect: 'Wind avoids people', light: 'Light Display',
-        beep: 'Beep', autoClean: 'Auto clean', humidity: 'Humidity sensor', filter: 'Filter status', filterAlert: 'Filter alert (notifications and automations)', outdoorTemperature: 'Outdoor temperature', energyEve: 'Power & energy' },
+        beep: 'Beep', autoClean: 'Auto clean', airPurify: 'Air purify switch (ion purification on some models)', humidity: 'Humidity sensor', filter: 'Filter status', filterAlert: 'Filter alert (notifications and automations)', outdoorTemperature: 'Outdoor temperature', energyEve: 'Power & energy' },
     },
     ar: {
       title: 'Samsung Local', subtitle: 'تحكم محلي دون اشتراك سحابي',
@@ -510,7 +510,7 @@
         'fan.auto': 'المروحة: تلقائي', 'fan.low': 'المروحة: منخفض', 'fan.medium': 'المروحة: متوسط', 'fan.high': 'المروحة: مرتفع', 'fan.turbo': 'المروحة: السرعة القصوى',
         swing: 'التأرجح', 'preset.windFree': 'WindFree', 'preset.fast': 'سريع', 'preset.quiet': 'هادئ', 'preset.sleep': 'نوم',
         'preset.smart': 'ذكي', 'preset.comfort': 'راحة', 'preset.twoStep': 'مرحلتان', 'preset.motionDirect': 'توجيه الهواء نحو الأشخاص',
-        'preset.motionIndirect': 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة', beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي',
+        'preset.motionIndirect': 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة', beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي', airPurify: 'تنقية الهواء',
         cycle: 'الدورة', remainingTime: 'الوقت المتبقي', cycleFinished: 'انتهاء الدورة (حساس)', progress: 'نسبة التقدم', kidsLock: 'قفل الأطفال', washCount: 'عدد الغسلات حتى الآن', waterLitres: 'الماء المستهلك حتى الآن', stages: 'حساسات المراحل (غسيل، شطف، عصر)', drumClean: 'تنظيف الحوض يعمل', course: 'الدورة المختارة', lastDrumClean: 'آخر تنظيف للحوض',
         filter: 'استهلاك الفلتر (%)', alarms: 'التنبيهات والأعطال', powerWatts: 'القدرة اللحظية (واط)', energyKWh: 'الطاقة التراكمية (كيلوواط ساعة)',
         voltage: 'الجهد (فولت)', current: 'التيار (أمبير)', outdoorTemperature: 'الحرارة الخارجية (°م)', occupancy: 'الحركة والإشغال' },
@@ -521,7 +521,7 @@
       feat: { unloadSensor: 'تذكير إخراج الغسيل: كل نصف ساعة ما دام الغسيل في الداخل', smartControlSensor: 'حساس «Smart Control»: يُكتشف ما دام مفعّلًا من اللوحة', ctlPower: 'مفتاح التشغيل والإطفاء', ctlRun: 'مفتاح «Start Pause»: التشغيل يبدأ أو يكمل، والإطفاء يوقف مؤقتًا (قد تحتاج الغسالة تفعيل «Smart Control» من لوحتها)', ctlStop: '«Cancel Cycle»: ينهي الدورة ويصفّرها (ضغطة)', ctlKidsLock: 'قفل الأطفال قابل للضبط', ctlBuzzer: 'مفتاح الصوت', ctlSpin: 'قوة العصر (مجموعة مفاتيح)', ctlRinse: 'عدد الشطف (مجموعة مفاتيح)', ctlWaterTemp: 'حرارة الماء: بارد ودافئ وحار (مجموعة مفاتيح)', ctlWaterLevel: 'مستوى الماء (مجموعة مفاتيح)', ctlWashTime: 'مدة الغسل (مجموعة مفاتيح)', ctlCourse: 'البرنامج (مجموعة مفاتيح إذا أعلنت الغسالة برامجها، وإلا ضغطة للرقم التالي)', ctlSuperSpeed: 'مفتاح «Super Speed»', ctlBubbleSoak: 'مفتاح «Bubble Soak» (بلا إشارة في بعض اللوحات)', ctlBubbleStorm: 'مفتاح «Eco Bubble»', cycleTile: 'بطاقة الدورة مع الوقت المتبقي', finishedSensor: 'حساس انتهاء الدورة', progressTile: 'بطاقة نسبة التقدم (نسبة مئوية، تظهر بأيقونة الرطوبة)', kidsLockSensor: 'حالة قفل الأطفال', alertSensor: 'حساس التنبيه (أعطال الجهاز)', stageSensors: 'حساسات المراحل: غسيل، شطف، عصر (تجريبي)', drumCleanSensor: 'حساس تنظيف الحوض (تجريبي)', fan: 'بطاقة المروحة', fanAutoSwitch: 'مفتاح المروحة التلقائية', fanTurboSwitch: 'مفتاح السرعة القصوى', fanSpeedSwitches: 'مفاتيح منخفض/متوسط/مرتفع',
         drySwitch: 'مفتاح التجفيف', fanOnlySwitch: 'مفتاح مروحة فقط', windFree: 'WindFree', fast: 'سريع', quiet: 'هادئ', sleep: 'نوم', smart: 'ذكي',
         comfort: 'راحة', twoStep: 'مرحلتان', motionDirect: 'توجيه الهواء نحو الأشخاص', motionIndirect: 'إبعاد الهواء عن الأشخاص', light: 'إضاءة الشاشة',
-        beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي', humidity: 'حساس الرطوبة', filter: 'حالة الفلتر', filterAlert: 'تنبيه تنظيف الفلتر (للإشعارات والأتمتة)', outdoorTemperature: 'الحرارة الخارجية', energyEve: 'القدرة والطاقة' },
+        beep: 'صوت التنبيه', autoClean: 'التنظيف التلقائي', airPurify: 'مفتاح تنقية الهواء (التأيين في بعض الموديلات)', humidity: 'حساس الرطوبة', filter: 'حالة الفلتر', filterAlert: 'تنبيه تنظيف الفلتر (للإشعارات والأتمتة)', outdoorTemperature: 'الحرارة الخارجية', energyEve: 'القدرة والطاقة' },
     },
   };
   const KINDS = {
@@ -532,12 +532,12 @@
   const LAUNDRY_CONTROLS = ['ctlPower', 'ctlRun', 'ctlStop', 'ctlKidsLock', 'ctlBuzzer', 'ctlSpin', 'ctlRinse', 'ctlWaterTemp', 'ctlWaterLevel', 'ctlWashTime', 'ctlCourse', 'ctlSuperSpeed', 'ctlBubbleSoak', 'ctlBubbleStorm'];
   const DEFAULTS = { fan: true, fanAutoSwitch: true, fanTurboSwitch: true, fanSpeedSwitches: false, drySwitch: true, fanOnlySwitch: true,
     windFree: true, fast: true, quiet: true, sleep: false, smart: false, comfort: false, twoStep: false, motionDirect: false, motionIndirect: false,
-    light: true, beep: false, autoClean: false, humidity: true, filter: true, filterAlert: false, outdoorTemperature: false, energyEve: true };
+    light: true, beep: false, autoClean: false, airPurify: false, humidity: true, filter: true, filterAlert: false, outdoorTemperature: false, energyEve: true };
   // Which appliance feature rows make a HomeKit option meaningful.
   const NEEDS = { fan: ['fan.low', 'fan.auto'], fanAutoSwitch: ['fan.auto'], fanTurboSwitch: ['fan.turbo'], fanSpeedSwitches: ['fan.low', 'fan.medium', 'fan.high'],
     drySwitch: ['mode.dry'], fanOnlySwitch: ['mode.fan'], windFree: ['preset.windFree'], fast: ['preset.fast'], quiet: ['preset.quiet'], sleep: ['preset.sleep'],
     smart: ['preset.smart'], comfort: ['preset.comfort'], twoStep: ['preset.twoStep'], motionDirect: ['preset.motionDirect'], motionIndirect: ['preset.motionIndirect'],
-    light: ['light'], beep: ['beep'], autoClean: ['autoClean'], humidity: ['humidity'], filter: ['filter'], filterAlert: ['filter'], outdoorTemperature: ['outdoorTemperature'], energyEve: ['powerWatts', 'energyKWh'] };
+    light: ['light'], beep: ['beep'], autoClean: ['autoClean'], airPurify: ['airPurify'], humidity: ['humidity'], filter: ['filter'], filterAlert: ['filter'], outdoorTemperature: ['outdoorTemperature'], energyEve: ['powerWatts', 'energyKWh'] };
 
   let lang = (localStorage.getItem('sl-lang') || (navigator.language || 'en')).startsWith('ar') ? 'ar' : 'en';
   const t = (k) => T[lang][k] ?? T.en[k] ?? k;

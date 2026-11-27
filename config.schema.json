@@ -144,6 +144,11 @@
                   "type": "boolean",
                   "default": false
                 },
+                "airPurify": {
+                  "title": "Air Purify switch",
+                  "type": "boolean",
+                  "default": false
+                },
                 "humidity": {
                   "title": "Humidity sensor",
                   "type": "boolean",

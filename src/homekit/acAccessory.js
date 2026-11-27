@@ -22,6 +22,7 @@ export const DEFAULT_FEATURES = Object.freeze({
   light: true,
   beep: false,
   autoClean: false,
+  airPurify: false,
   humidity: true,
   filter: true,
   filterAlert: false,
@@ -34,7 +35,7 @@ const LABELS = {
   fanLow: 'Fan Low', fanMedium: 'Fan Medium', fanHigh: 'Fan High',
   windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart', comfort: 'Comfort',
   twoStep: '2-Step', motionDirect: 'Wind Follows', motionIndirect: 'Wind Avoids',
-  light: 'Light Display', beep: 'Beep', autoClean: 'Auto Clean', humidity: 'Humidity', filter: 'Filter', filterAlert: 'Filter Alert',
+  light: 'Light Display', beep: 'Beep', autoClean: 'Auto Clean', airPurify: 'Air Purify', humidity: 'Humidity', filter: 'Filter', filterAlert: 'Filter Alert',
   outdoor: 'Outdoor Temperature',
 };
 
@@ -453,6 +454,7 @@ export class AcAccessory {
 
     this.#switch('beep', Boolean(s.beep) && f.beep, (st) => st.beep, (on) => this.#command('beep', on));
     this.#switch('autoClean', Boolean(s.autoClean) && f.autoClean, (st) => st.autoClean, (on) => this.#command('autoClean', on, 'auto clean'));
+    this.#switch('airPurify', Boolean(s.airPurify) && f.airPurify, (st) => st.airPurify, (on) => this.#command('airPurify', on, `air purify ${on ? 'on' : 'off'}`));
 
     const light = this.#service('light', Service.Lightbulb, this.#label('light'), Boolean(s.light) && f.light);
     const lightOn = light?.getCharacteristic(Characteristic.On);

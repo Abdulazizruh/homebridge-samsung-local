@@ -1175,3 +1175,21 @@ test('filter alert: not there unless ticked', async (t) => {
   await online(platform);
   assert.equal(platform.devices.get(DI).handler.services.has('filterAlert'), false);
 });
+
+test('air purify: an optional switch where the unit has the option, sent as On/Off and shown as the unit reports it', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', features: { airPurify: true } }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  const sw = handler.services.get('airPurify');
+  assert.ok(sw, 'the switch is there when ticked and the unit has the option');
+  assert.equal(sw.getCharacteristic(C.On).value, false);
+  await sw.getCharacteristic(C.On).handleSetRequest(true);
+  await waitFor(() => handler.model.state.airPurify === true, 6000);
+  const plain = await boot({ devices: [ac('10.0.0.6')], config: { devices: [{ host: '10.0.0.6' }] } });
+  t.after(() => plain.platform.stop());
+  await waitFor(() => [...plain.platform.devices.values()].some((d) => d.link.online && d.link.resources));
+  const other = [...plain.platform.devices.values()][0].handler;
+  assert.equal(other.services.has('airPurify'), false, 'not there unless ticked');
+});
