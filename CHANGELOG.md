@@ -2,6 +2,22 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.8
+
+A new option for air conditioners: a filter alert that Apple Home shows, notifies about and can start an automation with. Your settings, pairings and accessories are kept as they are.
+
+- **New, off by default: "Filter alert".** A sensor in Apple Home, in the Sensors card of each air conditioner's options. It turns on while the air conditioner reports that its filter needs cleaning, the same reading Eve shows as "change needed", and turns off once the filter is cleaned and its counter reset. Apple Home can send a notification for it and use it to start an automation.
+- The log says it once each way: `the filter needs cleaning.` and `the filter is clean again.`
+- The filter status in the Eve app stays as it is.
+
+**بالعربية**
+
+خيار جديد للمكيفات: تنبيه تنظيف الفلتر، يظهر في Apple Home ويرسل إشعارًا ويصلح مشغّلًا للأتمتة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **جديد، غير مفعّل افتراضيًا: «تنبيه تنظيف الفلتر».** حساس في Apple Home، تجده في بطاقة «الحساسات» ضمن خيارات كل مكيف. يتفعّل ما دام المكيف يبلّغ أن الفلتر يحتاج تنظيفًا، وهي القراءة نفسها التي يعرضها Eve «مطلوب»، ويرجع بعد تنظيف الفلتر وتصفير عدّاده. يستطيع Apple Home أن يرسل إشعارًا به، وأن يبدأ به أتمتة.
+- يكتب السجل ذلك مرة في كل اتجاه: `the filter needs cleaning.` و`the filter is clean again.`
+- حالة الفلتر في تطبيق Eve تبقى كما هي.
+
 ## 1.9.7
 
 Two small fixes on the washer's options, seen on a phone. Your settings, pairings and accessories are kept as they are.

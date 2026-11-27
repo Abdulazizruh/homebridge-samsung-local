@@ -154,6 +154,11 @@
                   "type": "boolean",
                   "default": true
                 },
+                "filterAlert": {
+                  "title": "Filter alert sensor",
+                  "type": "boolean",
+                  "default": false
+                },
                 "outdoorTemperature": {
                   "title": "Outdoor temperature sensor (derived, unverified)",
                   "type": "boolean",

@@ -24,6 +24,7 @@ export const DEFAULT_FEATURES = Object.freeze({
   autoClean: false,
   humidity: true,
   filter: true,
+  filterAlert: false,
   outdoorTemperature: false,
   energyEve: true,
 });
@@ -33,7 +34,7 @@ const LABELS = {
   fanLow: 'Fan Low', fanMedium: 'Fan Medium', fanHigh: 'Fan High',
   windFree: 'WindFree', fast: 'Fast', quiet: 'Quiet', sleep: 'Sleep', smart: 'Smart', comfort: 'Comfort',
   twoStep: '2-Step', motionDirect: 'Wind Follows', motionIndirect: 'Wind Avoids',
-  light: 'Light Display', beep: 'Beep', autoClean: 'Auto Clean', humidity: 'Humidity', filter: 'Filter',
+  light: 'Light Display', beep: 'Beep', autoClean: 'Auto Clean', humidity: 'Humidity', filter: 'Filter', filterAlert: 'Filter Alert',
   outdoor: 'Outdoor Temperature',
 };
 
@@ -466,6 +467,10 @@ export class AcAccessory {
     filter?.getCharacteristic(Characteristic.FilterChangeIndication).onGet(() => this.#filterIndication(this.#requireOnline()));
     filter?.getCharacteristic(Characteristic.FilterLifeLevel).onGet(() => this.#filterLife(this.#requireOnline()));
 
+    // A sensor Apple Home shows, notifies about and can start an automation with: on while the filter needs cleaning.
+    const filterAlert = this.#service('filterAlert', Service.OccupancySensor, this.#label('filterAlert'), Boolean(s.filter) && f.filterAlert);
+    filterAlert?.getCharacteristic(Characteristic.OccupancyDetected).onGet(() => this.#filterIndication(this.#requireOnline()));
+
     const outdoor = this.#service('outdoor', Service.TemperatureSensor, this.#label('outdoor'),
       Boolean(s.outdoorTemperature) && f.outdoorTemperature);
     outdoor?.getCharacteristic(Characteristic.CurrentTemperature)
@@ -747,6 +752,15 @@ export class AcAccessory {
     }
     get('filter')?.updateCharacteristic(Characteristic.FilterChangeIndication, this.#filterIndication(st));
     get('filter')?.updateCharacteristic(Characteristic.FilterLifeLevel, this.#filterLife(st));
+    get('filterAlert')?.updateCharacteristic(Characteristic.OccupancyDetected, this.#filterIndication(st));
+    if (this.model?.supports?.filter) {
+      // Said once each way, so the log shows when the filter asked for cleaning and when that ended.
+      const due = this.#filterIndication(st) === 1;
+      if (this.context.filterDue !== undefined && this.context.filterDue !== due) {
+        this.log.info(`[${this.displayName}] ${due ? 'the filter needs cleaning.' : 'the filter is clean again.'}`);
+      }
+      this.context.filterDue = due;
+    }
     if (st.outdoorTemperature !== undefined) {
       get('outdoor')?.updateCharacteristic(Characteristic.CurrentTemperature, st.outdoorTemperature);
     }

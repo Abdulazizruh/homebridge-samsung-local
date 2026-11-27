@@ -1145,3 +1145,33 @@ test('a washer tile name with a "+" kept in the cache by an older version is put
   assert.equal(rinse.displayName, 'Course Rinse and Spin');
   await second.platform.stop();
 });
+
+test('filter alert: a sensor that is on while the filter needs cleaning, only when ticked, and the log says it once', async (t) => {
+  const lines = [];
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', features: { filterAlert: true } }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  const info = handler.log.info;
+  handler.log = { ...handler.log, info: (m) => { lines.push(m); info?.call(handler.log, m); } };
+  const sensor = handler.services.get('filterAlert');
+  assert.ok(sensor, 'the sensor is there when ticked');
+  assert.equal(sensor.getCharacteristic(C.OccupancyDetected).value, 0);
+  const sim = (path, body) => platform.helper.request('sim', { key: DI, action: 'remote', path, body });
+  await sim(['filter', 'airdustfilter', 'vs', '0'], { 'x.com.samsung.da.filterStatus': 'Wash' });
+  await platform.helper.request('refresh', { key: DI });
+  await waitFor(() => sensor.getCharacteristic(C.OccupancyDetected).value === 1, 6000);
+  assert.equal(handler.services.get('filter').getCharacteristic(C.FilterChangeIndication).value, 1); // Eve says the same
+  await sim(['filter', 'airdustfilter', 'vs', '0'], { 'x.com.samsung.da.filterStatus': 'Normal' });
+  await platform.helper.request('refresh', { key: DI });
+  await waitFor(() => sensor.getCharacteristic(C.OccupancyDetected).value === 0, 6000);
+  assert.deepEqual(lines.filter((m) => m.includes('filter')), ['[Bedroom AC] the filter needs cleaning.', '[Bedroom AC] the filter is clean again.'].map((m) => m.replace('Bedroom AC', handler.displayName)));
+});
+
+test('filter alert: not there unless ticked', async (t) => {
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] } });
+  t.after(() => platform.stop());
+  await online(platform);
+  assert.equal(platform.devices.get(DI).handler.services.has('filterAlert'), false);
+});

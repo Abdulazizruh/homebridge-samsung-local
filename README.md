@@ -32,7 +32,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.9.7. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer (`WA80F16B9CYL`) and four TVs (`UA55KU7000`, `QA50Q60D`, `QA65QN70F`, `QA75QN85D`), with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.9.8. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer (`WA80F16B9CYL`) and four TVs (`UA55KU7000`, `QA50Q60D`, `QA65QN70F`, `QA75QN85D`), with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -223,6 +223,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Light Display | Light | Apple Home | On/off only. Brightness is not available locally |
 | Humidity | Humidity sensor | Apple Home | Hidden while the appliance reports 0 |
 | Filter | Filter maintenance | Eve and other HomeKit apps | Change indication and remaining life. Apple Home does not show this service type |
+| Filter alert (optional, off by default) | Occupancy sensor | Apple Home | On while the filter needs cleaning: a notification and an automation trigger. Off again once the filter is cleaned and its counter reset |
 | Beep, Auto Clean | Switches (off by default) | Apple Home | |
 | Power now (W), energy total (kWh) | Eve characteristics on the thermostat | Eve-compatible apps and the plugin settings page | Apple Home has no power or energy type. No misleading sensor type is used |
 | Alarms / error codes | — | Plugin settings page and log | |
@@ -293,7 +294,7 @@ A name is changed in place with the pencil beside it. **Remove** asks to be pres
 
 ### Air conditioner options
 
-Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter, power and energy.
+Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter alert, outdoor temperature, filter, power and energy.
 
 The filter, and power and energy, show in the free **Eve** app and other HomeKit apps, not in Apple Home: Apple Home has no tile for them. The settings keep them in their own card, "In the Eve app only", each marked Eve, so a part that does not show in Apple Home is not mistaken for a fault.
 
