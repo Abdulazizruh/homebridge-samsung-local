@@ -32,7 +32,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 [العربية](README.ar.md)
 
-> **Status: 1.9.5. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer (`WA80F16B9CYL`) and four TVs (`UA55KU7000`, `QA50Q60D`, `QA65QN70F`, `QA75QN85D`), with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
+> **Status: 1.9.6. Tested on real appliances.** Running daily in one home on five air conditioners from two model families (`ARTIK051_PRAC_20K` and `TP1X_DA-AC-RAC-01001`), one washer (`WA80F16B9CYL`) and four TVs (`UA55KU7000`, `QA50Q60D`, `QA65QN70F`, `QA75QN85D`), with Homebridge in Docker on a Raspberry Pi. The plugin shows the features your own appliance reports, so the result depends on the target appliance. See [What has been tested](#what-has-been-tested).
 > Unofficial project. Not affiliated with, endorsed by or supported by Samsung.
 
 ## What it does
@@ -58,9 +58,9 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 | Washers | **Tested on one washer**; control is a trial | A tile that shows the cycle running and the time remaining, a sensor that turns on when the cycle ends (for notifications), power and energy in Eve. Trial, on by default: a sensor for each stage (washing, rinsing, spinning) and a drum clean sensor. Optional: progress, child lock status, fault alert, and an unload reminder every half hour while the washing stays inside. The cycle is started at the appliance; nothing is sent to it unless you tick a [control trial](#washer-control-trial), which is off by default and was tried on one top loader |
 | Samsung TVs (Tizen, 2016 and later) | **Tested on four TVs** | Paired once from the settings page while you stand in front of the TV (choose "Allow" on its screen). Appears either as a TV tile with the Control Centre remote, or as switches inside the bridge: power, mute, volume |
 | Dryers, dishwashers | **Same follow-up, not yet tried on a real one** | Built on the same readings as the washer |
-| Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality, filter and humidity as sensors. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
+| Air purifiers, dehumidifiers | **Trial, not yet tried on a real one** | Air quality and humidity as sensors; the filter in the Eve app. Power, fan speed, automatic mode and a dehumidifier's target humidity as trial controls |
 | Refrigerators | **Trial, not yet tried on a real one** | The temperature of each zone and a contact sensor per door. Setting each zone's temperature, Power Cool and Power Freeze as trial controls |
-| Robot vacuums | **Trial, not yet tried on a real one** | Battery and filters. One trial switch: on starts a run, off sends the robot back to its station |
+| Robot vacuums | **Trial, not yet tried on a real one** | Battery; the filters in the Eve app. One trial switch: on starts a run, off sends the robot back to its station |
 | Ovens, ranges, microwaves, cooktops | **Trial, shown only** | Door, temperature and a "running" sensor. Never commanded |
 | Any other Samsung appliance | **Whatever it reports that the plugin knows** | Shown the same way; otherwise listed for diagnostics |
 | Older appliances with only TCP 8888 | **Not supported** | Detected and reported |
@@ -287,13 +287,15 @@ Give each TV a fixed address in your router (a DHCP reservation). An air conditi
 
 ## Options for each appliance
 
-Every appliance has its own options. Press **Options** under it in the plugin settings: they open right there, under the appliance. Tick what you want to see in Apple Home, then press **Update configuration**. Only the functions your own appliance reports are offered. A part you switch off is removed from Apple Home; the rest stays as it is.
+Every appliance has its own options. Press **Options** under it in the plugin settings: they open right there, under the appliance. Tick what you want to see in Apple Home, then press **Update configuration**. The options sit in up to three cards, always in this order: **Operation** (power, modes and settings), **Sensors** (readings), and **In the Eve app only**. Only the functions your own appliance reports are offered. A part you switch off is removed from Apple Home; the rest stays as it is.
 
 A name is changed in place with the pencil beside it. **Remove** asks to be pressed twice.
 
 ### Air conditioner options
 
 Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter, power and energy.
+
+The filter, and power and energy, show in the free **Eve** app and other HomeKit apps, not in Apple Home: Apple Home has no tile for them. The settings keep them in their own card, "In the Eve app only", each marked Eve, so a part that does not show in Apple Home is not mistaken for a fault.
 
 <p><img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="320"></p>
 

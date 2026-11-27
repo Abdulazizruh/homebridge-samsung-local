@@ -301,7 +301,7 @@ const NOTE = { filter: '%', temperature: '°C', setpoint: '°C', humidity: '%', 
 export function applianceFeatureRows(model) {
   return model.parts.map((part) => ({
     id: part.id, type: part.type, name: part.name ?? null, device: true, plugin: true,
-    where: part.type === 'energy' ? 'eve' : 'home', write: part.control, trial: part.control,
+    where: ['energy', 'filter'].includes(part.type) ? 'eve' : 'home', // Apple Home shows no filter service write: part.control, trial: part.control,
     value: show(part), note: NOTE[part.type] ?? null, default: partDefault(part),
   }));
 }

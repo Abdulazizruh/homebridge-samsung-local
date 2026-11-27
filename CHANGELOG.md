@@ -2,6 +2,24 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.6
+
+The options of each appliance are now in three cards, and what shows only in the Eve app has a card of its own. Your settings, pairings and accessories are kept as they are.
+
+- **Options in three cards, always in the same order:** Operation (power, modes and settings), Sensors (readings), and In the Eve app only. For air conditioners, washers, air purifiers, robot vacuums and the other appliances alike. Every option is in exactly one card, so none is lost between them; an empty card is left out.
+- **"In the Eve app only":** the filter, and power and energy. Apple Home has no tile for them, so ticking one showed nothing there and looked like a fault. The card says why under its title, and each of its options is marked Eve. The table of what each appliance reports says "Eve + this page" for the filter too.
+- **Washer:** the controls stay in their own card, "Control (trial)", with the same notes; "How the cycle tile behaves" moved into the Sensors card, beside the tile it shapes.
+- The README says it too, in both languages.
+
+**بالعربية**
+
+خيارات كل جهاز صارت في ثلاث بطاقات، وما يظهر في تطبيق Eve فقط له بطاقة خاصة. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **الخيارات في ثلاث بطاقات، بالترتيب نفسه دائمًا:** التشغيل والضبط (التشغيل والأوضاع والإعدادات)، ثم الحساسات (القراءات)، ثم «في تطبيق Eve فقط». ينطبق ذلك على المكيفات والغسالات ومنقيات الهواء والمكانس الآلية وبقية الأجهزة. كل خيار في بطاقة واحدة فقط، فلا يضيع خيار بينها، والبطاقة الفارغة لا تظهر.
+- **«في تطبيق Eve فقط»:** الفلتر، والقدرة والطاقة. Apple Home لا يملك بطاقة لها، فكان تفعيل أحدها لا يُظهر شيئًا فيه، فيبدو كأنه عطل. تشرح البطاقة السبب تحت عنوانها، وعلى كل خيار فيها شارة Eve. وجدول ما يعلنه الجهاز يكتب «Eve وهذه الصفحة» للفلتر أيضًا.
+- **الغسالة:** التحكم باقٍ في بطاقته «التحكم (تجريبي)» بملاحظاته نفسها، وانتقل «سلوك بطاقة الدورة» إلى بطاقة الحساسات بجانب البطاقة التي يضبطها.
+- يذكر الدليل ذلك أيضًا، باللغتين.
+
 ## 1.9.5
 
 A washer tile name is put right in the cache, so Homebridge no longer warns about it at each start. Your settings, pairings and accessories are kept as they are.
