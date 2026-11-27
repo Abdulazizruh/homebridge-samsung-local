@@ -304,7 +304,7 @@ npm install --save homebridge-samsung-local
 
 الفلتر، والقدرة والطاقة، تظهر في تطبيق **Eve** المجاني وتطبيقات HomeKit الأخرى، ولا تظهر في Apple Home لأنه لا يملك بطاقة لها. وتضعها الإعدادات في بطاقة خاصة بها، «في تطبيق Eve فقط»، وعلى كل منها شارة Eve، حتى لا يُظن أن الجزء الذي لا يظهر في Apple Home عطل.
 
-<p><img src="assets/screenshots/options-air-conditioner.png" alt="خيارات المكيف في إعدادات الإضافة" width="320"></p>
+<p><img src="assets/screenshots/options-air-conditioner-ar.png" alt="خيارات المكيف في إعدادات الإضافة: بطاقة التشغيل والضبط، وبطاقة الحساسات، وبطاقة ما يظهر في تطبيق Eve فقط" width="320"></p>
 
 ### خيارات الغسالة
 

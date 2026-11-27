@@ -12,7 +12,7 @@ The air conditioner's fan only switch takes the name SmartThings gives the same 
 
 مفتاح المروحة فقط في المكيف يأخذ الاسم الذي يعطيه SmartThings للوضع نفسه. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
-- **مفتاح «مروحة فقط» صار اسمه «Purify»، كما يسميه SmartThings.** شوهد على مكيفات حقيقية من فئتَي الموديلات: يعرض SmartThings الأوضاع Auto وCool وDry وPurify وHeat، واختيار Purify يضبط وضع Wind (مروحة فقط) في المكيف، وهو نفسه الذي يضبطه هذا المفتاح، ولا يغيّر شيئًا آخر. يظهر المفتاح في Apple Home مثلًا باسم «Bedroom AC Purify»، والبطاقة التي غيّرت اسمها في تطبيق Home تحتفظ باسمك. وفي الإعدادات: «مفتاح Purify (مروحة فقط، كما يسميه SmartThings)».
+- **مفتاح «مروحة فقط» صار اسمه «Purify»، كما يسميه SmartThings.** شوهد على مكيفات حقيقية من فئتَي الموديلات: يعرض SmartThings الأوضاع Auto وCool وDry وPurify وHeat، واختيار Purify يضبط وضع Wind (مروحة فقط) في المكيف، وهو نفسه الذي يضبطه هذا المفتاح، ولا يغيّر شيئًا آخر. يظهر المفتاح في Apple Home مثلًا باسم «Bedroom AC Purify»، والبطاقة التي غيّرت اسمها في تطبيق Home تحتفظ باسمك. وفي الإعدادات: «مفتاح Purify (اسمه في SmartThings، وهو المروحة فقط)».
 
 ## 1.9.8
 

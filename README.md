@@ -298,7 +298,7 @@ Fan tile, mode switches, WindFree, Fast, Quiet, Light Display, humidity, filter 
 
 The filter, and power and energy, show in the free **Eve** app and other HomeKit apps, not in Apple Home: Apple Home has no tile for them. The settings keep them in their own card, "In the Eve app only", each marked Eve, so a part that does not show in Apple Home is not mistaken for a fault.
 
-<p><img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings" width="320"></p>
+<p><img src="assets/screenshots/options-air-conditioner.png" alt="Air conditioner options in the plugin settings: the Operation card, the Sensors card, and the In the Eve app only card" width="320"></p>
 
 ### Washer options
 
