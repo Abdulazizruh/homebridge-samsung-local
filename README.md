@@ -345,7 +345,7 @@ The TV's options are three ticks that do not exclude one another: tick all of th
 3. **In the Home app: switches for automations**. No code: they come with this plugin's bridge. You choose which switches appear.
 
 
-<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: on the iPhone the remote like Apple TV with its code and touch area, and in the Home app the TV tile with its code and the switches for automations" width="320"></p>
+<p><img src="assets/screenshots/options-tv.png" alt="TV options in the plugin settings: the TV's link to Homebridge, on the iPhone the remote like Apple TV with its pairing code and touch area, and in the Home app the TV tile with its Apple Home code (a sample code) and the switches for automations" width="320"></p>
 
 With a remote like Apple TV chosen, the touch area of that remote can be swipe like Apple TV (tested, every TV) or a pointer like a mouse (trial, newer TVs only; greyed out on older models). The pointer shows in the TV's browser and in some apps.
 
