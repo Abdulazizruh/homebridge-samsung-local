@@ -7,7 +7,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 A clearer note on the outdoor temperature, and a README whose pictures show the page as it is now. Your settings, pairings and accessories are kept as they are.
 
 - **Outdoor temperature: the note says how it reads.** In "What the appliance reports" it said "derived value, unverified". Seen on real units: it comes from the outdoor unit's own sensor, read 28 °C with the unit off and 37 °C soon after switching it on, from the unit's own heat. The note now says it rises several degrees once the unit runs.
-- **README pictures redone:** the setup page, an appliance card, the options of the air conditioner, washer, air purifier and TV, and an air conditioner's parts in Apple Home (filter alert, outdoor temperature, Purify). Each in English and, where the page is in Arabic, in Arabic. Names are generic; the TV's Apple Home code is a sample.
+- **README pictures redone:** the setup page, an appliance card, the options of the air conditioner, washer, air purifier and TV, an air conditioner's parts in Apple Home (filter alert, outdoor temperature, Purify), and the same air conditioner in the Eve app (power, energy and filter). Each in English and, where the page is in Arabic, in Arabic. Names are generic; the TV's Apple Home code is a sample.
 - **README: asking for more.** "Reported but not used yet", under each appliance's options, lists what the appliance reports and the plugin does not use; the README says how to ask for one of them, with the Diagnostics file.
 
 **بالعربية**
@@ -15,7 +15,7 @@ A clearer note on the outdoor temperature, and a README whose pictures show the 
 ملاحظة أوضح عن الحرارة الخارجية، ودليل تعرض صوره الصفحة كما هي الآن. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **الحرارة الخارجية: الملاحظة تشرح القراءة.** كانت في «ما يعلنه الجهاز» تقول «قيمة مشتقة غير مؤكدة». شوهد على مكيفات حقيقية: تأتي من حساس الوحدة الخارجية نفسها، وقرأت 28 درجة والمكيف مطفأ، و37 بعد تشغيله بقليل، من حرارة الوحدة نفسها. والملاحظة الآن تقول إنها ترتفع عدة درجات بعد تشغيل المكيف.
-- **صور الدليل من جديد:** صفحة الإعداد، وبطاقة الجهاز، وخيارات المكيف والغسالة ومنقي الهواء والتلفزيون، وأجزاء المكيف في Apple Home (تنبيه تنظيف الفلتر، والحرارة الخارجية، وPurify). كل صورة بالإنجليزية، وبالعربية حيث تتوفر الصفحة العربية. الأسماء عامة، ورمز Apple Home للتلفزيون مثال وليس حقيقيًا.
+- **صور الدليل من جديد:** صفحة الإعداد، وبطاقة الجهاز، وخيارات المكيف والغسالة ومنقي الهواء والتلفزيون، وأجزاء المكيف في Apple Home (تنبيه تنظيف الفلتر، والحرارة الخارجية، وPurify)، والمكيف نفسه في تطبيق Eve (القدرة والطاقة والفلتر). كل صورة بالإنجليزية، وبالعربية حيث تتوفر الصفحة العربية. الأسماء عامة، ورمز Apple Home للتلفزيون مثال وليس حقيقيًا.
 - **الدليل: طلب المزيد.** قائمة «موارد يعلنها الجهاز ولم تُستخدم بعد» تحت خيارات كل جهاز تعرض ما يعلنه الجهاز ولا تستعمله الإضافة، ويشرح الدليل كيف تطلب شيئًا منها مع ملف التشخيص.
 
 ## 1.9.11
