@@ -304,7 +304,7 @@ The filter, and power and energy, show in the free **Eve** app and other HomeKit
 
 In three cards, like every appliance. **Control (trial)** is shown under [Washer control](#washer-control-trial). **Sensors**: cycle tile with time remaining, cycle finished sensor, stage sensors, drum clean, progress, child lock status, fault alert, unload reminder, Smart Control, and how the cycle tile behaves when tapped. **In the Eve app only**: power and energy.
 
-<p><img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings: the Sensors card with the cycle tile choice, and the In the Eve app only card" width="320"></p>
+<p><img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings, all ticked: the Control (trial) card with its cautions, the Sensors card with the cycle tile choice, and the In the Eve app only card" width="320"></p>
 
 #### Washer control (trial)
 
