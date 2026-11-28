@@ -324,29 +324,29 @@ test('wipe and reinstall: only this plugin\'s folder is touched', async () => {
 
 test('renaming in the settings renames the existing accessory, without a duplicate', async (t) => {
   const storage = tmpDir();
-  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC Local' }] } });
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Bedroom AC Local' }] } });
   await online(first.platform);
   const cachedAccessory = first.api.registered[0].accessory;
   await first.platform.stop();
-  const second = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] }, cached: [cachedAccessory] });
+  const second = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Bedroom AC' }] }, cached: [cachedAccessory] });
   t.after(() => second.platform.stop());
   await online(second.platform);
   assert.equal(second.api.registered.length, 0);
-  assert.equal(cachedAccessory.displayName, 'Layla AC');
+  assert.equal(cachedAccessory.displayName, 'Bedroom AC');
   const C = second.api.hap.Characteristic;
-  assert.equal(second.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).value, 'Layla AC');
+  assert.equal(second.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).value, 'Bedroom AC');
 });
 
 test('a name given in the Home app survives restarts and settings changes', async (t) => {
   const storage = tmpDir();
-  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC Local' }] } });
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Bedroom AC Local' }] } });
   await online(first.platform);
   const cachedAccessory = first.api.registered[0].accessory;
   const C = first.api.hap.Characteristic;
   // What the Home app does when the user renames the tile.
   first.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).updateValue('غرفة ليلى');
   await first.platform.stop();
-  for (const name of ['Layla AC Local', 'Layla AC', 'Something else']) {
+  for (const name of ['Bedroom AC Local', 'Bedroom AC', 'Something else']) {
     const next = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name }] }, cached: [cachedAccessory] });
     await online(next.platform);
     assert.equal(next.platform.devices.get(DI).handler.services.get('thermostat').getCharacteristic(C.ConfiguredName).value, 'غرفة ليلى', name);
@@ -356,16 +356,16 @@ test('a name given in the Home app survives restarts and settings changes', asyn
 
 test('every part is named after its appliance; tiles from earlier versions follow unless renamed in the Home app', async (t) => {
   const storage = tmpDir();
-  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] } });
+  const first = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Bedroom AC' }] } });
   await online(first.platform);
   const cachedAccessory = first.api.registered[0].accessory;
   const C = first.api.hap.Characteristic;
   const name = (platform, key) => platform.devices.get(DI).handler.services.get(key).getCharacteristic(C.ConfiguredName).value;
-  assert.equal(name(first.platform, 'thermostat'), 'Layla AC');
-  assert.equal(name(first.platform, 'fan'), 'Layla AC Fan');
-  assert.equal(name(first.platform, 'fast'), 'Layla AC Fast');
-  assert.equal(name(first.platform, 'humidity'), 'Layla AC Humidity');
-  assert.equal(name(first.platform, 'light'), 'Layla AC Light Display');
+  assert.equal(name(first.platform, 'thermostat'), 'Bedroom AC');
+  assert.equal(name(first.platform, 'fan'), 'Bedroom AC Fan');
+  assert.equal(name(first.platform, 'fast'), 'Bedroom AC Fast');
+  assert.equal(name(first.platform, 'humidity'), 'Bedroom AC Humidity');
+  assert.equal(name(first.platform, 'light'), 'Bedroom AC Light Display');
   // Rewind to what an earlier version left behind: bare names, no record.
   const services = first.platform.devices.get(DI).handler.services;
   services.get('fan').getCharacteristic(C.ConfiguredName).updateValue('Fan');
@@ -374,10 +374,10 @@ test('every part is named after its appliance; tiles from earlier versions follo
   delete cachedAccessory.context.appliedNames;
   await first.platform.stop();
 
-  const second = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] }, cached: [cachedAccessory] });
+  const second = await boot({ storage, devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5', id: DI, name: 'Bedroom AC' }] }, cached: [cachedAccessory] });
   await online(second.platform);
-  assert.equal(name(second.platform, 'fan'), 'Layla AC Fan');
-  assert.equal(name(second.platform, 'light'), 'Layla AC Light Display');
+  assert.equal(name(second.platform, 'fan'), 'Bedroom AC Fan');
+  assert.equal(name(second.platform, 'light'), 'Bedroom AC Light Display');
   assert.equal(name(second.platform, 'fast'), 'تبريد سريع');
   await second.platform.stop();
 
@@ -392,7 +392,7 @@ test('every part is named after its appliance; tiles from earlier versions follo
 
 test('an appliance that moves to a new address is followed, and found there again after a restart', async (t) => {
   const storage = tmpDir();
-  const config = { devices: [{ host: '10.0.0.5', id: DI, name: 'Layla AC' }] };
+  const config = { devices: [{ host: '10.0.0.5', id: DI, name: 'Bedroom AC' }] };
   const first = await boot({ storage, devices: [ac('10.0.0.5')], config });
   await online(first.platform);
   const cachedAccessory = first.api.registered[0].accessory;
@@ -412,7 +412,7 @@ test('an appliance that moves to a new address is followed, and found there agai
   await second.platform.stop();
 
   // An address typed in the settings afterwards wins over the remembered one.
-  const third = await boot({ storage, devices: [ac('10.0.0.20')], config: { devices: [{ host: '10.0.0.20', id: DI, name: 'Layla AC' }] }, cached: [cachedAccessory] });
+  const third = await boot({ storage, devices: [ac('10.0.0.20')], config: { devices: [{ host: '10.0.0.20', id: DI, name: 'Bedroom AC' }] }, cached: [cachedAccessory] });
   t.after(() => third.platform.stop());
   await online(third.platform);
   assert.equal(third.platform.devices.get(DI).link.host, '10.0.0.20');

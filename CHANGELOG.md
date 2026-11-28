@@ -7,7 +7,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Releases are publish
 A power command that does not go through is sent once more by itself, the outdoor temperature says how it reads, and a README whose pictures show the page as it is now. Your settings, pairings and accessories are kept as they are.
 
 - **Power on or off that does not go through is sent once more, by itself.** Seen at night on two units: one accepted "power on" and did not carry it out; another timed out twice, and someone pressed three times within a minute. Now, when a power command times out or is accepted and not carried out, the plugin sends it once more, once the appliance answers again, and checks the next reading. The tile keeps showing what was asked meanwhile, so it does not flip. Only power is sent again: a temperature or fan speed may have been changed since. Nothing changes while the link is good: one command, one write, no wait.
-- **The daily line says it**, so nobody has to report it: `[Layla AC] last 24 hours: no connection losses; power command that did not go through the first time: 1 (1 worked when sent again).`
+- **The daily line says it**, so nobody has to report it: `[Bedroom AC] last 24 hours: no connection losses; power command that did not go through the first time: 1 (1 worked when sent again).`
 - **Outdoor temperature: says how it reads.** Seen on real units: it comes from the outdoor unit's own sensor, is updated only while the unit runs, and then reads warmer than the weather (28 °C off, 37 °C soon after switching on). Switched off, the unit keeps the last reading. The note in "What the appliance reports" (it said "derived value, unverified"), the tick ("updated while the unit runs") and the README now say so; the sensor is marked not active while the unit is off, which apps such as Eve show. It is a sign of how the outdoor unit works, not the weather.
 - **README pictures redone:** the setup page, an appliance card, the options of the air conditioner, washer, air purifier and TV, an air conditioner's parts in Apple Home (filter alert, outdoor temperature, Purify), and the same air conditioner in the Eve app (power, energy and filter). Each in English and, where the page is in Arabic, in Arabic. Names are generic; the TV's Apple Home code is a sample.
 - **README: asking for more.** "Reported but not used yet", under each appliance's options, lists what the appliance reports and the plugin does not use; the README says how to ask for one of them, with the Diagnostics file.
@@ -17,7 +17,7 @@ A power command that does not go through is sent once more by itself, the outdoo
 أمر التشغيل أو الإطفاء الذي لم يصل يُرسل مرة ثانية وحده، والحرارة الخارجية توضّح طريقة قراءتها، ودليل تعرض صوره الصفحة كما هي الآن. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
 
 - **أمر التشغيل أو الإطفاء الذي لم يصل يُرسل مرة ثانية وحده.** شوهد ليلًا على مكيفين: أحدهما قبِل «التشغيل» ولم ينفّذه، والآخر انتهت مهلته مرتين، فضغط المستخدم ثلاث مرات خلال دقيقة. الآن، إذا انتهت مهلة أمر التشغيل أو الإطفاء، أو قبِله المكيف ولم ينفّذه، تعيد الإضافة إرساله مرة واحدة بعد أن يجيب المكيف، وتتحقق من القراءة التالية. وتبقى البطاقة على ما طُلب في الأثناء، فلا تتقلب. لا يُعاد إلا التشغيل والإطفاء، لأن الحرارة أو سرعة المروحة قد تكون تغيّرت بعد ذلك. ولا يتغير شيء والاتصال جيد: أمر واحد، وكتابة واحدة، دون انتظار.
-- **السطر اليومي يذكر ذلك**، فلا يحتاج أحد أن يبلّغ: `[Layla AC] last 24 hours: no connection losses; power command that did not go through the first time: 1 (1 worked when sent again).`
+- **السطر اليومي يذكر ذلك**، فلا يحتاج أحد أن يبلّغ: `[Bedroom AC] last 24 hours: no connection losses; power command that did not go through the first time: 1 (1 worked when sent again).`
 - **الحرارة الخارجية: توضيح طريقة قراءتها.** شوهد على مكيفات حقيقية: تأتي من حساس الوحدة الخارجية نفسها، وتتحدث فقط والمكيف يعمل، وتكون حينها أعلى من الطقس (28 درجة والمكيف مطفأ، و37 بعد تشغيله بقليل). والمكيف مطفأ تبقى على آخر قراءة. صارت الملاحظة في «ما يعلنه الجهاز» (كانت «قيمة مشتقة غير مؤكدة») والعلامة («تتحدث والمكيف يعمل») والدليل تقول ذلك. ويُعلَّم الحساس غير نشط والمكيف مطفأ، وتعرض ذلك تطبيقات مثل Eve. فهي مؤشر لعمل الوحدة الخارجية، وليست حرارة الجو.
 - **صور الدليل من جديد:** صفحة الإعداد، وبطاقة الجهاز، وخيارات المكيف والغسالة ومنقي الهواء والتلفزيون، وأجزاء المكيف في Apple Home (تنبيه تنظيف الفلتر، والحرارة الخارجية، وPurify)، والمكيف نفسه في تطبيق Eve (القدرة والطاقة والفلتر). كل صورة بالإنجليزية، وبالعربية حيث تتوفر الصفحة العربية. الأسماء عامة، ورمز Apple Home للتلفزيون مثال وليس حقيقيًا.
 - **الدليل: طلب المزيد.** قائمة «موارد يعلنها الجهاز ولم تُستخدم بعد» تحت خيارات كل جهاز تعرض ما يعلنه الجهاز ولا تستعمله الإضافة، ويشرح الدليل كيف تطلب شيئًا منها مع ملف التشخيص.
@@ -2119,7 +2119,7 @@ Why: logs from five air conditioners show short drops roughly every five minutes
 ## 1.0.8 — 2026-11-22
 
 ### Changed
-- Every part of an air conditioner is now named after its appliance: "Abdulaziz AC Fan", "Abdulaziz AC Fast", "Abdulaziz AC Humidity", and so on. Before, every unit had a tile simply called "Fan", so a Siri command could hit all of them at once.
+- Every part of an air conditioner is now named after its appliance: "Bedroom AC Fan", "Bedroom AC Fast", "Bedroom AC Humidity", and so on. Before, every unit had a tile simply called "Fan", so a Siri command could hit all of them at once.
 - The display light is named "Light Display".
 - Existing tiles take the new names on the next restart, except tiles you renamed in the Home app: those keep your name.
 
@@ -2133,7 +2133,7 @@ Why: logs from five air conditioners show short drops roughly every five minutes
 - The Python packages are now installed with checksum verification: every downloaded file must match a SHA-256 recorded in the plugin, otherwise nothing is installed. A dependency that was not pinned before (`typing-extensions`, needed on Python older than 3.13) is pinned too. An environment that is already prepared is left as it is.
 
 ### بالعربية
-- كل عنصر داخل المكيف يحمل اسم جهازه: «Abdulaziz AC Fan» و«Abdulaziz AC Fast» و«Abdulaziz AC Humidity» وهكذا. سابقًا كان لكل مكيف عنصر اسمه «Fan» فقط، فيصيب أمر Siri الجميع.
+- كل عنصر داخل المكيف يحمل اسم جهازه: «Bedroom AC Fan» و«Bedroom AC Fast» و«Bedroom AC Humidity» وهكذا. سابقًا كان لكل مكيف عنصر اسمه «Fan» فقط، فيصيب أمر Siri الجميع.
 - ضوء الشاشة صار اسمه «Light Display».
 - العناصر الحالية تأخذ الأسماء الجديدة عند إعادة التشغيل، وما غيّرت اسمه من تطبيق Home يبقى باسمك.
 - على Python 3.12 وما قبله كان إيقاف اتصال الجهاز يسبب خطأ داخليًا في الكود المساعد (تعارض اسم مع كود Python نفسه)، وقد يؤخر الإيقاف أو إعادة التشغيل النظيفة للجسر الفرعي. الخلل موجود منذ أول إصدار ولم تكن الاختبارات الآلية تغطيه.
