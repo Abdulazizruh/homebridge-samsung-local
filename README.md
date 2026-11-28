@@ -68,7 +68,7 @@ Local, cloud-free control of Samsung appliances from Apple Home: air conditioner
 
 Readings are sensors from the first day. Controls of these new types carry the word **trial** in the settings: they are built from recorded appliances of the same families, and none has been confirmed on a real one by this project yet. Each can be removed from Apple Home by unticking it, and each has a **Not working?** button that opens a ready report.
 
-<p><img src="assets/screenshots/options-air-purifier.png" alt="Air purifier options in the plugin settings: readings with a tick each, and two trial controls, each with its trial tag and a Not working? button" width="320"></p>
+<p><img src="assets/screenshots/options-air-purifier.png" alt="Air purifier options in the plugin settings: the Operation card with power and fan speed, the Sensors card, and the In the Eve app only card with the filter and power and energy" width="320"></p>
 
 An IP address alone is **not** enough for every appliance. Discovery only reports success after it has read the appliance's identity and resources over an authenticated session.
 
@@ -302,9 +302,9 @@ The filter, and power and energy, show in the free **Eve** app and other HomeKit
 
 ### Washer options
 
-Cycle tile with time remaining, cycle finished sensor, progress, child lock status, fault alert, unload reminder, and how the cycle tile behaves when tapped.
+In three cards, like every appliance. **Control (trial)** is shown under [Washer control](#washer-control-trial). **Sensors**: cycle tile with time remaining, cycle finished sensor, stage sensors, drum clean, progress, child lock status, fault alert, unload reminder, Smart Control, and how the cycle tile behaves when tapped. **In the Eve app only**: power and energy.
 
-<p><img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings" width="320"></p>
+<p><img src="assets/screenshots/options-washer.png" alt="Washer options in the plugin settings: the Sensors card with the cycle tile choice, and the In the Eve app only card" width="320"></p>
 
 #### Washer control (trial)
 
