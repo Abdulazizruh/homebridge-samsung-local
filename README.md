@@ -125,7 +125,7 @@ Then restart Homebridge.
 
 The settings page shows these steps with a tick beside each one that is done, the version, the engine in use and how many appliances are connected.
 
-<p><img src="assets/screenshots/setup-page.png" alt="The plugin settings page: the setup steps with what is done, the connection engine, and the field to add an appliance" width="360"></p>
+<p><img src="assets/screenshots/setup-page.png" alt="The plugin settings page: the version and connection badges, the setup steps with what is done, the connection engine, and the Python runtime" width="360"></p>
 
 ### Automatic scan
 
