@@ -223,6 +223,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Light Display | Light | Apple Home | On/off only. Brightness is not available locally |
 | Humidity | Humidity sensor | Apple Home | Hidden while the appliance reports 0 |
 | Filter | Filter maintenance | Eve and other HomeKit apps | Change indication and remaining life. Apple Home does not show this service type |
+| Outdoor temperature (optional, off by default) | Temperature sensor | Apple Home | From the outdoor unit's own sensor. It is updated only while the unit runs, and then reads warmer than the weather (the unit's own heat: 28 °C off, 37 °C running, seen on a real unit). Switched off, it keeps the last reading. A sign of how the outdoor unit works, not the weather |
 | Filter alert (optional, off by default) | Occupancy sensor | Apple Home | On while the filter needs cleaning: a notification and an automation trigger. Off again once the filter is cleaned and its counter reset. Apple Home calls its state "detected" and may count it in the room's occupancy; it has nothing to do with people, so leave it out of automations that are meant to follow people |
 | Beep, Auto Clean | Switches (off by default) | Apple Home | |
 | Power now (W), energy total (kWh) | Eve characteristics on the thermostat | Eve-compatible apps and the plugin settings page | Apple Home has no power or energy type. No misleading sensor type is used |

@@ -764,6 +764,9 @@ export class AcAccessory {
     if (st.outdoorTemperature !== undefined) {
       get('outdoor')?.updateCharacteristic(Characteristic.CurrentTemperature, st.outdoorTemperature);
     }
+    // The outdoor unit reports a new figure only while it runs; switched off, it keeps the last one.
+    // Apps that read StatusActive (Eve) then show the reading as not current.
+    get('outdoor')?.updateCharacteristic(Characteristic.StatusActive, Boolean(st.power));
   }
 }
 
