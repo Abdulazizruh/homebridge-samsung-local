@@ -2,6 +2,26 @@
 
 Versions follow [Semantic Versioning](https://semver.org/). Releases are published under the npm tag `latest`; pre-releases under `beta`.
 
+## 1.9.13
+
+The second try of a power command waits for the appliance to come back, and never overrules the remote. Your settings, pairings and accessories are kept as they are.
+
+- **The second try waits up to 90 seconds for the appliance**, not 20. Seen on real units: some air conditioners drop off Wi-Fi now and then and come back after up to a minute; a command sent in that gap timed out, and 20 seconds were too short to catch the return. The tile keeps showing what was asked meanwhile, and the unit carries it out when it is back, with nobody pressing again.
+- **It decides on a fresh reading.** The second try is sent only after the appliance has answered a reading taken after the failure, so it is never based on the state from before the drop. No reading is added for this: the next ordinary one is used.
+- **The remote wins.** If that reading shows the unit already as asked, nothing is sent. If it shows anything else changed since the command (power, mode, fan, temperature or a preset), someone used the remote, and the plugin does not overrule them: nothing is sent, and the log says so.
+- **Nothing changes while the link is good:** one command, one write, no wait. All of this runs only after a failure.
+- **Household names removed** from the examples in the release notes and from the tests.
+
+**بالعربية**
+
+المحاولة الثانية لأمر التشغيل أو الإطفاء تنتظر عودة المكيف، ولا تعارض الريموت أبدًا. إعداداتك واقتراناتك وأجهزتك في Apple Home تبقى كما هي.
+
+- **المحاولة الثانية تنتظر المكيف حتى 90 ثانية** بدل 20. شوهد على مكيفات حقيقية: بعضها ينقطع عن الواي فاي أحيانًا ويعود بعد دقيقة تقريبًا، فانتهت مهلة الأمر المرسل في تلك الفترة، و20 ثانية لم تكفِ لانتظار عودته. تبقى البطاقة على ما طُلب في الأثناء، وينفّذه المكيف حين يرجع دون أن يضغط أحد مرة أخرى.
+- **تقرر بناءً على قراءة جديدة.** لا تُرسل المحاولة الثانية إلا بعد أن يجيب المكيف قراءةً أُخذت بعد الفشل، فلا تعتمد أبدًا على حالته قبل الانقطاع. ولا تضيف الإضافة قراءة لذلك، بل تنتظر القراءة العادية التالية.
+- **الريموت له الكلمة.** إذا أظهرت القراءة أن المكيف صار على ما طُلب، لا تُرسل الإضافة شيئًا. وإذا تغيّر أي شيء منذ الأمر (التشغيل أو الوضع أو المروحة أو الحرارة أو أحد الأوضاع الخاصة)، فقد استخدم أحدهم الريموت، فلا تعارضه الإضافة: لا ترسل شيئًا، ويذكر السجل ذلك.
+- **لا يتغير شيء والاتصال جيد:** أمر واحد، وكتابة واحدة، دون انتظار. كل هذا يعمل بعد الفشل فقط.
+- **أُزيلت أسماء أفراد البيت** من الأمثلة في ملاحظات الإصدار ومن الاختبارات.
+
 ## 1.9.12
 
 A power command that does not go through is sent once more by itself, the outdoor temperature says how it reads, and a README whose pictures show the page as it is now. Your settings, pairings and accessories are kept as they are.

@@ -49,6 +49,11 @@ const CONFIRM_MS = 12000; // after this an unconfirmed write is reported and dro
 const QUICK_REPLY_MS = 1200;
 const PRESET_FEATURES = ['windFree', 'fast', 'quiet', 'sleep', 'smart', 'comfort', 'twoStep', 'motionDirect', 'motionIndirect'];
 
+/** What a remote changes: compared before and after a dropped power command. */
+function remoteView(st) {
+  return { power: st.power, mode: st.mode, fan: st.fan, targetTemperature: st.targetTemperature, preset: st.preset };
+}
+
 /**
  * Presents one air conditioner as a single HomeKit accessory holding several
  * services. Reads only the normalized model from capabilities/ac.js and sends
@@ -60,7 +65,8 @@ export class AcAccessory {
   static settleMs = SETTLE_MS;
   /** A power command that did not go through is sent once more after this, once the unit answers again. */
   static retryWaitMs = 2000;
-  static retryOnlineMs = 20000;
+  /** How long the second try waits for the unit to answer again: seen on real units, a Wi-Fi drop lasts up to about a minute. */
+  static retryOnlineMs = 90000;
 
   constructor({ api, log, accessory, link, displayName, features = {} }) {
     this.api = api;
@@ -87,7 +93,11 @@ export class AcAccessory {
       this.model = buildAcModel(this.context.resources);
       this.#buildServices();
     }
-    link.on('update', (resources) => this.#onUpdate(resources));
+    this.readAt = 0; // when the appliance last answered a reading; a second try waits for a newer one
+    link.on('update', (resources) => {
+      this.readAt = Date.now();
+      this.#onUpdate(resources);
+    });
     link.on('availability', (online, error) => this.#onAvailability(online, error));
     if (link.resources) {
       this.#onUpdate(link.resources);
@@ -213,12 +223,15 @@ export class AcAccessory {
     this.askedOrder = (this.askedOrder ?? 0) + 1;
     this.askedAt.set(key, { kind, value, order: this.askedOrder });
     const newest = () => this.asked.get(key) === same;
+    // What the unit was before a switch-on or switch-off: if it is anything else when the second
+    // try is due, someone used the remote meanwhile, and the plugin does not overrule them.
+    const before = kind === 'power' && !retry ? remoteView(this.model.state) : null;
     const hold = () => {
       if (!newest()) { return; } // a later value of this kind is already on its way and held
       const now = Date.now();
       this.pending.set(key, {
         check: expectedAfter(kind, value), settleUntil: now + AcAccessory.settleMs, confirmUntil: now + AcAccessory.confirmMs, label, value: same,
-        kind, raw: value, retry,
+        kind, raw: value, retry, before,
       });
       if (kind === 'power') {
         this.#showRequestedPower(Boolean(value));
@@ -245,7 +258,7 @@ export class AcAccessory {
         hold(); // the tile keeps showing what was asked meanwhile
         const shown = this.pending.get(key);
         if (shown) { shown.retrying = true; }
-        this.#retryPower(value, label);
+        this.#retryPower(value, label, before, Date.now());
         return;
       }
       if (retry) {
@@ -324,7 +337,7 @@ export class AcAccessory {
         p.retrying = true;
         held.add(key);
         this.log.info(`[${this.displayName}] the appliance accepted "${p.label}" but did not apply it; sending it once more.`);
-        this.#retryPower(p.raw, p.label);
+        this.#retryPower(p.raw, p.label, p.before, this.readAt - 1);
       } else if (now >= p.confirmUntil) {
         this.pending.delete(key);
         if (p.retry) {
@@ -338,8 +351,12 @@ export class AcAccessory {
     return held;
   }
 
-  /** Send a power command once more, after a short wait and once the appliance answers again. */
-  #retryPower(value, label) {
+  /**
+   * Send a power command once more, after a short wait and once the appliance answers a reading
+   * newer than `readAfter`, so the decision is made on its real state, not on one from before
+   * the drop. No reading is added for this: the next ordinary one is used.
+   */
+  #retryPower(value, label, before, readAfter) {
     const same = JSON.stringify(value);
     const started = Date.now();
     const release = () => {
@@ -352,13 +369,22 @@ export class AcAccessory {
         release(); // someone asked for something else meanwhile: that one counts
         return;
       }
-      if (!this.online && Date.now() - started < AcAccessory.retryOnlineMs) {
+      const fresh = this.online && this.readAt > readAfter;
+      if (!fresh && Date.now() - started < AcAccessory.retryOnlineMs) {
         setTimeout(attempt, 1000).unref?.();
         return;
       }
-      if (!this.online) {
+      if (!fresh) {
         release();
         this.log.warn(`[${this.displayName}] ${label} not sent again: the appliance did not answer. Showing its real state.`);
+        this.link.emit?.('commandOutcome', 'not-carried');
+        this.#showRealState();
+        return;
+      }
+      const st = this.model.state;
+      if (!expectedAfter('power', value)(st) && before && JSON.stringify(remoteView(st)) !== JSON.stringify(before)) {
+        release();
+        this.log.info(`[${this.displayName}] ${label} not sent again: the appliance was changed meanwhile, by its remote perhaps. Showing its real state.`);
         this.link.emit?.('commandOutcome', 'not-carried');
         this.#showRealState();
         return;

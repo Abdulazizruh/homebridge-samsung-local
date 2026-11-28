@@ -1232,6 +1232,37 @@ test('power: accepted but not carried out is sent once more by itself, and the d
   assert.match(report, /power command that did not go through the first time: 1 \(1 worked when sent again\)/);
 });
 
+test('power: changed at the remote while the second try waits, the plugin does not overrule it', async (t) => {
+  const { AcAccessory } = await import('../src/homekit/acAccessory.js');
+  const saved = [AcAccessory.confirmMs, AcAccessory.settleMs, AcAccessory.retryWaitMs];
+  AcAccessory.confirmMs = 1500; AcAccessory.settleMs = 1000; AcAccessory.retryWaitMs = 100;
+  t.after(() => { [AcAccessory.confirmMs, AcAccessory.settleMs, AcAccessory.retryWaitMs] = saved; });
+  const { platform } = await boot({ devices: [ac('10.0.0.5')], config: { devices: [{ host: '10.0.0.5' }] },
+    overrides: { createHelper: helperFactory([ac('10.0.0.5')], { FAKE_POLL_MS: '300' }) } });
+  t.after(() => platform.stop());
+  await online(platform);
+  const { handler, link } = platform.devices.get(DI);
+  const C = platform.api.hap.Characteristic;
+  const outcomes = [];
+  link.on('commandOutcome', (o) => outcomes.push(o));
+  const lines = [];
+  const info = handler.log.info;
+  handler.log.info = (m) => { lines.push(m); return info.call(handler.log, m); };
+  const writes = async () => (await platform.helper.request('sim', { key: DI, action: 'writes' })).writes;
+  const wasOn = handler.model.state.power;
+  const first = await writes();
+  await platform.helper.request('sim', { key: DI, action: 'refuse', value: 'ignore-once' });
+  const fan = handler.services.get('fan').getCharacteristic(C.Active);
+  const target = handler.services.get('thermostat').getCharacteristic(C.TargetHeatingCoolingState);
+  await (wasOn ? target.handleSetRequest(C.TargetHeatingCoolingState.OFF) : fan.handleSetRequest(1));
+  // Someone reaches for the remote before the plugin's second try.
+  await platform.helper.request('sim', { key: DI, action: 'remote', path: ['mode', 'convenient', 'vs', '0'], body: { [`${V}modes`]: 'Quiet' } });
+  await waitFor(() => lines.some((m) => /not sent again: the appliance was changed meanwhile/.test(m)), 8000);
+  assert.equal((await writes()) - first, 1, 'nothing sent over the remote');
+  assert.equal(handler.model.state.power, wasOn);
+  assert.deepEqual(outcomes, ['not-carried']);
+});
+
 test('power: a timeout is sent once more by itself, once the appliance answers', async (t) => {
   const { outcomes, lines, sent } = await powerRetryCase(t, 'timeout-once');
   assert.equal(sent, 2, 'the first timed out, the second went through; no third');
