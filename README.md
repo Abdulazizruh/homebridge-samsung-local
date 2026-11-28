@@ -229,7 +229,7 @@ One accessory per air conditioner, holding these services (each only if the appl
 | Alarms / error codes | — | Plugin settings page and log | |
 | Voltage, current | — | — | Not reported by the air conditioners on record |
 | Motion / occupancy | — | — | No known local resource carries the detection result |
-| Everything else the appliance reports | — | Diagnostics download | Redacted, so it can be supported later |
+| Everything else the appliance reports | — | "Reported but not used yet" in the settings, and the Diagnostics download | Redacted. Ask for a part you need in an issue, with the Diagnostics file |
 
 Behaviour rules:
 
@@ -291,6 +291,8 @@ Give each TV a fixed address in your router (a DHCP reservation). An air conditi
 Every appliance has its own options. Press **Options** under it in the plugin settings: they open right there, under the appliance. Tick what you want to see in Apple Home, then press **Update configuration**. The options sit in up to three cards, always in this order: **Operation** (power, modes and settings), **Sensors** (readings), and **In the Eve app only**. Only the functions your own appliance reports are offered. A part you switch off is removed from Apple Home; the rest stays as it is.
 
 A name is changed in place with the pencil beside it. **Remove** asks to be pressed twice.
+
+Under the options, **What the appliance reports** lists every function and reading the plugin knows: whether your appliance has it, whether the plugin uses it, where it shows, and its value now. Below that, **Reported but not used yet** lists the parts your appliance reports that the plugin does not use. If you need one of them, [open an issue](https://github.com/Abdulazizruh/homebridge-samsung-local/issues) with the **Diagnostics** file of that appliance (addresses, IDs and keys are removed from it), and it can be added, as the outdoor temperature and the filter alert were.
 
 ### Air conditioner options
 
