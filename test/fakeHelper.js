@@ -104,6 +104,11 @@ function handle(req) {
           setTimeout(() => out({ ev: 'state', key: req.key, resources: dev.resources }), 30);
           return { code: '2.04', accepted: true, detail: null };
         }
+        if (dev.refuse === 'timeout-once') {
+          // The session times out and nothing reaches the unit, as on a weak link at night.
+          dev.refuse = false;
+          throw Object.assign(new Error('SessionTimeoutError: session operation timed out'), { code: 'timeout' });
+        }
         if (dev.refuse === 'once-done') {
           // Answers 4.00 and carries the command out all the same, as a real unit was heard to do.
           dev.refuse = false; applyWrite(dev, req.path, req.body);
@@ -132,7 +137,7 @@ function handle(req) {
       if (req.action === 'writes') { return { writes: dev.writes ?? 0 }; }
       if (req.action === 'offline') { dev.reachable = false; }
       if (req.action === 'online') { dev.reachable = true; }
-      if (req.action === 'refuse') { dev.refuse = ['once', 'once-done', 'ignore-once'].includes(req.value) ? req.value : Boolean(req.value); }
+      if (req.action === 'refuse') { dev.refuse = ['once', 'once-done', 'ignore-once', 'timeout-once'].includes(req.value) ? req.value : Boolean(req.value); }
       if (req.action === 'ignore') { dev.ignore = Boolean(req.value); }
       if (req.action === 'delay') { dev.delay = Number(req.value) || 0; }
       if (req.action === 'remote') { applyWrite(dev, req.path, req.body); }

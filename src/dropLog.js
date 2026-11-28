@@ -57,6 +57,23 @@ export class DropLog {
     this.#save(this.#state);
   }
 
+  /**
+   * Record a power command that did not go through the first time and was sent once more:
+   * 'retried-ok' when the second try worked, 'not-carried' when it did not. Nobody has to
+   * report it: the daily line says it.
+   */
+  command(name, outcome) {
+    const entry = this.#entry(name);
+    if (outcome === 'retried-ok') {
+      entry.retriedOk = (entry.retriedOk ?? 0) + 1;
+    } else if (outcome === 'not-carried') {
+      entry.notCarried = (entry.notCarried ?? 0) + 1;
+    } else {
+      return;
+    }
+    this.#save(this.#state);
+  }
+
   /** True once a full period has passed since the last report. */
   due() {
     return this.#now() - this.#state.periodStart >= this.periodMs;
@@ -77,13 +94,18 @@ export class DropLog {
         open ? 'still not reachable' : null,
       ].filter(Boolean);
       const tail = notes.length ? ` (${notes.join('; ')})` : '';
+      const ok = entry.retriedOk ?? 0;
+      const failed = entry.notCarried ?? 0;
+      const commands = ok + failed === 0 ? ''
+        : `; power ${ok + failed === 1 ? 'command' : 'commands'} that did not go through the first time: ${ok + failed}`
+          + ` (${[ok ? `${ok} worked when sent again` : '', failed ? `${failed} did not` : ''].filter(Boolean).join(', ')})`;
       if (!entry.connected && !open) {
-        lines.push(`[${name}] ${period}: did not connect during the period.`);
+        lines.push(`[${name}] ${period}: did not connect during the period${commands}.`);
       } else if (entry.drops === 0 && !open && !carried) {
-        lines.push(`[${name}] ${period}: no connection losses.`);
+        lines.push(`[${name}] ${period}: no connection losses${commands}.`);
       } else {
         const count = `${entry.drops} new connection ${entry.drops === 1 ? 'loss' : 'losses'}`;
-        lines.push(`[${name}] ${period}: ${count}${longest ? `, longest gap ${span(longest)}` : ''}${tail}.`);
+        lines.push(`[${name}] ${period}: ${count}${longest ? `, longest gap ${span(longest)}` : ''}${tail}${commands}.`);
       }
       if (open) {
         this.#carried.add(name);

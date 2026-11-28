@@ -55,6 +55,13 @@ const PRESET_FEATURES = ['windFree', 'fast', 'quiet', 'sleep', 'smart', 'comfort
  * only normalized commands: it never sees resource paths.
  */
 export class AcAccessory {
+  /** After this an unconfirmed write is reported (or, for power, sent once more). */
+  static confirmMs = CONFIRM_MS;
+  static settleMs = SETTLE_MS;
+  /** A power command that did not go through is sent once more after this, once the unit answers again. */
+  static retryWaitMs = 2000;
+  static retryOnlineMs = 20000;
+
   constructor({ api, log, accessory, link, displayName, features = {} }) {
     this.api = api;
     this.hap = api.hap;
@@ -155,7 +162,7 @@ export class AcAccessory {
   }
 
   /** Send one normalized command and wait for the appliance to acknowledge it. */
-  async #command(kind, value, label = kind) {
+  async #command(kind, value, label = kind, retry = false) {
     const { HapStatusError, HAPStatus } = this.hap;
     this.#requireOnline();
     const key = kind === 'preset' ? `preset:${value.name}` : kind;
@@ -180,7 +187,7 @@ export class AcAccessory {
     // "off" came after it, so it must be sent, or the unit ends up off while the tile shows on.
     const repeat = this.asked.get(key) === same
       && (this.inflight.get(key) === same || (waiting?.value === same && Date.now() < waiting.settleUntil));
-    if (repeat) {
+    if (repeat && !retry) {
       this.log.debug(`[${this.displayName}] ${label}: already on its way; not sent twice.`);
       return;
     }
@@ -190,7 +197,13 @@ export class AcAccessory {
       setTimeout(() => this.#push(), 600);
       return;
     }
-    if (!waiting && !this.inflight.has(key) && expectedAfter(kind, value)(this.model.state)) {
+    if ((retry || (!waiting && !this.inflight.has(key))) && expectedAfter(kind, value)(this.model.state)) {
+      if (retry) {
+        // It went through after all (a late report): nothing more to send.
+        this.pending.delete(key);
+        this.link.emit?.('commandOutcome', 'retried-ok');
+        return;
+      }
       this.log.debug(`[${this.displayName}] ${label}: the appliance is already there; nothing sent.`);
       setTimeout(() => this.#push(), 600);
       return;
@@ -204,7 +217,8 @@ export class AcAccessory {
       if (!newest()) { return; } // a later value of this kind is already on its way and held
       const now = Date.now();
       this.pending.set(key, {
-        check: expectedAfter(kind, value), settleUntil: now + SETTLE_MS, confirmUntil: now + CONFIRM_MS, label, value: same,
+        check: expectedAfter(kind, value), settleUntil: now + AcAccessory.settleMs, confirmUntil: now + AcAccessory.confirmMs, label, value: same,
+        kind, raw: value, retry,
       });
       if (kind === 'power') {
         this.#showRequestedPower(Boolean(value));
@@ -224,8 +238,21 @@ export class AcAccessory {
       // switch-on is heard as several beeps this shows which commands they were.
       this.log.info(`[${this.displayName}] sent: ${label}.`);
     }, (err) => {
+      // Power is the one command sent once more by itself: a timeout on a weak link must not leave
+      // someone pressing three times. Nothing changes while the link is good: this runs only on a failure.
+      if (kind === 'power' && !retry && newest() && err.code !== 'refused') {
+        this.log.info(`[${this.displayName}] ${label} did not get through (${err.message}); sending it once more when the appliance answers.`);
+        hold(); // the tile keeps showing what was asked meanwhile
+        const shown = this.pending.get(key);
+        if (shown) { shown.retrying = true; }
+        this.#retryPower(value, label);
+        return;
+      }
+      if (retry) {
+        this.link.emit?.('commandOutcome', 'not-carried');
+      }
       const hint = autoOption && err.code === 'refused' ? ' The unit is in Auto mode, where it may not take this option: choose Cool (or another mode) first.' : '';
-      this.log.warn(`[${this.displayName}] ${label} failed: ${err.message}${hint}`);
+      this.log.warn(`[${this.displayName}] ${label} failed${retry ? ' again' : ''}: ${err.message}${hint}`);
       if (late) {
         // HomeKit was already told "done": put the real state back on screen,
         // unless a later value of this kind is already on its way.
@@ -285,16 +312,63 @@ export class AcAccessory {
     for (const [key, p] of this.pending) {
       if (p.check(st)) {
         this.pending.delete(key);
-      } else if (now < p.settleUntil) {
+        if (p.retry) {
+          this.log.info(`[${this.displayName}] "${p.label}" carried out on the second try.`);
+          this.link.emit?.('commandOutcome', 'retried-ok');
+        }
+      } else if (now < p.settleUntil || p.retrying) {
         held.add(key.split(':')[0]);
+      } else if (now >= p.confirmUntil && key === 'power' && !p.retry && this.asked.get(key) === p.value) {
+        // Accepted but not carried out, as seen on a real unit at night: sent once more, the tile
+        // keeps showing what was asked meanwhile, so it does not flip back and forth.
+        p.retrying = true;
+        held.add(key);
+        this.log.info(`[${this.displayName}] the appliance accepted "${p.label}" but did not apply it; sending it once more.`);
+        this.#retryPower(p.raw, p.label);
       } else if (now >= p.confirmUntil) {
         this.pending.delete(key);
+        if (p.retry) {
+          this.link.emit?.('commandOutcome', 'not-carried');
+        }
         const shown = st[key.split(':')[0]];
         const reports = shown === undefined || typeof shown === 'object' ? '' : ` (it reports ${shown})`;
         this.log.warn(`[${this.displayName}] the appliance accepted "${p.label}" but did not apply it${reports}. Showing its real state.`);
       }
     }
     return held;
+  }
+
+  /** Send a power command once more, after a short wait and once the appliance answers again. */
+  #retryPower(value, label) {
+    const same = JSON.stringify(value);
+    const started = Date.now();
+    const release = () => {
+      if (this.pending.get('power')?.retrying) {
+        this.pending.delete('power');
+      }
+    };
+    const attempt = () => {
+      if (this.asked.get('power') !== same) {
+        release(); // someone asked for something else meanwhile: that one counts
+        return;
+      }
+      if (!this.online && Date.now() - started < AcAccessory.retryOnlineMs) {
+        setTimeout(attempt, 1000).unref?.();
+        return;
+      }
+      if (!this.online) {
+        release();
+        this.log.warn(`[${this.displayName}] ${label} not sent again: the appliance did not answer. Showing its real state.`);
+        this.link.emit?.('commandOutcome', 'not-carried');
+        this.#showRealState();
+        return;
+      }
+      this.#command('power', value, label, true).catch(() => {
+        release();
+        this.#showRealState();
+      });
+    };
+    setTimeout(attempt, AcAccessory.retryWaitMs).unref?.();
   }
 
   // -------------------------------------------------------------- services

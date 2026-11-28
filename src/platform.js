@@ -577,6 +577,7 @@ export class SamsungLocalPlatform {
     this.retryTimers.add(pushCheck);
     this.stabilityNames.add(name);
     this.drops.expect(name);
+    link.on('commandOutcome', (outcome) => this.drops.command(name, outcome));
     link.on('availability', (online) => {
       if (!this.stopping) {
         this.drops.note(name, online);
