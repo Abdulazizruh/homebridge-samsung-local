@@ -254,6 +254,10 @@ The parts of the same air conditioner. Each one can be switched off in the plugi
 
 <p><img src="assets/screenshots/ac-parts.png" alt="The parts of one air conditioner in Apple Home: thermostat, fan, Fast, filter alert, humidity, outdoor temperature, Purify, WindFree and Light Display" width="420"></p>
 
+In the free **Eve** app the same air conditioner also shows what Apple Home has no tile for: power now and energy total on the thermostat, and the filter (whether it needs cleaning, and how much of its life is left).
+
+<p><img src="assets/screenshots/eve-ac.png" alt="An air conditioner in the Eve app: consumption 714 W, total consumption 8,102.22 kWh, filter change not needed, filter life 82 percent" width="420"></p>
+
 ### A washer in Apple Home
 
 The cycle tile is on while a cycle runs, with the time remaining inside it. The sensor turns on when the cycle has finished, for a notification or an automation. On a washer that announces the end of a cycle itself, only that announcement turns the sensor on, so a cancelled cycle gives no notice. The washer is read only; nothing is sent to it unless you tick a control trial (below).
