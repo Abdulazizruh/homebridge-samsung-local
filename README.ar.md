@@ -258,7 +258,7 @@ npm install --save homebridge-samsung-local
 
 أجزاء المكيف نفسه. كل جزء منها يمكن إيقافه من إعدادات الإضافة.
 
-<p><img src="assets/screenshots/ac-parts.png" alt="أجزاء المكيف الواحد في Apple Home: الترموستات والمروحة و Fast و WindFree والرطوبة وإضاءة الشاشة" width="420"></p>
+<p><img src="assets/screenshots/ac-parts.png" alt="أجزاء المكيف الواحد في Apple Home: الترموستات والمروحة و Fast وتنبيه تنظيف الفلتر والرطوبة والحرارة الخارجية و Purify و WindFree وإضاءة الشاشة" width="420"></p>
 
 ### الغسالة في Apple Home
 

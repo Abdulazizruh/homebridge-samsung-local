@@ -252,7 +252,7 @@ The thermostat: target temperature, current temperature, humidity and the mode.
 
 The parts of the same air conditioner. Each one can be switched off in the plugin settings.
 
-<p><img src="assets/screenshots/ac-parts.png" alt="The parts of one air conditioner in Apple Home: thermostat, fan, Fast, WindFree, humidity and Light Display" width="420"></p>
+<p><img src="assets/screenshots/ac-parts.png" alt="The parts of one air conditioner in Apple Home: thermostat, fan, Fast, filter alert, humidity, outdoor temperature, Purify, WindFree and Light Display" width="420"></p>
 
 ### A washer in Apple Home
 
